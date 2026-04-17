@@ -143,8 +143,8 @@ class Engine:
 
                 record = analyze(opp, inv, outcome, sig)
                 record_dict = record.to_dict()
-                self.store.append(record_dict)
-                pg_store.append(record_dict)
+                written_record = self.store.append(record_dict)
+                pg_store.append(written_record)
                 stats.records_stored += 1
             except Exception as exc:
                 stats.errors.append(f"pipeline:{opp.opportunity_id}:{exc}")
