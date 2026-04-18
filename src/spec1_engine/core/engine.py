@@ -105,7 +105,8 @@ class Engine:
                 stats.errors.append(f"harvest:{src}:{err}")
             logger.info("Harvested %d signals", stats.signals_harvested)
         except Exception as exc:
-            stats.errors.append(f"harvest_all:{exc}")
+            stats.errors.append(f"harvest_all:{type(exc).__name__}:{exc}")
+            logger.error("Harvest failed (%s): %s", type(exc).__name__, exc, exc_info=True)
             stats.finish()
             return stats
 
@@ -116,7 +117,8 @@ class Engine:
                 ps = parse_signal(sig)
                 parsed_signals.append(ps)
             except Exception as exc:
-                stats.errors.append(f"parse:{sig.signal_id}:{exc}")
+                stats.errors.append(f"parse:{sig.signal_id}:{type(exc).__name__}:{exc}")
+                logger.warning("Parse failed for %s (%s): %s", sig.signal_id, type(exc).__name__, exc)
         stats.signals_parsed = len(parsed_signals)
         logger.info("Parsed %d signals", stats.signals_parsed)
 
@@ -128,7 +130,8 @@ class Engine:
                 if opp is not None:
                     opportunities.append((sig, ps, opp))
             except Exception as exc:
-                stats.errors.append(f"score:{sig.signal_id}:{exc}")
+                stats.errors.append(f"score:{sig.signal_id}:{type(exc).__name__}:{exc}")
+                logger.warning("Score failed for %s (%s): %s", sig.signal_id, type(exc).__name__, exc)
         stats.opportunities_found = len(opportunities)
         logger.info("Scored: %d opportunities", stats.opportunities_found)
 
@@ -147,7 +150,8 @@ class Engine:
                 pg_store.append(written_record)
                 stats.records_stored += 1
             except Exception as exc:
-                stats.errors.append(f"pipeline:{opp.opportunity_id}:{exc}")
+                stats.errors.append(f"pipeline:{opp.opportunity_id}:{type(exc).__name__}:{exc}")
+                logger.error("Pipeline failed for %s (%s): %s", opp.opportunity_id, type(exc).__name__, exc, exc_info=True)
 
         stats.finish()
         logger.info(

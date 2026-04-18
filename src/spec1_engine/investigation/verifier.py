@@ -17,6 +17,18 @@ from spec1_engine.schemas.models import Investigation, Outcome
 
 logger = logging.getLogger(__name__)
 
+# Transient errors — worth retrying; permanent errors — not worth retrying
+_TRANSIENT_API_ERRORS = (
+    anthropic.RateLimitError,
+    anthropic.APIConnectionError,
+    anthropic.APITimeoutError,
+)
+_PERMANENT_API_ERRORS = (
+    anthropic.AuthenticationError,
+    anthropic.PermissionDeniedError,
+    anthropic.BadRequestError,
+)
+
 MODEL = "claude-haiku-4-5-20251001"
 VALID_CLASSIFICATIONS = {
     "Corroborated", "Escalate", "Investigate", "Monitor", "Conflicted", "Archive"
@@ -82,8 +94,20 @@ def verify_investigation(investigation: Investigation) -> Outcome:
             ],
         )
         raw = message.content[0].text.strip()
+    except _TRANSIENT_API_ERRORS as exc:
+        logger.warning(
+            "Claude API transient error (%s) — fallback outcome: %s",
+            type(exc).__name__, exc,
+        )
+        return _fallback_outcome()
+    except _PERMANENT_API_ERRORS as exc:
+        logger.error(
+            "Claude API permanent error (%s) — check credentials/request: %s",
+            type(exc).__name__, exc,
+        )
+        return _fallback_outcome()
     except Exception as exc:
-        logger.error("Claude API call failed: %s", exc)
+        logger.error("Claude API unexpected error (%s): %s", type(exc).__name__, exc, exc_info=True)
         return _fallback_outcome()
 
     try:
@@ -108,5 +132,8 @@ def verify_investigation(investigation: Investigation) -> Outcome:
             evidence=evidence,
         )
     except Exception as exc:
-        logger.error("Failed to parse Claude response %r: %s", raw, exc)
+        logger.error(
+            "Failed to parse Claude response (%s) %r: %s",
+            type(exc).__name__, raw, exc,
+        )
         return _fallback_outcome()

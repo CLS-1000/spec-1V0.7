@@ -2,11 +2,8 @@
 
 from __future__ import annotations
 
-import io
-import ssl
 from datetime import datetime, timezone
-from pathlib import Path
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import MagicMock, patch
 
 import feedparser
 import pytest
@@ -16,9 +13,7 @@ from spec1_engine.signal.harvester import (
     _get_text,
     _get_author,
     _fetch_raw_sanitized,
-    _fetch_raw_no_ssl,
     _parse_feed,
-    _SSL_UNVERIFIED,
     _SANITIZE_XML,
     fetch_feed,
     harvest_all,
@@ -201,56 +196,7 @@ def test_fetch_raw_sanitized_calls_raise_for_status():
     mock_resp.raise_for_status.assert_called_once()
 
 
-# ─── _fetch_raw_no_ssl tests ──────────────────────────────────────────────────
-
-def test_fetch_raw_no_ssl_returns_bytes():
-    """_fetch_raw_no_ssl reads from urlopen response."""
-    fake_content = b"<feed><item/></feed>"
-    mock_response = MagicMock()
-    mock_response.__enter__ = MagicMock(return_value=mock_response)
-    mock_response.__exit__ = MagicMock(return_value=False)
-    mock_response.read = MagicMock(return_value=fake_content)
-
-    with patch("spec1_engine.signal.harvester.urllib.request.urlopen", return_value=mock_response), \
-         patch("spec1_engine.signal.harvester.ssl.create_default_context") as mock_ctx:
-        mock_ctx.return_value = MagicMock()
-        result = _fetch_raw_no_ssl("https://example.com/feed", timeout=5)
-
-    assert result == fake_content
-
-
-def test_fetch_raw_no_ssl_disables_cert_verification():
-    """_fetch_raw_no_ssl creates an SSL context with cert verification off."""
-    fake_content = b"<feed/>"
-    mock_response = MagicMock()
-    mock_response.__enter__ = MagicMock(return_value=mock_response)
-    mock_response.__exit__ = MagicMock(return_value=False)
-    mock_response.read = MagicMock(return_value=fake_content)
-
-    mock_ssl_ctx = MagicMock()
-    with patch("spec1_engine.signal.harvester.urllib.request.urlopen", return_value=mock_response), \
-         patch("spec1_engine.signal.harvester.ssl.create_default_context", return_value=mock_ssl_ctx):
-        _fetch_raw_no_ssl("https://example.com/feed", timeout=5)
-
-    assert mock_ssl_ctx.check_hostname is False
-    assert mock_ssl_ctx.verify_mode == ssl.CERT_NONE
-
-
 # ─── _parse_feed tests ────────────────────────────────────────────────────────
-
-def test_parse_feed_ssl_unverified_uses_no_ssl_fetch():
-    """SSL-unverified sources use _fetch_raw_no_ssl."""
-    fake_bytes = b"<rss/>"
-    # Take the first SSL_UNVERIFIED source
-    ssl_source = next(iter(_SSL_UNVERIFIED))
-
-    with patch("spec1_engine.signal.harvester._fetch_raw_no_ssl", return_value=fake_bytes) as mock_no_ssl, \
-         patch("spec1_engine.signal.harvester.feedparser.parse") as mock_parse:
-        mock_parse.return_value = MagicMock(entries=[])
-        _parse_feed(ssl_source, "https://example.com", timeout=5)
-
-    mock_no_ssl.assert_called_once()
-
 
 def test_parse_feed_sanitize_xml_uses_raw_sanitized():
     """SANITIZE_XML sources use _fetch_raw_sanitized."""

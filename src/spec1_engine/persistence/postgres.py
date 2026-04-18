@@ -71,7 +71,7 @@ def _get_engine(url: Optional[str] = None) -> Optional[Engine]:
         try:
             _engine = create_engine(database_url, pool_pre_ping=True)
         except Exception as exc:
-            logger.error("Failed to create database engine: %s", exc)
+            logger.error("Failed to create database engine (%s): %s", type(exc).__name__, exc, exc_info=True)
             return None
     return _engine
 
@@ -89,7 +89,7 @@ def init_db(url: Optional[str] = None) -> bool:
         logger.info("PostgreSQL tables initialised (or already exist)")
         return True
     except Exception as exc:
-        logger.error("Failed to initialise database tables: %s", exc)
+        logger.error("Failed to initialise database tables (%s): %s", type(exc).__name__, exc, exc_info=True)
         return False
 
 
@@ -121,7 +121,7 @@ def append(record: dict, url: Optional[str] = None) -> bool:
         exc_str = str(exc).lower()
         if "unique" in exc_str or "duplicate" in exc_str or "primary key" in exc_str:
             return True
-        logger.error("PostgreSQL append failed: %s", exc)
+        logger.error("PostgreSQL append failed (%s): %s", type(exc).__name__, exc, exc_info=True)
         return False
 
 
@@ -160,7 +160,7 @@ def query_latest(limit: int = 20, url: Optional[str] = None) -> list[dict]:
             )
             return [dict(row._mapping) for row in result]
     except Exception as exc:
-        logger.error("query_latest failed: %s", exc)
+        logger.error("query_latest failed (%s): %s", type(exc).__name__, exc, exc_info=True)
         return []
 
 
@@ -174,7 +174,7 @@ def count(url: Optional[str] = None) -> int:
             result = conn.execute(text("SELECT COUNT(*) FROM intelligence_records"))
             return result.scalar() or 0
     except Exception as exc:
-        logger.error("count failed: %s", exc)
+        logger.error("count failed (%s): %s", type(exc).__name__, exc, exc_info=True)
         return 0
 
 

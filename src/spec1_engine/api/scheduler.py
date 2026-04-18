@@ -38,7 +38,7 @@ def _guarded_cycle() -> None:
             stats.get("records_stored", 0),
         )
     except Exception as exc:
-        logger.error("Scheduled cycle failed: %s", exc)
+        logger.error("Scheduled cycle failed (%s): %s", type(exc).__name__, exc, exc_info=True)
 
 
 def build_scheduler() -> BackgroundScheduler:
