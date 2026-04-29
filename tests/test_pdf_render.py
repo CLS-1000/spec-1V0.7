@@ -23,10 +23,10 @@ def test_argparser_requires_brief_md_and_out():
 def test_render_brief_html_wraps_template(tmp_path):
     pytest.importorskip("markdown")
     html = pdf_render.render_brief_html("# Hello\n\nbody text")
-    assert "<html>" in html
+    assert "<!DOCTYPE html>" in html
     assert "Hello" in html
     assert "body text" in html
-    assert "<svg" in html  # sacred geometry logo
+    assert "WORLD STATE BRIEF" in html  # masthead title
 
 
 def test_wrapper_raises_runtime_error_on_subprocess_failure(tmp_path):
