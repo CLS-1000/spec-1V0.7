@@ -28,9 +28,9 @@ This isn't paranoia. It's the lesson of seventeen years of operations: the parts
 
 ### 3. Dual-write persistence — JSONL and SQLite
 
-JSONL is the system of record: append-only, immutable, audit-friendly. SQLite is the query layer: indexed, fast, easy to inspect. Every store writes both atomically through `cls_db.dual_write` so they cannot diverge. The API reads from JSONL via repository abstractions — never the database directly — so the database can be rebuilt from the log if it ever gets corrupted.
+JSONL is the system of record: append-only, immutable, audit-friendly. SQLite is the query layer: indexed, fast, and easy to inspect, but it is secondary to the log. Where `cls_db.dual_write` is used, the write path is best-effort rather than atomic: JSONL is written first, then SQLite is attempted as a non-fatal cache/index update, so the two can diverge if the SQLite step fails. In practice, most stores are still JSONL-only today; dual-write is optional and currently has limited coverage rather than being universal across the system. The API reads through repository abstractions instead of depending on SQLite as the source of truth, so the database can be rebuilt from the log if needed.
 
-I picked this because I wanted the durability story to be obvious: the source of truth is plain text on disk. The database is a cache. If anything ever looked off, I could `cat` a file and read it. That kind of inspectability is what I trust under pressure, and it's what lets the system survive me being wrong about something else later.
+I picked this because I wanted the durability story to be obvious: the source of truth is plain text on disk. The database is a convenience layer, not the canonical record. If anything ever looked off, I could `cat` a file and read it. That kind of inspectability is what I trust under pressure, and it's what lets the system survive me being wrong about something else later.
 
 ### 4. Test discipline as a calibration anchor
 
