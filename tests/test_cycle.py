@@ -155,8 +155,8 @@ def test_harvest_error_captured(fake_feed_xml):
     assert "errors" in result
 
 
-def test_default_feeds_has_six_sources():
-    assert len(DEFAULT_FEEDS) == 6
+def test_default_feeds_has_expected_sources():
+    assert len(DEFAULT_FEEDS) == 10
 
 
 def test_default_feeds_includes_rand():
