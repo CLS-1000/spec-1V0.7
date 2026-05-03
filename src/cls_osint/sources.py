@@ -72,6 +72,39 @@ RSS_SOURCES: dict[str, OsintSource] = {
         credibility=0.92,
         tags=["foreign_policy", "international_relations"],
     ),
+    # ── DPRK / Korea intelligence sources ────────────────────────────────────
+    "38_north": OsintSource(
+        name="38_north",
+        source_type="RSS",
+        url="https://www.38north.org/feed/",
+        credibility=0.89,
+        refresh_interval_hours=6,
+        tags=["dprk", "korea", "energy", "military", "satellite_imagery", "osint"],
+    ),
+    "nk_news": OsintSource(
+        name="nk_news",
+        source_type="RSS",
+        url="https://www.nknews.org/feed/",
+        credibility=0.85,
+        refresh_interval_hours=4,
+        tags=["dprk", "korea", "sanctions", "economy", "defector"],
+    ),
+    "csis_korea": OsintSource(
+        name="csis_korea",
+        source_type="RSS",
+        url="https://www.csis.org/programs/korea-chair/feed",
+        credibility=0.88,
+        refresh_interval_hours=12,
+        tags=["dprk", "korea", "military", "strategy", "policy"],
+    ),
+    "yonhap": OsintSource(
+        name="yonhap",
+        source_type="RSS",
+        url="https://en.yna.co.kr/RSS/news.xml",
+        credibility=0.82,
+        refresh_interval_hours=2,
+        tags=["korea", "dprk", "asia", "news"],
+    ),
 }
 
 # FARA sources

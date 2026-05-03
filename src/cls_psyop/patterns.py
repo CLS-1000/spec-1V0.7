@@ -153,6 +153,40 @@ PATTERNS: list[PsyopPattern] = [
         threat_level="MEDIUM",
         category="framing",
     ),
+    # ── DPRK-specific patterns ────────────────────────────────────────────────
+    PsyopPattern(
+        pattern_id="P013",
+        name="Juche Energy Self-Reliance Deflection",
+        description=(
+            "DPRK state media amplifies 'self-reliance' (Juche) energy narratives "
+            "to mask real fuel import dependence and military logistics vulnerabilities."
+        ),
+        indicators=[
+            "juche", "self-reliance", "our own resources", "independent energy",
+            "no foreign fuel needed", "sanctions have no effect",
+            "energy self-sufficiency", "domestic fuel production",
+            "we need no outside help", "korean-made energy",
+        ],
+        threat_level="MEDIUM",
+        category="disinformation",
+    ),
+    PsyopPattern(
+        pattern_id="P014",
+        name="DPRK Military Readiness Inflation",
+        description=(
+            "Exaggerates Korean People's Army operational readiness to conceal "
+            "fuel shortages, logistics gaps, and sanctions pressure on military capacity."
+        ),
+        indicators=[
+            "invincible korean people's army", "unstoppable military power",
+            "fully combat ready", "unlimited operational capacity",
+            "our forces need nothing", "military fully supplied",
+            "fuel and ammunition fully stocked", "ready to strike at any moment",
+            "no logistics vulnerabilities", "sanctions cannot weaken us",
+        ],
+        threat_level="HIGH",
+        category="disinformation",
+    ),
 ]
 
 # Index by pattern_id

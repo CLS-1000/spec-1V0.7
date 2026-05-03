@@ -33,6 +33,14 @@ NARRATIVE_THEMES: dict[str, list[str]] = {
         "north korea", "dprk", "kim jong", "icbm", "missile test", "pyongyang",
         "nuclear warhead", "ballistic",
     ],
+    "DPRK military fuel and sanctions evasion": [
+        "dprk fuel", "north korea fuel", "north korea oil", "dprk petroleum",
+        "petroleum imports", "sanctions evasion", "dark fleet", "ship-to-ship",
+        "coal smuggling", "russia oil dprk", "china fuel north korea",
+        "fuel depot", "strategic fuel reserve", "military logistics dprk",
+        "korean people's army fuel", "juche energy", "energy self-reliance",
+        "refined products korea", "oil embargo korea",
+    ],
     "US election interference": [
         "election interference", "disinformation", "foreign influence",
         "voter fraud", "campaign hack", "social media manipulation",

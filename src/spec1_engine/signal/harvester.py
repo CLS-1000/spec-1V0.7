@@ -25,6 +25,11 @@ DEFAULT_FEEDS: dict[str, str] = {
     "rand": "https://www.rand.org/blog.xml",
     "atlantic_council": "https://www.atlanticcouncil.org/feed/",
     "defense_one": "https://www.defenseone.com/rss/all/",
+    # DPRK / Korea intelligence feeds
+    "38_north": "https://www.38north.org/feed/",
+    "nk_news": "https://www.nknews.org/feed/",
+    "csis_korea": "https://www.csis.org/programs/korea-chair/feed",
+    "yonhap": "https://en.yna.co.kr/RSS/news.xml",
 }
 
 TIMEOUT = 15
