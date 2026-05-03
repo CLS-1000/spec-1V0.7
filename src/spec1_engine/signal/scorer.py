@@ -27,6 +27,11 @@ SOURCE_CREDIBILITY: dict[str, float] = {
     "rand": 0.90,
     "atlantic_council": 0.82,
     "defense_one": 0.83,
+    # DPRK / Korea intelligence sources
+    "38_north": 0.89,
+    "nk_news": 0.85,
+    "csis_korea": 0.88,
+    "yonhap": 0.82,
     # legacy sources (from cls_osint)
     "reuters_world": 0.90,
     "reuters_us": 0.90,
@@ -62,6 +67,12 @@ NOVELTY_TERMS: set[str] = {
     "missile", "drone", "navy", "army", "coalition", "alliance", "nato",
     "ukraine", "russia", "china", "iran", "north korea", "taiwan",
     "pentagon", "cia", "nsa", "fbi", "dod", "state department",
+    # DPRK military fuel & sanctions-evasion keywords
+    "dprk", "pyongyang", "kim jong", "juche", "korean people's army",
+    "fuel", "diesel", "petroleum", "oil imports", "refined products",
+    "sanctions evasion", "dark fleet", "ship-to-ship transfer",
+    "coal exports", "russia oil", "china border trade",
+    "fuel depot", "strategic reserves", "military logistics",
 }
 NOVELTY_THRESHOLD = 1  # must have at least 1 novelty term hit
 
