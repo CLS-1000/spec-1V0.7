@@ -26,4 +26,9 @@ def test_root_returns_html(client):
 
 def test_root_contains_spec1_title(client):
     r = client.get("/")
-    assert "SPEC-1" in r.text
+    assert "SPEC-1 Intelligence Engine" in r.text
+
+
+def test_root_contains_layout_div(client):
+    r = client.get("/")
+    assert 'class="layout"' in r.text

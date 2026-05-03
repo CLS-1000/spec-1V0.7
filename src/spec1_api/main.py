@@ -7,7 +7,7 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
 
 from spec1_api import __version__
@@ -50,7 +50,10 @@ def create_app() -> FastAPI:
     @app.get("/", include_in_schema=False)
     async def ui_root() -> FileResponse:
         """Serve the SPEC-1 UI."""
-        return FileResponse(_STATIC_DIR / "index.html", media_type="text/html")
+        path = _STATIC_DIR / "index.html"
+        if not path.is_file():
+            raise HTTPException(status_code=404, detail="UI not found")
+        return FileResponse(path, media_type="text/html")
 
     app.include_router(health.router)
     app.include_router(signals.router)
