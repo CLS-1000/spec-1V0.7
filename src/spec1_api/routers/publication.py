@@ -9,16 +9,16 @@ from fastapi.responses import FileResponse
 
 router = APIRouter(prefix="/publication", tags=["publication"])
 
-_BRIEFS_DIR = Path("briefs")
+_BRIEFS_DIR = Path("generated/briefs")
 
 
 @router.get("/latest")
 def get_latest_publication() -> FileResponse:
     """Return the most recently generated publication PDF."""
-    pdfs = sorted(_BRIEFS_DIR.glob("spec1_issue_*.pdf")) if _BRIEFS_DIR.exists() else []
+    pdfs = list(_BRIEFS_DIR.glob("spec1_issue_*.pdf")) if _BRIEFS_DIR.exists() else []
     if not pdfs:
         raise HTTPException(status_code=404, detail="No publication PDFs found")
-    latest = pdfs[-1]
+    latest = max(pdfs, key=lambda p: p.stat().st_mtime)
     return FileResponse(
         path=str(latest),
         media_type="application/pdf",

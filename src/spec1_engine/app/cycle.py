@@ -312,6 +312,7 @@ def run_cycle(
     last_run_state["record_count"] = records_stored
 
     # ── Briefing ──────────────────────────────────────────────────────────────
+    brief_md = ''
     try:
         from spec1_engine.briefing.generator import generate_brief
         from spec1_engine.briefing.templates import SYSTEM_PROMPT, USER_PROMPT_TEMPLATE
@@ -347,12 +348,11 @@ def run_cycle(
     # ── Auto-generate publication PDF ────────────────────────────────────────
     try:
         from spec1_engine.tools.publication_generator import generate_publication
-        top_records = [
-            r.__dict__ if hasattr(r, '__dict__') else r
-            for r in stored_records[:5]
-        ]
-        brief_path = Path('briefs/spec1_brief_latest.md')
-        brief_text_pub = brief_path.read_text(encoding='utf-8') if brief_path.exists() else ''
+        top_records = sorted(
+            stored_records, key=lambda r: r.get('opportunity_score', 0.0), reverse=True
+        )[:5]
+        # Use brief_md already in memory (covers both normal and fallback paths).
+        brief_text_pub = brief_md
         pub_path = generate_publication(
             records=top_records,
             brief_text=brief_text_pub,

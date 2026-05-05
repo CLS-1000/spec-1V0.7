@@ -183,13 +183,16 @@ def _build_signals_page(records: list, s: dict) -> list:
         ))
         story.append(Paragraph(content, s['body']))
 
-        # Gate box — use gate_results from cycle or fall back to defaults
+        # Gate box — handle both real engine shape (dict[str, bool]) and
+        # enriched shape (dict[str, {passed, reason}]).
         gate_results = rec.get('gate_results', {})
         if gate_results:
-            gates = {
-                name.title(): {'pass': res.get('passed', True), 'reason': res.get('reason', '')}
-                for name, res in gate_results.items()
-            }
+            gates = {}
+            for name, res in gate_results.items():
+                if isinstance(res, dict):
+                    gates[name.title()] = {'pass': res.get('passed', True), 'reason': res.get('reason', '')}
+                else:
+                    gates[name.title()] = {'pass': bool(res), 'reason': ''}
         else:
             gates = {
                 'Credibility': {'pass': True, 'reason': 'Primary source, verifiable'},
@@ -241,7 +244,7 @@ def _build_intelligence_page(brief_text: str, cycle_stats: dict, s: dict) -> lis
     return story
 
 
-def _draw_hexagon_cover(run_date: str, domain_scores: dict) -> Drawing:
+def _draw_hexagon_cover(domain_scores: dict) -> Drawing:
     """
     Draw the World State Brief hexagon radar cover.
     Six nodes: POWER · SECURITY · ECONOMICS · CONFLICT · DIPLOMACY · ALLIANCES
@@ -318,7 +321,7 @@ def generate_publication(
     records: list,
     brief_text: str,
     cycle_stats: dict,
-    output_dir: str = 'briefs',
+    output_dir: str = 'generated/briefs',
     issue_number: Optional[int] = None,
 ) -> str:
     """
@@ -342,7 +345,16 @@ def generate_publication(
 
     if issue_number is None:
         existing = list(Path(output_dir).glob('spec1_issue_*.pdf'))
-        issue_number = len(existing) + 1
+        if existing:
+            max_n = 0
+            for p in existing:
+                try:
+                    max_n = max(max_n, int(p.name.split('_')[2]))
+                except (IndexError, ValueError):
+                    pass
+            issue_number = max_n + 1
+        else:
+            issue_number = 1
 
     issue_str = str(issue_number).zfill(3)
     out_path  = str(Path(output_dir) / f'spec1_issue_{issue_str}_{file_date}.pdf')
@@ -380,7 +392,7 @@ def generate_publication(
         'alliances': 0.35,
     }
 
-    hex_drawing = _draw_hexagon_cover(date_str, domain_scores)
+    hex_drawing = _draw_hexagon_cover(domain_scores)
     story.append(hex_drawing)
 
     title_data = [[

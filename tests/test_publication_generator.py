@@ -88,7 +88,7 @@ def test_generate_publication_creates_pdf(tmp_path, sample_records, sample_brief
 
 
 def test_generate_publication_file_size(tmp_path, sample_records, sample_brief_text, sample_cycle_stats):
-    """Generated PDF must be larger than 10 KB — not an empty shell."""
+    """Generated PDF must be larger than 5 KB — not an empty shell."""
     from spec1_engine.tools.publication_generator import generate_publication
 
     out = generate_publication(
@@ -206,3 +206,44 @@ def test_generate_publication_output_dir_created(tmp_path, sample_records, sampl
         issue_number=1,
     )
     assert Path(out).exists()
+
+
+def test_generate_publication_bool_gate_results(tmp_path, sample_brief_text, sample_cycle_stats):
+    """Records with bool gate_results (real engine shape) must not raise AttributeError."""
+    from spec1_engine.tools.publication_generator import generate_publication
+
+    records_with_bool_gates = [
+        {
+            "content": "Foreign state actors coordinated disinformation across social platforms ahead of scheduled elections.",
+            "source": "ap",
+            "credibility_score": 0.88,
+            "velocity_label": "RAPID",
+            "gate_results": {
+                "credibility": True,
+                "volume": True,
+                "velocity": True,
+                "novelty": True,
+            },
+        },
+        {
+            "content": "Sanctions package targets energy sector financing linked to sanctioned entities.",
+            "source": "reuters",
+            "credibility_score": 0.65,
+            "velocity_label": "STANDARD",
+            "gate_results": {
+                "credibility": True,
+                "volume": False,
+                "velocity": True,
+                "novelty": True,
+            },
+        },
+    ]
+    out = generate_publication(
+        records=records_with_bool_gates,
+        brief_text=sample_brief_text,
+        cycle_stats=sample_cycle_stats,
+        output_dir=str(tmp_path),
+        issue_number=1,
+    )
+    assert Path(out).exists()
+    assert Path(out).stat().st_size > 1_000
