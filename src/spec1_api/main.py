@@ -20,6 +20,7 @@ from spec1_api.routers import (
     intel,
     leads,
     psyop,
+    publication,
     signals,
     verdicts,
 )
@@ -65,6 +66,7 @@ def create_app() -> FastAPI:
     app.include_router(cycle.router)
     app.include_router(verdicts.router)
     app.include_router(calibration.router)
+    app.include_router(publication.router)
 
     return app
 
