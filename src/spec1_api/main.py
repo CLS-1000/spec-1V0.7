@@ -55,6 +55,14 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=404, detail="UI not found")
         return FileResponse(path, media_type="text/html")
 
+    @app.get("/portland-web", include_in_schema=False)
+    async def portland_web() -> FileResponse:
+        """Serve the Portland Political Web force-graph visualization."""
+        path = _STATIC_DIR / "portland_political_web.html"
+        if not path.is_file():
+            raise HTTPException(status_code=404, detail="Portland Political Web not found")
+        return FileResponse(path, media_type="text/html")
+
     app.include_router(health.router)
     app.include_router(signals.router)
     app.include_router(intel.router)
