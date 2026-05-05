@@ -6,7 +6,6 @@ Runs after each cycle completes.
 from __future__ import annotations
 
 import math
-import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
@@ -19,8 +18,7 @@ from reportlab.platypus import (
 )
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.graphics.shapes import Drawing, Line, Circle, Polygon, String
-from reportlab.graphics import renderPDF
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
+from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
 
 W, H = letter
 M = 0.7 * inch
@@ -170,10 +168,9 @@ def _build_signals_page(records: list, s: dict) -> list:
     for rec in top_records:
         content       = rec.get('content', rec.get('pattern', 'No content'))
         source        = rec.get('source', rec.get('signal_source', 'UNKNOWN'))
-        credibility   = rec.get('credibility_score', rec.get('outcome_confidence', 0.0))
-        cred_label    = 'HIGH' if credibility >= 0.8 else 'MEDIUM' if credibility >= 0.6 else 'LOW'
-        classification = rec.get('classification', rec.get('outcome_classification', 'INVESTIGATE'))
-        velocity      = rec.get('velocity_label', 'STANDARD')
+        credibility = rec.get('credibility_score', rec.get('outcome_confidence', 0.0))
+        cred_label = 'HIGH' if credibility >= 0.8 else 'MEDIUM' if credibility >= 0.6 else 'LOW'
+        velocity = rec.get('velocity_label', 'STANDARD')
 
         headline = content[:80].strip()
         if len(content) > 80:

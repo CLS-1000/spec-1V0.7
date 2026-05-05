@@ -1,7 +1,6 @@
 """Tests for spec1_engine.tools.publication_generator."""
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import pytest
@@ -15,7 +14,10 @@ import pytest
 def sample_records() -> list[dict]:
     return [
         {
-            "content": "Intelligence agencies have identified coordinated influence operations targeting election infrastructure across multiple jurisdictions.",
+            "content": (
+                "Intelligence agencies have identified coordinated influence operations"
+                " targeting election infrastructure across multiple jurisdictions."
+            ),
             "source": "reuters",
             "credibility_score": 0.85,
             "classification": "ESCALATE",
@@ -28,7 +30,10 @@ def sample_records() -> list[dict]:
             },
         },
         {
-            "content": "Congressional oversight committee launches investigation into foreign lobbying disclosures following FARA filing surge.",
+            "content": (
+                "Congressional oversight committee launches investigation into foreign"
+                " lobbying disclosures following FARA filing surge."
+            ),
             "source": "politico",
             "credibility_score": 0.72,
             "classification": "INVESTIGATE",
@@ -140,7 +145,6 @@ def test_generate_publication_empty_records(tmp_path, sample_brief_text, sample_
 def test_generate_publication_domain_scores_capped(tmp_path, sample_records, sample_brief_text):
     """Domain scores derived from extreme cycle_stats must be capped at 1.0."""
     from spec1_engine.tools.publication_generator import generate_publication
-    from spec1_engine.tools.publication_generator import _draw_hexagon_cover
 
     cycle_stats = {
         "signals_harvested": 9999,   # would produce > 1.0 without cap
