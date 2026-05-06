@@ -141,13 +141,15 @@ async def get_node_signal(node_id: str) -> NodeTooltipPayload:
         )
 
     signal = _row_to_signal(row)
-    age_h = signal.signal_age_hours
+    # Compute age directly from published_at — not from the rounded signal_age_hours
+    # field — to avoid a rounding error flipping the stale flag at the 48h boundary.
+    precise_age_h = _age_hours(signal.published_at)
 
     return NodeTooltipPayload(
         node_id=node_id,
         label=meta["label"],
         role=meta["role"],
         signal=signal,
-        stale=age_h > 48,
+        stale=precise_age_h > 48,
         last_updated=signal.published_at,
     )

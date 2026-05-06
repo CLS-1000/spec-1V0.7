@@ -30,14 +30,24 @@ from spec1_api.scheduler import start_scheduler, stop_scheduler
 
 logger = logging.getLogger(__name__)
 
-# Origins allowed to call the API (viz dev servers + file:// via "null")
-_CORS_ORIGINS = [
+# In non-production environments, allow common local dev origins including
+# "null" (the file:// origin). In production, read from SPEC1_CORS_ORIGINS
+# (comma-separated) or default to an empty allowlist.
+_DEV_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5173",
     "http://127.0.0.1:5500",
-    "null",  # file:// origin sent by browsers
+    "null",  # file:// origin sent by browsers opening spec1_ui.html directly
 ]
 _STATIC_DIR = Path(__file__).parent / "static"
+
+
+def _build_cors_origins() -> list[str]:
+    env = os.environ.get("SPEC1_ENVIRONMENT", "production")
+    if env in ("development", "dev", "local"):
+        return _DEV_ORIGINS
+    raw = os.environ.get("SPEC1_CORS_ORIGINS", "")
+    return [o.strip() for o in raw.split(",") if o.strip()]
 
 
 @asynccontextmanager
@@ -57,10 +67,11 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    cors_origins = _build_cors_origins()
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=_CORS_ORIGINS,
-        allow_credentials=True,
+        allow_origins=cors_origins,
+        allow_credentials=bool(cors_origins),
         allow_methods=["*"],
         allow_headers=["*"],
     )

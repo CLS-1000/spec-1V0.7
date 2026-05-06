@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from spec1_engine.signal.gates import GATE_THRESHOLD
 
@@ -49,7 +49,7 @@ class SignalRecord(BaseModel):
     freshness_label: str  # LIVE | RECENT | STALE
     analyst_voice: Optional[str] = None
     conflict_score: Optional[float] = None
-    tags: List[str] = []
+    tags: List[str] = Field(default_factory=list)
 
 
 class NodeTooltipPayload(BaseModel):
@@ -70,7 +70,7 @@ class CrawlerPayload(BaseModel):
     published_at: datetime
     analyst_voice: Optional[str] = None
     conflict_score: Optional[float] = None
-    tags: List[str] = []
+    tags: List[str] = Field(default_factory=list)
 
 
 class IngestResult(BaseModel):

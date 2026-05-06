@@ -38,7 +38,6 @@ DOMAIN_CREDIBILITY: dict[str, float] = {
     "katu.com":              0.72,
     "oregon.gov":            0.88,
     "multco.us":             0.86,
-    "oregonlive.com":        0.82,
 }
 
 _DOMAIN_DEFAULT: float = 0.35
@@ -84,7 +83,7 @@ _TAG_WEIGHTS: dict[str, float] = {
 _TAG_DEFAULT_WEIGHT: float = 0.50
 
 
-def score_volume(node_id: str, tags: List[str]) -> float:
+def score_volume(tags: List[str]) -> float:
     """Return volume score as weighted average of tag scores (0.0–1.0).
 
     Unknown tags receive the default weight (0.50). An empty tag list

@@ -85,8 +85,12 @@ async def ingest_signal(payload: CrawlerPayload) -> IngestResult:
     if payload.node_id not in NODE_REGISTRY:
         raise HTTPException(status_code=422, detail=f"Unknown node_id: {payload.node_id!r}")
 
-    # Deterministic IDs
-    pub_iso = payload.published_at.isoformat()
+    # Enforce UTC — reject naive datetimes, normalise any non-UTC offset
+    pub = payload.published_at
+    if pub.tzinfo is None:
+        raise HTTPException(status_code=422, detail="published_at must be timezone-aware (UTC required)")
+    pub_utc = pub.astimezone(timezone.utc)
+    pub_iso = pub_utc.isoformat()
     signal_id = _make_signal_id(payload.node_id, payload.source_url, pub_iso)
     run_id = _make_run_id()
     retrieved_at = datetime.now(timezone.utc)
@@ -96,9 +100,10 @@ async def ingest_signal(payload: CrawlerPayload) -> IngestResult:
 
     # Score all 4 gates
     cred = score_credibility(payload.source_domain)
-    vol = score_volume(payload.node_id, payload.tags)
-    vel = score_velocity(payload.published_at)
+    vol = score_volume(payload.tags)
+    vel = score_velocity(pub_utc)
     nov = score_novelty(payload.body, prior_summaries)
+    age_h = _age_hours(pub_utc)
 
     gates = GateScores(
         credibility=round(cred, 4),
@@ -108,7 +113,6 @@ async def ingest_signal(payload: CrawlerPayload) -> IngestResult:
     )
     gate_status = GateStatus.PASS if gates.all_pass() else GateStatus.FAIL
 
-    age_h = _age_hours(payload.published_at)
     summary = _extract_summary(payload.body)
 
     logger.info(
