@@ -3,6 +3,7 @@
 Base URL: `http://localhost:8000` (default)
 
 All responses are JSON. Errors follow `{"detail": "..."}` (FastAPI default).
+Paginated endpoints return `{"total": N, "limit": N, "offset": N, "items": [...]}`.
 
 ---
 
@@ -22,23 +23,38 @@ Returns service health and scheduler status.
 
 ### `GET /signals`
 
-Returns recently harvested signals.
+Returns signals from the OSINT store.
 
 Query params:
-- `limit` (int, default 50) — max records to return
-- `source` (str, optional) — filter by source name
+- `limit` (int, default 20, max 200)
+- `offset` (int, default 0)
+- `source_type` (str, optional) — filter by source type (e.g. `"RSS"`, `"API"`)
 
 ```json
-[
-  {
-    "signal_id": "sig_...",
-    "source": "war_on_the_rocks",
-    "title": "...",
-    "url": "...",
-    "published_at": "2026-05-06T12:00:00Z",
-    "word_count": 1240
-  }
-]
+{
+  "total": 142,
+  "limit": 20,
+  "offset": 0,
+  "items": [
+    {
+      "signal_id": "sig_...",
+      "source": "war_on_the_rocks",
+      "source_type": "RSS",
+      "title": "...",
+      "url": "...",
+      "published_at": "2026-05-06T12:00:00Z",
+      "word_count": 1240
+    }
+  ]
+}
+```
+
+### `POST /signals/ingest`
+
+Accept an external signal, score it, and enqueue for pipeline processing. Returns immediately (202).
+
+```json
+{"signal_id": "sig_...", "status": "queued"}
 ```
 
 ---
@@ -50,23 +66,29 @@ Query params:
 Returns scored and analyzed intelligence records.
 
 Query params:
-- `limit` (int, default 50)
-- `min_confidence` (float, optional) — filter by confidence floor
-- `outcome` (str, optional) — filter by outcome classification
+- `limit` (int, default 20, max 200)
+- `offset` (int, default 0)
+- `classification` (str, optional) — filter by classification (e.g. `"Corroborated"`, `"Escalate"`)
+- `min_confidence` (float, default 0.0) — filter by confidence floor
 
 ```json
-[
-  {
-    "record_id": "rec_...",
-    "run_id": "run_...",
-    "signal_id": "sig_...",
-    "outcome": "Corroborated",
-    "confidence": 0.87,
-    "domain": "cyber",
-    "pattern": "...",
-    "generated_at": "2026-05-06T06:01:00Z"
-  }
-]
+{
+  "total": 37,
+  "limit": 20,
+  "offset": 0,
+  "items": [
+    {
+      "record_id": "rec_...",
+      "run_id": "run_...",
+      "signal_id": "sig_...",
+      "classification": "Corroborated",
+      "confidence": 0.87,
+      "domain": "cyber",
+      "pattern": "...",
+      "generated_at": "2026-05-06T06:01:00Z"
+    }
+  ]
+}
 ```
 
 ---
@@ -75,20 +97,23 @@ Query params:
 
 ### `GET /leads`
 
-Returns actionable intelligence leads.
+Returns stored intelligence leads.
 
-### `POST /leads`
+Query params:
+- `limit` (int, default 20, max 200)
+- `offset` (int, default 0)
+- `priority` (str, optional) — filter by priority (`HIGH`, `MEDIUM`, `LOW`)
+- `category` (str, optional) — filter by category
 
-Create a lead manually.
+### `POST /leads/generate`
 
-Request body:
+Generate leads from current intelligence records and store them. No request body.
+
+Query params:
+- `max_leads` (int, default 50, max 200)
+
 ```json
-{
-  "title": "...",
-  "summary": "...",
-  "priority": "high",
-  "source_record_ids": ["rec_..."]
-}
+{"generated": 12, "stored": 12}
 ```
 
 ---
@@ -116,11 +141,26 @@ Returns the latest daily world intelligence brief.
 
 ### `GET /psyop`
 
-Returns psychological-operation detection results.
+Returns stored PsyOp detection scores.
 
 Query params:
-- `limit` (int, default 50)
-- `min_score` (float, optional)
+- `limit` (int, default 20, max 200)
+- `offset` (int, default 0)
+- `classification` (str, optional) — filter by classification (e.g. `"HIGH"`, `"MEDIUM"`)
+
+### `POST /psyop/analyse`
+
+Score a single text snippet for PsyOp patterns. Saves the result.
+
+Request body: `{"text": "..."}`
+
+### `POST /psyop/run`
+
+Run PsyOp detection over all current OSINT records.
+
+```json
+{"processed": 58, "flagged": 3}
+```
 
 ---
 
@@ -161,16 +201,31 @@ Request body:
 
 ## Calibration
 
-### `GET /calibration`
+### `GET /calibration/report`
 
-Returns the calibration drift report. Descriptive only — never auto-applies tuning.
+Returns the current calibration report (accuracy by classification, confidence buckets).
+Descriptive only — never auto-applies tuning.
 
 ```json
 {
   "generated_at": "...",
   "overall_accuracy": 0.74,
   "by_classification": {...},
-  "reliability_buckets": {...},
+  "reliability_buckets": {...}
+}
+```
+
+### `GET /calibration/proposals`
+
+Returns suggested threshold adjustments. Descriptive only — never auto-applied.
+
+Query params:
+- `sample_floor` (int, default 5) — minimum verdicts to consider a bucket
+- `delta_floor` (float, default 0.15) — minimum drift to surface an adjustment
+
+```json
+{
+  "generated_at": "...",
   "suggested_adjustments": [...]
 }
 ```
@@ -181,11 +236,26 @@ Returns the calibration drift report. Descriptive only — never auto-applies tu
 
 ### `POST /cycle/run`
 
-Triggers an immediate full pipeline cycle. Returns cycle metadata on completion.
+Triggers a full pipeline cycle synchronously. Returns when complete.
 
 ```json
-{"run_id": "run_...", "status": "complete", "records_produced": 7}
+{
+  "run_id": "run_...",
+  "started_at": "2026-05-06T06:00:00Z",
+  "finished_at": "2026-05-06T06:01:23Z",
+  "signals_harvested": 42,
+  "signals_parsed": 42,
+  "opportunities_found": 11,
+  "investigations_generated": 11,
+  "outcomes_verified": 11,
+  "records_stored": 9,
+  "errors": []
+}
 ```
+
+### `GET /cycle/status`
+
+Returns the status and result of the last cycle run.
 
 ---
 
@@ -202,6 +272,5 @@ Triggers an immediate full pipeline cycle. Returns cycle metadata on completion.
 | `SPEC1_CRON_MINUTE` | `0` | Scheduled cycle minute |
 | `SPEC1_TIMEZONE` | `America/Los_Angeles` | Scheduler timezone |
 | `SPEC1_FEED_TIMEOUT` | `15` | Feed fetch timeout (seconds) |
-| `SPEC1_QUANT_ENABLED` | `false` | Enable quantitative market pipeline |
 | `SPEC1_ENVIRONMENT` | `production` | Runtime environment tag |
 | `SPEC1_LOG_LEVEL` | `INFO` | Logging verbosity |

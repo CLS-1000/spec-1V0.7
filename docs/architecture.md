@@ -99,14 +99,15 @@ RSS / FARA / Congress / Narrative
 
 ## 4-Gate Scoring System
 
-Every signal must pass ALL four gates to become an `Opportunity`:
+Every signal must pass ALL four gates to become an `Opportunity`.
+Exact constants are in `src/spec1_engine/signal/scorer.py`.
 
-| Gate | Criterion | Default Threshold |
-|------|-----------|-------------------|
-| credibility | Source/analyst weight ≥ 0.5 | 0.5 |
-| volume | Word count ≥ 50 | 50 words |
-| velocity | Signal recency ≤ 48 hours | 48h |
-| novelty | Not duplicate (hash-based) + keyword domain match | — |
+| Gate | Criterion | Constant |
+|------|-----------|----------|
+| credibility | Source credibility score ≥ threshold | `CREDIBILITY_THRESHOLD = 0.60` |
+| volume | Volume score ≥ threshold (tier-based; ≥30 words passes) | `VOLUME_THRESHOLD = 0.30` |
+| velocity | Signal velocity score ≥ threshold (uses `signal.velocity`) | `VELOCITY_THRESHOLD = 0.0` |
+| novelty | At least N keyword domain matches | `NOVELTY_THRESHOLD = 1` |
 
 Calibration drift across gates is surfaced by `cls_calibration` — **never auto-applied**.
 

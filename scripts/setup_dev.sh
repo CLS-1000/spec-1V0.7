@@ -1,19 +1,25 @@
 #!/usr/bin/env bash
-# Development environment setup for SPEC-1
+# Development environment setup for SPEC-1.
+# Run from any directory — paths are resolved relative to the script's repo root.
 set -euo pipefail
 
-echo "==> Setting up SPEC-1 development environment"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-# 1. Check Python version
-python_version=$(python3 --version 2>&1 | awk '{print $2}')
-required_major=3
-required_minor=9
-actual_minor=$(echo "$python_version" | cut -d. -f2)
-if [ "$actual_minor" -lt "$required_minor" ]; then
-    echo "ERROR: Python 3.${required_minor}+ required (found $python_version)"
-    exit 1
-fi
-echo "    Python $python_version — OK"
+cd "$REPO_ROOT"
+
+echo "==> Setting up SPEC-1 development environment"
+echo "    Repo: $REPO_ROOT"
+
+# 1. Check Python version (≥3.9)
+python3 -c "
+import sys
+major, minor = sys.version_info[:2]
+if (major, minor) < (3, 9):
+    print(f'ERROR: Python 3.9+ required (found {major}.{minor})')
+    sys.exit(1)
+print(f'    Python {major}.{minor} — OK')
+"
 
 # 2. Create .env if it doesn't exist
 if [ ! -f .env ]; then
@@ -26,23 +32,30 @@ fi
 
 # 3. Install package + dev deps
 echo "==> Installing dependencies"
-pip install -e ".[dev]"
-
-# 4. Optionally install quant deps
 if [ "${1:-}" = "--quant" ]; then
-    echo "==> Installing quant dependencies (numpy, pandas, yfinance)"
-    pip install -e ".[quant]"
+    python3 -m pip install -e ".[dev,quant]"
+else
+    python3 -m pip install -e ".[dev]"
 fi
 
-# 5. Create generated/ directory
+# 4. Create generated/ directory
 mkdir -p generated/briefs generated/reports generated/exports
 echo "    Created generated/ directories"
 
-# 6. Smoke test
+# 5. Smoke test
 echo "==> Running smoke test"
-PYTHONPATH=src python -c "from spec1_engine.core.engine import IntelligenceEngine; print('    Engine import — OK')"
-PYTHONPATH=src python -c "from spec1_api.main import app; print('    API import — OK')"
-PYTHONPATH=src python -c "import mcp_server; print('    MCP server import — OK')"
+PYTHONPATH="$REPO_ROOT/src" python3 -c "
+from spec1_engine.core.engine import Engine
+print('    Engine import — OK')
+"
+PYTHONPATH="$REPO_ROOT/src" python3 -c "
+from spec1_api.main import app
+print('    API import — OK')
+"
+PYTHONPATH="$REPO_ROOT/src" python3 -c "
+import mcp_server
+print('    MCP server import — OK')
+"
 
 echo ""
 echo "Setup complete. Next steps:"

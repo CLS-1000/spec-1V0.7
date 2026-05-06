@@ -59,13 +59,6 @@ make mcp
 PYTHONPATH=src python mcp_server.py
 ```
 
-### Kill-file pause (stop scheduled cycles without restarting)
-
-```bash
-touch .kill_cycle      # Scheduler checks for this file and skips cycles
-rm .kill_cycle         # Resume
-```
-
 ---
 
 ## Development
@@ -78,11 +71,13 @@ make test       # pytest tests/ -v --tb=short
 make lint       # flake8 src/ tests/
 ```
 
-### Run with quant pipeline enabled
+### Run the quantitative market signal pipeline
 
 ```bash
 pip install -e ".[dev,quant]"
-SPEC1_QUANT_ENABLED=true python -m spec1_engine.app.cycle
+PYTHONPATH=src python -m spec1_engine.quant.cycle
+# or
+make install-quant && scripts/run_cycle.sh --quant
 ```
 
 ### Environment setup
@@ -208,11 +203,12 @@ PYTHONPATH=src python -m cls_db.migrate
 
 ## Generated Artifacts
 
-Runtime artifacts go to `generated/` (gitignored). Never commit them to `main`.
+Scheduled cycle briefs are written to `briefs/` (gitignored at root).
+One-off exports and reports go to `generated/` (also gitignored). Never commit either to `main`.
 
 ```
+briefs/            # Brief .md files written by the cycle and historical_briefs tool
 generated/
-├── briefs/        # Brief markdown files from historical_briefs
 ├── reports/       # Calibration proposal reports
 └── exports/       # One-off data exports
 ```

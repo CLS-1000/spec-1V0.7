@@ -18,7 +18,7 @@ state or active work changes significantly.
 | `spec1_engine` | Active | Core pipeline — frozen core off-limits |
 | `cls_osint` | Active | 10 RSS feeds including 4 DPRK/Korea sources |
 | `cls_psyop` | Active | Pattern detection + evidence chains |
-| `cls_quant` | Active | Disabled by default (`SPEC1_QUANT_ENABLED=false`) |
+| `cls_quant` | Active | Run separately: `python -m spec1_engine.quant.cycle` (requires `.[quant]` extras) |
 | `cls_leads` | Active | |
 | `cls_world_brief` | Active | |
 | `cls_verdicts` | Active | Append-only; currently single reviewer |

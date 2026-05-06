@@ -1,4 +1,4 @@
-.PHONY: install test lint run mcp cycle backfill calibration workspace clean help
+.PHONY: install install-quant test test-fast test-cov lint run mcp cycle backfill calibration workspace clean help
 
 PYTHONPATH := src
 PYTHON     := PYTHONPATH=$(PYTHONPATH) python
