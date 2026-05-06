@@ -5,9 +5,12 @@ from __future__ import annotations
 import logging
 import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 
 from spec1_api import __version__
 from spec1_api.routers import (
@@ -34,6 +37,7 @@ _CORS_ORIGINS = [
     "http://127.0.0.1:5500",
     "null",  # file:// origin sent by browsers
 ]
+_STATIC_DIR = Path(__file__).parent / "static"
 
 
 @asynccontextmanager
@@ -60,6 +64,13 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    @app.get("/", include_in_schema=False)
+    async def ui_root() -> FileResponse:
+        """Serve the SPEC-1 UI."""
+        path = _STATIC_DIR / "index.html"
+        if not path.is_file():
+            raise HTTPException(status_code=404, detail="UI not found")
+        return FileResponse(path, media_type="text/html")
 
     app.include_router(health.router)
     app.include_router(signals.router)
