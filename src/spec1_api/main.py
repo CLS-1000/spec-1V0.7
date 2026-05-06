@@ -7,6 +7,7 @@ import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from spec1_api import __version__
 from spec1_api.routers import (
@@ -21,9 +22,18 @@ from spec1_api.routers import (
     signals,
     verdicts,
 )
+from spec1_api.routers import nodes, ingest
 from spec1_api.scheduler import start_scheduler, stop_scheduler
 
 logger = logging.getLogger(__name__)
+
+# Origins allowed to call the API (viz dev servers + file:// via "null")
+_CORS_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5500",
+    "null",  # file:// origin sent by browsers
+]
 
 
 @asynccontextmanager
@@ -43,6 +53,14 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=_CORS_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     app.include_router(health.router)
     app.include_router(signals.router)
     app.include_router(intel.router)
@@ -53,6 +71,8 @@ def create_app() -> FastAPI:
     app.include_router(cycle.router)
     app.include_router(verdicts.router)
     app.include_router(calibration.router)
+    app.include_router(nodes.router)
+    app.include_router(ingest.router)
 
     return app
 
