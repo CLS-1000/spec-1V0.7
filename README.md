@@ -5,8 +5,16 @@ RSS feeds, FARA filings, congressional records, and narrative sources; scores th
 4-gate pipeline; detects psychological operations; generates actionable leads and world briefs;
 and persists everything to JSONL and SQLite.
 
-For a high-level overview of the project's purpose and design decisions, see
-[PORTFOLIO_SUMMARY.md](PORTFOLIO_SUMMARY.md).
+| Document | Description |
+|----------|-------------|
+| [docs/architecture.md](docs/architecture.md) | System architecture, data flow, data models |
+| [docs/api.md](docs/api.md) | HTTP API endpoint reference |
+| [docs/runbook.md](docs/runbook.md) | Operational procedures and troubleshooting |
+| [docs/portfolio.md](docs/portfolio.md) | Project overview for stakeholders |
+| [docs/case_study.md](docs/case_study.md) | Design decisions and engineering rationale |
+| [CHANGELOG.md](CHANGELOG.md) | Version history |
+| [memory/decisions.md](memory/decisions.md) | Architecture Decision Records (ADRs) |
+| [CLAUDE.md](CLAUDE.md) | Developer and agent governance guide |
 
 ## Architecture
 
@@ -37,25 +45,21 @@ RSS/FARA/Congress/Narrative
 ## Quick Start
 
 ```bash
+# Install and verify
+bash scripts/setup_dev.sh
+
+# Or manually:
 pip install -e ".[dev]"
-
-# One-shot intelligence cycle
-python -m spec1_engine.app.cycle
-
-# API server (http://localhost:8000)
-python -m spec1_api.main
-
-# MCP server (Claude integration)
-python mcp_server.py
-
-# Workspace CLI (case management)
-python -m spec1_engine.workspace
+cp .env.example .env  # then set ANTHROPIC_API_KEY
 ```
 
-## Running Tests
-
 ```bash
-pytest tests/ -v --tb=short
+make cycle      # one-shot intelligence cycle
+make run        # API server → http://localhost:8000
+make mcp        # MCP server (Claude integration)
+make workspace  # workspace CLI (case management)
+make test       # full test suite
+make help       # all available commands
 ```
 
 ## Environment

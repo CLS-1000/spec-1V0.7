@@ -45,3 +45,9 @@ data/psyop_signals.jsonl
 briefs/
 workspace/
 .mcp.json
+
+# Loose runtime artifacts at root — exports, rendered HTML, kill files
+/spec1_intelligence_export.json
+/spec1_portfolio.html
+/spec1_ui.html
+/.kill_cycle
