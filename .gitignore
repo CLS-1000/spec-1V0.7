@@ -33,6 +33,9 @@ htmlcov/
 *.log
 .DS_Store
 
+# SQLite databases — runtime artifacts, never committed
+*.db
+
 # Generated artifacts — briefs, historical outputs, logs
 # Write these to generated/ or a dedicated branch, not main
 generated/
