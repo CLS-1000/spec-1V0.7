@@ -32,3 +32,21 @@ def test_root_contains_spec1_title(client):
 def test_root_contains_layout_div(client):
     r = client.get("/")
     assert 'class="layout"' in r.text
+
+
+# ─── GET /portland-web ────────────────────────────────────────────────────────
+
+def test_portland_web_returns_html(client):
+    r = client.get("/portland-web")
+    assert r.status_code == 200
+    assert "text/html" in r.headers["content-type"]
+
+
+def test_portland_web_contains_title(client):
+    r = client.get("/portland-web")
+    assert "Portland Political Web" in r.text
+
+
+def test_portland_web_contains_d3_script(client):
+    r = client.get("/portland-web")
+    assert "d3" in r.text

@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portland Political Web — SPEC-1 · Psyche-Ops</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"
+  integrity="sha512-M7nHCiNUOwFt6Us3r8alutZLm9qMt4s9951uo8jqO4UwJ1hziseL6O3ndFyigx6+LREfZqnhHxYjKRJ8ZQ69DQ=="
+  crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
 
@@ -580,7 +582,7 @@ nodeSel
     const [mx,my] = d3.pointer(e, document.body);
     tooltip.style('opacity',1)
       .style('left', (mx+18)+'px')
-      .style('top', Math.min(my-10, H-180)+'px');
+      .style('top', Math.min(my-10, window.innerHeight-180)+'px');
     d3.select('#tt-name').text(d.label.replace(/\n/g,' '));
     d3.select('#tt-role').text(d.role);
     d3.select('#tt-desc').text(d.desc);
