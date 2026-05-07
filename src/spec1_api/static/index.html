@@ -18,190 +18,235 @@
     --mono: 'IBM Plex Mono', 'Courier Prime', monospace;
   }
 
-  html, body {
-    height: 100%;
-    background: var(--background);
-    color: var(--text-primary);
-    font-family: var(--mono);
-    font-size: 14px;
-  }
+  html, body { height: 100%; background: var(--background); color: var(--text-primary); font-family: var(--mono); font-size: 14px; }
 
-  /* ── Flower of Life background ──────────────────────────── */
-  #fol-bg {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    pointer-events: none;
-  }
+  #fol-bg { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 
-  /* ── Layout ──────────────────────────────────────────────── */
+  /* ── Layout ── */
   .layout { display: flex; flex-direction: column; height: 100vh; overflow: hidden; position: relative; z-index: 1; }
 
   header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 20px; height: 52px;
-    background: rgba(0,0,0,.94);
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
+    background: rgba(0,0,0,.94); border-bottom: 1px solid var(--border); flex-shrink: 0;
   }
-
-  .logo {
-    display: flex; align-items: center; gap: 12px;
-    font-weight: 700; font-size: 15px; letter-spacing: .08em;
-    color: var(--text-primary); font-family: var(--mono);
-  }
-
-  .logo-badge {
-    border: 1px solid var(--border);
-    color: var(--text-primary);
-    font-size: 10px; font-weight: 700;
-    padding: 2px 7px; letter-spacing: .14em;
-  }
-
-  #api-status { display: flex; align-items: center; gap: 8px; font-size: 12px; font-family: var(--mono); color: var(--text-secondary); }
-
-  .status-geo {
-    width: 8px; height: 8px;
-    border: 1px solid var(--border);
-    flex-shrink: 0;
-    transform: rotate(45deg);
-    transition: background .3s;
-  }
-  .status-geo.online  { background: var(--text-primary); }
+  .logo { display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 15px; letter-spacing: .08em; color: var(--text-primary); }
+  .logo-badge { border: 1px solid var(--border); color: var(--text-primary); font-size: 10px; font-weight: 700; padding: 2px 7px; letter-spacing: .14em; }
+  #api-status { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
+  .status-geo { width: 8px; height: 8px; border: 1px solid var(--border); flex-shrink: 0; transform: rotate(45deg); transition: background .3s; }
+  .status-geo.online { background: var(--text-primary); }
   .status-geo.offline { background: transparent; }
-
-  .start-btn {
-    margin-left: 8px; padding: 3px 10px; background: transparent;
-    border: 1px solid var(--text-muted); color: var(--text-muted);
-    cursor: pointer; font-size: 11px; font-family: var(--mono);
-    transition: border-color .15s, color .15s; letter-spacing: .06em;
-  }
+  .start-btn { margin-left: 8px; padding: 3px 10px; background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); cursor: pointer; font-size: 11px; font-family: var(--mono); transition: border-color .15s, color .15s; letter-spacing: .06em; }
   .start-btn:hover { border-color: var(--text-primary); color: var(--text-primary); }
 
   .body { display: flex; flex: 1; overflow: hidden; }
 
-  /* ── Sidebar ─────────────────────────────────────────────── */
-  nav {
-    width: 210px; flex-shrink: 0;
-    background: rgba(10,10,10,.96);
-    border-right: 1px solid var(--border);
-    display: flex; flex-direction: column; overflow-y: auto; padding: 12px 0;
-  }
-
-  .nav-section { padding: 8px 16px 4px; font-size: 10px; font-weight: 600; letter-spacing: .14em; color: var(--text-muted); text-transform: uppercase; font-family: var(--mono); }
-
-  .nav-item {
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 16px; cursor: pointer; font-size: 12px;
-    color: var(--text-muted); border-left: 2px solid transparent;
-    transition: all .12s; user-select: none;
-    font-family: var(--mono); letter-spacing: .04em;
-  }
+  /* ── Sidebar ── */
+  nav { width: 210px; flex-shrink: 0; background: rgba(10,10,10,.96); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; padding: 12px 0; }
+  .nav-section { padding: 8px 16px 4px; font-size: 10px; font-weight: 600; letter-spacing: .14em; color: var(--text-muted); text-transform: uppercase; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px 16px; cursor: pointer; font-size: 12px; color: var(--text-muted); border-left: 2px solid transparent; transition: all .12s; user-select: none; letter-spacing: .04em; }
   .nav-item:hover { color: var(--text-secondary); }
   .nav-item.active { color: var(--text-primary); border-left-color: var(--border); }
-
   .nav-glyph { font-size: 11px; width: 18px; text-align: center; }
-
   .nav-divider { height: 1px; background: rgba(255,255,255,.15); margin: 8px 16px; }
 
-  /* ── Main ────────────────────────────────────────────────── */
+  /* ── Main ── */
   main { flex: 1; overflow-y: auto; padding: 24px 28px; }
-
-  .panel { display: none; max-width: 860px; }
+  .panel { display: none; max-width: 900px; }
   .panel.active { display: block; }
+  .panel-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; letter-spacing: .06em; }
+  .panel-sub { color: var(--text-muted); font-size: 12px; margin-bottom: 24px; }
 
-  .panel-title { font-size: 20px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; letter-spacing: .06em; font-family: var(--mono); }
-  .panel-sub { color: var(--text-muted); font-size: 12px; margin-bottom: 24px; font-family: var(--mono); }
-
-  /* ── Spinner ─────────────────────────────────────────────── */
-  .loading { color: var(--text-muted); font-family: var(--mono); font-size: 12px; padding: 24px 0; display: flex; align-items: center; gap: 8px; letter-spacing: .06em; }
+  /* ── Spinner ── */
+  .loading { color: var(--text-muted); font-size: 12px; padding: 24px 0; display: flex; align-items: center; gap: 8px; letter-spacing: .06em; }
   .loading::before { content: ''; display: inline-block; width: 14px; height: 14px; border: 1px solid rgba(255,255,255,.25); border-top-color: var(--text-primary); animation: spin .8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ── Brief rendered output ───────────────────────────────── */
+  /* ── Brief ── */
   .brief-wrap { background: rgba(10,10,10,.92); border: 1px solid var(--border); padding: 24px; }
   .brief-id-row { display: flex; gap: 12px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
-  .tag { font-family: var(--mono); font-size: 11px; padding: 2px 8px; border: 1px solid rgba(255,255,255,.3); color: var(--text-secondary); letter-spacing: .04em; }
+  .tag { font-size: 11px; padding: 2px 8px; border: 1px solid rgba(255,255,255,.3); color: var(--text-secondary); letter-spacing: .04em; }
 
-  /* ── Markdown rendered styles ────────────────────────────── */
-  .md h1 { font-size: 18px; font-weight: 700; margin: 0 0 14px; line-height: 1.4; letter-spacing: .05em; font-family: var(--mono); }
-  .md h2 { font-size: 15px; font-weight: 600; margin: 22px 0 8px; color: var(--text-primary); letter-spacing: .06em; font-family: var(--mono); }
-  .md h3 { font-size: 12px; font-weight: 600; margin: 18px 0 6px; text-transform: uppercase; letter-spacing: .12em; color: var(--text-secondary); font-family: var(--mono); }
-  .md h4 { font-size: 13px; font-weight: 600; margin: 14px 0 5px; font-family: var(--mono); }
-  .md p  { line-height: 1.75; margin-bottom: 10px; color: var(--text-secondary); font-family: var(--mono); font-size: 13px; }
+  /* ── Markdown ── */
+  .md h1 { font-size: 18px; font-weight: 700; margin: 0 0 14px; line-height: 1.4; letter-spacing: .05em; }
+  .md h2 { font-size: 15px; font-weight: 600; margin: 22px 0 8px; color: var(--text-primary); letter-spacing: .06em; }
+  .md h3 { font-size: 12px; font-weight: 600; margin: 18px 0 6px; text-transform: uppercase; letter-spacing: .12em; color: var(--text-secondary); }
+  .md h4 { font-size: 13px; font-weight: 600; margin: 14px 0 5px; }
+  .md p  { line-height: 1.75; margin-bottom: 10px; color: var(--text-secondary); font-size: 13px; }
   .md ul, .md ol { margin: 8px 0 10px 22px; }
-  .md li { line-height: 1.65; margin-bottom: 4px; color: var(--text-secondary); font-family: var(--mono); font-size: 13px; }
+  .md li { line-height: 1.65; margin-bottom: 4px; color: var(--text-secondary); font-size: 13px; }
   .md strong { font-weight: 700; color: var(--text-primary); }
   .md em { font-style: italic; color: var(--text-secondary); }
   .md code { font-family: 'Courier Prime', monospace; font-size: 11px; background: var(--background); border: 1px solid rgba(255,255,255,.3); padding: 1px 5px; color: var(--text-primary); }
   .md blockquote { border-left: 2px solid rgba(255,255,255,.4); padding: 6px 14px; margin: 10px 0; color: var(--text-secondary); }
   .md hr { border: none; border-top: 1px solid rgba(255,255,255,.15); margin: 18px 0; }
 
-  .brief-meta { display: flex; gap: 16px; font-size: 11px; font-family: var(--mono); color: var(--text-muted); margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,.15); }
-
-  /* ── Archive cards ───────────────────────────────────────── */
+  /* ── Archive cards ── */
   .archive-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
-  .archive-count { font-family: var(--mono); font-size: 11px; color: var(--text-muted); border: 1px solid rgba(255,255,255,.3); padding: 3px 10px; letter-spacing: .06em; }
+  .archive-count { font-size: 11px; color: var(--text-muted); border: 1px solid rgba(255,255,255,.3); padding: 3px 10px; letter-spacing: .06em; }
   .brief-cards { display: flex; flex-direction: column; gap: 10px; }
-  .brief-card {
-    background: rgba(10,10,10,.92); border: 1px solid rgba(255,255,255,.3);
-    padding: 16px 20px; cursor: pointer; transition: border-color .15s, background .15s;
-    font-family: var(--mono);
-  }
+  .brief-card { background: rgba(10,10,10,.92); border: 1px solid rgba(255,255,255,.3); padding: 16px 20px; cursor: pointer; transition: border-color .15s, background .15s; }
   .brief-card:hover { border-color: var(--border); background: rgba(255,255,255,.04); }
-  .card-date { font-family: var(--mono); font-size: 11px; color: var(--text-primary); margin-bottom: 6px; letter-spacing: .1em; font-weight: 600; }
-  .card-meta { display: flex; gap: 14px; font-size: 11px; font-family: var(--mono); color: var(--text-muted); margin-top: 8px; }
+  .card-date { font-size: 11px; color: var(--text-primary); margin-bottom: 6px; letter-spacing: .1em; font-weight: 600; }
+  .card-headline { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; line-height: 1.5; }
+  .card-meta { display: flex; gap: 14px; font-size: 11px; color: var(--text-muted); margin-top: 8px; }
 
-  /* ── Back button ─────────────────────────────────────────── */
-  .back-btn {
-    display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px;
-    padding: 6px 14px; background: transparent; border: 1px solid rgba(255,255,255,.3);
-    color: var(--text-muted); cursor: pointer;
-    font-size: 12px; font-family: var(--mono); transition: all .12s; letter-spacing: .05em;
-  }
+  /* ── Back button ── */
+  .back-btn { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px; padding: 6px 14px; background: transparent; border: 1px solid rgba(255,255,255,.3); color: var(--text-muted); cursor: pointer; font-size: 12px; transition: all .12s; letter-spacing: .05em; }
   .back-btn:hover { border-color: var(--border); color: var(--text-primary); }
 
-  /* ── State boxes ─────────────────────────────────────────── */
+  /* ── State box ── */
   .state-box { background: rgba(10,10,10,.92); border: 1px solid rgba(255,255,255,.3); padding: 28px 24px; }
-  .state-box p { color: var(--text-muted); margin-bottom: 14px; line-height: 1.6; font-family: var(--mono); font-size: 13px; }
+  .state-box p { color: var(--text-muted); margin-bottom: 14px; line-height: 1.6; font-size: 13px; }
   .state-box pre { background: var(--background); border: 1px solid rgba(255,255,255,.2); padding: 12px 14px; font-family: 'Courier Prime', monospace; font-size: 12px; color: var(--text-primary); overflow-x: auto; white-space: pre; margin-bottom: 10px; line-height: 1.65; }
 
-  /* ── Copy button ─────────────────────────────────────────── */
-  .copy-btn {
-    padding: 4px 12px; background: transparent; border: 1px solid rgba(255,255,255,.3);
-    color: var(--text-muted); cursor: pointer;
-    font-size: 11px; font-family: var(--mono); transition: all .12s; letter-spacing: .04em;
-  }
+  /* ── Copy button ── */
+  .copy-btn { padding: 4px 12px; background: transparent; border: 1px solid rgba(255,255,255,.3); color: var(--text-muted); cursor: pointer; font-size: 11px; font-family: var(--mono); transition: all .12s; letter-spacing: .04em; }
   .copy-btn:hover { border-color: var(--border); color: var(--text-primary); }
   .copy-btn.copied { border-color: var(--border); color: var(--text-primary); }
 
-  /* ── Local Access panel ──────────────────────────────────── */
+  /* ── Local Access ── */
   .cmd-grid { display: flex; flex-direction: column; gap: 16px; }
   .cmd-block { background: rgba(10,10,10,.92); border: 1px solid rgba(255,255,255,.3); overflow: hidden; }
-  .cmd-label { padding: 8px 16px; background: rgba(0,0,0,.85); border-bottom: 1px solid rgba(255,255,255,.2); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; color: var(--text-muted); font-family: var(--mono); }
+  .cmd-label { padding: 8px 16px; background: rgba(0,0,0,.85); border-bottom: 1px solid rgba(255,255,255,.2); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; color: var(--text-muted); }
   .cmd-body { padding: 14px 16px; }
   .cmd-body pre { font-family: 'Courier Prime', monospace; font-size: 12px; color: var(--text-primary); overflow-x: auto; white-space: pre; line-height: 1.7; margin-bottom: 10px; }
+
+  /* ── Filter bar ── */
+  .filter-bar { display: flex; gap: 10px; margin-bottom: 18px; align-items: center; flex-wrap: wrap; }
+  .filter-bar label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); }
+  .filter-input, .filter-select {
+    background: var(--background); color: var(--text-primary);
+    border: 1px solid rgba(255,255,255,.3);
+    padding: 5px 10px; font-family: var(--mono); font-size: 12px;
+    outline: none; transition: border-color .12s;
+  }
+  .filter-input:focus, .filter-select:focus { border-color: var(--border); }
+  .filter-select option { background: var(--surface); }
+  .filter-btn { padding: 5px 14px; background: transparent; border: 1px solid rgba(255,255,255,.3); color: var(--text-muted); cursor: pointer; font-family: var(--mono); font-size: 11px; transition: all .12s; letter-spacing: .04em; }
+  .filter-btn:hover { border-color: var(--border); color: var(--text-primary); }
+
+  /* ── Data table ── */
+  .table-wrap { overflow-x: auto; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .data-table th { text-align: left; padding: 7px 12px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); border-bottom: 1px solid rgba(255,255,255,.2); white-space: nowrap; }
+  .data-table td { padding: 8px 12px; color: var(--text-secondary); border-bottom: 1px solid rgba(255,255,255,.06); vertical-align: middle; }
+  .data-table tr:hover td { background: rgba(255,255,255,.03); }
+  .mono-id { font-size: 10px; color: var(--text-muted); font-family: 'Courier Prime', monospace; }
+  .cell-trunc { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* ── Confidence bar ── */
+  .conf-wrap { display: flex; align-items: center; gap: 6px; }
+  .conf-track { width: 50px; height: 3px; background: rgba(255,255,255,.1); flex-shrink: 0; }
+  .conf-fill { height: 100%; background: var(--text-primary); }
+  .conf-val { font-size: 11px; color: var(--text-secondary); min-width: 32px; font-family: 'Courier Prime', monospace; }
+
+  /* ── Badges ── */
+  .badge { font-size: 10px; padding: 1px 6px; border: 1px solid rgba(255,255,255,.25); color: rgba(255,255,255,.6); letter-spacing: .06em; white-space: nowrap; display: inline-block; }
+  .badge-critical, .badge-high-risk, .badge-corroborated { border-color: #fff; color: #fff; }
+  .badge-high, .badge-escalate    { border-color: rgba(255,255,255,.7); color: rgba(255,255,255,.9); }
+  .badge-medium, .badge-medium-risk, .badge-investigate { border-color: rgba(255,255,255,.45); color: rgba(255,255,255,.7); }
+  .badge-low, .badge-low-risk, .badge-monitor, .badge-clean { border-color: rgba(255,255,255,.2); color: rgba(255,255,255,.4); }
+  .badge-archive { border-color: rgba(255,255,255,.1); color: rgba(255,255,255,.25); }
+
+  /* ── Pagination ── */
+  .pager { display: flex; align-items: center; gap: 10px; margin-top: 16px; font-size: 12px; color: var(--text-muted); }
+  .page-btn { padding: 3px 10px; background: transparent; border: 1px solid rgba(255,255,255,.25); color: var(--text-muted); cursor: pointer; font-family: var(--mono); font-size: 11px; transition: all .12s; }
+  .page-btn:hover:not(:disabled) { border-color: var(--border); color: var(--text-primary); }
+  .page-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+  /* ── Forms ── */
+  .form-grid { display: flex; flex-direction: column; gap: 14px; max-width: 520px; }
+  .form-field {}
+  .form-label { display: block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); margin-bottom: 5px; }
+  .form-input, .form-select, .form-textarea { width: 100%; background: var(--background); color: var(--text-primary); border: 1px solid rgba(255,255,255,.3); padding: 8px 12px; font-family: var(--mono); font-size: 12px; outline: none; transition: border-color .12s; }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--border); }
+  .form-select option { background: var(--surface); }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .form-submit { padding: 7px 20px; background: transparent; border: 1px solid var(--border); color: var(--text-primary); cursor: pointer; font-family: var(--mono); font-size: 12px; letter-spacing: .06em; transition: background .12s; }
+  .form-submit:hover { background: rgba(255,255,255,.06); }
+  .form-submit:disabled { opacity: .4; cursor: not-allowed; }
+  .form-msg { font-size: 12px; color: var(--text-muted); margin-top: 8px; min-height: 18px; }
+  .form-msg.ok  { color: var(--text-primary); }
+  .form-msg.err { color: rgba(255,100,100,.9); }
+
+  /* ── Stats grid ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
+  .stat-box { border: 1px solid rgba(255,255,255,.25); padding: 14px 16px; }
+  .stat-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 5px; }
+  .stat-value { font-size: 22px; font-weight: 700; color: var(--text-primary); line-height: 1; }
+  .stat-sub { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+
+  /* ── Lead cards ── */
+  .lead-card { border: 1px solid rgba(255,255,255,.25); padding: 16px 20px; margin-bottom: 10px; background: rgba(10,10,10,.9); transition: border-color .12s; }
+  .lead-card:hover { border-color: rgba(255,255,255,.6); }
+  .lead-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  .lead-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.4; }
+  .lead-summary { font-size: 12px; color: var(--text-secondary); line-height: 1.65; margin-bottom: 10px; }
+  .lead-actions { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; }
+  .lead-action-item { font-size: 11px; color: var(--text-muted); padding-left: 14px; position: relative; }
+  .lead-action-item::before { content: '▸'; position: absolute; left: 0; color: rgba(255,255,255,.3); }
+  .lead-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 11px; color: var(--text-muted); }
+
+  /* ── Psyop cards ── */
+  .psyop-card { border: 1px solid rgba(255,255,255,.2); padding: 16px 20px; margin-bottom: 10px; background: rgba(10,10,10,.9); }
+  .psyop-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .psyop-score-display { display: flex; align-items: center; gap: 8px; }
+  .psyop-score-val { font-size: 20px; font-weight: 700; font-family: 'Courier Prime', monospace; }
+  .psyop-excerpt { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-bottom: 8px; font-style: italic; }
+  .psyop-patterns { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .psyop-pattern { font-size: 10px; padding: 2px 7px; border: 1px solid rgba(255,255,255,.15); color: rgba(255,255,255,.5); letter-spacing: .04em; }
+  .psyop-meta { font-size: 11px; color: var(--text-muted); }
+
+  /* ── Calibration ── */
+  .cal-section { margin-bottom: 28px; }
+  .cal-section-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .cal-overview { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-bottom: 20px; }
+  .cal-kv { border: 1px solid rgba(255,255,255,.15); padding: 10px 14px; }
+  .cal-kv-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+  .cal-kv-value { font-size: 18px; font-weight: 700; color: var(--text-primary); }
+  .cal-bucket-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.05); font-size: 12px; color: var(--text-secondary); }
+  .cal-bucket-label { width: 150px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cal-bucket-count { width: 40px; flex-shrink: 0; text-align: right; color: var(--text-muted); font-size: 11px; }
+  .cal-bucket-bar { flex: 1; height: 3px; background: rgba(255,255,255,.08); }
+  .cal-bucket-fill { height: 100%; background: rgba(255,255,255,.55); transition: width .3s; }
+  .cal-bucket-acc { width: 46px; flex-shrink: 0; text-align: right; font-family: 'Courier Prime', monospace; font-size: 11px; }
+
+  /* ── Verdict colors ── */
+  .v-correct   { color: #fff; }
+  .v-partial   { color: rgba(255,255,255,.7); }
+  .v-incorrect { color: rgba(255,255,255,.4); }
+  .v-unclear   { color: rgba(255,255,255,.25); }
+
+  /* ── Section divider ── */
+  .section-sep { height: 1px; background: rgba(255,255,255,.1); margin: 22px 0; }
+  .section-heading { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; color: var(--text-muted); margin-bottom: 14px; }
+
+  /* ── Cycle panel ── */
+  .cycle-run-box { border: 1px solid rgba(255,255,255,.25); padding: 20px 24px; margin-bottom: 20px; }
+  .cycle-status-box { border: 1px solid rgba(255,255,255,.2); padding: 20px 24px; }
+  .run-btn { padding: 8px 24px; background: transparent; border: 1px solid var(--border); color: var(--text-primary); cursor: pointer; font-family: var(--mono); font-size: 13px; letter-spacing: .08em; transition: background .12s; }
+  .run-btn:hover:not(:disabled) { background: rgba(255,255,255,.07); }
+  .run-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .run-msg { font-size: 12px; color: var(--text-muted); margin-top: 10px; min-height: 18px; }
+  .run-msg.running { color: var(--text-secondary); }
+  .run-msg.done    { color: var(--text-primary); }
+  .run-msg.err     { color: rgba(255,100,100,.9); }
 </style>
 </head>
 <body>
 
-<!-- Flower of Life background — programmatic SVG, 5% opacity -->
-<!-- r=40, tile: 80 × 69.28 (= 40√3). Centers form hexagonal lattice at spacing 40. -->
+<!-- Flower of Life background -->
 <svg id="fol-bg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <defs>
     <pattern id="fol-pattern" patternUnits="userSpaceOnUse" width="80" height="69.28">
-      <!-- Row 0: y=0 -->
       <circle cx="0"   cy="0"     r="40" fill="none" stroke="white" stroke-width="0.6"/>
       <circle cx="40"  cy="0"     r="40" fill="none" stroke="white" stroke-width="0.6"/>
       <circle cx="80"  cy="0"     r="40" fill="none" stroke="white" stroke-width="0.6"/>
-      <!-- Row 1: y=34.64 (= 40√3/2), x offset by 20 -->
       <circle cx="-20" cy="34.64" r="40" fill="none" stroke="white" stroke-width="0.6"/>
       <circle cx="20"  cy="34.64" r="40" fill="none" stroke="white" stroke-width="0.6"/>
       <circle cx="60"  cy="34.64" r="40" fill="none" stroke="white" stroke-width="0.6"/>
       <circle cx="100" cy="34.64" r="40" fill="none" stroke="white" stroke-width="0.6"/>
-      <!-- Row 2: y=69.28 (= 40√3) — closes the tile -->
       <circle cx="0"   cy="69.28" r="40" fill="none" stroke="white" stroke-width="0.6"/>
       <circle cx="40"  cy="69.28" r="40" fill="none" stroke="white" stroke-width="0.6"/>
       <circle cx="80"  cy="69.28" r="40" fill="none" stroke="white" stroke-width="0.6"/>
@@ -212,7 +257,7 @@
 
 <div class="layout">
 
-  <!-- ── Header ────────────────────────────────────────────── -->
+  <!-- ── Header ── -->
   <header>
     <div class="logo">
       <span class="logo-badge">S1</span>
@@ -226,7 +271,7 @@
 
   <div class="body">
 
-    <!-- ── Sidebar ───────────────────────────────────────────── -->
+    <!-- ── Sidebar ── -->
     <nav>
       <div class="nav-section">Intelligence</div>
       <div class="nav-item active" data-panel="panel-brief" onclick="showPanel('panel-brief')">
@@ -235,6 +280,40 @@
       <div class="nav-item" data-panel="panel-archive" onclick="showPanel('panel-archive')">
         <span class="nav-glyph">◻</span> Archive
       </div>
+
+      <div class="nav-divider"></div>
+      <div class="nav-section">Signals</div>
+      <div class="nav-item" data-panel="panel-signals" onclick="showPanel('panel-signals')">
+        <span class="nav-glyph">⊹</span> Raw Signals
+      </div>
+      <div class="nav-item" data-panel="panel-intel" onclick="showPanel('panel-intel')">
+        <span class="nav-glyph">▣</span> Intel Records
+      </div>
+      <div class="nav-item" data-panel="panel-leads" onclick="showPanel('panel-leads')">
+        <span class="nav-glyph">◈</span> Leads
+      </div>
+
+      <div class="nav-divider"></div>
+      <div class="nav-section">Analysis</div>
+      <div class="nav-item" data-panel="panel-psyop" onclick="showPanel('panel-psyop')">
+        <span class="nav-glyph">⊗</span> Psyop
+      </div>
+      <div class="nav-item" data-panel="panel-fara" onclick="showPanel('panel-fara')">
+        <span class="nav-glyph">⊡</span> FARA
+      </div>
+
+      <div class="nav-divider"></div>
+      <div class="nav-section">Operations</div>
+      <div class="nav-item" data-panel="panel-cycle" onclick="showPanel('panel-cycle')">
+        <span class="nav-glyph">▷</span> Cycle
+      </div>
+      <div class="nav-item" data-panel="panel-verdicts" onclick="showPanel('panel-verdicts')">
+        <span class="nav-glyph">◻</span> Verdicts
+      </div>
+      <div class="nav-item" data-panel="panel-calibration" onclick="showPanel('panel-calibration')">
+        <span class="nav-glyph">⊞</span> Calibration
+      </div>
+
       <div class="nav-divider"></div>
       <div class="nav-section">Tools</div>
       <div class="nav-item" data-panel="panel-local" onclick="showPanel('panel-local')">
@@ -242,24 +321,219 @@
       </div>
     </nav>
 
-    <!-- ── Main content ──────────────────────────────────────── -->
+    <!-- ── Main content ── -->
     <main>
 
-      <!-- Daily Brief panel -->
+      <!-- ─────────────────────────── Daily Brief ─────────────────────────── -->
       <div class="panel active" id="panel-brief">
         <div class="panel-title">◈ Daily Brief</div>
-        <div class="panel-sub">Latest world intelligence brief — loaded live from the SPEC-1 API</div>
+        <div class="panel-sub">Latest world intelligence brief</div>
         <div id="brief-content"><div class="loading">Loading latest brief…</div></div>
       </div>
 
-      <!-- Archive panel -->
+      <!-- ─────────────────────────── Archive ─────────────────────────────── -->
       <div class="panel" id="panel-archive">
         <div class="panel-title">◻ Brief Archive</div>
         <div class="panel-sub">All generated briefs, newest first — click a card to read</div>
-        <div id="archive-content"><div class="loading">Loading index…</div></div>
+        <div id="archive-content"><div class="loading">Loading archive…</div></div>
       </div>
 
-      <!-- Local Access panel -->
+      <!-- ─────────────────────────── Raw Signals ─────────────────────────── -->
+      <div class="panel" id="panel-signals">
+        <div class="panel-title">⊹ Raw Signals</div>
+        <div class="panel-sub">OSINT signals from all adapters (RSS, FARA, Congressional, Narrative)</div>
+        <div class="filter-bar">
+          <label>Source type</label>
+          <input id="sig-source" class="filter-input" placeholder="e.g. RSS" style="width:130px">
+          <button class="filter-btn" onclick="loadSignals(0)">Filter</button>
+          <button class="filter-btn" onclick="document.getElementById('sig-source').value='';loadSignals(0)">Clear</button>
+        </div>
+        <div id="signals-content"><div class="loading">Loading signals…</div></div>
+      </div>
+
+      <!-- ─────────────────────────── Intel Records ───────────────────────── -->
+      <div class="panel" id="panel-intel">
+        <div class="panel-title">▣ Intel Records</div>
+        <div class="panel-sub">Analyzed intelligence records scored through the 4-gate pipeline</div>
+        <div class="filter-bar">
+          <label>Classification</label>
+          <select id="intel-cls" class="filter-select" style="width:160px">
+            <option value="">All</option>
+            <option value="CORROBORATED">CORROBORATED</option>
+            <option value="ESCALATE">ESCALATE</option>
+            <option value="INVESTIGATE">INVESTIGATE</option>
+            <option value="MONITOR">MONITOR</option>
+            <option value="ARCHIVE">ARCHIVE</option>
+          </select>
+          <label>Min confidence</label>
+          <input id="intel-conf" class="filter-input" type="number" min="0" max="1" step="0.05" value="0" style="width:80px">
+          <button class="filter-btn" onclick="loadIntel(0)">Filter</button>
+          <button class="filter-btn" onclick="document.getElementById('intel-cls').value='';document.getElementById('intel-conf').value='0';loadIntel(0)">Clear</button>
+        </div>
+        <div id="intel-content"><div class="loading">Loading intelligence records…</div></div>
+      </div>
+
+      <!-- ─────────────────────────── Leads ───────────────────────────────── -->
+      <div class="panel" id="panel-leads">
+        <div class="panel-title">◈ Leads</div>
+        <div class="panel-sub">Actionable intelligence leads generated from verified records</div>
+        <div class="filter-bar">
+          <label>Priority</label>
+          <select id="leads-pri" class="filter-select" style="width:130px">
+            <option value="">All</option>
+            <option value="CRITICAL">CRITICAL</option>
+            <option value="HIGH">HIGH</option>
+            <option value="MEDIUM">MEDIUM</option>
+            <option value="LOW">LOW</option>
+          </select>
+          <label>Category</label>
+          <select id="leads-cat" class="filter-select" style="width:150px">
+            <option value="">All</option>
+            <option value="military">MILITARY</option>
+            <option value="cyber">CYBER</option>
+            <option value="geopolitical">GEOPOLITICAL</option>
+            <option value="fara">FARA</option>
+            <option value="psyop">PSYOP</option>
+            <option value="quant">QUANT</option>
+          </select>
+          <button class="filter-btn" onclick="loadLeads(0)">Filter</button>
+          <button class="filter-btn" onclick="document.getElementById('leads-pri').value='';document.getElementById('leads-cat').value='';loadLeads(0)">Clear</button>
+        </div>
+        <div id="leads-content"><div class="loading">Loading leads…</div></div>
+      </div>
+
+      <!-- ─────────────────────────── Psyop ───────────────────────────────── -->
+      <div class="panel" id="panel-psyop">
+        <div class="panel-title">⊗ Psyop Detection</div>
+        <div class="panel-sub">Psychological-operation pattern scoring and evidence chains</div>
+
+        <div class="section-heading">Analyse Text</div>
+        <div class="state-box" style="margin-bottom:22px;">
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="form-label">Text to analyse</label>
+              <textarea id="psyop-text" class="form-textarea" rows="4" placeholder="Paste a news headline, social media post, or narrative text…"></textarea>
+            </div>
+            <div>
+              <button class="form-submit" id="psyop-submit-btn" onclick="analysePsyopText()">Analyse for Psyop Patterns</button>
+              <div class="form-msg" id="psyop-analyse-msg"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-sep"></div>
+        <div class="section-heading">Stored Scores</div>
+        <div class="filter-bar">
+          <label>Classification</label>
+          <select id="psyop-cls" class="filter-select" style="width:160px">
+            <option value="">All</option>
+            <option value="HIGH_RISK">HIGH_RISK</option>
+            <option value="MEDIUM_RISK">MEDIUM_RISK</option>
+            <option value="LOW_RISK">LOW_RISK</option>
+            <option value="CLEAN">CLEAN</option>
+          </select>
+          <button class="filter-btn" onclick="loadPsyop(0)">Filter</button>
+          <button class="filter-btn" onclick="document.getElementById('psyop-cls').value='';loadPsyop(0)">Clear</button>
+        </div>
+        <div id="psyop-content"><div class="loading">Loading psyop scores…</div></div>
+      </div>
+
+      <!-- ─────────────────────────── FARA ────────────────────────────────── -->
+      <div class="panel" id="panel-fara">
+        <div class="panel-title">⊡ FARA Records</div>
+        <div class="panel-sub">Foreign Agents Registration Act filings from the OSINT store</div>
+        <div class="filter-bar">
+          <label>Country</label>
+          <input id="fara-country" class="filter-input" placeholder="e.g. Russia" style="width:140px">
+          <label>Registrant</label>
+          <input id="fara-reg" class="filter-input" placeholder="Name fragment" style="width:160px">
+          <button class="filter-btn" onclick="loadFara(0)">Filter</button>
+          <button class="filter-btn" onclick="document.getElementById('fara-country').value='';document.getElementById('fara-reg').value='';loadFara(0)">Clear</button>
+        </div>
+        <div id="fara-content"><div class="loading">Loading FARA records…</div></div>
+      </div>
+
+      <!-- ─────────────────────────── Cycle ───────────────────────────────── -->
+      <div class="panel" id="panel-cycle">
+        <div class="panel-title">▷ Cycle</div>
+        <div class="panel-sub">Trigger and monitor the full SPEC-1 intelligence pipeline</div>
+
+        <div class="cycle-run-box">
+          <div class="section-heading">Run Cycle</div>
+          <p style="font-size:12px;color:var(--text-muted);margin-bottom:14px;line-height:1.6;">
+            Harvest signals → parse → 4-gate score → investigate → verify → store. Runs synchronously; may take 30–90 seconds depending on feed volume.
+          </p>
+          <button class="run-btn" id="cycle-run-btn" onclick="runCycle()">▷ Run Intelligence Cycle</button>
+          <div class="run-msg" id="cycle-run-msg"></div>
+        </div>
+
+        <div class="section-heading" style="margin-top:20px;">Last Run Status</div>
+        <div id="cycle-status-content"><div class="loading">Loading cycle status…</div></div>
+      </div>
+
+      <!-- ─────────────────────────── Verdicts ────────────────────────────── -->
+      <div class="panel" id="panel-verdicts">
+        <div class="panel-title">◻ Verdicts</div>
+        <div class="panel-sub">Human ground truth on intelligence records — Phase 1 calibration feedback</div>
+
+        <div class="section-heading">File a Verdict</div>
+        <div class="state-box" style="margin-bottom:22px;">
+          <div class="form-grid">
+            <div class="form-field">
+              <label class="form-label">Record ID</label>
+              <input id="v-record-id" class="form-input" placeholder="rec_… or full record_id">
+            </div>
+            <div class="form-field">
+              <label class="form-label">Verdict</label>
+              <select id="v-verdict" class="form-select">
+                <option value="correct">correct — assessment was right</option>
+                <option value="partial">partial — partially right</option>
+                <option value="incorrect">incorrect — assessment was wrong</option>
+                <option value="unclear">unclear — cannot determine</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label">Reviewer (optional)</label>
+              <input id="v-reviewer" class="form-input" placeholder="analyst handle or name">
+            </div>
+            <div class="form-field">
+              <label class="form-label">Notes (optional)</label>
+              <textarea id="v-notes" class="form-textarea" rows="3" placeholder="Why this verdict? What evidence?"></textarea>
+            </div>
+            <div>
+              <button class="form-submit" id="v-submit-btn" onclick="submitVerdict()">Submit Verdict</button>
+              <div class="form-msg" id="v-msg"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-sep"></div>
+        <div class="section-heading">Verdict Log</div>
+        <div class="filter-bar">
+          <label>Filter record</label>
+          <input id="vf-record" class="filter-input" placeholder="record_id" style="width:200px">
+          <label>Verdict</label>
+          <select id="vf-verdict" class="filter-select" style="width:130px">
+            <option value="">All</option>
+            <option value="correct">correct</option>
+            <option value="partial">partial</option>
+            <option value="incorrect">incorrect</option>
+            <option value="unclear">unclear</option>
+          </select>
+          <button class="filter-btn" onclick="loadVerdicts(0)">Filter</button>
+          <button class="filter-btn" onclick="document.getElementById('vf-record').value='';document.getElementById('vf-verdict').value='';loadVerdicts(0)">Clear</button>
+        </div>
+        <div id="verdicts-content"><div class="loading">Loading verdicts…</div></div>
+      </div>
+
+      <!-- ─────────────────────────── Calibration ─────────────────────────── -->
+      <div class="panel" id="panel-calibration">
+        <div class="panel-title">⊞ Calibration</div>
+        <div class="panel-sub">Accuracy drift surfacing across confidence, source weight, and classification — descriptive only, never auto-applied</div>
+        <div id="calibration-content"><div class="loading">Loading calibration report…</div></div>
+      </div>
+
+      <!-- ─────────────────────────── Local Access ─────────────────────────── -->
       <div class="panel" id="panel-local">
         <div class="panel-title">▷ Local Access</div>
         <div class="panel-sub">Terminal shortcuts for working with SPEC-1 directly</div>
@@ -282,28 +556,39 @@
           </div>
 
           <div class="cmd-block">
-            <div class="cmd-label">Read specific date</div>
-            <div class="cmd-body">
-              <pre>cat ~/spec-1/briefs/spec1_brief_2026-04-24.md</pre>
-              <button class="copy-btn" onclick="copyText(this, 'cat ~/spec-1/briefs/spec1_brief_2026-04-24.md')">Copy</button>
-            </div>
-          </div>
-
-          <div class="cmd-block">
             <div class="cmd-label">Start API server</div>
             <div class="cmd-body">
-              <pre>cd ~/spec-1 &amp;&amp; export PYTHONPATH="src" &amp;&amp; python -m spec1_engine.main</pre>
-              <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 &amp;&amp; export PYTHONPATH=&quot;src&quot; &amp;&amp; python -m spec1_engine.main')">Copy</button>
+              <pre>cd ~/spec-1 &amp;&amp; PYTHONPATH=src python -m spec1_api.main</pre>
+              <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && PYTHONPATH=src python -m spec1_api.main')">Copy</button>
             </div>
           </div>
 
           <div class="cmd-block">
             <div class="cmd-label">Run intelligence cycle manually</div>
             <div class="cmd-body">
-<pre>cd ~/spec-1 &amp;&amp; export PYTHONPATH="src" &amp;&amp; \
-ANTHROPIC_API_KEY=$(cat .env | grep ANTHROPIC_API_KEY | \
-cut -d= -f2 | tr -d '\r') python -m spec1_engine.app.cycle</pre>
-              <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && export PYTHONPATH=&quot;src&quot; && ANTHROPIC_API_KEY=$(cat .env | grep ANTHROPIC_API_KEY | cut -d= -f2 | tr -d \'\\r\') python -m spec1_engine.app.cycle')">Copy</button>
+<pre>cd ~/spec-1 &amp;&amp; PYTHONPATH=src \
+ANTHROPIC_API_KEY=$(grep ANTHROPIC_API_KEY .env | cut -d= -f2 | tr -d '\r') \
+python -m spec1_engine.app.cycle</pre>
+              <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && PYTHONPATH=src ANTHROPIC_API_KEY=$(grep ANTHROPIC_API_KEY .env | cut -d= -f2 | tr -d \'\\r\') python -m spec1_engine.app.cycle')">Copy</button>
+            </div>
+          </div>
+
+          <div class="cmd-block">
+            <div class="cmd-label">Run pytest</div>
+            <div class="cmd-body">
+              <pre>cd ~/spec-1 &amp;&amp; PYTHONPATH=src pytest tests/ -v --tb=short</pre>
+              <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && PYTHONPATH=src pytest tests/ -v --tb=short')">Copy</button>
+            </div>
+          </div>
+
+          <div class="cmd-block">
+            <div class="cmd-label">Build calibration proposal report</div>
+            <div class="cmd-body">
+<pre>cd ~/spec-1 &amp;&amp; PYTHONPATH=src python -m spec1_engine.tools.calibration_propose \
+  --intel spec1_intelligence.jsonl \
+  --verdicts verdicts.jsonl \
+  --out-dir generated/</pre>
+              <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && PYTHONPATH=src python -m spec1_engine.tools.calibration_propose --intel spec1_intelligence.jsonl --verdicts verdicts.jsonl --out-dir generated/')">Copy</button>
             </div>
           </div>
 
@@ -314,430 +599,154 @@ cut -d= -f2 | tr -d '\r') python -m spec1_engine.app.cycle</pre>
   </div>
 </div>
 
-<!-- ── Start-API overlay ──────────────────────────────────────── -->
-<div id="start-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.88);
-  z-index:100; align-items:center; justify-content:center;">
-  <div style="background:#0A0A0A; border:1px solid #FFFFFF;
-    padding:28px; max-width:560px; width:90%;">
+<!-- ── Start-API overlay ── -->
+<div id="start-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:100; align-items:center; justify-content:center;">
+  <div style="background:#0A0A0A; border:1px solid #FFFFFF; padding:28px; max-width:560px; width:90%;">
     <div style="font-size:15px; font-weight:700; margin-bottom:12px; font-family:'IBM Plex Mono',monospace; letter-spacing:.06em; color:#FFFFFF;">API Offline</div>
     <p style="color:#666666; font-size:13px; margin-bottom:16px; line-height:1.6; font-family:'IBM Plex Mono',monospace;">
       The SPEC-1 API is not running. Start it with:
     </p>
-    <pre style="background:#000000; border:1px solid rgba(255,255,255,.3);
-      padding:14px; font-family:'Courier Prime',monospace; font-size:12px; color:#FFFFFF;
-      overflow-x:auto; margin-bottom:14px; line-height:1.6;">cd ~/spec-1 &amp;&amp; export PYTHONPATH="src" &amp;&amp; python -m spec1_engine.main</pre>
+    <pre style="background:#000000; border:1px solid rgba(255,255,255,.3); padding:14px; font-family:'Courier Prime',monospace; font-size:12px; color:#FFFFFF; overflow-x:auto; margin-bottom:14px; line-height:1.6;">cd ~/spec-1 &amp;&amp; PYTHONPATH=src python -m spec1_api.main</pre>
     <div style="display:flex; gap:10px;">
-      <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && export PYTHONPATH=&quot;src&quot; && python -m spec1_engine.main')">Copy command</button>
+      <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && PYTHONPATH=src python -m spec1_api.main')">Copy command</button>
       <button class="copy-btn" onclick="closeOverlay()" style="margin-left:auto;">Close</button>
     </div>
   </div>
 </div>
 
 <script>
-const API = '/api/v1';
+// API base — relative so this works when served by the API itself at /
+const API = '';
+const PAGE = 20;
 let _online = false;
 
-// ── Sample briefs (shown when API is offline) ─────────────────────────────────
-
-const SAMPLE_BRIEFS = [
-  {
-    run_id: 'run-a97bf0b2f291',
-    date: '2026-05-03',
-    word_count: 820,
-    generated_at: '2026-05-03T06:04:11Z',
-    brief: `## SPEC-1 DAILY BRIEF — 2026-05-03
-
-### Executive Summary
-
-FISA Section 702 reauthorization debate intensified across three independent sources this cycle, with Cipher Brief analysts split on whether FBI domestic-query reforms are sufficient. Iran's post-war posture continues to generate elevated signal volume, with assessed shifts in air-defence doctrine following last cycle's confirmed strikes on radar installations. U.S. cyber strategy execution gaps remain the dominant structural concern: policy ambition is assessed at high confidence (0.87); resourcing alignment assessed at low confidence (0.31).
-
----
-
-### Elevated Signals
-
-**Cipher Brief — FISA Section 702 / FBI Query Rules** *(confidence 0.43, source weight 0.85)*
-Three separate Cipher Brief analysts published divergent assessments of FBI compliance under Section 702 on 2026-05-02. Two argued current minimisation procedures are inadequate for domestic-query oversight; one assessed existing safeguards sufficient. No independent corroboration from congressional sources this cycle. Classification: INVESTIGATE. Watch: Senate Judiciary mark-up session scheduled 2026-05-07.
-
-**Cipher Brief — Trump Cyber Strategy Execution** *(confidence 0.43, source weight 0.85)*
-Cipher Brief assessed the administration's published cyber strategy as "a strong playbook" while flagging a structural gap between strategic objectives and CISA / NSA budget allocations for FY2027. Single-source, unverified by DoD public statements. Classification: INVESTIGATE. Watch: CISA congressional testimony, 2026-05-08.
-
-**Cipher Brief — Iran War Scorecard** *(confidence 0.41, source weight 0.85)*
-Post-conflict Iran air-power assessment published. Key claim: U.S. strikes exposed a gap in Iranian medium-altitude radar coverage that Iran's IRGC has not yet addressed. Assessed at 0.41 confidence — single analyst, no corroborating OSINT imagery cited. Classification: INVESTIGATE. Watch: IRGC procurement announcements, regional defence attache reporting.
-
----
-
-### Domain Briefings
-
-**Geopolitics**
-
-The Iran post-war posture cluster dominated geopolitical signal volume this cycle. Cipher Brief's war scorecard and air-power exposure analyses are consistent with each other and with prior-cycle Atlantic Council reporting, raising aggregate confidence on the air-defence gap finding to assessed (pattern-corroborated, not confirmed). The key unresolved question is timeline: how quickly can Iran source replacement radar systems, and through which supply chain. China-Iran defence cooperation signals remain at monitor threshold — no new procurement signatures detected.
-
-Just Security and Atlantic Council both flagged U.S. alliance stress in the Western Hemisphere, with specific reference to adversarial influence operations in three unnamed Central American states. No country attribution in open sources this cycle. Defense One's sourcing on Western Hemisphere posture is assessed as stronger than Atlantic Council's on this specific thread.
-
-**Cyber / Info Ops**
-
-FISA 702 debate is the dominant cyber-adjacent signal. The FBI's domestic-query authority remains the contested point; all three Cipher Brief analysts agree on the legal framing but diverge on sufficiency of current rules. This is a policy dispute, not an operational intelligence signal — but congressional resolution will materially affect NSA and FBI collection authorities before the current reauthorisation window closes.
-
-U.S. cyber strategy budget gap is single-source but structurally consistent with prior-cycle signals from War on the Rocks on DoD acquisition lag. If CISA's FY2027 request is cut below the published strategy's resourcing floor, defensive capacity against VOLT TYPHOON-class persistent intrusions will degrade within 18 months by Cipher Brief's assessment.
-
-**Psyop / Narrative Analysis**
-
-No psyop pattern chains fired above threshold this cycle. Narrative signal from adversarial accounts on the Iran air-power story was monitored; amplification patterns were within normal variance for the source pool. No coordinated inauthentic behaviour detected.
-
----
-
-### Story Leads
-
-**LEAD: FBI Domestic-Query Compliance Under Section 702**
-Signal: Cipher Brief, three-analyst divergence on FBI minimisation procedures, confidence 0.43
-The question: Has the FBI filed required compliance certifications with FISC for all domestic queries conducted under Section 702 in FY2025?
-Who to call: Senate Judiciary Committee staff director; FISC public docket officer
-Documents to request: FISC compliance certification docket, FY2025; FBI OGC Section 702 minimisation review logs (via FOIA)
-Window: 3 days
-Confidence: MEDIUM
-
-> **CLAUDE PROMPT:**
-> "You are an investigative journalist working this lead: FBI Domestic-Query Compliance Under Section 702.
-> The signal: Cipher Brief three-analyst divergence on FBI minimisation adequacy, confidence 0.43, source weight 0.85.
-> The core question: Has FBI filed required FISC compliance certifications for all domestic Section 702 queries in FY2025?
->
-> Step 1 — Draft a 3-paragraph background memo on FBI's Section 702 query obligations and the FISC compliance certification process.
-> Step 2 — Write 5 specific questions for the Senate Judiciary Committee staff director.
-> Step 3 — Write a FOIA request draft targeting FISC compliance certification docket and FBI OGC Section 702 minimisation review logs.
-> Step 4 — Write a 150-word pitch memo for an editor meeting."
-
-**LEAD: CISA Budget vs. Cyber Strategy Resourcing Floor**
-Signal: Cipher Brief, FY2027 CISA allocation vs. published strategy floor, confidence 0.43
-The question: Does the White House FY2027 budget request meet the resourcing floor implicit in the published national cyber strategy?
-Who to call: CISA budget office; Senate Appropriations subcommittee staff
-Documents to request: CISA FY2027 congressional justification; NSC cyber strategy implementation plan (if declassified)
-Window: 1 week
-Confidence: MEDIUM
-
-> **CLAUDE PROMPT:**
-> "You are an investigative journalist working this lead: CISA Budget vs. Cyber Strategy Resourcing Floor.
-> The signal: Cipher Brief assessment of structural gap between cyber strategy ambition and FY2027 CISA allocation, confidence 0.43.
-> The core question: Does the FY2027 request fund the strategy's stated objectives?
->
-> Step 1 — Draft a 3-paragraph background memo on CISA's role in implementing the national cyber strategy and historical budget trends.
-> Step 2 — Write 5 specific questions for Senate Appropriations Homeland Security subcommittee staff.
-> Step 3 — Write a FOIA request draft targeting CISA's FY2027 congressional budget justification and implementation milestones.
-> Step 4 — Write a 150-word pitch memo for an editor meeting."
-
----
-
-### Watch List — Tomorrow
-
-- Senate Judiciary Section 702 mark-up session: staffing, amendment text, vote timing
-- IRGC radar procurement signals: any China-Iran defence transfer announcement
-- CISA FY2027 appropriations markup: line-item resourcing for threat-hunt capacity
-- Cipher Brief follow-on: whether the three-analyst 702 divergence produces an editorial consensus piece
-
----
-
-### Psyop Assessment
-
-Classification: NO PATTERN. Score: 0.08. No pattern chains fired above the 0.30 threshold this cycle. Iran air-power narrative monitored for amplification anomalies; none detected. Source pool amplification within normal variance.
-
----
-
-### Signal Notes
-
-234 signals harvested this cycle; 38 elevated (16.2%). All elevated signals originated from Cipher Brief, War on the Rocks, Atlantic Council, Defense One, and Just Security. No new source entries. Gate failure pattern: velocity gate rejected 41 signals older than 48 hours from the congressional adapter — expected given weekend publication cadence. Novelty gate deduplication rate: 12%. Signal depth is adequate for cyber and Iran threads; Western Hemisphere geopolitics remains thin at single-source level.`
-  },
-  {
-    run_id: 'run-4b984295c04d',
-    date: '2026-05-02',
-    word_count: 790,
-    generated_at: '2026-05-02T06:03:44Z',
-    brief: `## SPEC-1 DAILY BRIEF — 2026-05-02
-
-### Executive Summary
-
-Iran-China strategic competition for post-war influence emerged as the dominant geopolitical signal cluster this cycle, with Cipher Brief assessing Beijing is exploiting Tehran's reconstruction dependency to extract long-term basing concessions. U.S. drone warfare strategy faces a documented supply-chain constraint: current production capacity for Group 3 UAS is assessed at 34% of operational demand. Critical minerals competition intensified on the diplomatic track, with three independent sources flagging new Chinese offtake agreements in the DRC and Zambia signed in April 2026.
-
----
-
-### Elevated Signals
-
-**Cipher Brief — Iran-China Great Power Contest** *(confidence 0.43, source weight 0.85)*
-Cipher Brief published a structured assessment of Beijing's post-war Iran engagement, identifying three specific leverage vectors: reconstruction financing, dual-use technology transfers, and IRGC officer training programmes. Single analyst, no independent corroboration this cycle. Classification: INVESTIGATE. Watch: Iranian state media coverage of Chinese diplomatic visits.
-
-**Cipher Brief — U.S. Critical Minerals Dependence** *(confidence 0.43, source weight 0.85)*
-"America's Most Dangerous Dependence" analysis flagged four rare earth elements — dysprosium, terbium, neodymium, hafnium — where U.S. processing capacity is below 5% of domestic consumption. Two of four have no active domestic mine-to-refinery pathway. Assessed as structurally consistent with prior DoD supply chain reviews. Classification: INVESTIGATE.
-
-**Cipher Brief — U.S. Lagging Drone Warfare Superiority** *(confidence 0.41, source weight 0.85)*
-Production gap between operational UAS demand and domestic manufacturing output assessed at 66% shortfall for Group 3 platforms. Supply chain analysis identifies three single-source chokepoints: propulsion systems (one domestic supplier), electro-optical payloads (two), and encrypted datalinks (one). Classification: INVESTIGATE. Watch: DoD Replicator programme procurement announcements.
-
----
-
-### Domain Briefings
-
-**Geopolitics**
-
-Iran-China post-war engagement is this cycle's highest-priority geopolitical thread. Cipher Brief's three-vector assessment (financing, tech transfer, training) is internally consistent but rests on a single analyst. The basing-concession hypothesis — that China is extracting Bandar Abbas or Chahbahar access rights in exchange for reconstruction support — is not yet supported by open-source evidence. It remains an assessed hypothesis at 0.43 confidence, not a confirmed finding. The watch item is Iranian state media: any official reference to "comprehensive strategic partnership" language in the context of Chinese visits would confirm the diplomatic track.
-
-Critical minerals competition moved from background monitor to elevated signal this cycle. The April 2026 DRC and Zambia offtake agreements, if confirmed, would give Chinese state-owned enterprises preferential access to an estimated 40% of global cobalt production by 2028. Defense One's sourcing on this thread is assessed stronger than Atlantic Council's.
-
-**Cyber / Info Ops**
-
-No new cyber operational signals this cycle. The dominant cyber-adjacent signal remains the structural budget gap identified yesterday — no new developments. Australia's National Intelligence Community museum announcement (Cipher Brief) is assessed as a soft-power and recruitment-pipeline signal, not an operational development.
-
-**Psyop / Narrative Analysis**
-
-Coordinated narrative activity detected around the critical minerals story. Three accounts across two platforms published within a 90-minute window on 2026-05-01, all amplifying Chinese offtake agreement coverage with added framing that U.S. restrictions are "counterproductive." Pattern consistent with influence operation amplification but below confirmation threshold. Evidence chain: three posts, two platforms, 90-minute clustering, pro-Beijing framing. Assess as LOW-confidence early-stage amplification — monitor for 48-hour repost patterns.
-
----
-
-### Story Leads
-
-**LEAD: China-Iran Basing Concession Hypothesis**
-Signal: Cipher Brief, Iran-China post-war engagement, three leverage vectors, confidence 0.43
-The question: Has China formally requested or informally secured access rights to Bandar Abbas or Chahbahar in exchange for reconstruction financing?
-Who to call: State Department Iran desk; defence attaché network (Gulf states)
-Documents to request: State Department cable traffic on China-Iran diplomatic contacts (via FOIA); Treasury OFAC waiver records for Iran reconstruction finance
-Window: 1 week
-Confidence: LOW
-
-> **CLAUDE PROMPT:**
-> "You are an investigative journalist working this lead: China-Iran Basing Concession Hypothesis.
-> The signal: Cipher Brief three-vector assessment of Beijing's post-war Iran leverage, confidence 0.43, no independent corroboration.
-> The core question: Has China secured or is pursuing naval/air basing access at Bandar Abbas or Chahbahar as part of post-war reconstruction financing?
->
-> Step 1 — Draft a 3-paragraph background memo on the history of China-Iran defence cooperation and Bandar Abbas's strategic significance.
-> Step 2 — Write 5 specific questions for a State Department Iran desk officer.
-> Step 3 — Write a FOIA request draft targeting State Department cable traffic on China-Iran diplomatic contacts since June 2025.
-> Step 4 — Write a 150-word pitch memo for an editor meeting."
-
-**LEAD: DoD Replicator vs. Group 3 UAS Production Gap**
-Signal: Cipher Brief, 66% Group 3 UAS production shortfall, three single-source supply chain chokepoints, confidence 0.41
-The question: Does the DoD Replicator programme's current procurement pace close the Group 3 production gap by FY2027, and which chokepoints does it address?
-Who to call: House Armed Services Committee staff; DoD acquisition office (OSD A&S)
-Documents to request: Replicator programme quarterly progress report; OSD UAS industrial base assessment (FY2026)
-Window: 3 days
-Confidence: MEDIUM
-
-> **CLAUDE PROMPT:**
-> "You are an investigative journalist working this lead: DoD Replicator vs. Group 3 UAS Production Gap.
-> The signal: Cipher Brief assessment of 66% Group 3 UAS production shortfall with three identified supply-chain chokepoints, confidence 0.41.
-> The core question: Does the Replicator programme's current procurement pace close this gap by FY2027?
->
-> Step 1 — Draft a 3-paragraph background memo on the Replicator programme's stated objectives and current contract awards.
-> Step 2 — Write 5 specific questions for House Armed Services Committee professional staff.
-> Step 3 — Write a FOIA request draft targeting Replicator quarterly progress reports and OSD UAS industrial base assessment.
-> Step 4 — Write a 150-word pitch memo for an editor meeting."
-
----
-
-### Watch List — Tomorrow
-
-- Iranian state media: any "comprehensive strategic partnership" language in Chinese diplomatic visit coverage
-- Chinese offtake agreement confirmation: DRC mining ministry announcement expected this week
-- DoD Replicator programme: new contract award announcements
-- IRGC radar procurement: follow-on to yesterday's air-defence gap finding
-
----
-
-### Psyop Assessment
-
-Classification: MONITOR. Score: 0.34. One low-confidence evidence chain detected: coordinated amplification of Chinese critical-minerals offtake story, three accounts, two platforms, 90-minute clustering window, pro-Beijing framing. Below confirmation threshold (0.50). Pattern consistent with influence operation warm-up phase. No psyop pattern chains fired above 0.50.
-
----
-
-### Signal Notes
-
-234 signals harvested; 38 elevated (16.2%). Source distribution unchanged from prior cycles. Critical minerals and drone supply chain threads are thin — both rest on single Cipher Brief analyst assessments without independent corroboration. The Iran-China thread is the most developed but remains single-source. Congressional adapter continues to suppress weekend-published signals via velocity gate — expected pattern.`
-  },
-  {
-    run_id: 'run-37a3ab43f34b',
-    date: '2026-05-01',
-    word_count: 760,
-    generated_at: '2026-05-01T06:01:22Z',
-    brief: `## SPEC-1 DAILY BRIEF — 2026-05-01
-
-### Executive Summary
-
-Pentagon autonomous warfare procurement crossed a signal-volume threshold this cycle, with three independent sources converging on a single finding: DoD's autonomous systems budget is front-loaded with R&D expenditure but back-loaded on production, creating a fielding gap that adversaries can exploit in the 2027–2029 window. Western alliance stress testing — a persistent background signal — produced its highest-confidence reading to date (0.44) following Atlantic Council analysis of Article 5 commitment divergence. U.S. AI strategy framework published; Cipher Brief assesses execution capacity at medium confidence.
-
----
-
-### Elevated Signals
-
-**Cipher Brief — Pentagon's Bet on Autonomous Warfare** *(confidence 0.43, source weight 0.85)*
-Structural analysis of DoD autonomous systems budget: R&D at 68% of autonomous warfare line items, production at 22%, logistics/sustainment at 10%. Analyst assessment: "a fielding gap of at least 24 months between capability demonstration and operational deployment at scale." Consistent with prior-cycle drone supply-chain findings. Classification: INVESTIGATE.
-
-**Cipher Brief — Stress Test of Western Alliances** *(confidence 0.43, source weight 0.85)*
-Atlantic Council-sourced analysis of Article 5 commitment variance across 12 NATO members. Three unnamed members assessed as having "conditional" commitment language in internal parliamentary resolutions — not public, not confirmed. Single analyst, unverified. Classification: INVESTIGATE. Watch: NATO defence ministers' meeting, 2026-05-14.
-
-**Cipher Brief — U.S. AI Strategy** *(confidence 0.43, source weight 0.85)*
-Published framework assessed as "comprehensive on objectives, thin on governance." Specific gap identified: no binding interagency coordination mechanism for dual-use AI export controls. Single-source, consistent with prior Commerce Department signalling. Classification: INVESTIGATE.
-
----
-
-### Domain Briefings
-
-**Geopolitics**
-
-Alliance stress is the most consequential geopolitical signal this cycle. The finding of conditional Article 5 language in three unnamed member states' internal resolutions is unconfirmed and single-source, but if true would represent a structural shift in NATO cohesion that has not appeared in any public statement. The watch item is the 2026-05-14 defence ministers' meeting: any departure from standard burden-sharing communiqué language would be a partial corroboration signal.
-
-Iran learning-from-Russia signalling continued at monitor level. Cipher Brief published a structured comparison of IRGC adaptation of Russian electronic warfare tactics observed in Ukraine. No new operational indicators — this is doctrine-watching, not operational intelligence.
-
-**Cyber / Info Ops**
-
-U.S. AI strategy governance gap is the dominant cyber-adjacent signal. Cipher Brief's assessment of missing interagency coordination on dual-use AI export controls aligns with prior Commerce and NSC signals. The specific policy gap: no mechanism currently prevents a U.S. AI company from selling a dual-use model to a strategic competitor via a third-country subsidiary without triggering export control review. Assessed at medium confidence based on pattern consistency across three independent sources over four cycles.
-
-**Psyop / Narrative Analysis**
-
-No evidence chains above threshold this cycle. Narrative monitoring of the "alliance stress" story identified three repost clusters on adversarial-adjacent accounts amplifying the conditional Article 5 assessment. Pattern is consistent with adversarial interest in the narrative but does not meet the evidence threshold for coordinated inauthentic behaviour. Amplification rate within normal variance for the source pool size.
-
----
-
-### Story Leads
-
-**LEAD: NATO Members' Conditional Article 5 Language**
-Signal: Atlantic Council via Cipher Brief, conditional Article 5 commitment in three unnamed member parliaments, confidence 0.43
-The question: Which three NATO member states have internal parliamentary resolutions with conditional Article 5 language, and what conditions are specified?
-Who to call: NATO Parliamentary Assembly staff; respective national defence committee chairs
-Documents to request: Parliamentary committee resolutions on Article 5 obligations (via national parliament freedom of information processes); NATO internal assessment of member commitment variance
-Window: 1 week
-Confidence: LOW
-
-> **CLAUDE PROMPT:**
-> "You are an investigative journalist working this lead: NATO Members' Conditional Article 5 Language.
-> The signal: Atlantic Council via Cipher Brief, unconfirmed claim of conditional Article 5 commitment language in three unnamed NATO member parliaments, confidence 0.43.
-> The core question: Which three members, and what conditions are specified?
->
-> Step 1 — Draft a 3-paragraph background memo on Article 5's legal obligations and historical instances of commitment ambiguity among NATO members.
-> Step 2 — Write 5 specific questions for NATO Parliamentary Assembly staff.
-> Step 3 — Draft freedom-of-information requests for parliamentary committee resolutions on Article 5 obligations in Hungary, Slovakia, and Italy (the three most likely candidates based on open-source parliamentary reporting).
-> Step 4 — Write a 150-word pitch memo for an editor meeting."
-
-**LEAD: Dual-Use AI Export Control Gap**
-Signal: Cipher Brief, missing interagency coordination mechanism for dual-use AI export controls, confidence 0.43, pattern-consistent across three sources over four cycles
-The question: Has the NSC or Commerce produced an interagency coordination framework for dual-use AI export controls, and if not, why not?
-Who to call: Commerce BIS director; NSC technology policy staff; House Foreign Affairs Committee staff
-Documents to request: NSC dual-use AI working group charter (if extant); Commerce BIS AI export control review records FY2025–2026
-Window: 3 days
-Confidence: MEDIUM
-
-> **CLAUDE PROMPT:**
-> "You are an investigative journalist working this lead: Dual-Use AI Export Control Gap.
-> The signal: Cipher Brief assessment of missing interagency mechanism for dual-use AI export controls, confidence 0.43, consistent across three sources over four cycles.
-> The core question: Has any interagency coordination framework been produced, and does the current gap allow third-country subsidiary routing to avoid export control review?
->
-> Step 1 — Draft a 3-paragraph background memo on current U.S. AI export control authorities and the EAR's coverage of AI models.
-> Step 2 — Write 5 specific questions for a Commerce BIS official.
-> Step 3 — Write a FOIA request draft targeting Commerce BIS AI export control review records FY2025–2026 and any NSC AI working group charter.
-> Step 4 — Write a 150-word pitch memo for an editor meeting."
-
----
-
-### Watch List — Tomorrow
-
-- NATO defence ministers' meeting (2026-05-14) pre-meeting signalling: burden-sharing language, commitment language
-- Iran IRGC EW doctrine: any operational test events in the Persian Gulf
-- Commerce BIS AI export control rule: Federal Register publication timeline
-- DoD autonomous systems: any production contract awards above $500M
-
----
-
-### Psyop Assessment
-
-Classification: MONITOR. Score: 0.22. Three repost clusters on adversarial-adjacent accounts amplifying alliance stress narrative. Amplification rate within normal variance. No evidence chains above 0.30 threshold. No coordinated inauthentic behaviour confirmed.
-
----
-
-### Signal Notes
-
-Signal volume consistent with prior cycles at 234 harvested, 38 elevated. Source pool unchanged. Autonomous warfare and alliance stress threads are the strongest this cycle but both rest primarily on Cipher Brief single-analyst assessments. Independent corroboration from War on the Rocks or Defense One would substantially raise confidence on both threads. Congressional adapter signal volume low — expected for start-of-week collection.`
-  }
-];
-
-const SAMPLE_INDEX = SAMPLE_BRIEFS.map(b => ({
-  run_id: b.run_id,
-  date: b.date,
-  word_count: b.word_count,
-  timestamp: b.generated_at
-}));
-
-// ── Escape helpers ────────────────────────────────────────────────────────────
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function esc(s) {
   return String(s == null ? '' : s)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── Markdown → HTML (simple) ──────────────────────────────────────────────────
+function pct(v) {
+  if (v == null) return '—';
+  return (parseFloat(v) * 100).toFixed(0) + '%';
+}
+
+function confBar(v) {
+  const pv = Math.min(1, Math.max(0, parseFloat(v) || 0));
+  return `<div class="conf-wrap">
+    <div class="conf-track"><div class="conf-fill" style="width:${pv*100}%"></div></div>
+    <span class="conf-val">${pv.toFixed(2)}</span>
+  </div>`;
+}
+
+function badge(text) {
+  if (!text) return '';
+  const cls = 'badge-' + String(text).toLowerCase().replace(/[^a-z0-9]/g,'-');
+  return `<span class="badge ${cls}">${esc(text)}</span>`;
+}
+
+function ts(s) {
+  if (!s) return '—';
+  try { return new Date(s).toLocaleString('en-US', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false}); }
+  catch { return esc(s); }
+}
+
+function trunc(s, n) {
+  s = String(s || '');
+  return s.length > n ? s.slice(0, n) + '…' : s;
+}
+
+function emptyState(msg) {
+  return `<div class="state-box"><p>${msg}</p></div>`;
+}
+
+function pager(total, offset, limit, loadFn) {
+  const page = Math.floor(offset / limit) + 1;
+  const pages = Math.max(1, Math.ceil(total / limit));
+  return `<div class="pager">
+    <button class="page-btn" onclick="${loadFn}(${offset - limit})" ${offset <= 0 ? 'disabled' : ''}>← Prev</button>
+    <span>${page} / ${pages}</span>
+    <button class="page-btn" onclick="${loadFn}(${offset + limit})" ${offset + limit >= total ? 'disabled' : ''}>Next →</button>
+    <span style="margin-left:4px;font-size:11px;">(${total} total)</span>
+  </div>`;
+}
+
+// ── Markdown → HTML ───────────────────────────────────────────────────────────
 
 function renderMd(raw) {
   if (!raw) return '';
-  let t = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-  t = t.replace(/`([^`\n]+)`/g, '<code>$1</code>');
-  t = t.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
-  t = t.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-  t = t.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  let t = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  t = t.replace(/`([^`\n]+)`/g,'<code>$1</code>');
+  t = t.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');
+  t = t.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  t = t.replace(/\*(.+?)\*/g,'<em>$1</em>');
 
   const lines = t.split('\n');
   const out = [];
   let inUL = false, inOL = false, inBQ = false;
-
   const closeAll = () => {
-    if (inUL) { out.push('</ul>'); inUL = false; }
-    if (inOL) { out.push('</ol>'); inOL = false; }
-    if (inBQ) { out.push('</blockquote>'); inBQ = false; }
-  };
-
-  for (const line of lines) {
-    if (/^#{4} /.test(line))  { closeAll(); out.push('<h4>' + line.replace(/^#{4} /, '') + '</h4>'); continue; }
-    if (/^#{3} /.test(line))  { closeAll(); out.push('<h3>' + line.replace(/^#{3} /, '') + '</h3>'); continue; }
-    if (/^#{2} /.test(line))  { closeAll(); out.push('<h2>' + line.replace(/^#{2} /, '') + '</h2>'); continue; }
-    if (/^# /.test(line))     { closeAll(); out.push('<h1>' + line.replace(/^# /, '')   + '</h1>'); continue; }
-    if (/^---+$/.test(line.trim())) { closeAll(); out.push('<hr>'); continue; }
-
-    if (/^> /.test(line)) {
-      if (!inBQ) { if (inUL) { out.push('</ul>'); inUL=false; } if (inOL) { out.push('</ol>'); inOL=false; } out.push('<blockquote>'); inBQ=true; }
-      out.push('<p>' + line.replace(/^> /, '') + '</p>');
-      continue;
-    }
-    if (inBQ && !/^> /.test(line)) { out.push('</blockquote>'); inBQ=false; }
-
-    if (/^[-*] /.test(line)) {
-      if (inOL) { out.push('</ol>'); inOL=false; }
-      if (!inUL) { out.push('<ul>'); inUL=true; }
-      out.push('<li>' + line.replace(/^[-*] /, '') + '</li>');
-      continue;
-    }
-    if (/^\d+\. /.test(line)) {
-      if (inUL) { out.push('</ul>'); inUL=false; }
-      if (!inOL) { out.push('<ol>'); inOL=true; }
-      out.push('<li>' + line.replace(/^\d+\. /, '') + '</li>');
-      continue;
-    }
     if (inUL) { out.push('</ul>'); inUL=false; }
     if (inOL) { out.push('</ol>'); inOL=false; }
-
-    if (line.trim() === '') { out.push(''); } else { out.push('<p>' + line + '</p>'); }
+    if (inBQ) { out.push('</blockquote>'); inBQ=false; }
+  };
+  for (const line of lines) {
+    if (/^#{4} /.test(line)) { closeAll(); out.push('<h4>'+line.replace(/^#{4} /,'')+'</h4>'); continue; }
+    if (/^#{3} /.test(line)) { closeAll(); out.push('<h3>'+line.replace(/^#{3} /,'')+'</h3>'); continue; }
+    if (/^#{2} /.test(line)) { closeAll(); out.push('<h2>'+line.replace(/^#{2} /,'')+'</h2>'); continue; }
+    if (/^# /.test(line))    { closeAll(); out.push('<h1>'+line.replace(/^# /,'')+'</h1>'); continue; }
+    if (/^---+$/.test(line.trim())) { closeAll(); out.push('<hr>'); continue; }
+    if (/^> /.test(line)) {
+      if (!inBQ) { if(inUL){out.push('</ul>');inUL=false;} if(inOL){out.push('</ol>');inOL=false;} out.push('<blockquote>'); inBQ=true; }
+      out.push('<p>'+line.replace(/^> /,'')+'</p>'); continue;
+    }
+    if (inBQ && !/^> /.test(line)) { out.push('</blockquote>'); inBQ=false; }
+    if (/^[-*] /.test(line)) {
+      if(inOL){out.push('</ol>');inOL=false;} if(!inUL){out.push('<ul>');inUL=true;}
+      out.push('<li>'+line.replace(/^[-*] /,'')+'</li>'); continue;
+    }
+    if (/^\d+\. /.test(line)) {
+      if(inUL){out.push('</ul>');inUL=false;} if(!inOL){out.push('<ol>');inOL=true;}
+      out.push('<li>'+line.replace(/^\d+\. /,'')+'</li>'); continue;
+    }
+    if(inUL){out.push('</ul>');inUL=false;} if(inOL){out.push('</ol>');inOL=false;}
+    if (line.trim() === '') { out.push(''); } else { out.push('<p>'+line+'</p>'); }
   }
-  if (inUL) out.push('</ul>');
-  if (inOL) out.push('</ol>');
-  if (inBQ) out.push('</blockquote>');
+  if(inUL) out.push('</ul>'); if(inOL) out.push('</ol>'); if(inBQ) out.push('</blockquote>');
   return out.join('\n');
 }
 
-// ── Fetch with timeout ────────────────────────────────────────────────────────
+// ── API fetch ─────────────────────────────────────────────────────────────────
 
-async function apiFetch(path) {
+async function apiFetch(path, opts) {
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 5000);
+  const t = setTimeout(() => ctrl.abort(), 10000);
   try {
-    const r = await fetch(API + path, { signal: ctrl.signal });
+    const r = await fetch(API + path, { signal: ctrl.signal, ...opts });
     clearTimeout(t);
     if (!r.ok) return null;
     return await r.json();
   } catch {
     clearTimeout(t);
     return null;
+  }
+}
+
+async function apiPost(path, body) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 90000);
+  try {
+    const r = await fetch(API + path, {
+      method: 'POST', signal: ctrl.signal,
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body),
+    });
+    clearTimeout(t);
+    const data = await r.json().catch(() => null);
+    return { ok: r.ok, status: r.status, data };
+  } catch (e) {
+    clearTimeout(t);
+    return { ok: false, status: 0, data: null };
   }
 }
 
@@ -759,156 +768,543 @@ async function checkStatus() {
   return _online;
 }
 
-function openOverlay()  { document.getElementById('start-overlay').style.display = 'flex'; }
-function closeOverlay() { document.getElementById('start-overlay').style.display = 'none'; }
-document.getElementById('start-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeOverlay(); });
+function openOverlay()  { document.getElementById('start-overlay').style.display='flex'; }
+function closeOverlay() { document.getElementById('start-overlay').style.display='none'; }
+document.getElementById('start-overlay').addEventListener('click', e => { if(e.target===e.currentTarget) closeOverlay(); });
 
 // ── Navigation ────────────────────────────────────────────────────────────────
+
+const _panelLoaders = {
+  'panel-brief':       () => loadLatestBrief(),
+  'panel-archive':     () => loadBriefIndex(),
+  'panel-signals':     () => loadSignals(0),
+  'panel-intel':       () => loadIntel(0),
+  'panel-leads':       () => loadLeads(0),
+  'panel-psyop':       () => loadPsyop(0),
+  'panel-fara':        () => loadFara(0),
+  'panel-cycle':       () => loadCycleStatus(),
+  'panel-verdicts':    () => loadVerdicts(0),
+  'panel-calibration': () => loadCalibration(),
+  'panel-local':       () => {},
+};
 
 function showPanel(id) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  const nav = document.querySelector('[data-panel="' + id + '"]');
+  const nav = document.querySelector('[data-panel="'+id+'"]');
   if (nav) nav.classList.add('active');
-  if (id === 'panel-brief')   loadLatestBrief();
-  if (id === 'panel-archive') loadBriefIndex();
+  if (_panelLoaders[id]) _panelLoaders[id]();
 }
 
-// ── Daily Brief panel ─────────────────────────────────────────────────────────
-// API returns: { brief: "<markdown string>", run_id: "...", generated_at: "..." }
+// ── Brief panel ───────────────────────────────────────────────────────────────
+
+function renderWorldBrief(data) {
+  const tags = [
+    data.date         ? `<span class="tag">${esc(data.date)}</span>`                         : '',
+    data.confidence   ? `<span class="tag">CONF ${pct(data.confidence)}</span>`              : '',
+    data.produced_at  ? `<span class="tag">${esc(ts(data.produced_at))}</span>`              : '',
+    data.brief_id     ? `<span class="tag" style="opacity:.5">${esc(data.brief_id)}</span>`  : '',
+  ].filter(Boolean).join('');
+
+  const sections = (data.sections || []).map(s =>
+    `<h2>${esc(s.title || '')}</h2><div>${renderMd(s.body || '')}</div>`
+  ).join('');
+
+  return `<div class="brief-wrap">
+    ${tags ? `<div class="brief-id-row">${tags}</div>` : ''}
+    <div class="md">
+      ${data.headline ? `<h1>${esc(data.headline)}</h1>` : ''}
+      ${renderMd(data.summary || '')}
+      ${sections}
+      ${(data.sources||[]).length ? `<p style="font-size:11px;color:var(--text-muted);margin-top:18px;">Sources: ${data.sources.map(s=>`<a href="${esc(s)}" style="color:var(--text-muted)">${esc(s)}</a>`).join(', ')}</p>` : ''}
+    </div>
+  </div>`;
+}
+
+function renderBriefData(data) {
+  if (!data) return emptyState('No brief available yet. Run a cycle to generate the first brief.');
+  if (data.message) return emptyState(esc(data.message));
+  if (data.headline) return renderWorldBrief(data);
+  if (data.brief) {
+    const tags = [
+      data.run_id      ? `<span class="tag">${esc(data.run_id)}</span>`                : '',
+      data.generated_at? `<span class="tag">Generated: ${esc(ts(data.generated_at))}</span>` : '',
+    ].filter(Boolean).join('');
+    return `<div class="brief-wrap">${tags?`<div class="brief-id-row">${tags}</div>`:''}<div class="md">${renderMd(data.brief)}</div></div>`;
+  }
+  return emptyState('Unrecognised brief format.');
+}
 
 async function loadLatestBrief() {
   const el = document.getElementById('brief-content');
   el.innerHTML = '<div class="loading">Loading latest brief…</div>';
   const data = await apiFetch('/brief/latest');
-  if (data && data.brief) {
-    el.innerHTML = renderBriefMarkdown(data.brief, { run_id: data.run_id, generated_at: data.generated_at });
-    return;
-  }
-  // Fall back to sample brief
-  const sample = SAMPLE_BRIEFS[0];
-  el.innerHTML = renderBriefMarkdown(sample.brief, { run_id: sample.run_id, generated_at: sample.generated_at })
-    + '<div style="margin-top:14px;padding:8px 14px;border:1px solid rgba(255,255,255,.15);font-size:11px;color:#666;font-family:var(--mono)">SAMPLE DATA — start the API to load live briefs</div>';
-}
-
-function renderBriefMarkdown(mdText, meta) {
-  const runId   = meta && meta.run_id      ? meta.run_id      : null;
-  const genAt   = meta && meta.generated_at ? new Date(meta.generated_at).toUTCString() : null;
-  const tags = [
-    runId  ? `<span class="tag">${esc(runId)}</span>`                    : '',
-    genAt  ? `<span class="tag">Generated: ${esc(genAt)}</span>`         : '',
-  ].filter(Boolean).join('');
-
-  return `
-    <div class="brief-wrap">
-      ${tags ? `<div class="brief-id-row">${tags}</div>` : ''}
-      <div class="md">${renderMd(mdText)}</div>
-    </div>`;
+  el.innerHTML = renderBriefData(data);
 }
 
 // ── Archive panel ─────────────────────────────────────────────────────────────
-// API returns: [ { run_id, date, filepath, word_count, timestamp }, … ] (newest first)
 
 async function loadBriefIndex() {
   const el = document.getElementById('archive-content');
   el.innerHTML = '<div class="loading">Loading archive…</div>';
   const data = await apiFetch('/brief/index');
 
-  const usingSample = (data === null || !Array.isArray(data) || data.length === 0);
-  const index = usingSample ? SAMPLE_INDEX : data;
+  if (!data) { el.innerHTML = emptyState('API offline — cannot load archive.'); return; }
 
-  if (usingSample) {
-    el.innerHTML = '<div style="margin-bottom:14px;padding:8px 14px;border:1px solid rgba(255,255,255,.15);font-size:11px;color:#666;font-family:var(--mono)">SAMPLE DATA — start the API to load live archive</div>';
-  } else {
-    el.innerHTML = '';
-  }
+  const items = Array.isArray(data) ? data : (data.items || []);
+  if (!items.length) { el.innerHTML = emptyState('No briefs found yet. Run a cycle to generate the first brief.'); return; }
 
-  if (!Array.isArray(index) || index.length === 0) {
-    el.innerHTML += `
-      <div class="state-box">
-        <p>No briefs found yet. Run a cycle to generate the first brief:</p>
-        <pre>cd ~/spec-1 &amp;&amp; export PYTHONPATH="src" &amp;&amp; \
-ANTHROPIC_API_KEY=$(cat .env | grep ANTHROPIC_API_KEY | cut -d= -f2 | tr -d '\\r') \
-python -m spec1_engine.app.cycle</pre>
-        <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && export PYTHONPATH=&quot;src&quot; && ANTHROPIC_API_KEY=$(cat .env | grep ANTHROPIC_API_KEY | cut -d= -f2) python -m spec1_engine.app.cycle')">Copy</button>
-      </div>`;
-    return;
-  }
+  const cards = items.map(item => `
+    <div class="brief-card" onclick="loadBriefDetail('${esc(item.date||item.brief_id||'')}')">
+      <div class="card-date">${esc(item.date||'—')}</div>
+      ${item.headline ? `<div class="card-headline">${esc(trunc(item.headline,120))}</div>` : ''}
+      <div class="card-meta">
+        <span>${item.word_count||0} words</span>
+        ${item.confidence ? `<span>CONF ${pct(item.confidence)}</span>` : ''}
+        <span style="opacity:.5">${esc(trunc(item.brief_id||'',28))}</span>
+      </div>
+    </div>`).join('');
 
-  const cards = index.map(item => {
-    const wc  = item.word_count || 0;
-    const rid = String(item.run_id || '').slice(0, 24);
-    return `
-      <div class="brief-card" onclick="loadBriefDetail('${esc(item.date)}')">
-        <div class="card-date">${esc(item.date || '—')}</div>
-        <div class="card-meta">
-          <span>${wc} words</span>
-          <span style="opacity:.5">${esc(rid)}</span>
-        </div>
-      </div>`;
-  }).join('');
-
-  el.innerHTML += `
+  el.innerHTML = `
     <div class="archive-bar">
       <span></span>
-      <span class="archive-count">${index.length} brief${index.length !== 1 ? 's' : ''}</span>
+      <span class="archive-count">${items.length} brief${items.length!==1?'s':''}</span>
     </div>
     <div class="brief-cards">${cards}</div>`;
 }
 
-// API returns: { brief: "<markdown string>", date: "YYYY-MM-DD" }
-async function loadBriefDetail(date) {
+async function loadBriefDetail(dateOrId) {
   const el = document.getElementById('archive-content');
-  el.innerHTML = '<div class="loading">Loading brief for ' + esc(date) + '…</div>';
-  const data = await apiFetch('/brief/' + encodeURIComponent(date));
+  el.innerHTML = '<div class="loading">Loading brief…</div>';
+  const data = await apiFetch('/brief/' + encodeURIComponent(dateOrId));
+  const back = '<button class="back-btn" onclick="loadBriefIndex()">← Back to Archive</button>';
+  el.innerHTML = back + renderBriefData(data);
+}
 
-  const backBtn = '<button class="back-btn" onclick="loadBriefIndex()">← Back to Archive</button>';
+// ── Signals panel ─────────────────────────────────────────────────────────────
 
-  if (data && data.brief) {
-    el.innerHTML = backBtn + renderBriefMarkdown(data.brief, { generated_at: null, run_id: null });
-    return;
-  }
+let _sigOff = 0;
+async function loadSignals(offset) {
+  if (offset < 0) offset = 0;
+  _sigOff = offset;
+  const el = document.getElementById('signals-content');
+  el.innerHTML = '<div class="loading">Loading signals…</div>';
 
-  // Fall back to sample brief for this date
-  const sample = SAMPLE_BRIEFS.find(b => b.date === date);
-  if (sample) {
-    el.innerHTML = backBtn
-      + renderBriefMarkdown(sample.brief, { run_id: sample.run_id, generated_at: sample.generated_at })
-      + '<div style="margin-top:14px;padding:8px 14px;border:1px solid rgba(255,255,255,.15);font-size:11px;color:#666;font-family:var(--mono)">SAMPLE DATA — start the API to load live briefs</div>';
-    return;
-  }
+  const src = document.getElementById('sig-source').value.trim();
+  let url = `/signals?limit=${PAGE}&offset=${offset}`;
+  if (src) url += `&source_type=${encodeURIComponent(src)}`;
 
-  el.innerHTML = backBtn + `
-    <div class="state-box">
-      <p>${data === null ? 'API offline — cannot load brief.' : 'No brief found for ' + esc(date) + '.'}</p>
+  const data = await apiFetch(url);
+  if (!data) { el.innerHTML = emptyState('API offline — cannot load signals.'); return; }
+
+  const items = data.items || [];
+  if (!items.length) { el.innerHTML = emptyState('No signals found.'); return; }
+
+  const rows = items.map(r => `<tr>
+    <td><span class="mono-id">${esc(trunc(r.signal_id||r.id||'',22))}</span></td>
+    <td>${esc(r.source||'—')}</td>
+    <td>${badge(r.source_type||'')}</td>
+    <td><span class="cell-trunc" title="${esc(r.text||r.title||'')}">${esc(trunc(r.text||r.title||r.headline||'',80))}</span></td>
+    <td>${ts(r.published_at||r.created_at||'')}</td>
+  </tr>`).join('');
+
+  el.innerHTML = `<div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>ID</th><th>Source</th><th>Type</th><th>Text</th><th>Published</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>` + pager(data.total||items.length, offset, PAGE, 'loadSignals');
+}
+
+// ── Intel Records panel ───────────────────────────────────────────────────────
+
+let _intelOff = 0;
+async function loadIntel(offset) {
+  if (offset < 0) offset = 0;
+  _intelOff = offset;
+  const el = document.getElementById('intel-content');
+  el.innerHTML = '<div class="loading">Loading intel records…</div>';
+
+  const cls  = document.getElementById('intel-cls').value;
+  const conf = parseFloat(document.getElementById('intel-conf').value) || 0;
+  let url = `/intel?limit=${PAGE}&offset=${offset}&min_confidence=${conf}`;
+  if (cls) url += `&classification=${encodeURIComponent(cls)}`;
+
+  const data = await apiFetch(url);
+  if (!data) { el.innerHTML = emptyState('API offline — cannot load intel records.'); return; }
+
+  const items = data.items || [];
+  if (!items.length) { el.innerHTML = emptyState('No intel records found matching the current filter.'); return; }
+
+  const rows = items.map(r => `<tr>
+    <td><span class="mono-id">${esc(trunc(r.record_id||'',22))}</span></td>
+    <td><span class="cell-trunc" title="${esc(r.pattern||r.headline||'')}">${esc(trunc(r.pattern||r.headline||r.title||'',80))}</span></td>
+    <td>${badge(r.classification||'')}</td>
+    <td>${confBar(r.confidence)}</td>
+    <td>${confBar(r.source_weight)}</td>
+    <td>${confBar(r.analyst_weight)}</td>
+  </tr>`).join('');
+
+  el.innerHTML = `<div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>ID</th><th>Pattern</th><th>Class</th><th>Confidence</th><th>Src Wt</th><th>Ana Wt</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>` + pager(data.total||items.length, offset, PAGE, 'loadIntel');
+}
+
+// ── Leads panel ───────────────────────────────────────────────────────────────
+
+let _leadsOff = 0;
+async function loadLeads(offset) {
+  if (offset < 0) offset = 0;
+  _leadsOff = offset;
+  const el = document.getElementById('leads-content');
+  el.innerHTML = '<div class="loading">Loading leads…</div>';
+
+  const pri = document.getElementById('leads-pri').value;
+  const cat = document.getElementById('leads-cat').value;
+  let url = `/leads?limit=${PAGE}&offset=${offset}`;
+  if (pri) url += `&priority=${encodeURIComponent(pri)}`;
+  if (cat) url += `&category=${encodeURIComponent(cat)}`;
+
+  const data = await apiFetch(url);
+  if (!data) { el.innerHTML = emptyState('API offline — cannot load leads.'); return; }
+
+  const items = data.items || [];
+  if (!items.length) { el.innerHTML = emptyState('No leads found. Generate leads via POST /leads/generate.'); return; }
+
+  const cards = items.map(r => {
+    const actions = (r.action_items||[]).slice(0,3).map(a =>
+      `<div class="lead-action-item">${esc(a)}</div>`).join('');
+    return `<div class="lead-card">
+      <div class="lead-header">
+        <div class="lead-title">${esc(r.title||'—')}</div>
+        <div style="flex-shrink:0">${badge(r.priority||'')} ${badge(r.category||'')}</div>
+      </div>
+      <div class="lead-summary">${esc(trunc(r.summary||'',240))}</div>
+      ${actions ? `<div class="lead-actions">${actions}</div>` : ''}
+      <div class="lead-meta">
+        ${confBar(r.confidence)}
+        <span>${ts(r.generated_at||'')}</span>
+        ${r.expires_at ? `<span>Expires: ${ts(r.expires_at)}</span>` : ''}
+        <span style="opacity:.4">${esc(trunc(r.lead_id||'',20))}</span>
+      </div>
     </div>`;
+  }).join('');
+
+  el.innerHTML = cards + pager(data.total||items.length, offset, PAGE, 'loadLeads');
+}
+
+// ── Psyop panel ───────────────────────────────────────────────────────────────
+
+let _psyopOff = 0;
+
+async function analysePsyopText() {
+  const text = document.getElementById('psyop-text').value.trim();
+  const msg  = document.getElementById('psyop-analyse-msg');
+  const btn  = document.getElementById('psyop-submit-btn');
+  if (!text) { msg.textContent = 'Enter text to analyse.'; msg.className='form-msg err'; return; }
+  btn.disabled = true;
+  msg.textContent = 'Analysing…'; msg.className = 'form-msg';
+  const res = await apiPost('/psyop/analyse', { text });
+  btn.disabled = false;
+  if (!res.ok || !res.data) { msg.textContent = 'Analysis failed — is the API online?'; msg.className='form-msg err'; return; }
+  const d = res.data;
+  msg.innerHTML = `
+    <span class="${'form-msg ok'}">Score: <strong>${(d.score||0).toFixed(3)}</strong> &nbsp;
+    ${badge(d.classification||'')} &nbsp;
+    Patterns: ${(d.patterns_matched||[]).length}</span>`;
+  msg.className = 'form-msg ok';
+  loadPsyop(0);
+}
+
+async function loadPsyop(offset) {
+  if (offset < 0) offset = 0;
+  _psyopOff = offset;
+  const el = document.getElementById('psyop-content');
+  el.innerHTML = '<div class="loading">Loading psyop scores…</div>';
+
+  const cls = document.getElementById('psyop-cls').value;
+  let url = `/psyop?limit=${PAGE}&offset=${offset}`;
+  if (cls) url += `&classification=${encodeURIComponent(cls)}`;
+
+  const data = await apiFetch(url);
+  if (!data) { el.innerHTML = emptyState('API offline — cannot load psyop data.'); return; }
+
+  const items = data.items || [];
+  if (!items.length) { el.innerHTML = emptyState('No psyop scores found. Use the analyse form above to score a text.'); return; }
+
+  const cards = items.map(r => {
+    const score = parseFloat(r.score||0);
+    const patterns = (r.pattern_names||r.patterns_matched||[]).slice(0,6);
+    return `<div class="psyop-card">
+      <div class="psyop-header">
+        <div class="psyop-score-display">
+          <span class="psyop-score-val">${score.toFixed(3)}</span>
+          <span class="psyop-meta">&nbsp;psyop index</span>
+        </div>
+        <div>${badge(r.classification||'')} &nbsp;<span style="font-size:11px;color:var(--text-muted)">${ts(r.scored_at||'')}</span></div>
+      </div>
+      <div class="psyop-excerpt">${esc(trunc(r.text_excerpt||'',200))}</div>
+      ${patterns.length ? `<div class="psyop-patterns">${patterns.map(p=>`<span class="psyop-pattern">${esc(p)}</span>`).join('')}</div>` : ''}
+      ${(r.threat_categories||[]).length ? `<div class="psyop-meta">Threat categories: ${(r.threat_categories||[]).map(c=>esc(c)).join(', ')}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  el.innerHTML = cards + pager(data.total||items.length, offset, PAGE, 'loadPsyop');
+}
+
+// ── FARA panel ────────────────────────────────────────────────────────────────
+
+let _faraOff = 0;
+async function loadFara(offset) {
+  if (offset < 0) offset = 0;
+  _faraOff = offset;
+  const el = document.getElementById('fara-content');
+  el.innerHTML = '<div class="loading">Loading FARA records…</div>';
+
+  const country = document.getElementById('fara-country').value.trim();
+  const reg     = document.getElementById('fara-reg').value.trim();
+  let url = `/fara?limit=${PAGE}&offset=${offset}`;
+  if (country) url += `&country=${encodeURIComponent(country)}`;
+  if (reg)     url += `&registrant=${encodeURIComponent(reg)}`;
+
+  const data = await apiFetch(url);
+  if (!data) { el.innerHTML = emptyState('API offline — cannot load FARA records.'); return; }
+
+  const items = data.items || [];
+  if (!items.length) { el.innerHTML = emptyState('No FARA records found. Filters: country and/or registrant name fragment.'); return; }
+
+  const rows = items.map(r => {
+    const meta = r.metadata || {};
+    return `<tr>
+      <td><span class="cell-trunc" title="${esc(meta.registrant||r.registrant||'')}">${esc(trunc(meta.registrant||r.registrant||'—',36))}</span></td>
+      <td>${esc(meta.country||r.country||'—')}</td>
+      <td>${esc(meta.filing_type||r.source_type||'—')}</td>
+      <td>${ts(meta.filing_date||r.published_at||r.created_at||'')}</td>
+      <td><span class="cell-trunc" title="${esc(r.text||r.summary||'')}">${esc(trunc(r.text||r.summary||r.headline||'',80))}</span></td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `<div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Registrant</th><th>Country</th><th>Type</th><th>Filed</th><th>Summary</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>` + pager(data.total||items.length, offset, PAGE, 'loadFara');
+}
+
+// ── Cycle panel ───────────────────────────────────────────────────────────────
+
+async function loadCycleStatus() {
+  const el = document.getElementById('cycle-status-content');
+  el.innerHTML = '<div class="loading">Loading cycle status…</div>';
+  const data = await apiFetch('/cycle/status');
+  if (!data) { el.innerHTML = emptyState('API offline — cannot load cycle status.'); return; }
+  if (data.status === 'no_run') { el.innerHTML = emptyState(data.message || 'No cycle has been run yet.'); return; }
+  el.innerHTML = renderCycleStats(data);
+}
+
+function renderCycleStats(d) {
+  const fields = [
+    ['Signals Harvested', d.signals_harvested],
+    ['Signals Parsed',    d.signals_parsed],
+    ['Opportunities',     d.opportunities_found],
+    ['Investigations',    d.investigations_generated],
+    ['Outcomes',          d.outcomes_verified],
+    ['Records Stored',    d.records_stored],
+    ['Errors',            d.errors],
+  ];
+  const boxes = fields.map(([label, val]) => `
+    <div class="stat-box">
+      <div class="stat-label">${label}</div>
+      <div class="stat-value">${val ?? '—'}</div>
+    </div>`).join('');
+
+  return `<div class="cycle-status-box">
+    <div class="stats-grid">${boxes}</div>
+    <div style="font-size:11px;color:var(--text-muted);display:flex;gap:20px;flex-wrap:wrap;">
+      ${d.run_id       ? `<span>Run: <code style="color:var(--text-secondary)">${esc(d.run_id)}</code></span>` : ''}
+      ${d.started_at   ? `<span>Started: ${ts(d.started_at)}</span>` : ''}
+      ${d.finished_at  ? `<span>Finished: ${ts(d.finished_at)}</span>` : ''}
+    </div>
+  </div>`;
+}
+
+async function runCycle() {
+  const btn = document.getElementById('cycle-run-btn');
+  const msg = document.getElementById('cycle-run-msg');
+  btn.disabled = true;
+  msg.textContent = 'Running cycle — this may take 30–90 seconds…';
+  msg.className = 'run-msg running';
+
+  const res = await apiPost('/cycle/run', { environment: 'production', max_signals: 500 });
+  btn.disabled = false;
+  if (!res.ok || !res.data) {
+    msg.textContent = 'Cycle failed — check API logs.';
+    msg.className = 'run-msg err';
+    return;
+  }
+  msg.textContent = `Cycle complete — ${res.data.records_stored ?? 0} records stored.`;
+  msg.className = 'run-msg done';
+  document.getElementById('cycle-status-content').innerHTML = renderCycleStats(res.data);
+}
+
+// ── Verdicts panel ────────────────────────────────────────────────────────────
+
+let _verdictsOff = 0;
+
+async function submitVerdict() {
+  const btn = document.getElementById('v-submit-btn');
+  const msg = document.getElementById('v-msg');
+  const recordId = document.getElementById('v-record-id').value.trim();
+  const verdict  = document.getElementById('v-verdict').value;
+  const reviewer = document.getElementById('v-reviewer').value.trim() || 'anonymous';
+  const notes    = document.getElementById('v-notes').value.trim();
+
+  if (!recordId) { msg.textContent = 'Record ID is required.'; msg.className='form-msg err'; return; }
+  btn.disabled = true;
+  msg.textContent = 'Submitting…'; msg.className = 'form-msg';
+
+  const res = await apiPost('/verdicts', { record_id: recordId, verdict, reviewer, notes });
+  btn.disabled = false;
+  if (!res.ok) {
+    const detail = res.data?.detail || 'Submission failed.';
+    msg.textContent = typeof detail === 'string' ? detail : JSON.stringify(detail);
+    msg.className = 'form-msg err';
+    return;
+  }
+  msg.textContent = `Verdict filed: ${verdict} on ${trunc(recordId,24)}`;
+  msg.className = 'form-msg ok';
+  document.getElementById('v-record-id').value = '';
+  document.getElementById('v-notes').value = '';
+  loadVerdicts(0);
+}
+
+async function loadVerdicts(offset) {
+  if (offset < 0) offset = 0;
+  _verdictsOff = offset;
+  const el = document.getElementById('verdicts-content');
+  el.innerHTML = '<div class="loading">Loading verdicts…</div>';
+
+  const recId   = document.getElementById('vf-record').value.trim();
+  const verdict = document.getElementById('vf-verdict').value;
+  let url = `/verdicts?limit=${PAGE}&offset=${offset}`;
+  if (recId)   url += `&record_id=${encodeURIComponent(recId)}`;
+  if (verdict) url += `&verdict=${encodeURIComponent(verdict)}`;
+
+  const data = await apiFetch(url);
+  if (!data) { el.innerHTML = emptyState('API offline — cannot load verdicts.'); return; }
+
+  const items = data.items || [];
+  if (!items.length) { el.innerHTML = emptyState('No verdicts filed yet.'); return; }
+
+  const rows = items.map(r => {
+    const vcls = 'v-' + (r.verdict||'unclear');
+    return `<tr>
+      <td><span class="mono-id">${esc(trunc(r.record_id||'',28))}</span></td>
+      <td><strong class="${vcls}">${esc(r.verdict||'—')}</strong></td>
+      <td>${esc(r.reviewer||'anonymous')}</td>
+      <td>${ts(r.reviewed_at||'')}</td>
+      <td><span class="cell-trunc" title="${esc(r.notes||'')}">${esc(trunc(r.notes||'',60))}</span></td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `<div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>Record ID</th><th>Verdict</th><th>Reviewer</th><th>Reviewed At</th><th>Notes</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>` + pager(data.total||items.length, offset, PAGE, 'loadVerdicts');
+}
+
+// ── Calibration panel ─────────────────────────────────────────────────────────
+
+async function loadCalibration() {
+  const el = document.getElementById('calibration-content');
+  el.innerHTML = '<div class="loading">Computing calibration report…</div>';
+  const data = await apiFetch('/calibration/report');
+  if (!data) { el.innerHTML = emptyState('API offline — cannot compute calibration report.'); return; }
+
+  function bucketTable(buckets) {
+    if (!buckets || !Object.keys(buckets).length) return '<p style="font-size:12px;color:var(--text-muted);">No data.</p>';
+    const rows = Object.values(buckets).map(b => {
+      const acc = b.accuracy != null ? (b.accuracy*100).toFixed(1)+'%' : '—';
+      const pct = b.accuracy != null ? b.accuracy * 100 : 0;
+      return `<div class="cal-bucket-row">
+        <span class="cal-bucket-label">${esc(b.label)}</span>
+        <span class="cal-bucket-count">${b.count}</span>
+        <div class="cal-bucket-bar"><div class="cal-bucket-fill" style="width:${pct}%"></div></div>
+        <span class="cal-bucket-acc">${acc}</span>
+      </div>`;
+    }).join('');
+    return rows;
+  }
+
+  const overall = data.overall || {};
+  const overallAcc = overall.accuracy != null ? (overall.accuracy*100).toFixed(1)+'%' : '—';
+
+  el.innerHTML = `
+    <div class="cal-section">
+      <div class="cal-section-title">Overview</div>
+      <div class="cal-overview">
+        <div class="cal-kv"><div class="cal-kv-label">Records</div><div class="cal-kv-value">${data.total_records||0}</div></div>
+        <div class="cal-kv"><div class="cal-kv-label">Verdicts</div><div class="cal-kv-value">${data.total_verdicts||0}</div></div>
+        <div class="cal-kv"><div class="cal-kv-label">Matched</div><div class="cal-kv-value">${data.matched_verdicts||0}</div></div>
+        <div class="cal-kv"><div class="cal-kv-label">Accuracy</div><div class="cal-kv-value">${overallAcc}</div></div>
+        <div class="cal-kv">
+          <div class="cal-kv-label">Correct</div>
+          <div class="cal-kv-value" style="font-size:14px">${overall.correct||0} / ${overall.incorrect||0} / ${overall.partial||0}</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">✓ / ✗ / ~</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cal-section">
+      <div class="cal-section-title">By Classification</div>
+      ${bucketTable(data.by_classification)}
+    </div>
+
+    <div class="cal-section">
+      <div class="cal-section-title">By Confidence Bucket</div>
+      ${bucketTable(data.by_confidence_bucket)}
+    </div>
+
+    <div class="cal-section">
+      <div class="cal-section-title">By Source Weight Bucket</div>
+      ${bucketTable(data.by_source_weight_bucket)}
+    </div>
+
+    <div class="cal-section">
+      <div class="cal-section-title">By Analyst Weight Bucket</div>
+      ${bucketTable(data.by_analyst_weight_bucket)}
+    </div>
+
+    <p style="font-size:11px;color:var(--text-muted);margin-top:16px;">
+      Generated: ${ts(data.generated_at||'')} &nbsp;·&nbsp;
+      Calibration is descriptive — adjustments require explicit human code changes.
+    </p>`;
 }
 
 // ── Copy helper ───────────────────────────────────────────────────────────────
 
 function copyText(btn, text) {
-  const decoded = text
-    .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+  const decoded = text.replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"');
   const orig = btn.textContent;
   (navigator.clipboard
     ? navigator.clipboard.writeText(decoded)
     : Promise.resolve(fallbackCopy(decoded))
   ).then(() => {
-    btn.textContent = 'Copied ✓';
-    btn.classList.add('copied');
+    btn.textContent = 'Copied ✓'; btn.classList.add('copied');
     setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1800);
   });
 }
 
 function fallbackCopy(text) {
-  const ta = Object.assign(document.createElement('textarea'), {
-    value: text, style: 'position:fixed;opacity:0'
-  });
-  document.body.appendChild(ta);
-  ta.select();
-  document.execCommand('copy');
-  document.body.removeChild(ta);
+  const ta = Object.assign(document.createElement('textarea'), { value: text, style: 'position:fixed;opacity:0' });
+  document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
