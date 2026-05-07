@@ -20,7 +20,14 @@ wheels/
 *.egg
 MANIFEST
 .env
+.envrc
 .venv
+
+# Shell init files — never commit; high risk of leaking secrets via env exports
+.bashrc
+.zshrc
+.bash_profile
+.profile
 env/
 venv/
 ENV/
@@ -51,3 +58,6 @@ workspace/
 /spec1_portfolio.html
 /spec1_ui.html
 /.kill_cycle
+
+# Personal scratch scripts — not part of the project
+/get_signals.py
