@@ -64,7 +64,7 @@ def test_generate_publication_creates_pdf(tmp_path):
 
 
 def test_generate_publication_file_size(tmp_path):
-    """Generated PDF is larger than 10 KB."""
+    """Generated PDF is larger than 5 KB."""
     out = generate_publication(
         records=_SAMPLE_RECORDS,
         brief_text=_SAMPLE_BRIEF,

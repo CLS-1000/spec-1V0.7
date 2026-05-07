@@ -351,11 +351,17 @@ def run_cycle(
             r.__dict__ if hasattr(r, '__dict__') else r
             for r in stored_records[:5]
         ]
-        brief_path = Path('briefs/spec1_brief_latest.md')
-        brief_text = brief_path.read_text(encoding='utf-8') if brief_path.exists() else ''
+        # Prefer in-memory brief_md; fall back to stats['brief_path'] on disk
+        _brief_text = ''
+        try:
+            _brief_text = brief_md  # type: ignore[name-defined]
+        except NameError:
+            _bp = stats.get('brief_path')
+            if _bp and Path(_bp).exists():
+                _brief_text = Path(_bp).read_text(encoding='utf-8')
         pub_path = generate_publication(
             records=top_records,
-            brief_text=brief_text,
+            brief_text=_brief_text,
             cycle_stats=stats,
         )
         logger.info('Publication PDF generated: %s', pub_path)

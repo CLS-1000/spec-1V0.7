@@ -6,9 +6,11 @@ Runs after each cycle completes.
 from __future__ import annotations
 
 import math
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
+from xml.sax.saxutils import escape as _xml_escape
 
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
@@ -161,16 +163,16 @@ def _build_signals_page(records: list, s: dict) -> list:
         classification = rec.get('classification', rec.get('outcome_classification', 'INVESTIGATE'))
         velocity     = rec.get('velocity_label', 'STANDARD')
 
-        headline = content[:80].strip()
+        headline = _xml_escape(content[:80].strip())
         if len(content) > 80:
             headline += '...'
 
         story.append(Paragraph(headline, s['story_headline']))
         story.append(Paragraph(
-            f'SOURCE: {source.upper()}  ·  CREDIBILITY: {cred_label}  ·  VELOCITY: {velocity.upper()}',
+            f'SOURCE: {_xml_escape(source.upper())}  ·  CREDIBILITY: {cred_label}  ·  VELOCITY: {_xml_escape(velocity.upper())}',
             s['story_source']
         ))
-        story.append(Paragraph(content, s['body']))
+        story.append(Paragraph(_xml_escape(content), s['body']))
 
         # Build gate trace from gate_results if gate_trace not present
         gates = rec.get('gate_trace')
@@ -201,13 +203,13 @@ def _build_intelligence_page(brief_text: str, cycle_stats: dict, s: dict) -> lis
     story.append(Paragraph('INTELLIGENCE', s['section_label']))
     story.append(_hr(BORDER, 0.4, 0, 10))
 
-    pattern_text = brief_text[:600].strip() if brief_text else 'Pattern analysis pending.'
+    pattern_text = _xml_escape(brief_text[:600].strip()) if brief_text else 'Pattern analysis pending.'
 
     psyop_class  = cycle_stats.get('psyop_classification', 'NOISE')
     patterns     = cycle_stats.get('psyop_patterns_fired', [])
     pattern_name = patterns[0] if patterns else 'Signal Convergence'
 
-    story.append(Paragraph(f'Pattern: {pattern_name.replace("_", " ").title()}', s['pattern_title']))
+    story.append(Paragraph(f'Pattern: {_xml_escape(pattern_name.replace("_", " ").title())}', s['pattern_title']))
     story.append(Paragraph(
         f'ANALYST: SYSTEMS ARCHITECT  ·  CONFIDENCE: {"MEDIUM-HIGH" if psyop_class != "NOISE" else "MEDIUM"}',
         s['analyst_meta']
@@ -300,7 +302,7 @@ def generate_publication(
     records: list,
     brief_text: str,
     cycle_stats: dict,
-    output_dir: str = 'briefs',
+    output_dir: str = 'generated/briefs',
     issue_number: Optional[int] = None,
 ) -> str:
     """
@@ -323,7 +325,13 @@ def generate_publication(
 
     if issue_number is None:
         existing = list(Path(output_dir).glob('spec1_issue_*.pdf'))
-        issue_number = len(existing) + 1
+        # Parse max NNN from existing filenames to avoid gaps/collisions
+        parsed = []
+        for p in existing:
+            m = re.match(r'spec1_issue_(\d+)_', p.name)
+            if m:
+                parsed.append(int(m.group(1)))
+        issue_number = (max(parsed) + 1) if parsed else 1
     issue_str = str(issue_number).zfill(3)
 
     out_path = str(Path(output_dir) / f'spec1_issue_{issue_str}_{file_date}.pdf')

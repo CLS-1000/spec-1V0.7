@@ -9,14 +9,14 @@ from fastapi.responses import FileResponse
 
 router = APIRouter(prefix="/publication", tags=["publication"])
 
-_BRIEFS_DIR = Path("briefs")
+_BRIEFS_DIR = Path("generated/briefs")
 
 
 def _latest_pdf() -> Path | None:
-    """Return the most recently created spec1_issue_*.pdf in briefs/."""
+    """Return the most recently modified spec1_issue_*.pdf in generated/briefs/."""
     if not _BRIEFS_DIR.exists():
         return None
-    pdfs = sorted(_BRIEFS_DIR.glob("spec1_issue_*.pdf"))
+    pdfs = sorted(_BRIEFS_DIR.glob("spec1_issue_*.pdf"), key=lambda p: p.stat().st_mtime)
     return pdfs[-1] if pdfs else None
 
 
@@ -38,7 +38,8 @@ def list_publications() -> dict:
     """List all available publication PDFs, newest first."""
     if not _BRIEFS_DIR.exists():
         return {"total": 0, "items": []}
-    pdfs = sorted(_BRIEFS_DIR.glob("spec1_issue_*.pdf"), reverse=True)
+    pdfs = sorted(_BRIEFS_DIR.glob("spec1_issue_*.pdf"),
+                  key=lambda p: p.stat().st_mtime, reverse=True)
     return {
         "total": len(pdfs),
         "items": [p.name for p in pdfs],
