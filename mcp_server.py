@@ -10,6 +10,9 @@ Tools exposed:
   - get_fara           Return FARA filing records
   - analyse_psyop      Score text for psyop patterns
   - get_stats          Return system statistics
+  - file_verdict       File a human ground-truth verdict for a record
+  - get_verdicts       Return filed verdicts
+  - get_calibration    Return calibration drift report
 
 This server uses a simple JSON-RPC 2.0 over stdio protocol compatible
 with the Claude MCP specification.
@@ -171,6 +174,7 @@ def tool_get_stats(args: dict) -> dict:
         "psyop": _store_path("SPEC1_PSYOP_PATH", "psyop_scores.jsonl"),
         "quant": _store_path("SPEC1_QUANT_PATH", "quant_signals.jsonl"),
         "briefs": _store_path("SPEC1_BRIEFS_PATH", "world_briefs.jsonl"),
+        "verdicts": _store_path("SPEC1_VERDICTS_PATH", "verdicts.jsonl"),
     }
     for name, path in paths.items():
         if path.exists():
@@ -180,6 +184,59 @@ def tool_get_stats(args: dict) -> dict:
             stats[name] = 0
     stats["checked_at"] = datetime.now(timezone.utc).isoformat()  # type: ignore[assignment]
     return stats
+
+
+def tool_file_verdict(args: dict) -> dict:
+    """File a human ground-truth verdict for an intelligence record."""
+    import uuid
+    from cls_verdicts.schemas import Verdict, VALID_OUTCOMES
+    from cls_verdicts.store import VerdictStore
+
+    record_id = args.get("record_id", "")
+    outcome = args.get("outcome", "")
+    if not record_id:
+        return {"error": "record_id is required"}
+    if outcome not in VALID_OUTCOMES:
+        return {"error": f"outcome must be one of {sorted(VALID_OUTCOMES)}"}
+
+    verdict = Verdict(
+        verdict_id=str(uuid.uuid4()),
+        record_id=record_id,
+        outcome=outcome,
+        analyst_id=args.get("analyst_id", ""),
+        notes=args.get("notes", ""),
+    )
+    path = _store_path("SPEC1_VERDICTS_PATH", "verdicts.jsonl")
+    VerdictStore(path).append(verdict)
+    return verdict.to_dict()
+
+
+def tool_get_verdicts(args: dict) -> list[dict]:
+    """Return filed verdicts, optionally filtered by record_id."""
+    from cls_verdicts.store import VerdictStore
+
+    path = _store_path("SPEC1_VERDICTS_PATH", "verdicts.jsonl")
+    store = VerdictStore(path)
+    record_id = args.get("record_id")
+    limit = int(args.get("limit", 100))
+    if record_id:
+        return [v.to_dict() for v in store.read_for_record(record_id)]
+    return [v.to_dict() for v in store.read_all(limit=limit)]
+
+
+def tool_get_calibration(args: dict) -> dict:
+    """Return a calibration drift report aggregating verdicts onto intel records."""
+    from cls_verdicts.store import VerdictStore
+    from cls_calibration.producer import produce_report
+
+    intel_path = _store_path("SPEC1_STORE_PATH", "spec1_intelligence.jsonl")
+    verdicts_path = _store_path("SPEC1_VERDICTS_PATH", "verdicts.jsonl")
+    include_proposals = bool(args.get("include_proposals", False))
+
+    records = _read_jsonl(intel_path, limit=10_000)
+    verdicts = [v.to_dict() for v in VerdictStore(verdicts_path).read_all(limit=50_000)]
+    report = produce_report(records, verdicts, include_proposals=include_proposals)
+    return report.to_dict()
 
 
 # ---------------------------------------------------------------------------
@@ -277,6 +334,49 @@ TOOLS: dict[str, dict] = {
         "parameters": {"type": "object", "properties": {}},
         "fn": tool_get_stats,
     },
+    "file_verdict": {
+        "description": "File a human ground-truth verdict (TP/FP/TN/FN/PARTIAL) for an intelligence record.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "record_id": {"type": "string", "description": "ID of the intelligence record"},
+                "outcome": {
+                    "type": "string",
+                    "enum": ["TP", "FP", "TN", "FN", "PARTIAL"],
+                    "description": "Ground-truth outcome label",
+                },
+                "analyst_id": {"type": "string", "description": "Analyst identifier (optional)"},
+                "notes": {"type": "string", "description": "Free-text notes (optional)"},
+            },
+            "required": ["record_id", "outcome"],
+        },
+        "fn": tool_file_verdict,
+    },
+    "get_verdicts": {
+        "description": "Return filed human ground-truth verdicts.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "record_id": {"type": "string", "description": "Filter by record ID (optional)"},
+                "limit": {"type": "integer", "default": 100},
+            },
+        },
+        "fn": tool_get_verdicts,
+    },
+    "get_calibration": {
+        "description": "Return a calibration drift report aggregating verdicts onto intelligence records.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "include_proposals": {
+                    "type": "boolean",
+                    "default": False,
+                    "description": "Include adjustment proposals in the report",
+                },
+            },
+        },
+        "fn": tool_get_calibration,
+    },
 }
 
 
@@ -288,7 +388,7 @@ def handle_initialize(request_id: Any, params: dict) -> dict:
     return _make_response(request_id, {
         "protocolVersion": "2024-11-05",
         "capabilities": {"tools": {}},
-        "serverInfo": {"name": "spec1-mcp-server", "version": "0.3.0"},
+        "serverInfo": {"name": "spec1-mcp-server", "version": "0.4.0"},
     })
 
 
