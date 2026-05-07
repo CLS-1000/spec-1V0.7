@@ -6,11 +6,11 @@ Applies DDL statements to create tables if they don't already exist.
 from __future__ import annotations
 
 from cls_db.database import Database
-from cls_db.models import ALL_DDL
+from cls_db.models import ALL_DDL, AUX_DDL
 
 
 def ensure_schema(db: Database) -> list[str]:
-    """Create all tables that don't yet exist.
+    """Create all tables that don't yet exist, then apply AUX_DDL.
 
     Returns list of table names that were created.
     """
@@ -19,6 +19,8 @@ def ensure_schema(db: Database) -> list[str]:
         if not db.table_exists(table_name):
             db.execute(ddl)
             created.append(table_name)
+    for aux in AUX_DDL:
+        db.execute(aux)
     return created
 
 
@@ -30,6 +32,7 @@ def run_migrations(db: Database) -> dict:
         "tables_created": created,
         "tables_existing": existing,
         "total_tables": len(ALL_DDL),
+        "aux_ddl_applied": len(AUX_DDL),
     }
 
 
