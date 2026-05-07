@@ -2,7 +2,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
-.Python
 build/
 develop-eggs/
 dist/
@@ -24,19 +23,18 @@ MANIFEST
 env/
 venv/
 ENV/
-env.bak/
-venv.bak/
 .pytest_cache/
 .coverage
 htmlcov/
 *.jsonl
 *.log
+*.db
 .DS_Store
 
-# Generated artifacts — briefs, historical outputs, logs
-# Write these to generated/ or a dedicated branch, not main
+# Generated artifacts — write to generated/ or a dedicated branch
 generated/
-data/psyop_signals.jsonl
-
-# Generated brief and prompt markdown files — never committed to main
 briefs/
+data/
+
+# MCP config — may contain local paths; committed separately if desired
+# .mcp.json
