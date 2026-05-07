@@ -344,6 +344,25 @@ def run_cycle(
             logger.error("Rule-based brief fallback failed: %s", fallback_exc)
             stats["errors"].append(f"briefing_fallback:{fallback_exc}")
 
+    # ── Publication PDF ────────────────────────────────────────────────────────
+    try:
+        from spec1_engine.tools.publication_generator import generate_publication
+        top_records = [
+            r.__dict__ if hasattr(r, '__dict__') else r
+            for r in stored_records[:5]
+        ]
+        brief_path = Path('briefs/spec1_brief_latest.md')
+        brief_text = brief_path.read_text(encoding='utf-8') if brief_path.exists() else ''
+        pub_path = generate_publication(
+            records=top_records,
+            brief_text=brief_text,
+            cycle_stats=stats,
+        )
+        logger.info('Publication PDF generated: %s', pub_path)
+        stats['publication_path'] = pub_path
+    except Exception as exc:
+        logger.warning('Publication generation failed (non-blocking): %s', exc)
+
     # ── Case workspace: Match signals to open cases and run research ──────────
     try:
         from spec1_engine.workspace.tracker import match_signals_to_cases

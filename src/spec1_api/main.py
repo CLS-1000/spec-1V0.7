@@ -26,6 +26,7 @@ from spec1_api.routers import (
     verdicts,
 )
 from spec1_api.routers import nodes, ingest
+from spec1_api.routers import publication
 from spec1_api.scheduler import start_scheduler, stop_scheduler
 
 logger = logging.getLogger(__name__)
@@ -103,6 +104,7 @@ def create_app() -> FastAPI:
     app.include_router(calibration.router)
     app.include_router(nodes.router)
     app.include_router(ingest.router)
+    app.include_router(publication.router)
 
     return app
 
