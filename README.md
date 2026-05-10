@@ -35,9 +35,9 @@ RSS / FARA / Congress / Narrative
   IntelligenceRecord  →  spec1_intelligence.jsonl  (append-only)
 
 ═══ Operator tools (manual, on-demand) ════════════════════════════════
-  spec1_engine.tools.run_psyop       → psyop_scores.jsonl       (make psyop)
-  spec1_engine.tools.generate_brief  → generated/briefs/*.md    (make brief)
-  spec1_engine.tools.generate_leads  → leads.jsonl              (make leads)
+  make psyop                          → psyop_scores.jsonl
+  make brief                          → generated/briefs/*.md
+  make leads                          → leads.jsonl
   spec1_engine.tools.calibration_propose → calibration_report.* (make calibration)
   spec1_engine.tools.historical_briefs   → backfill briefs      (make backfill)
 
