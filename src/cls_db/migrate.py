@@ -10,7 +10,7 @@ from cls_db.models import ALL_DDL, AUX_DDL
 
 
 def ensure_schema(db: Database) -> list[str]:
-    """Create all tables that don't yet exist, then apply AUX_DDL.
+    """Create all tables (and auxiliary indexes) that don't yet exist.
 
     Returns list of table names that were created.
     """
@@ -19,8 +19,8 @@ def ensure_schema(db: Database) -> list[str]:
         if not db.table_exists(table_name):
             db.execute(ddl)
             created.append(table_name)
-    for aux in AUX_DDL:
-        db.execute(aux)
+    for ddl in AUX_DDL:
+        db.execute(ddl)
     return created
 
 

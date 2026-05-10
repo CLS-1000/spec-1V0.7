@@ -19,7 +19,14 @@ wheels/
 *.egg
 MANIFEST
 .env
+.envrc
 .venv
+
+# Shell init files — never commit; high risk of leaking secrets via env exports
+.bashrc
+.zshrc
+.bash_profile
+.profile
 env/
 venv/
 ENV/
@@ -31,10 +38,21 @@ htmlcov/
 *.db
 .DS_Store
 
-# Generated artifacts — write to generated/ or a dedicated branch
+# SQLite databases — runtime artifacts, never committed
+*.db
+
+# Generated artifacts — briefs, historical outputs, logs
+# Write these to generated/ or a dedicated branch, not main
 generated/
 briefs/
-data/
+workspace/
+.mcp.json
 
-# MCP config — may contain local paths; committed separately if desired
-# .mcp.json
+# Loose runtime artifacts at root — exports, rendered HTML, kill files
+/spec1_intelligence_export.json
+/spec1_portfolio.html
+/spec1_ui.html
+/.kill_cycle
+
+# Personal scratch scripts — not part of the project
+/get_signals.py

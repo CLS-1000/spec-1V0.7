@@ -10,9 +10,12 @@ Tools exposed:
   - get_fara           Return FARA filing records
   - analyse_psyop      Score text for psyop patterns
   - get_stats          Return system statistics
-  - file_verdict       File a human ground-truth verdict for a record
-  - get_verdicts       Return filed verdicts
-  - get_calibration    Return calibration drift report
+  - file_verdict       File a human verdict on an intelligence record
+  - get_verdicts       Return verdicts (optionally for a single record)
+  - get_calibration    Produce a calibration drift report from intel + verdicts
+  - run_psyop          Score every intelligence record for psyop patterns (operator tool)
+  - generate_brief     Build a daily brief for one run_id (operator tool, Claude + fallback)
+  - generate_leads     Derive Lead objects from intelligence records (operator tool)
 
 This server uses a simple JSON-RPC 2.0 over stdio protocol compatible
 with the Claude MCP specification.
@@ -187,56 +190,186 @@ def tool_get_stats(args: dict) -> dict:
 
 
 def tool_file_verdict(args: dict) -> dict:
-    """File a human ground-truth verdict for an intelligence record."""
-    import uuid
-    from cls_verdicts.schemas import Verdict, VALID_OUTCOMES
+    """File a human verdict on a stored intelligence record."""
+    from cls_verdicts.schemas import VALID_VERDICTS, Verdict
     from cls_verdicts.store import VerdictStore
 
-    record_id = args.get("record_id", "")
-    outcome = args.get("outcome", "")
+    record_id = str(args.get("record_id", "")).strip()
+    kind = str(args.get("verdict", "")).strip().lower()
+    reviewer = str(args.get("reviewer", "anonymous")).strip() or "anonymous"
+    notes = str(args.get("notes", ""))
+
     if not record_id:
         return {"error": "record_id is required"}
-    if outcome not in VALID_OUTCOMES:
-        return {"error": f"outcome must be one of {sorted(VALID_OUTCOMES)}"}
+    if kind not in VALID_VERDICTS:
+        return {"error": f"verdict must be one of {sorted(VALID_VERDICTS)}, got {kind!r}"}
 
+    reviewed_at = datetime.now(timezone.utc)
     verdict = Verdict(
-        verdict_id=str(uuid.uuid4()),
+        verdict_id=Verdict.make_id(record_id, reviewer, reviewed_at),
         record_id=record_id,
-        outcome=outcome,
-        analyst_id=args.get("analyst_id", ""),
-        notes=args.get("notes", ""),
+        verdict=kind,  # type: ignore[arg-type]
+        reviewer=reviewer,
+        reviewed_at=reviewed_at,
+        notes=notes,
     )
-    path = _store_path("SPEC1_VERDICTS_PATH", "verdicts.jsonl")
-    VerdictStore(path).append(verdict)
-    return verdict.to_dict()
+    store = VerdictStore(_store_path("SPEC1_VERDICTS_PATH", "verdicts.jsonl"))
+    return store.save(verdict)
 
 
 def tool_get_verdicts(args: dict) -> list[dict]:
-    """Return filed verdicts, optionally filtered by record_id."""
+    """Return verdicts. If record_id is given, returns every verdict for that record."""
     from cls_verdicts.store import VerdictStore
 
-    path = _store_path("SPEC1_VERDICTS_PATH", "verdicts.jsonl")
-    store = VerdictStore(path)
     record_id = args.get("record_id")
-    limit = int(args.get("limit", 100))
+    limit = int(args.get("limit", 20))
+    store = VerdictStore(_store_path("SPEC1_VERDICTS_PATH", "verdicts.jsonl"))
+
     if record_id:
-        return [v.to_dict() for v in store.read_for_record(record_id)]
-    return [v.to_dict() for v in store.read_all(limit=limit)]
+        return store.for_record(str(record_id))
+    # Tail of the JSONL — last `limit` verdicts in insertion order.
+    return list(store.read_all())[-limit:]
+
+
+def tool_run_psyop(args: dict) -> dict:
+    """Score every intelligence record for psyop patterns and persist the scores.
+
+    Reads from $SPEC1_STORE_PATH (default spec1_intelligence.jsonl) and
+    writes one PsyopScore per scored record to the configured psyop store.
+    """
+    from cls_psyop.scorer import filter_risky, score_records
+    from cls_psyop.store import PsyopStore
+
+    intel_path = _store_path("SPEC1_STORE_PATH", "spec1_intelligence.jsonl")
+    out_path = Path(args.get("out") or os.environ.get("SPEC1_PSYOP_PATH", "generated/psyop_scores.jsonl"))
+    min_classification = args.get("min_classification", "CLEAN")
+
+    records = _read_jsonl(intel_path, limit=10**9)
+    scores = score_records(records)
+    if min_classification != "CLEAN":
+        scores = filter_risky(scores, min_classification=min_classification)
+
+    written = PsyopStore(out_path).save_batch(scores)
+    by_class: dict[str, int] = {}
+    for s in scores:
+        by_class[s.classification] = by_class.get(s.classification, 0) + 1
+
+    return {
+        "intel_path": str(intel_path),
+        "out_path": str(out_path),
+        "records_read": len(records),
+        "scores_kept": len(scores),
+        "scores_written": len(written),
+        "by_classification": by_class,
+    }
+
+
+def tool_generate_brief(args: dict) -> dict:
+    """Generate a daily intelligence brief for one run_id (default: latest).
+
+    Tries Claude Sonnet first; falls back to the rule-based producer on failure
+    or when ANTHROPIC_API_KEY is unset. Writes to generated/briefs/ by default.
+    """
+    from spec1_engine.tools.generate_brief import (
+        _cycle_stats_for,
+        _group_by_run_id,
+        _pick_run,
+        _read_jsonl as _read_intel_jsonl,
+        _rule_based_fallback,
+        _try_claude,
+        _write_outputs,
+    )
+
+    intel_path = _store_path("SPEC1_STORE_PATH", "spec1_intelligence.jsonl")
+    out_dir = Path(args.get("out_dir") or os.environ.get("SPEC1_BRIEFS_DIR", "generated/briefs"))
+    run_id_arg = args.get("run_id", "latest")
+    rule_based = bool(args.get("rule_based", False))
+
+    records = _read_intel_jsonl(intel_path)
+    if not records:
+        return {"records_read": 0, "out_path": None, "note": "no records"}
+
+    groups = _group_by_run_id(records)
+    run_id, run_records = _pick_run(groups, run_id_arg)
+    cycle_stats = _cycle_stats_for(run_id, run_records)
+
+    brief_md = ""
+    prompts = ""
+    used_fallback = False
+    if not rule_based:
+        result = _try_claude(run_records, cycle_stats)
+        if result is not None:
+            brief_md, prompts = result
+    if not brief_md:
+        brief_md = _rule_based_fallback(run_records)
+        used_fallback = True
+
+    out_path = _write_outputs(out_dir, brief_md, prompts, run_id, cycle_stats["finished_at"])
+    return {
+        "run_id": run_id,
+        "records_used": len(run_records),
+        "word_count": len(brief_md.split()),
+        "source": "rule-based" if used_fallback else "claude",
+        "out_path": str(out_path),
+    }
+
+
+def tool_generate_leads(args: dict) -> dict:
+    """Derive Lead objects from intelligence records and persist them.
+
+    Reads from $SPEC1_STORE_PATH and writes Lead JSONL to the configured leads store.
+    """
+    from cls_leads.generator import generate_leads
+    from cls_leads.store import LeadStore
+
+    intel_path = _store_path("SPEC1_STORE_PATH", "spec1_intelligence.jsonl")
+    out_path = Path(args.get("out") or os.environ.get("SPEC1_LEADS_PATH", "generated/leads.jsonl"))
+    min_confidence = float(args.get("min_confidence", 0.3))
+    max_leads = int(args.get("max_leads", 50))
+    priority_filter = args.get("priority")
+
+    records = _read_jsonl(intel_path, limit=10**9)
+    leads = generate_leads(records, min_confidence=min_confidence, max_leads=max_leads)
+    if priority_filter:
+        leads = [lead for lead in leads if lead.priority == priority_filter]
+
+    written = LeadStore(out_path).save_batch(leads)
+    by_priority: dict[str, int] = {}
+    for lead in leads:
+        by_priority[lead.priority] = by_priority.get(lead.priority, 0) + 1
+
+    return {
+        "intel_path": str(intel_path),
+        "out_path": str(out_path),
+        "records_read": len(records),
+        "leads_kept": len(leads),
+        "leads_written": len(written),
+        "by_priority": by_priority,
+    }
 
 
 def tool_get_calibration(args: dict) -> dict:
-    """Return a calibration drift report aggregating verdicts onto intel records."""
-    from cls_verdicts.store import VerdictStore
-    from cls_calibration.producer import produce_report
+    """Produce a calibration drift report from the current intel + verdicts stores."""
+    from cls_calibration.aggregator import produce_report
+    from cls_calibration.proposer import propose_adjustments
 
-    intel_path = _store_path("SPEC1_STORE_PATH", "spec1_intelligence.jsonl")
-    verdicts_path = _store_path("SPEC1_VERDICTS_PATH", "verdicts.jsonl")
     include_proposals = bool(args.get("include_proposals", False))
+    sample_floor = int(args.get("sample_floor", 5))
+    delta_floor = float(args.get("delta_floor", 0.15))
 
-    records = _read_jsonl(intel_path, limit=10_000)
-    verdicts = [v.to_dict() for v in VerdictStore(verdicts_path).read_all(limit=50_000)]
-    report = produce_report(records, verdicts, include_proposals=include_proposals)
-    return report.to_dict()
+    intel = _read_jsonl(_store_path("SPEC1_STORE_PATH", "spec1_intelligence.jsonl"), limit=10**9)
+    verdicts = _read_jsonl(_store_path("SPEC1_VERDICTS_PATH", "verdicts.jsonl"), limit=10**9)
+
+    report = produce_report(intel, verdicts)
+    out = report.to_dict()
+    if include_proposals:
+        proposal = propose_adjustments(
+            report,
+            sample_floor=sample_floor,
+            delta_floor=delta_floor,
+        )
+        out["proposal"] = proposal.to_dict()
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -335,47 +468,100 @@ TOOLS: dict[str, dict] = {
         "fn": tool_get_stats,
     },
     "file_verdict": {
-        "description": "File a human ground-truth verdict (TP/FP/TN/FN/PARTIAL) for an intelligence record.",
+        "description": (
+            "File a human verdict on a stored intelligence record. "
+            "Verdicts are append-only — multiple verdicts may exist per record."
+        ),
         "parameters": {
             "type": "object",
             "properties": {
-                "record_id": {"type": "string", "description": "ID of the intelligence record"},
-                "outcome": {
+                "record_id": {"type": "string", "description": "Target IntelligenceRecord id"},
+                "verdict": {
                     "type": "string",
-                    "enum": ["TP", "FP", "TN", "FN", "PARTIAL"],
-                    "description": "Ground-truth outcome label",
+                    "enum": ["correct", "incorrect", "partial", "unclear"],
                 },
-                "analyst_id": {"type": "string", "description": "Analyst identifier (optional)"},
-                "notes": {"type": "string", "description": "Free-text notes (optional)"},
+                "reviewer": {"type": "string", "default": "anonymous"},
+                "notes": {"type": "string", "default": ""},
             },
-            "required": ["record_id", "outcome"],
+            "required": ["record_id", "verdict"],
         },
         "fn": tool_file_verdict,
     },
     "get_verdicts": {
-        "description": "Return filed human ground-truth verdicts.",
+        "description": "Return verdicts. With record_id, returns every verdict for that record.",
         "parameters": {
             "type": "object",
             "properties": {
-                "record_id": {"type": "string", "description": "Filter by record ID (optional)"},
-                "limit": {"type": "integer", "default": 100},
+                "record_id": {"type": "string", "description": "Filter to a single record (optional)"},
+                "limit": {"type": "integer", "default": 20},
             },
         },
         "fn": tool_get_verdicts,
     },
     "get_calibration": {
-        "description": "Return a calibration drift report aggregating verdicts onto intelligence records.",
+        "description": (
+            "Produce a calibration drift report from the current intel + verdicts stores. "
+            "Descriptive only — never auto-applies tuning. Set include_proposals=true to "
+            "also return suggested adjustments."
+        ),
         "parameters": {
             "type": "object",
             "properties": {
-                "include_proposals": {
-                    "type": "boolean",
-                    "default": False,
-                    "description": "Include adjustment proposals in the report",
-                },
+                "include_proposals": {"type": "boolean", "default": False},
+                "sample_floor": {"type": "integer", "default": 5},
+                "delta_floor": {"type": "number", "default": 0.15},
             },
         },
         "fn": tool_get_calibration,
+    },
+    "run_psyop": {
+        "description": (
+            "Score every intelligence record for psyop patterns and append the scores to "
+            "the psyop store. Operator tool — runs out of band from the cycle."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "out": {"type": "string", "description": "Output JSONL path (default generated/psyop_scores.jsonl)"},
+                "min_classification": {
+                    "type": "string",
+                    "enum": ["CLEAN", "LOW_RISK", "MEDIUM_RISK", "HIGH_RISK"],
+                    "default": "CLEAN",
+                },
+            },
+        },
+        "fn": tool_run_psyop,
+    },
+    "generate_brief": {
+        "description": (
+            "Generate a daily intelligence brief for one run_id (default: latest run). "
+            "Tries Claude Sonnet first; falls back to the rule-based producer."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "run_id": {"type": "string", "default": "latest"},
+                "out_dir": {"type": "string", "description": "Output directory (default generated/briefs)"},
+                "rule_based": {"type": "boolean", "default": False, "description": "Skip Claude entirely"},
+            },
+        },
+        "fn": tool_generate_brief,
+    },
+    "generate_leads": {
+        "description": (
+            "Derive actionable Lead objects from intelligence records and persist them. "
+            "Operator tool — runs out of band from the cycle."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "out": {"type": "string", "description": "Output JSONL path (default generated/leads.jsonl)"},
+                "min_confidence": {"type": "number", "default": 0.3},
+                "max_leads": {"type": "integer", "default": 50},
+                "priority": {"type": "string", "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"]},
+            },
+        },
+        "fn": tool_generate_leads,
     },
 }
 

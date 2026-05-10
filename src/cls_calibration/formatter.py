@@ -1,57 +1,66 @@
-"""Markdown formatter for CalibrationReport."""
+"""Markdown rendering for ProposalReport."""
 
 from __future__ import annotations
 
-from cls_calibration.schemas import CalibrationReport
+from cls_calibration.schemas import ProposalReport
 
 
-def format_report_markdown(report: CalibrationReport) -> str:
-    """Render a CalibrationReport as a human-readable Markdown document."""
-    lines: list[str] = [
-        f"# Calibration Report",
-        f"",
-        f"**Report ID:** {report.report_id}  ",
-        f"**Generated:** {report.generated_at}  ",
-        f"**Intelligence records:** {report.record_count}  ",
-        f"**Verdicts filed:** {report.verdict_count}  ",
-        f"",
-    ]
+_SEVERITY_ORDER = {"large": 0, "moderate": 1, "small": 2}
 
-    def _table(buckets: list) -> list[str]:
-        if not buckets:
-            return ["_No data_", ""]
-        rows = [
-            "| Bucket | Records | Verdicts | TP | FP | Precision | TP-Rate |",
-            "|--------|---------|----------|----|-----|-----------|---------|",
-        ]
-        for b in buckets:
-            prec = f"{b.precision:.2f}" if b.precision >= 0 else "—"
-            tpr = f"{b.tp_rate:.2f}" if b.tp_rate >= 0 else "—"
-            rows.append(
-                f"| {b.bucket_label} | {b.record_count} | {b.verdict_count} "
-                f"| {b.tp_count} | {b.fp_count} | {prec} | {tpr} |"
-            )
-        return rows + [""]
 
-    lines += ["## Confidence buckets", ""]
-    lines += _table(report.confidence_buckets)
+def to_markdown(report: ProposalReport) -> str:
+    """Render a ProposalReport as a human-readable markdown document.
 
-    lines += ["## Source-weight buckets", ""]
-    lines += _table(report.source_weight_buckets)
+    Designed for the calibration_propose CLI to write into generated/.
+    """
+    lines: list[str] = []
+    lines.append("# SPEC-1 Calibration Proposal")
+    lines.append("")
+    lines.append(f"_Generated: {report.generated_at}_")
+    lines.append("")
+    lines.append(
+        f"Floors: sample_size ≥ **{report.sample_floor}**, "
+        f"|delta| ≥ **{report.delta_floor:.2f}**."
+    )
+    lines.append("")
 
-    lines += ["## Analyst-weight buckets", ""]
-    lines += _table(report.analyst_weight_buckets)
+    if not report.adjustments:
+        lines.append("No drift signals exceed the configured floors. Nothing to surface.")
+        lines.append("")
+        return "\n".join(lines)
 
-    if report.proposals:
-        lines += ["## Adjustment proposals _(descriptive only — never auto-applied)_", ""]
-        for p in report.proposals:
+    by_severity: dict[str, list] = {"large": [], "moderate": [], "small": []}
+    for adj in report.adjustments:
+        by_severity.setdefault(adj.severity, []).append(adj)
+
+    for severity in ("large", "moderate", "small"):
+        items = by_severity.get(severity, [])
+        if not items:
+            continue
+        lines.append(f"## {severity.title()} drift ({len(items)})")
+        lines.append("")
+        lines.append("| target_kind | target_id | expected | observed | delta | n |")
+        lines.append("|---|---|---:|---:|---:|---:|")
+        for a in items:
             lines.append(
-                f"- **{p.dimension}** bucket `{p.bucket_label}`: "
-                f"current {p.current_value:.2f} → suggested **{p.suggested_value:.2f}**  "
+                f"| {a.target_kind} | `{a.target_id}` | {a.expected:.2f} | "
+                f"{a.observed:.2f} | {a.delta:+.2f} | {a.sample_size} |"
             )
-            lines.append(f"  _{p.reason}_")
-            lines.append("")
-    else:
-        lines += ["## Adjustment proposals", "", "_None — insufficient verdict data or no significant drift detected._", ""]
+        lines.append("")
+        lines.append("**Rationale**")
+        lines.append("")
+        for a in items:
+            lines.append(f"- {a.rationale}")
+        lines.append("")
 
+    lines.append("---")
+    lines.append("")
+    lines.append(
+        "_This report is descriptive only. Apply changes by editing the "
+        "relevant constants by hand (e.g. `CLASSIFICATION_WEIGHTS` in "
+        "`spec1_engine.intelligence.analyzer`, `SOURCE_CREDIBILITY` in "
+        "`spec1_engine.signal.scorer`) and bumping the version per "
+        "CLAUDE.md governance._"
+    )
+    lines.append("")
     return "\n".join(lines)
