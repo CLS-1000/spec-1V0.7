@@ -194,6 +194,3 @@ See [CLAUDE.md](../CLAUDE.md) for full governance rules and agent write surfaces
 | `file_verdict` | write | Record a human verdict on a record |
 | `get_verdicts` | read | Retrieve filed verdicts |
 | `get_calibration` | read | Get calibration drift report (descriptive only) |
-| `run_psyop` | operator tool | Score every intelligence record and persist PsyopScores |
-| `generate_brief` | operator tool | Build a daily brief (Claude + rule-based fallback) |
-| `generate_leads` | operator tool | Derive Lead objects from intelligence records |
