@@ -2,7 +2,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
-.Python
 build/
 develop-eggs/
 dist/
@@ -31,13 +30,12 @@ MANIFEST
 env/
 venv/
 ENV/
-env.bak/
-venv.bak/
 .pytest_cache/
 .coverage
 htmlcov/
 *.jsonl
 *.log
+*.db
 .DS_Store
 
 # SQLite databases — runtime artifacts, never committed
@@ -46,9 +44,6 @@ htmlcov/
 # Generated artifacts — briefs, historical outputs, logs
 # Write these to generated/ or a dedicated branch, not main
 generated/
-data/psyop_signals.jsonl
-
-# Generated brief and prompt markdown files — never committed to main
 briefs/
 workspace/
 .mcp.json

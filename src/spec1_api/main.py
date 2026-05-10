@@ -25,7 +25,7 @@ from spec1_api.routers import (
     signals,
     verdicts,
 )
-from spec1_api.scheduler import start_scheduler, stop_scheduler
+from spec1_api.scheduler import maybe_run_on_start, start_scheduler, stop_scheduler
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +63,7 @@ def _political_web_enabled() -> bool:
 async def lifespan(app: FastAPI):
     """Application lifespan — start/stop scheduler."""
     start_scheduler()
+    maybe_run_on_start()
     yield
     stop_scheduler()
 

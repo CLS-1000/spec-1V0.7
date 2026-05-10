@@ -22,21 +22,44 @@ curl http://localhost:8000/health
 ### Trigger a manual cycle
 
 ```bash
-# Via CLI (no server required)
-python -m spec1_engine.app.cycle
-
-# Via API
+# Canonical lean cycle — produces intelligence records only.
+# This is what the API scheduler runs, and what `POST /cycle/run` triggers.
+PYTHONPATH=src python -m spec1_engine.core.engine    # (via Engine class — embedded use)
 curl -X POST http://localhost:8000/cycle/run
 
-# Via Makefile
-make cycle
+# Rich CLI cycle — also runs psyop scoring + brief generation + workspace case
+# updates inline. Convenient for one-shot local runs; not what the canonical
+# scheduler executes.
+make cycle                                            # → python -m spec1_engine.app.cycle
 ```
+
+The canonical FastAPI scheduler runs the lean cycle daily. To produce a brief,
+leads, or psyop scores from the canonical cycle's records, run the operator
+tools below.
 
 ### Check scheduler status
 
 ```bash
 curl http://localhost:8000/health
 # Look for: "scheduler": "running"
+```
+
+### Pause scheduled cycles (kill-switch)
+
+The canonical scheduler checks for a `.cls_kill` file at the repo root before every
+scheduled run. To pause cycles without restarting:
+
+```bash
+touch .cls_kill          # next scheduled run skips with a logged warning
+rm    .cls_kill          # restored — next scheduled run proceeds
+```
+
+### Run a cycle on API startup
+
+```bash
+SPEC1_RUN_ON_START=true make run
+# Daemon thread fires one immediate cycle alongside the scheduled cron;
+# also respects .cls_kill.
 ```
 
 ---
@@ -119,13 +142,56 @@ PYTHONPATH=src python -m cls_db.migrate
 
 ---
 
-## Briefing
+## Operator Tools
+
+Each tool reads from the intelligence JSONL store independently of the cycle. None
+runs automatically inside the canonical cycle.
+
+### Generate a brief from the latest run
+
+```bash
+make brief
+# or:
+PYTHONPATH=src python -m spec1_engine.tools.generate_brief \
+    --intel spec1_intelligence.jsonl \
+    --run-id latest \
+    --out-dir generated/briefs
+
+# Force the rule-based producer (skip Claude entirely):
+PYTHONPATH=src python -m spec1_engine.tools.generate_brief --rule-based
+```
+
+Falls back to the rule-based `cls_world_brief.producer` if `ANTHROPIC_API_KEY`
+is unset or the API call fails. Writes `spec1_brief_<date>.md`,
+`spec1_brief_latest.md`, and an append-only `brief_index.jsonl` entry.
+
+### Derive Lead objects from intelligence records
+
+```bash
+make leads
+# or:
+PYTHONPATH=src python -m spec1_engine.tools.generate_leads \
+    --intel spec1_intelligence.jsonl \
+    --out generated/leads.jsonl \
+    --min-confidence 0.3 --max-leads 50
+```
+
+### Score every intelligence record for psyop patterns
+
+```bash
+make psyop
+# or:
+PYTHONPATH=src python -m spec1_engine.tools.run_psyop \
+    --intel spec1_intelligence.jsonl \
+    --out generated/psyop_scores.jsonl \
+    --min-classification MEDIUM_RISK   # optional filter
+```
 
 ### Backfill briefs for historical run_ids
 
 ```bash
 make backfill
-# or
+# or:
 PYTHONPATH=src python -m spec1_engine.tools.historical_briefs
 ```
 
@@ -133,7 +199,7 @@ PYTHONPATH=src python -m spec1_engine.tools.historical_briefs
 
 ```bash
 make calibration
-# or
+# or:
 PYTHONPATH=src python -m spec1_engine.tools.calibration_propose \
     --intel spec1_intelligence.jsonl \
     --verdicts verdicts.jsonl \
@@ -203,12 +269,17 @@ PYTHONPATH=src python -m cls_db.migrate
 
 ## Generated Artifacts
 
-Scheduled cycle briefs are written to `briefs/` (gitignored at root).
-One-off exports and reports go to `generated/` (also gitignored). Never commit either to `main`.
+The canonical lean cycle produces only intelligence records (`spec1_intelligence.jsonl`).
+Briefs, leads, and psyop scores are produced by the operator tools above.
 
 ```
-briefs/            # Brief .md files written by the cycle and historical_briefs tool
-generated/
-├── reports/       # Calibration proposal reports
-└── exports/       # One-off data exports
+spec1_intelligence.jsonl   # Canonical cycle output — append-only source of truth
+briefs/                    # Legacy: written by the rich `make cycle` CLI path and by historical_briefs
+generated/                 # New default for operator tool outputs (gitignored)
+├── briefs/                # generate_brief writes here
+├── leads.jsonl            # generate_leads writes here
+├── psyop_scores.jsonl     # run_psyop writes here
+└── calibration_report.md  # calibration_propose writes here
 ```
+
+Do not commit anything in `briefs/` or `generated/` to `main` — both are gitignored.

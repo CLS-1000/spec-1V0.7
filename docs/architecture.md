@@ -39,7 +39,7 @@ spec-1/
 │   ├── spec1_api/           # Canonical FastAPI application + APScheduler
 │   └── spec1_labels.py      # Canonical label/enum strings
 │
-├── tests/                   # 30 test files, 917 test functions
+├── tests/                   # 30 test files, ~825 collected tests (run `pytest --collect-only -q` for live count)
 ├── docs/                    # This folder — architecture, API, runbook, case study
 ├── memory/                  # Agent context, ADRs, session log
 ├── scripts/                 # Dev and operational scripts
@@ -54,7 +54,12 @@ spec-1/
 
 ## Data Flow
 
+The system has two distinct execution layers: a canonical cycle that runs
+automatically (on cron or on-demand via `/cycle/run`) and a set of operator
+tools that the user invokes when they want a specific downstream artifact.
+
 ```
+═════ Canonical cycle (automatic) ═════════════════════════════════════════════
 RSS / FARA / Congress / Narrative
          │
          ▼
@@ -65,34 +70,45 @@ RSS / FARA / Congress / Narrative
   ├── harvester  → Signal[]                    ├── fara          → FaraRecord[]
   ├── parser     → ParsedSignal[]              ├── congressional → CongressRecord[]
   └── scorer     → Opportunity[]               └── narrative     → NarrativeRecord[]
-         │                                            │
-         ▼                                            ▼
-  spec1_engine.investigation             cls_psyop.pipeline → PsyopScore[]
-  ├── generator  → Investigation[]
+         │
+         ▼
+  spec1_engine.investigation
+  ├── generator  → Investigation[]   (Claude Haiku)
   └── verifier   → Outcome[]
          │
          ▼
   spec1_engine.intelligence
   ├── analyzer   → IntelligenceRecord[]
-  └── store      → spec1_intelligence.jsonl
-         │
-         ├──────────────┬──────────────────┬────────────────┐
-         ▼              ▼                  ▼                ▼
-  cls_world_brief   cls_leads      spec1_engine.briefing  cls_verdicts
-  → WorldBrief[]    → Lead[]       → daily brief .md      (human input)
-                                                                │
-                                                                ▼
-                                                       cls_calibration
-                                                       → CalibrationReport
-         │
-         ▼
-  cls_db.dual_write
-  ├── JSONL (append-only, source of truth)
-  └── SQLite (queryable index, can be rebuilt from JSONL)
-         │
-         ▼
-  spec1_api (FastAPI + APScheduler)
-  mcp_server.py (Claude MCP integration)
+  └── store      → spec1_intelligence.jsonl   (append-only)
+
+
+═════ Operator tools (manual, on-demand) ══════════════════════════════════════
+  Each reads from spec1_intelligence.jsonl independently. None run inside the cycle.
+
+  spec1_api /psyop/run                   → psyop_scores.jsonl
+  spec1_api /brief/generate              → generated/briefs/spec1_brief_<date>.md
+                                            (Claude Sonnet → cls_world_brief fallback)
+  spec1_api /leads/generate              → leads.jsonl
+  spec1_engine.tools.calibration_propose → calibration_report.{md,jsonl}
+  spec1_engine.tools.historical_briefs   → backfill briefs for historical run_ids
+
+
+═════ Feedback ════════════════════════════════════════════════════════════════
+  cls_verdicts        — append-only human verdicts (correct|incorrect|partial|unclear)
+                        on stored IntelligenceRecords
+  cls_calibration     — descriptive drift report; never auto-applies tuning
+
+
+═════ Persistence reality ═════════════════════════════════════════════════════
+  JSONL is the source of truth across every store (append-only, immutable).
+  cls_db.dual_write currently writes both JSONL and SQLite **only for verdicts**.
+  Every other store is JSONL-only today; broader dual-write coverage is a roadmap
+  goal, not a current property.
+
+
+═════ Surfaces ════════════════════════════════════════════════════════════════
+  spec1_api (FastAPI + APScheduler)   — canonical lean cycle on cron + read endpoints
+  mcp_server.py (Claude MCP)          — cycle + each operator tool exposed as a tool
 ```
 
 ---
@@ -164,17 +180,17 @@ See [CLAUDE.md](../CLAUDE.md) for full governance rules and agent write surfaces
 
 ## MCP Tools (mcp_server.py)
 
-| Tool | Description |
-|------|-------------|
-| `run_cycle` | Trigger a full OSINT pipeline cycle |
-| `get_signals` | Retrieve recent harvested signals |
-| `get_intel` | Retrieve intelligence records |
-| `get_leads` | Retrieve actionable leads |
-| `get_brief` | Retrieve the latest world brief |
-| `get_psyop` | Retrieve PsyOp detection results |
-| `get_fara` | Retrieve FARA filings |
-| `analyse_psyop` | Run PsyOp analysis on a signal |
-| `get_stats` | System statistics |
-| `file_verdict` | Record a human verdict on a record |
-| `get_verdicts` | Retrieve filed verdicts |
-| `get_calibration` | Get calibration drift report (descriptive only) |
+| Tool | Kind | Description |
+|------|------|-------------|
+| `run_cycle` | cycle | Trigger a full canonical OSINT cycle (intelligence records only) |
+| `get_signals` | read | Retrieve recent harvested signals |
+| `get_intel` | read | Retrieve intelligence records |
+| `get_leads` | read | Retrieve actionable leads |
+| `get_brief` | read | Retrieve the latest world brief |
+| `get_psyop` | read | Retrieve PsyOp detection results |
+| `get_fara` | read | Retrieve FARA filings |
+| `analyse_psyop` | read | Run PsyOp analysis on arbitrary text |
+| `get_stats` | read | System statistics |
+| `file_verdict` | write | Record a human verdict on a record |
+| `get_verdicts` | read | Retrieve filed verdicts |
+| `get_calibration` | read | Get calibration drift report (descriptive only) |
