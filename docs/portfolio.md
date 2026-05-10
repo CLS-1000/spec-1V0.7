@@ -201,7 +201,7 @@ These are the calibrated parameters that represent the operational intelligence 
 | AI integration | Claude Haiku (verification), Claude Sonnet (briefing) |
 | Market signals | 4-sector equity watchlist via yfinance |
 | Persistence | Append-only JSONL (source of truth across every store); SQLite dual-write for verdicts only today |
-| API | FastAPI with APScheduler for daily cron + `.cls_kill` kill-switch + optional `SPEC1_RUN_ON_START` |
+| API | FastAPI with APScheduler for daily cron scheduling |
 | Tests | ~825 collected pytest tests across 30 files |
 | Architecture version | v0.4.0 |
 
