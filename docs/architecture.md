@@ -85,10 +85,10 @@ RSS / FARA / Congress / Narrative
 ═════ Operator tools (manual, on-demand) ══════════════════════════════════════
   Each reads from spec1_intelligence.jsonl independently. None run inside the cycle.
 
-  spec1_engine.tools.run_psyop          → psyop_scores.jsonl
-  spec1_engine.tools.generate_brief     → generated/briefs/spec1_brief_<date>.md
+  spec1_api /psyop/run                   → psyop_scores.jsonl
+  spec1_api /brief/generate              → generated/briefs/spec1_brief_<date>.md
                                             (Claude Sonnet → cls_world_brief fallback)
-  spec1_engine.tools.generate_leads     → leads.jsonl
+  spec1_api /leads/generate              → leads.jsonl
   spec1_engine.tools.calibration_propose → calibration_report.{md,jsonl}
   spec1_engine.tools.historical_briefs   → backfill briefs for historical run_ids
 
