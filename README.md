@@ -1,5 +1,12 @@
 # SPEC-1 Intelligence Engine
 
+[![CI](https://github.com/mjlak1000/spec-1/actions/workflows/python-package.yml/badge.svg)](https://github.com/mjlak1000/spec-1/actions/workflows/python-package.yml)
+[![Pages](https://github.com/mjlak1000/spec-1/actions/workflows/pages.yml/badge.svg)](https://mjlak1000.github.io/spec-1/)
+[![Python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](pyproject.toml)
+[![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
+
+**Landing:** [mjlak1000.github.io/spec-1](https://mjlak1000.github.io/spec-1/) · **Dashboard:** [/ui](https://mjlak1000.github.io/spec-1/ui/)
+
 SPEC-1 is a real-time open-source intelligence (OSINT) platform.
 
 **Canonical cycle (automatic):** harvest signals from RSS feeds, FARA filings, congressional records, and narrative sources → 4-gate scoring → Claude-driven investigation + verification → IntelligenceRecord persisted to append-only JSONL.
