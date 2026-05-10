@@ -47,19 +47,28 @@ consequential.
 ## ADR-003 — Dual-Write Persistence: JSONL Primary, SQLite Secondary
 
 **Date:** 2026-04-11
-**Status:** Active
+**Status:** Active (partially implemented)
 
 **Decision:** JSONL is the system of record — append-only, immutable, auditable.
 SQLite is a queryable index that can be rebuilt from the JSONL log at any time.
-`cls_db.dual_write` writes JSONL first, then attempts SQLite as a non-fatal operation.
-The API reads through repository abstractions, not direct DB queries.
+`cls_db.dual_write` is the write path that writes JSONL first, then attempts SQLite
+as a non-fatal operation. The API reads through repository abstractions, not direct
+DB queries.
 
 **Rationale:** The JSONL source of truth is plain text on disk — inspectable with
 `cat`, reconstructible from scratch, and immune to database corruption. The SQLite
 layer is a convenience that must never become a dependency.
 
+**Current coverage (as of v0.4):** Only `cls_verdicts/store.py` actually goes through
+`cls_db.dual_write`. `intelligence/store.py`, `cls_psyop/store.py`, `cls_leads/store.py`,
+and `cls_world_brief/store.py` are still JSONL-only. The decision stands; the
+implementation is incremental. Broader coverage is a roadmap goal, not a current
+property.
+
 **Tradeoff accepted:** JSONL and SQLite can diverge if a SQLite write fails. This is
-accepted because SQLite is the index, not the record.
+accepted because SQLite is the index, not the record. The current partial coverage
+also means most stores are inspectable only via `cat`, which is intentional during
+the dual-write rollout.
 
 ---
 
@@ -136,3 +145,34 @@ separate allows either to be run independently and avoids coupling their lifecyc
 
 **Tradeoff accepted:** Running both requires two processes. Shared state (JSONL files,
 SQLite) is the coordination layer.
+
+---
+
+## ADR-008 — Canonical Cycle Is Lean; Briefs / Leads / Psyop Are Operator Tools
+
+**Date:** 2026-05-09
+**Status:** Active
+
+**Decision:** The canonical FastAPI cycle (`POST /cycle/run`, scheduled run, MCP
+`run_cycle`) executes only the lean core pipeline: harvest → parse → score →
+investigate → verify → analyze → write `IntelligenceRecord` to JSONL. Brief
+generation, lead derivation, psyop scoring, calibration proposals, and workspace
+case processing are operator-invoked through the richer app/API entrypoints
+(`spec1_engine.app.cycle`, `POST /brief/generate`, `POST /leads/generate`,
+`POST /psyop/run`), each reading from the intelligence JSONL on demand.
+
+**Rationale:** An audit found the docs claimed the canonical cycle automatically
+produced briefs, leads, and psyop scores, but the actual `Engine.run()` produced
+only intelligence records. The richer behaviour lived in `spec1_engine.app.cycle`
+and related API routes rather than in the canonical scheduler path. The
+split-then-rejoin pattern preserves the trustworthy core, makes downstream artifacts
+explicit operator decisions, and keeps the test surface focused. It also matches
+the existing pattern of separate operator-invoked tooling for downstream artifacts.
+
+**Tradeoff accepted:** Two execution models coexist for some time. The richer app/API
+path remains available for backwards compatibility and operator workflows; the
+canonical scheduler does not invoke it automatically. Operators who want a brief
+after a scheduled run must call the brief-generation entrypoint explicitly (for
+example via `POST /brief/generate` or the MCP `generate_brief` tool). The
+simplification is presentational and operational, not algorithmic — no scoring or
+persistence semantics changed.

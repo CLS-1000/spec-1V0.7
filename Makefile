@@ -1,4 +1,4 @@
-.PHONY: install install-quant test test-fast test-cov lint run mcp cycle backfill calibration workspace clean help
+.PHONY: install install-quant test test-fast test-cov lint run mcp cycle backfill calibration workspace clean help brief leads psyop
 
 PYTHONPATH := src
 PYTHON     := PYTHONPATH=$(PYTHONPATH) python
@@ -12,9 +12,12 @@ help:
 	@echo "  make lint         Run flake8"
 	@echo "  make run          Start API server (port 8000)"
 	@echo "  make mcp          Start MCP server"
-	@echo "  make cycle        Run one-shot intelligence cycle"
+	@echo "  make cycle        Run one-shot intelligence cycle (rich path)"
 	@echo "  make backfill     Backfill briefs for historical run_ids"
 	@echo "  make calibration  Generate calibration proposal report"
+	@echo "  make brief        Generate a daily brief for the latest run_id (operator tool)"
+	@echo "  make leads        Derive Lead objects from intelligence records (operator tool)"
+	@echo "  make psyop        Score every intelligence record for psyop patterns (operator tool)"
 	@echo "  make workspace    Open workspace CLI"
 	@echo "  make clean        Remove __pycache__ and .pytest_cache"
 
@@ -53,6 +56,15 @@ calibration:
 		--intel spec1_intelligence.jsonl \
 		--verdicts verdicts.jsonl \
 		--out-dir generated/
+
+brief:
+	$(PYTHON) -m spec1_engine.tools.generate_brief
+
+leads:
+	$(PYTHON) -m spec1_engine.tools.generate_leads
+
+psyop:
+	$(PYTHON) -m spec1_engine.tools.run_psyop
 
 workspace:
 	$(PYTHON) -m spec1_engine.workspace

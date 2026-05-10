@@ -1,21 +1,36 @@
-"""Tests for the SPEC-1 UI root route (GET /)."""
+"""Tests for the SPEC-1 UI root route + Portland Political Web env-gating."""
 
 from __future__ import annotations
 
+import importlib
 from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
 
 
+def _build_client(political_web_enabled: bool):
+    """Build a TestClient with scheduler stubbed and political-web env set."""
+    env = {"SPEC1_POLITICAL_WEB_ENABLED": "true"} if political_web_enabled else {"SPEC1_POLITICAL_WEB_ENABLED": ""}
+    with patch.dict("os.environ", env, clear=False), \
+         patch("spec1_api.scheduler.start_scheduler"), \
+         patch("spec1_api.scheduler.stop_scheduler"):
+        import spec1_api.main as main_mod
+        importlib.reload(main_mod)  # rebuild app with current env
+        with TestClient(main_mod.app) as c:
+            yield c
+
+
 @pytest.fixture(scope="module")
 def client():
-    """TestClient with scheduler mocked so no real APScheduler runs."""
-    with patch("spec1_api.scheduler.start_scheduler"), \
-         patch("spec1_api.scheduler.stop_scheduler"):
-        from spec1_api.main import app
-        with TestClient(app) as c:
-            yield c
+    """Default client — political web DISABLED (the canonical config)."""
+    yield from _build_client(political_web_enabled=False)
+
+
+@pytest.fixture(scope="module")
+def client_with_political_web():
+    """Client with SPEC1_POLITICAL_WEB_ENABLED=true."""
+    yield from _build_client(political_web_enabled=True)
 
 
 def test_root_returns_html(client):
@@ -34,19 +49,32 @@ def test_root_contains_layout_div(client):
     assert 'class="layout"' in r.text
 
 
-# ─── GET /portland-web ────────────────────────────────────────────────────────
+# ─── Default: political web DISABLED ──────────────────────────────────────────
 
-def test_portland_web_returns_html(client):
+def test_portland_web_404_when_disabled(client):
     r = client.get("/portland-web")
+    assert r.status_code == 404
+
+
+def test_nodes_router_404_when_disabled(client):
+    # nodes.router is mounted at /nodes — should not exist by default
+    r = client.get("/nodes/some-id")
+    assert r.status_code == 404
+
+
+# ─── With SPEC1_POLITICAL_WEB_ENABLED=true ────────────────────────────────────
+
+def test_portland_web_returns_html_when_enabled(client_with_political_web):
+    r = client_with_political_web.get("/portland-web")
     assert r.status_code == 200
     assert "text/html" in r.headers["content-type"]
 
 
-def test_portland_web_contains_title(client):
-    r = client.get("/portland-web")
+def test_portland_web_contains_title_when_enabled(client_with_political_web):
+    r = client_with_political_web.get("/portland-web")
     assert "Portland Political Web" in r.text
 
 
-def test_portland_web_contains_d3_script(client):
-    r = client.get("/portland-web")
+def test_portland_web_contains_d3_script_when_enabled(client_with_political_web):
+    r = client_with_political_web.get("/portland-web")
     assert "d3" in r.text

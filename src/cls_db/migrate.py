@@ -32,6 +32,7 @@ def run_migrations(db: Database) -> dict:
         "tables_created": created,
         "tables_existing": existing,
         "total_tables": len(ALL_DDL),
+        "aux_ddl_applied": len(AUX_DDL),
     }
 
 

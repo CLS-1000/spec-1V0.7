@@ -25,9 +25,8 @@ from spec1_api.routers import (
     signals,
     verdicts,
 )
-from spec1_api.routers import nodes, ingest
 from spec1_api.routers import publication
-from spec1_api.scheduler import start_scheduler, stop_scheduler
+from spec1_api.scheduler import maybe_run_on_start, start_scheduler, stop_scheduler
 
 logger = logging.getLogger(__name__)
 
@@ -51,10 +50,21 @@ def _build_cors_origins() -> list[str]:
     return [o.strip() for o in raw.split(",") if o.strip()]
 
 
+def _political_web_enabled() -> bool:
+    """Whether to mount the Portland Political Web routes + viewer.
+
+    Off by default — opt in with SPEC1_POLITICAL_WEB_ENABLED=true. Keeps the
+    canonical API surface focused on the core intelligence cycle; the political
+    web is an experimental side feature with its own data store.
+    """
+    return os.environ.get("SPEC1_POLITICAL_WEB_ENABLED", "").lower() == "true"
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan — start/stop scheduler."""
     start_scheduler()
+    maybe_run_on_start()
     yield
     stop_scheduler()
 
@@ -84,14 +94,6 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=404, detail="UI not found")
         return FileResponse(path, media_type="text/html")
 
-    @app.get("/portland-web", include_in_schema=False)
-    async def portland_web() -> FileResponse:
-        """Serve the Portland Political Web force-graph visualization."""
-        path = _STATIC_DIR / "portland_political_web.html"
-        if not path.is_file():
-            raise HTTPException(status_code=404, detail="Portland Political Web not found")
-        return FileResponse(path, media_type="text/html")
-
     app.include_router(health.router)
     app.include_router(signals.router)
     app.include_router(intel.router)
@@ -102,9 +104,21 @@ def create_app() -> FastAPI:
     app.include_router(cycle.router)
     app.include_router(verdicts.router)
     app.include_router(calibration.router)
-    app.include_router(nodes.router)
-    app.include_router(ingest.router)
     app.include_router(publication.router)
+
+    if _political_web_enabled():
+        from spec1_api.routers import ingest, nodes
+
+        @app.get("/portland-web", include_in_schema=False)
+        async def portland_web() -> FileResponse:
+            """Serve the Portland Political Web force-graph visualization."""
+            path = _STATIC_DIR / "portland_political_web.html"
+            if not path.is_file():
+                raise HTTPException(status_code=404, detail="Portland Political Web not found")
+            return FileResponse(path, media_type="text/html")
+
+        app.include_router(nodes.router)
+        app.include_router(ingest.router)
 
     return app
 
