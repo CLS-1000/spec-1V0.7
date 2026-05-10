@@ -1,9 +1,12 @@
 # SPEC-1 Intelligence Engine
 
-SPEC-1 is a real-time open-source intelligence (OSINT) platform that harvests signals from
-RSS feeds, FARA filings, congressional records, and narrative sources; scores them through a
-4-gate pipeline; detects psychological operations; generates actionable leads and world briefs;
-and persists everything to JSONL and SQLite.
+SPEC-1 is a real-time open-source intelligence (OSINT) platform.
+
+**Canonical cycle (automatic):** harvest signals from RSS feeds, FARA filings, congressional records, and narrative sources → 4-gate scoring → Claude-driven investigation + verification → IntelligenceRecord persisted to append-only JSONL.
+
+**Operator tools (manual):** psyop scoring (`make psyop`), daily brief generation with rule-based fallback (`make brief`), actionable lead derivation (`make leads`), and calibration drift reports (`make calibration`). Each reads from the intelligence JSONL and writes its own artifact — none run automatically inside the cycle.
+
+The split is deliberate: the cycle ships a small, trustworthy core; downstream artifacts are explicit operator decisions, not silent side effects.
 
 | Document | Description |
 |----------|-------------|
@@ -19,27 +22,34 @@ and persists everything to JSONL and SQLite.
 ## Architecture
 
 ```
-RSS/FARA/Congress/Narrative
+═══ Canonical cycle (automatic) ═══════════════════════════════════════
+RSS / FARA / Congress / Narrative
         │
         ▼
-  cls_osint.feed ──────── cls_osint.adapters (fara, congressional, narrative)
+  cls_osint.feed ─────────── cls_osint.adapters (fara, congressional, narrative)
         │
         ▼
   spec1_engine  (harvest → parse → score → investigate → verify → analyze)
-  ├── analysts      (credibility weighting, source discovery)
-  ├── briefing      (daily brief generation)
-  ├── quant         (market signal analysis)
-  └── workspace     (case tracking, researcher CLI)
         │
-        ├── cls_psyop       (psychological operation detection)
-        ├── cls_quant       (market intelligence)
-        ├── cls_leads       (actionable leads)
-        ├── cls_world_brief (daily intelligence brief)
-        └── cls_db          (dual-write: JSONL + SQLite)
-                │
-                ▼
-          spec1_api  (FastAPI HTTP server)
-          mcp_server (MCP tools for Claude)
+        ▼
+  IntelligenceRecord  →  spec1_intelligence.jsonl  (append-only)
+
+═══ Operator tools (manual, on-demand) ════════════════════════════════
+  spec1_engine.tools.run_psyop       → psyop_scores.jsonl       (make psyop)
+  spec1_engine.tools.generate_brief  → generated/briefs/*.md    (make brief)
+  spec1_engine.tools.generate_leads  → leads.jsonl              (make leads)
+  spec1_engine.tools.calibration_propose → calibration_report.* (make calibration)
+  spec1_engine.tools.historical_briefs   → backfill briefs      (make backfill)
+
+═══ Surfaces ══════════════════════════════════════════════════════════
+  spec1_api  (FastAPI HTTP server + APScheduler)
+  mcp_server (MCP tools for Claude — cycle + each operator tool)
+
+═══ Persistence ═══════════════════════════════════════════════════════
+  JSONL  : source of truth, append-only (every store)
+  SQLite : queryable index, rebuildable from JSONL
+  cls_db.dual_write currently writes both for verdicts only;
+  every other store is JSONL-only today.
 ```
 
 ## Quick Start
@@ -54,12 +64,16 @@ cp .env.example .env  # then set ANTHROPIC_API_KEY
 ```
 
 ```bash
-make cycle      # one-shot intelligence cycle
-make run        # API server → http://localhost:8000
-make mcp        # MCP server (Claude integration)
-make workspace  # workspace CLI (case management)
-make test       # full test suite
-make help       # all available commands
+make cycle        # one-shot intelligence cycle (rich CLI path; produces records + brief + workspace updates)
+make run          # API server → http://localhost:8000  (canonical lean cycle on schedule)
+make mcp          # MCP server (Claude integration)
+make brief        # operator tool — generate brief from latest run_id (Claude + rule-based fallback)
+make leads        # operator tool — derive Lead objects from intelligence records
+make psyop        # operator tool — score every record for psyop patterns
+make calibration  # operator tool — calibration drift report from intel + verdicts
+make workspace    # workspace CLI (case management)
+make test         # full test suite
+make help         # all available commands
 ```
 
 ## Environment
@@ -83,7 +97,9 @@ Key variables:
 | `SPEC1_CRON_HOUR` | `6` | Scheduled cycle hour (24h) |
 | `SPEC1_TIMEZONE` | `America/Los_Angeles` | Scheduler timezone |
 | `SPEC1_FEED_TIMEOUT` | `15` | Feed fetch timeout (seconds) |
-| `SPEC1_QUANT_ENABLED` | `false` | Enable quantitative market pipeline |
+| `SPEC1_RUN_ON_START` | `false` | If `true`, run one cycle immediately on API startup |
+| `SPEC1_POLITICAL_WEB_ENABLED` | `false` | If `true`, mount `/portland-web`, `nodes`, and `ingest` routers (off by default) |
+| `SPEC1_QUANT_ENABLED` | `false` | Documented for the quant CLI; not currently read by the canonical cycle |
 
 ## Key Sources
 
@@ -102,9 +118,14 @@ Key variables:
 | GET | /health | Health check |
 | GET | /signals | Latest harvested signals |
 | GET | /intel | Intelligence records |
-| GET | /leads | Actionable leads |
+| GET | /leads | Actionable leads (read-only; populate via `make leads`) |
 | POST | /leads | Create a lead |
-| GET | /brief | Latest world brief |
-| GET | /psyop | PsyOp detections |
+| GET | /brief | Latest world brief (read-only; populate via `make brief`) |
+| GET | /psyop | PsyOp detections (read-only; populate via `make psyop`) |
 | GET | /fara | FARA filings |
-| POST | /cycle/run | Trigger a full cycle |
+| GET | /verdicts | Filed verdicts |
+| POST | /verdicts | File a verdict |
+| GET | /calibration | Calibration drift report (descriptive) |
+| POST | /cycle/run | Trigger one canonical lean cycle (intelligence records only) |
+
+The canonical cycle endpoint produces only intelligence records. Briefs, leads, and psyop scores are populated by the corresponding operator tools — see Quick Start.

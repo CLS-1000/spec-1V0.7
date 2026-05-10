@@ -2,9 +2,9 @@
 
 ## What This Is
 
-SPEC-1 is an automated open-source intelligence (OSINT) system built for real-time national security signal monitoring. It harvests, filters, investigates, and analyzes signals from authoritative sources — producing structured intelligence records and daily written briefs without manual intervention.
+SPEC-1 is an automated open-source intelligence (OSINT) system built for real-time national security signal monitoring. The canonical cycle harvests, filters, investigates, and analyzes signals from authoritative sources, producing structured intelligence records on a fixed schedule. Downstream artifacts — daily briefs, actionable leads, psyop scores, calibration reports — are explicit operator tools that read from the records, not steps the cycle silently performs.
 
-The system is designed to do one thing well: separate signal from noise in a high-volume information environment, and surface what actually matters to a human analyst.
+The system is designed to do one thing well: separate signal from noise in a high-volume information environment, and surface what actually matters to a human analyst. Everything else is operator-invoked, by design.
 
 ---
 
@@ -14,7 +14,7 @@ Anyone working in national security, geopolitical risk, or threat intelligence f
 
 The challenge is not access to information — it is triage.
 
-SPEC-1 automates that triage. It monitors a curated set of high-credibility sources continuously, evaluates each new signal through a structured scoring framework, and surfaces only those that clear every threshold. Signals that pass are handed off to an investigation and verification workflow powered by Claude. The result is a compressed, high-confidence set of intelligence records and a daily written brief — ready for human review without the noise.
+SPEC-1 automates that triage. It monitors a curated set of high-credibility sources continuously, evaluates each new signal through a structured scoring framework, and surfaces only those that clear every threshold. Signals that pass are handed off to an investigation and verification workflow powered by Claude. The result is a compressed, high-confidence set of intelligence records — ready for human review without the noise. From those records, an operator chooses what to produce next: a daily written brief, prioritized leads, psyop pattern scoring, or a calibration report against verdicts. The cycle stays small; the artifacts are explicit.
 
 ---
 
@@ -26,7 +26,7 @@ The system is built as a sequential pipeline with seven stages:
 Harvest → Parse → Score → Investigate → Verify → Analyze → Store
 ```
 
-Each stage transforms the data and gates what moves forward. A separate briefing module runs after the cycle completes, consuming the stored records to produce a structured daily brief. A FastAPI service wraps the pipeline for scheduled and on-demand operation.
+Each stage transforms the data and gates what moves forward. A FastAPI service wraps the pipeline for scheduled and on-demand operation. The briefing module — alongside leads, psyop scoring, and calibration — is an operator tool that runs separately from the cycle, reading from the stored intelligence records on demand.
 
 ### 1. Harvest
 
@@ -107,7 +107,7 @@ The rationale: defense and cybersecurity equities often move on information that
 
 ## Daily Intelligence Brief
 
-After each pipeline cycle, a briefing generator collects the scored intelligence records and calls Claude Sonnet to produce a structured written brief.
+A briefing operator tool (`make brief` / `python -m spec1_engine.tools.generate_brief`) collects the scored intelligence records for a given run and calls Claude Sonnet to produce a structured written brief. It is invoked deliberately by an operator after a cycle, not as a silent cycle step.
 
 The brief follows a consistent format:
 
@@ -170,7 +170,7 @@ The system does not automate this feedback loop — that would require human val
 
 ### Test Suite as a Learning Anchor
 
-The system has 145 tests with 97% coverage. This is not incidental — it is structural. The test suite encodes expected system behavior. When a threshold or weight changes during calibration, the tests verify that the change does not break intended behavior elsewhere. This makes calibration safe: changes can be made and validated without fear of silent regressions.
+The repo has roughly 825 collected pytest tests across 30 files. This is not incidental — it is structural. The test suite encodes expected system behavior. When a threshold or weight changes during calibration, the tests verify that the change does not break intended behavior elsewhere. This makes calibration safe: changes can be made and validated without fear of silent regressions.
 
 The tests also document assumptions. When a gate threshold is tested with a specific boundary case, that test is a record of a decision — why this threshold, not a looser or tighter one. The test suite is, in a real sense, a changelog of accumulated judgment.
 
@@ -200,10 +200,10 @@ These are the calibrated parameters that represent the operational intelligence 
 | Scoring framework | 4-gate deterministic filtering |
 | AI integration | Claude Haiku (verification), Claude Sonnet (briefing) |
 | Market signals | 4-sector equity watchlist via yfinance |
-| Persistence | Append-only JSONL with thread-safe writes |
-| API | FastAPI with APScheduler for daily cron |
-| Test coverage | 97% (145 tests) |
-| Architecture version | v0.2.0 |
+| Persistence | Append-only JSONL (source of truth across every store); SQLite dual-write for verdicts only today |
+| API | FastAPI with APScheduler for daily cron + `.cls_kill` kill-switch + optional `SPEC1_RUN_ON_START` |
+| Tests | ~825 collected pytest tests across 30 files |
+| Architecture version | v0.4.0 |
 
 ---
 
