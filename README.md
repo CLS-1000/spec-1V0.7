@@ -1,5 +1,9 @@
 # SPEC-1 Intelligence Engine
 
+[![Python package](https://github.com/mjlak1000/spec-1/actions/workflows/python-package.yml/badge.svg)](https://github.com/mjlak1000/spec-1/actions/workflows/python-package.yml)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
+[![License: Proprietary](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
+
 SPEC-1 is a real-time open-source intelligence (OSINT) platform that harvests signals from
 RSS feeds, FARA filings, congressional records, and narrative sources; scores them through a
 4-gate pipeline; detects psychological operations; generates actionable leads and world briefs;
