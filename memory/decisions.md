@@ -157,20 +157,22 @@ SQLite) is the coordination layer.
 `run_cycle`) executes only the lean core pipeline: harvest → parse → score →
 investigate → verify → analyze → write `IntelligenceRecord` to JSONL. Brief
 generation, lead derivation, psyop scoring, calibration proposals, and workspace
-case processing are operator-invoked tools under `spec1_engine/tools/` (`make brief`,
-`make leads`, `make psyop`, `make calibration`), each reading from the intelligence
-JSONL on demand.
+case processing are operator-invoked through the richer app/API entrypoints
+(`spec1_engine.app.cycle`, `POST /brief/generate`, `POST /leads/generate`,
+`POST /psyop/run`), each reading from the intelligence JSONL on demand.
 
 **Rationale:** An audit found the docs claimed the canonical cycle automatically
 produced briefs, leads, and psyop scores, but the actual `Engine.run()` produced
-only intelligence records. The richer behaviour lived in `spec1_engine/app/cycle.py`
-(reachable via `make cycle`) and in legacy code wired only to dead schedulers. The
+only intelligence records. The richer behaviour lived in `spec1_engine.app.cycle`
+and related API routes rather than in the canonical scheduler path. The
 split-then-rejoin pattern preserves the trustworthy core, makes downstream artifacts
 explicit operator decisions, and keeps the test surface focused. It also matches
-the existing `tools/historical_briefs.py` and `tools/calibration_propose.py` shape.
+the existing pattern of separate operator-invoked tooling for downstream artifacts.
 
-**Tradeoff accepted:** Two execution models coexist for some time. `make cycle` keeps
-calling the rich CLI path for backwards compatibility; the canonical scheduler does
-not. Operators who want a brief after a scheduled run must invoke `make brief` (or the
-MCP `generate_brief` tool) explicitly. The simplification is presentational and
-operational, not algorithmic — no scoring or persistence semantics changed.
+**Tradeoff accepted:** Two execution models coexist for some time. The richer app/API
+path remains available for backwards compatibility and operator workflows; the
+canonical scheduler does not invoke it automatically. Operators who want a brief
+after a scheduled run must call the brief-generation entrypoint explicitly (for
+example via `POST /brief/generate` or the MCP `generate_brief` tool). The
+simplification is presentational and operational, not algorithmic — no scoring or
+persistence semantics changed.
