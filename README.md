@@ -98,7 +98,6 @@ Key variables:
 | `SPEC1_TIMEZONE` | `America/Los_Angeles` | Scheduler timezone |
 | `SPEC1_FEED_TIMEOUT` | `15` | Feed fetch timeout (seconds) |
 | `SPEC1_RUN_ON_START` | `false` | If `true`, run one cycle immediately on API startup |
-| `SPEC1_POLITICAL_WEB_ENABLED` | `false` | If `true`, mount `/portland-web`, `nodes`, and `ingest` routers (off by default) |
 | `SPEC1_QUANT_ENABLED` | `false` | Documented for the quant CLI; not currently read by the canonical cycle |
 
 ## Key Sources
