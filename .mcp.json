@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "spec1": {
+      "command": "python",
+      "args": ["mcp_server.py"],
+      "env": {}
+    }
+  }
+}
