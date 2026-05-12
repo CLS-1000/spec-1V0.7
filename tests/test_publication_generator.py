@@ -143,8 +143,8 @@ def test_generate_publication_empty_records(tmp_path, sample_brief_text, sample_
 
 
 def test_generate_publication_domain_scores_capped(tmp_path, sample_records, sample_brief_text):
-    """Domain scores derived from extreme cycle_stats must be capped at 1.0."""
-    from spec1_engine.tools.publication_generator import generate_publication
+    """_derive_domain_scores() must cap all values to [0.0, 1.0] regardless of inputs."""
+    from spec1_engine.tools.publication_generator import generate_publication, _derive_domain_scores
 
     cycle_stats = {
         "signals_harvested": 9999,   # would produce > 1.0 without cap
@@ -155,14 +155,7 @@ def test_generate_publication_domain_scores_capped(tmp_path, sample_records, sam
         "fara_signals": 0,
     }
 
-    domain_scores = {
-        "power":     min(1.0, cycle_stats.get("signals_harvested", 100) / 300),
-        "security":  min(1.0, max(0.0, cycle_stats.get("confidence_avg", 0.6))),
-        "economics": 0.5,
-        "conflict":  min(1.0, cycle_stats.get("psyop_score", 2) / 10),
-        "diplomacy": 0.4,
-        "alliances": 0.35,
-    }
+    domain_scores = _derive_domain_scores(cycle_stats)
 
     for domain, score in domain_scores.items():
         assert score <= 1.0, f"Domain '{domain}' score {score} exceeds 1.0"

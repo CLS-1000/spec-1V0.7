@@ -29,9 +29,10 @@ def get_latest_publication() -> FileResponse:
 @router.get("/list")
 def list_publications() -> dict:
     """Return metadata for all generated publication PDFs, newest first."""
-    pdfs = sorted(_BRIEFS_DIR.glob("spec1_issue_*.pdf")) if _BRIEFS_DIR.exists() else []
+    pdfs = list(_BRIEFS_DIR.glob("spec1_issue_*.pdf")) if _BRIEFS_DIR.exists() else []
+    pdfs.sort(key=lambda p: p.stat().st_mtime, reverse=True)
     items = [
         {"filename": p.name, "size_bytes": p.stat().st_size}
-        for p in reversed(pdfs)
+        for p in pdfs
     ]
     return {"total": len(items), "items": items}

@@ -6,15 +6,18 @@ Runs after each cycle completes.
 from __future__ import annotations
 
 import math
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
+
+_ISSUE_RE = re.compile(r'spec1_issue_(\d+)')
 
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable, PageBreak
 )
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.graphics.shapes import Drawing, Line, Circle, Polygon, String
@@ -317,6 +320,18 @@ def _draw_hexagon_cover(domain_scores: dict) -> Drawing:
     return d
 
 
+def _derive_domain_scores(cycle_stats: dict) -> dict:
+    """Derive and cap the six radar domain scores from cycle statistics."""
+    return {
+        'power':     min(1.0, cycle_stats.get('signals_harvested', 100) / 300),
+        'security':  min(1.0, max(0.0, cycle_stats.get('confidence_avg', 0.6))),
+        'economics': 0.5,
+        'conflict':  min(1.0, cycle_stats.get('psyop_score', 2) / 10),
+        'diplomacy': 0.4,
+        'alliances': 0.35,
+    }
+
+
 def generate_publication(
     records: list,
     brief_text: str,
@@ -345,19 +360,20 @@ def generate_publication(
 
     if issue_number is None:
         existing = list(Path(output_dir).glob('spec1_issue_*.pdf'))
-        if existing:
-            max_n = 0
-            for p in existing:
-                try:
-                    max_n = max(max_n, int(p.name.split('_')[2]))
-                except (IndexError, ValueError):
-                    pass
-            issue_number = max_n + 1
-        else:
-            issue_number = 1
+        max_n = 0
+        for p in existing:
+            m = _ISSUE_RE.search(p.stem)
+            if m:
+                max_n = max(max_n, int(m.group(1)))
+        issue_number = max_n + 1
 
-    issue_str = str(issue_number).zfill(3)
-    out_path  = str(Path(output_dir) / f'spec1_issue_{issue_str}_{file_date}.pdf')
+    # Bump issue number until we find a path that doesn't exist (never overwrites).
+    while True:
+        issue_str = str(issue_number).zfill(3)
+        out_path = str(Path(output_dir) / f'spec1_issue_{issue_str}_{file_date}.pdf')
+        if not Path(out_path).exists():
+            break
+        issue_number += 1
 
     doc = SimpleDocTemplate(
         out_path,
@@ -375,24 +391,17 @@ def generate_publication(
 
     # ── PAGE 1: SIGNALS ──
     story.extend(_build_signals_page(records, s))
+    story.append(PageBreak())
 
     # ── PAGE 2: INTELLIGENCE ──
     story.extend(_build_intelligence_page(brief_text, cycle_stats, s))
+    story.append(PageBreak())
 
     # ── PAGE 3: WORLD STATE BRIEF COVER ──
     story.append(Spacer(1, 1.85 * inch))
     story.append(_hr(BLACK, 1, 0, 16))
 
-    domain_scores = {
-        'power':     min(1.0, cycle_stats.get('signals_harvested', 100) / 300),
-        'security':  min(1.0, max(0.0, cycle_stats.get('confidence_avg', 0.6))),
-        'economics': 0.5,
-        'conflict':  min(1.0, cycle_stats.get('psyop_score', 2) / 10),
-        'diplomacy': 0.4,
-        'alliances': 0.35,
-    }
-
-    hex_drawing = _draw_hexagon_cover(domain_scores)
+    hex_drawing = _draw_hexagon_cover(_derive_domain_scores(cycle_stats))
     story.append(hex_drawing)
 
     title_data = [[
