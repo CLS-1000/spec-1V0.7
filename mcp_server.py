@@ -75,21 +75,19 @@ def _read_jsonl(path: Path, limit: int = 20) -> list[dict]:
 
 
 def tool_run_cycle(args: dict) -> dict:
-    """Run a full SPEC-1 intelligence cycle."""
-    from spec1_engine.core.engine import Engine, EngineConfig
+    """Run a full SPEC-1 intelligence cycle (all steps: psyop, brief, publication, workspace)."""
+    from spec1_engine.app.cycle import run_cycle
 
     max_signals = args.get("max_signals")
     environment = args.get("environment", "production")
     store_path = _store_path("SPEC1_STORE_PATH", "spec1_intelligence.jsonl")
 
-    config = EngineConfig(
-        environment=environment,
+    return run_cycle(
         store_path=store_path,
+        environment=environment,
         max_signals=int(max_signals) if max_signals else None,
+        verbose=False,
     )
-    engine = Engine(config)
-    stats = engine.run()
-    return stats.to_dict()
 
 
 def tool_get_signals(args: dict) -> list[dict]:
