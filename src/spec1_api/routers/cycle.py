@@ -16,7 +16,7 @@ _last_run: dict = {}
 
 
 @router.post("/run", response_model=CycleResponse)
-def trigger_cycle(request: CycleRequest, background_tasks: BackgroundTasks) -> CycleResponse:
+def run_cycle(request: CycleRequest, background_tasks: BackgroundTasks) -> CycleResponse:
     """Trigger a full SPEC-1 intelligence cycle (all steps: psyop, brief, publication, workspace)."""
     store_path = Path(os.environ.get("SPEC1_STORE_PATH", "spec1_intelligence.jsonl"))
     stats = _execute_cycle(
@@ -40,8 +40,8 @@ def trigger_cycle(request: CycleRequest, background_tasks: BackgroundTasks) -> C
         psyop_score=stats.get("psyop_score"),
         psyop_patterns_fired=stats.get("psyop_patterns_fired"),
         brief_word_count=stats.get("brief_word_count"),
-        brief_path=str(stats["brief_path"]) if stats.get("brief_path") else None,
-        publication_path=str(stats["publication_path"]) if stats.get("publication_path") else None,
+        brief_path=str(stats["brief_path"]) if stats.get("brief_path") is not None else None,
+        publication_path=str(stats["publication_path"]) if stats.get("publication_path") is not None else None,
         cases_updated=stats.get("cases_updated"),
     )
     _last_run.update(result.model_dump())
