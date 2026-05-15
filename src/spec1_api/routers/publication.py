@@ -1,4 +1,4 @@
-"""Publication router — GET /publication/latest."""
+"""Publication router — GET /publication/latest, GET /publication/list."""
 
 from __future__ import annotations
 
@@ -12,6 +12,15 @@ router = APIRouter(prefix="/publication", tags=["publication"])
 _BRIEFS_DIR = Path("generated/briefs")
 
 
+def _safe_pdf_path(p: Path) -> Path:
+    """Resolve path and ensure it stays within _BRIEFS_DIR (no symlink escape)."""
+    resolved = p.resolve()
+    base = _BRIEFS_DIR.resolve()
+    if p.is_symlink() or not str(resolved).startswith(str(base)):
+        raise HTTPException(status_code=403, detail="Access denied")
+    return resolved
+
+
 @router.get("/latest")
 def get_latest_publication() -> FileResponse:
     """Return the most recently generated publication PDF."""
@@ -19,8 +28,9 @@ def get_latest_publication() -> FileResponse:
     if not pdfs:
         raise HTTPException(status_code=404, detail="No publication PDFs found")
     latest = max(pdfs, key=lambda p: p.stat().st_mtime)
+    safe = _safe_pdf_path(latest)
     return FileResponse(
-        path=str(latest),
+        path=str(safe),
         media_type="application/pdf",
         filename=latest.name,
     )
@@ -34,5 +44,6 @@ def list_publications() -> dict:
     items = [
         {"filename": p.name, "size_bytes": p.stat().st_size}
         for p in pdfs
+        if not p.is_symlink()
     ]
     return {"total": len(items), "items": items}

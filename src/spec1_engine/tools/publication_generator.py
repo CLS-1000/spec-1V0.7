@@ -10,6 +10,7 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional
+from xml.sax.saxutils import escape as _xml_escape
 
 _ISSUE_RE = re.compile(r'spec1_issue_(\d+)')
 
@@ -135,9 +136,9 @@ def _gate_box(gates: dict, s: dict) -> list:
     gate_lines = []
     for gate_name, result in gates.items():
         status = 'PASSED' if result.get('pass') else 'FAILED'
-        reason = result.get('reason', '')
+        reason = _xml_escape(result.get('reason', ''))
         gate_lines.append(
-            Paragraph(f'{gate_name} Gate: {status} ({reason})', s['gate_item'])
+            Paragraph(f'{_xml_escape(gate_name)} Gate: {status} ({reason})', s['gate_item'])
         )
     table_data = [[g] for g in gate_lines]
     t = Table(table_data, colWidths=[W - 2 * M - 0.4 * inch])
@@ -169,22 +170,28 @@ def _build_signals_page(records: list, s: dict) -> list:
         return story
 
     for rec in top_records:
-        content       = rec.get('content', rec.get('pattern', 'No content'))
-        source        = rec.get('source', rec.get('signal_source', 'UNKNOWN'))
+        # Prefer hypothesis (rich investigation text) over pattern (short label).
+        content = rec.get('hypothesis', rec.get('content', rec.get('pattern', 'No content')))
+        source  = rec.get('source', rec.get('signal_source', 'UNKNOWN'))
         credibility = rec.get('credibility_score', rec.get('outcome_confidence', 0.0))
         cred_label = 'HIGH' if credibility >= 0.8 else 'MEDIUM' if credibility >= 0.6 else 'LOW'
         velocity = rec.get('velocity_label', 'STANDARD')
 
-        headline = content[:80].strip()
+        # Escape XML special chars — ReportLab Paragraph uses an XML parser.
+        safe_content = _xml_escape(content)
+        safe_source  = _xml_escape(source.upper())
+        safe_velocity = _xml_escape(velocity.upper())
+
+        headline = _xml_escape(content[:80].strip())
         if len(content) > 80:
             headline += '...'
 
         story.append(Paragraph(headline, s['story_headline']))
         story.append(Paragraph(
-            f'SOURCE: {source.upper()}  \xb7  CREDIBILITY: {cred_label}  \xb7  VELOCITY: {velocity.upper()}',
+            f'SOURCE: {safe_source}  \xb7  CREDIBILITY: {cred_label}  \xb7  VELOCITY: {safe_velocity}',
             s['story_source']
         ))
-        story.append(Paragraph(content, s['body']))
+        story.append(Paragraph(safe_content, s['body']))
 
         # Gate box — handle both real engine shape (dict[str, bool]) and
         # enriched shape (dict[str, {passed, reason}]).
@@ -321,12 +328,12 @@ def _draw_hexagon_cover(domain_scores: dict) -> Drawing:
 
 
 def _derive_domain_scores(cycle_stats: dict) -> dict:
-    """Derive and cap the six radar domain scores from cycle statistics."""
+    """Derive and clamp the six radar domain scores to [0.0, 1.0]."""
     return {
-        'power':     min(1.0, cycle_stats.get('signals_harvested', 100) / 300),
+        'power':     min(1.0, max(0.0, cycle_stats.get('signals_harvested', 100) / 300)),
         'security':  min(1.0, max(0.0, cycle_stats.get('confidence_avg', 0.6))),
         'economics': 0.5,
-        'conflict':  min(1.0, cycle_stats.get('psyop_score', 2) / 10),
+        'conflict':  min(1.0, max(0.0, cycle_stats.get('psyop_score', 2) / 10)),
         'diplomacy': 0.4,
         'alliances': 0.35,
     }

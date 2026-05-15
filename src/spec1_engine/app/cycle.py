@@ -345,17 +345,22 @@ def run_cycle(
             logger.error("Rule-based brief fallback failed: %s", fallback_exc)
             stats["errors"].append(f"briefing_fallback:{fallback_exc}")
 
-    # ── Auto-generate publication PDF ────────────────────────────────────────
+    # ── Auto-generate publication PDF (non-fatal: errors are caught) ─────────
     try:
         from spec1_engine.tools.publication_generator import generate_publication
         top_records = sorted(
             stored_records, key=lambda r: r.get('opportunity_score', 0.0), reverse=True
         )[:5]
+        # Compute confidence_avg from this cycle's records so the radar chart
+        # reflects real signal quality rather than always defaulting to 0.6.
+        confidences = [r.get('outcome_confidence', 0.0) for r in stored_records]
+        stats['confidence_avg'] = (
+            sum(confidences) / len(confidences) if confidences else 0.0
+        )
         # Use brief_md already in memory (covers both normal and fallback paths).
-        brief_text_pub = brief_md
         pub_path = generate_publication(
             records=top_records,
-            brief_text=brief_text_pub,
+            brief_text=brief_md,
             cycle_stats=stats,
         )
         stats['publication_path'] = pub_path
@@ -363,7 +368,7 @@ def run_cycle(
         if verbose:
             print(f'\n[Publication] PDF generated: {pub_path}')
     except Exception as _pub_exc:
-        logger.warning('Publication generation failed (non-blocking): %s', _pub_exc)
+        logger.warning('Publication PDF generation failed: %s', _pub_exc)
         stats['errors'].append(f'publication:{_pub_exc}')
 
     # ── Case workspace: Match signals to open cases and run research ──────────

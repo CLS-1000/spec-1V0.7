@@ -88,7 +88,7 @@ def test_generate_publication_creates_pdf(tmp_path, sample_records, sample_brief
 
 
 def test_generate_publication_file_size(tmp_path, sample_records, sample_brief_text, sample_cycle_stats):
-    """Generated PDF must be larger than 5 KB — not an empty shell."""
+    """Generated file must be a valid PDF (starts with %PDF-) and non-trivially sized."""
     from spec1_engine.tools.publication_generator import generate_publication
 
     out = generate_publication(
@@ -98,8 +98,9 @@ def test_generate_publication_file_size(tmp_path, sample_records, sample_brief_t
         output_dir=str(tmp_path),
         issue_number=1,
     )
-    size = Path(out).stat().st_size
-    assert size > 5_000, f"PDF too small ({size} bytes) — expected > 5 KB"
+    header = Path(out).read_bytes()[:5]
+    assert header == b'%PDF-', f"File does not start with PDF magic bytes: {header!r}"
+    assert Path(out).stat().st_size > 5_000, "PDF is unexpectedly small"
 
 
 def test_generate_publication_issue_number_auto_increments(tmp_path, sample_records, sample_brief_text, sample_cycle_stats):
@@ -240,3 +241,55 @@ def test_generate_publication_bool_gate_results(tmp_path, sample_brief_text, sam
     )
     assert Path(out).exists()
     assert Path(out).stat().st_size > 1_000
+
+
+# ---------------------------------------------------------------------------
+# API router tests
+# ---------------------------------------------------------------------------
+
+def test_publication_latest_returns_404_when_no_pdfs(tmp_path, monkeypatch):
+    """GET /publication/latest must return 404 when generated/briefs has no PDFs."""
+    import spec1_api.routers.publication as pub_mod
+    monkeypatch.setattr(pub_mod, '_BRIEFS_DIR', tmp_path)
+
+    from fastapi.testclient import TestClient
+    from spec1_api.main import create_app
+    client = TestClient(create_app())
+    resp = client.get('/publication/latest')
+    assert resp.status_code == 404
+
+
+def test_publication_list_returns_stable_shape(tmp_path, monkeypatch, sample_records, sample_brief_text, sample_cycle_stats):
+    """GET /publication/list must return {total, items} and order newest first."""
+    from spec1_engine.tools.publication_generator import generate_publication
+    import spec1_api.routers.publication as pub_mod
+    monkeypatch.setattr(pub_mod, '_BRIEFS_DIR', tmp_path)
+
+    # Generate two PDFs with different issue numbers.
+    generate_publication(
+        records=sample_records,
+        brief_text=sample_brief_text,
+        cycle_stats=sample_cycle_stats,
+        output_dir=str(tmp_path),
+        issue_number=1,
+    )
+    generate_publication(
+        records=sample_records,
+        brief_text=sample_brief_text,
+        cycle_stats=sample_cycle_stats,
+        output_dir=str(tmp_path),
+        issue_number=2,
+    )
+
+    from fastapi.testclient import TestClient
+    from spec1_api.main import create_app
+    client = TestClient(create_app())
+    resp = client.get('/publication/list')
+    assert resp.status_code == 200
+    body = resp.json()
+    assert 'total' in body
+    assert 'items' in body
+    assert body['total'] == 2
+    assert len(body['items']) == 2
+    # Newest first — issue 002 should appear before issue 001.
+    assert 'spec1_issue_002' in body['items'][0]['filename']
