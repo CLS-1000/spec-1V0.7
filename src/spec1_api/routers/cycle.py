@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 from fastapi import APIRouter, BackgroundTasks
 
 from spec1_api.schemas import CycleRequest, CycleResponse
-from spec1_engine.core.engine import Engine, EngineConfig
+from spec1_engine.app.cycle import run_cycle as _execute_cycle
 
 router = APIRouter(prefix="/cycle", tags=["cycle"])
 
@@ -14,24 +17,32 @@ _last_run: dict = {}
 
 @router.post("/run", response_model=CycleResponse)
 def run_cycle(request: CycleRequest, background_tasks: BackgroundTasks) -> CycleResponse:
-    """Trigger a full SPEC-1 intelligence cycle synchronously."""
-    config = EngineConfig(
+    """Trigger a full SPEC-1 intelligence cycle (all steps: psyop, brief, publication, workspace)."""
+    store_path = Path(os.environ.get("SPEC1_STORE_PATH", "spec1_intelligence.jsonl"))
+    stats = _execute_cycle(
+        store_path=store_path,
         environment=request.environment,
         max_signals=request.max_signals,
+        verbose=False,
     )
-    engine = Engine(config)
-    stats = engine.run()
     result = CycleResponse(
-        run_id=stats.run_id,
-        started_at=stats.started_at,
-        finished_at=stats.finished_at,
-        signals_harvested=stats.signals_harvested,
-        signals_parsed=stats.signals_parsed,
-        opportunities_found=stats.opportunities_found,
-        investigations_generated=stats.investigations_generated,
-        outcomes_verified=stats.outcomes_verified,
-        records_stored=stats.records_stored,
-        errors=stats.errors,
+        run_id=stats["run_id"],
+        started_at=stats["started_at"],
+        finished_at=stats.get("finished_at"),
+        signals_harvested=stats.get("signals_harvested", 0),
+        signals_parsed=stats.get("signals_parsed", 0),
+        opportunities_found=stats.get("opportunities_found", 0),
+        investigations_generated=stats.get("investigations_generated", 0),
+        outcomes_verified=stats.get("outcomes_verified", 0),
+        records_stored=stats.get("records_stored", 0),
+        errors=stats.get("errors", []),
+        psyop_classification=stats.get("psyop_classification"),
+        psyop_score=stats.get("psyop_score"),
+        psyop_patterns_fired=stats.get("psyop_patterns_fired"),
+        brief_word_count=stats.get("brief_word_count"),
+        brief_path=str(stats["brief_path"]) if stats.get("brief_path") is not None else None,
+        publication_path=str(stats["publication_path"]) if stats.get("publication_path") is not None else None,
+        cases_updated=stats.get("cases_updated"),
     )
     _last_run.update(result.model_dump())
     return result

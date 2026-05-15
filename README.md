@@ -1,61 +1,86 @@
 # SPEC-1 Intelligence Engine
 
-SPEC-1 is a real-time open-source intelligence (OSINT) platform that harvests signals from
-RSS feeds, FARA filings, congressional records, and narrative sources; scores them through a
-4-gate pipeline; detects psychological operations; generates actionable leads and world briefs;
-and persists everything to JSONL and SQLite.
+[![CI](https://github.com/mjlak1000/spec-1/actions/workflows/python-package.yml/badge.svg)](https://github.com/mjlak1000/spec-1/actions/workflows/python-package.yml)
+[![Pages](https://github.com/mjlak1000/spec-1/actions/workflows/pages.yml/badge.svg)](https://mjlak1000.github.io/spec-1/)
+[![Python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](pyproject.toml)
+[![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
 
-For a high-level overview of the project's purpose and design decisions, see
-[PORTFOLIO_SUMMARY.md](PORTFOLIO_SUMMARY.md).
+**Landing:** [mjlak1000.github.io/spec-1](https://mjlak1000.github.io/spec-1/) · **Dashboard:** [/ui](https://mjlak1000.github.io/spec-1/ui/)
+
+SPEC-1 is a real-time open-source intelligence (OSINT) platform.
+
+**Canonical cycle (automatic):** harvest signals from RSS feeds, FARA filings, congressional records, and narrative sources → 4-gate scoring → Claude-driven investigation + verification → IntelligenceRecord persisted to append-only JSONL.
+
+**Operator tools (manual):** psyop scoring (`make psyop`), daily brief generation with rule-based fallback (`make brief`), actionable lead derivation (`make leads`), and calibration drift reports (`make calibration`). Each reads from the intelligence JSONL and writes its own artifact — none run automatically inside the cycle.
+
+The split is deliberate: the cycle ships a small, trustworthy core; downstream artifacts are explicit operator decisions, not silent side effects.
+
+| Document | Description |
+|----------|-------------|
+| [docs/architecture.md](docs/architecture.md) | System architecture, data flow, data models |
+| [docs/api.md](docs/api.md) | HTTP API endpoint reference |
+| [docs/runbook.md](docs/runbook.md) | Operational procedures and troubleshooting |
+| [docs/portfolio.md](docs/portfolio.md) | Project overview for stakeholders |
+| [docs/case_study.md](docs/case_study.md) | Design decisions and engineering rationale |
+| [CHANGELOG.md](CHANGELOG.md) | Version history |
+| [memory/decisions.md](memory/decisions.md) | Architecture Decision Records (ADRs) |
+| [CLAUDE.md](CLAUDE.md) | Developer and agent governance guide |
 
 ## Architecture
 
 ```
-RSS/FARA/Congress/Narrative
+═══ Canonical cycle (automatic) ═══════════════════════════════════════
+RSS / FARA / Congress / Narrative
         │
         ▼
-  cls_osint.feed ──────── cls_osint.adapters (fara, congressional, narrative)
+  cls_osint.feed ─────────── cls_osint.adapters (fara, congressional, narrative)
         │
         ▼
   spec1_engine  (harvest → parse → score → investigate → verify → analyze)
-  ├── analysts      (credibility weighting, source discovery)
-  ├── briefing      (daily brief generation)
-  ├── quant         (market signal analysis)
-  └── workspace     (case tracking, researcher CLI)
         │
-        ├── cls_psyop       (psychological operation detection)
-        ├── cls_quant       (market intelligence)
-        ├── cls_leads       (actionable leads)
-        ├── cls_world_brief (daily intelligence brief)
-        └── cls_db          (dual-write: JSONL + SQLite)
-                │
-                ▼
-          spec1_api  (FastAPI HTTP server)
-          mcp_server (MCP tools for Claude)
+        ▼
+  IntelligenceRecord  →  spec1_intelligence.jsonl  (append-only)
+
+═══ Operator tools (manual, on-demand) ════════════════════════════════
+  make psyop                          → psyop_scores.jsonl
+  make brief                          → generated/briefs/*.md
+  make leads                          → leads.jsonl
+  spec1_engine.tools.calibration_propose → calibration_report.* (make calibration)
+  spec1_engine.tools.historical_briefs   → backfill briefs      (make backfill)
+
+═══ Surfaces ══════════════════════════════════════════════════════════
+  spec1_api  (FastAPI HTTP server + APScheduler)
+  mcp_server (MCP tools for Claude — cycle + each operator tool)
+
+═══ Persistence ═══════════════════════════════════════════════════════
+  JSONL  : source of truth, append-only (every store)
+  SQLite : queryable index, rebuildable from JSONL
+  cls_db.dual_write currently writes both for verdicts only;
+  every other store is JSONL-only today.
 ```
 
 ## Quick Start
 
 ```bash
+# Install and verify
+bash scripts/setup_dev.sh
+
+# Or manually:
 pip install -e ".[dev]"
-
-# One-shot intelligence cycle
-python -m spec1_engine.app.cycle
-
-# API server (http://localhost:8000)
-python -m spec1_api.main
-
-# MCP server (Claude integration)
-python mcp_server.py
-
-# Workspace CLI (case management)
-python -m spec1_engine.workspace
+cp .env.example .env  # then set ANTHROPIC_API_KEY
 ```
 
-## Running Tests
-
 ```bash
-pytest tests/ -v --tb=short
+make cycle        # one-shot intelligence cycle (rich CLI path; produces records + brief + workspace updates)
+make run          # API server → http://localhost:8000  (canonical lean cycle on schedule)
+make mcp          # MCP server (Claude integration)
+make brief        # operator tool — generate brief from latest run_id (Claude + rule-based fallback)
+make leads        # operator tool — derive Lead objects from intelligence records
+make psyop        # operator tool — score every record for psyop patterns
+make calibration  # operator tool — calibration drift report from intel + verdicts
+make workspace    # workspace CLI (case management)
+make test         # full test suite
+make help         # all available commands
 ```
 
 ## Environment
@@ -79,7 +104,8 @@ Key variables:
 | `SPEC1_CRON_HOUR` | `6` | Scheduled cycle hour (24h) |
 | `SPEC1_TIMEZONE` | `America/Los_Angeles` | Scheduler timezone |
 | `SPEC1_FEED_TIMEOUT` | `15` | Feed fetch timeout (seconds) |
-| `SPEC1_QUANT_ENABLED` | `false` | Enable quantitative market pipeline |
+| `SPEC1_RUN_ON_START` | `false` | If `true`, run one cycle immediately on API startup |
+| `SPEC1_QUANT_ENABLED` | `false` | Documented for the quant CLI; not currently read by the canonical cycle |
 
 ## Key Sources
 
@@ -98,9 +124,14 @@ Key variables:
 | GET | /health | Health check |
 | GET | /signals | Latest harvested signals |
 | GET | /intel | Intelligence records |
-| GET | /leads | Actionable leads |
+| GET | /leads | Actionable leads (read-only; populate via `make leads`) |
 | POST | /leads | Create a lead |
-| GET | /brief | Latest world brief |
-| GET | /psyop | PsyOp detections |
+| GET | /brief | Latest world brief (read-only; populate via `make brief`) |
+| GET | /psyop | PsyOp detections (read-only; populate via `make psyop`) |
 | GET | /fara | FARA filings |
-| POST | /cycle/run | Trigger a full cycle |
+| GET | /verdicts | Filed verdicts |
+| POST | /verdicts | File a verdict |
+| GET | /calibration | Calibration drift report (descriptive) |
+| POST | /cycle/run | Trigger one canonical lean cycle (intelligence records only) |
+
+The canonical cycle endpoint produces only intelligence records. Briefs, leads, and psyop scores are populated by the corresponding operator tools — see Quick Start.
