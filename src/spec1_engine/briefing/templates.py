@@ -139,3 +139,31 @@ Every lead must include the CLAUDE PROMPT blockquote — it is not optional.]
 
 SYSTEM_PROMPT: str = _load("system_prompt.md", _SYSTEM_FALLBACK)
 USER_PROMPT_TEMPLATE: str = _load("user_prompt_template.md", _TEMPLATE_FALLBACK)
+
+_GEO_SYSTEM_FALLBACK = (
+    "You are the lead intelligence editor for a Geopolitics & Policy Desk.\n"
+    "Write with precision. Every claim traces directly to the provided signals. Never hallucinate.\n"
+    "Actors act — name them. Passive voice is banned. If signals are thin, say so."
+)
+
+_GEO_TEMPLATE_FALLBACK = _TEMPLATE_FALLBACK.replace(
+    "## SPEC-1 DAILY BRIEF — {date}",
+    "## GEOPOLITICS & POLICY DESK — {date}",
+)
+
+GEO_SYSTEM_PROMPT: str = _load("geopolitics_system_prompt.md", _GEO_SYSTEM_FALLBACK)
+GEO_USER_PROMPT_TEMPLATE: str = _load("geopolitics_user_prompt_template.md", _GEO_TEMPLATE_FALLBACK)
+
+_LEG_SYSTEM_FALLBACK = (
+    "You are the synthesis engine for the Legislative & Judicial Desk.\n"
+    "Describe structure: who voted, who sponsored, who funded, who benefits. Do not assign motive.\n"
+    "Every claim traces to a provided signal. If no records match a section: NO SIGNAL THIS CYCLE."
+)
+
+_LEG_TEMPLATE_FALLBACK = _TEMPLATE_FALLBACK.replace(
+    "## SPEC-1 DAILY BRIEF — {date}",
+    "## LEGISLATIVE & JUDICIAL DESK — {date}",
+)
+
+LEG_SYSTEM_PROMPT: str = _load("legislative_system_prompt.md", _LEG_SYSTEM_FALLBACK)
+LEG_USER_PROMPT_TEMPLATE: str = _load("legislative_user_prompt_template.md", _LEG_TEMPLATE_FALLBACK)

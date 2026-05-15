@@ -296,8 +296,9 @@ def tool_generate_brief(args: dict) -> dict:
     brief_md = ""
     prompts = ""
     used_fallback = False
+    mode = args.get("mode", "standard")
     if not rule_based:
-        result = _try_claude(run_records, cycle_stats)
+        result = _try_claude(run_records, cycle_stats, mode=mode)
         if result is not None:
             brief_md, prompts = result
     if not brief_md:
@@ -543,6 +544,16 @@ TOOLS: dict[str, dict] = {
                 "run_id": {"type": "string", "default": "latest"},
                 "out_dir": {"type": "string", "description": "Output directory (default generated/briefs)"},
                 "rule_based": {"type": "boolean", "default": False, "description": "Skip Claude entirely"},
+                "mode": {
+                    "type": "string",
+                    "enum": ["standard", "geopolitics", "legislative"],
+                    "default": "standard",
+                    "description": (
+                        "Brief template: 'standard' (default SPEC-1 brief), "
+                        "'geopolitics' (Geopolitics & Policy Desk), "
+                        "or 'legislative' (Legislative & Judicial Desk)"
+                    ),
+                },
             },
         },
         "fn": tool_generate_brief,

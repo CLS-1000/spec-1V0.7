@@ -854,3 +854,161 @@ def test_brief_prompts_latest_lead_count_correct(api_client, tmp_path):
         r = api_client.get("/api/v1/brief/prompts/latest")
     assert r.status_code == 200
     assert r.json()["lead_count"] == 3
+
+
+# ─── geopolitics mode tests ───────────────────────────────────────────────────
+
+GEO_SAMPLE_BRIEF = "\n".join([
+    "## GEOPOLITICS & POLICY DESK — 2026-04-11",
+    "### Executive Summary",
+    "Three developments intersect foreign policy and domestic legislation.",
+    "### The Geopolitics Brief",
+    "Strategic realignments observed.",
+    "### Capitol Hill & Lobbying Watch",
+    "No FARA signals this cycle.",
+    "### Local Government Impact",
+    "No local signals this cycle.",
+    "### Actionable Story Leads",
+    "**LEAD: Test Geo Lead**",
+    "**The Question:** What is the anomaly?",
+    "**Who to Call:** State Department spokesperson",
+    "**Documents to Request:** FARA filing 2026-Q1",
+    "**Window & Confidence:** 72 hours | 0.78",
+])
+
+
+def test_generate_brief_geopolitics_mode_returns_string():
+    from spec1_engine.briefing import generator
+    records = [make_record()]
+    stats = make_cycle_stats()
+    mock_resp = make_mock_claude_response(GEO_SAMPLE_BRIEF)
+    with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
+        with patch("anthropic.Anthropic") as MockClient:
+            MockClient.return_value.messages.create.return_value = mock_resp
+            brief, prompts = generator.generate_brief(records, stats, mode="geopolitics")
+    assert isinstance(brief, str)
+    assert "GEOPOLITICS & POLICY DESK" in brief
+
+
+def test_generate_brief_geopolitics_mode_uses_geo_system_prompt():
+    from spec1_engine.briefing import generator
+    from spec1_engine.briefing.templates import GEO_SYSTEM_PROMPT
+    records = [make_record()]
+    stats = make_cycle_stats()
+    mock_resp = make_mock_claude_response(GEO_SAMPLE_BRIEF)
+    with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
+        with patch("anthropic.Anthropic") as MockClient:
+            MockClient.return_value.messages.create.return_value = mock_resp
+            generator.generate_brief(records, stats, mode="geopolitics")
+            call_kwargs = MockClient.return_value.messages.create.call_args[1]
+    assert call_kwargs["system"] == GEO_SYSTEM_PROMPT
+
+
+def test_build_prompt_geopolitics_mode_uses_geo_template():
+    from spec1_engine.briefing.generator import _build_prompt
+    records = [make_record()]
+    stats = make_cycle_stats()
+    prompt = _build_prompt(records, stats, mode="geopolitics")
+    assert "GEOPOLITICS & POLICY DESK" in prompt
+
+
+def test_build_prompt_standard_mode_uses_standard_template():
+    from spec1_engine.briefing.generator import _build_prompt
+    records = [make_record()]
+    stats = make_cycle_stats()
+    prompt = _build_prompt(records, stats, mode="standard")
+    assert "SPEC-1 DAILY BRIEF" in prompt
+
+
+def test_geo_system_prompt_constant_is_string():
+    from spec1_engine.briefing.templates import GEO_SYSTEM_PROMPT
+    assert isinstance(GEO_SYSTEM_PROMPT, str)
+    assert len(GEO_SYSTEM_PROMPT) > 0
+
+
+def test_geo_user_prompt_template_has_required_placeholders():
+    from spec1_engine.briefing.templates import GEO_USER_PROMPT_TEMPLATE
+    for placeholder in ("{run_id}", "{elevated_records}", "{standard_records}", "{date}"):
+        assert placeholder in GEO_USER_PROMPT_TEMPLATE
+
+
+def test_generate_brief_standard_mode_unchanged():
+    from spec1_engine.briefing import generator
+    records = [make_record()]
+    stats = make_cycle_stats()
+    mock_resp = make_mock_claude_response(SAMPLE_BRIEF)
+    with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
+        with patch("anthropic.Anthropic") as MockClient:
+            MockClient.return_value.messages.create.return_value = mock_resp
+            brief, _ = generator.generate_brief(records, stats)
+    assert "## SPEC-1 DAILY BRIEF" in brief
+
+
+# ─── legislative mode tests ───────────────────────────────────────────────────
+
+LEG_SAMPLE_BRIEF = "\n".join([
+    "## LEGISLATIVE & JUDICIAL DESK — 2026-04-11",
+    "### Executive Summary",
+    "• run_id abc12345: Senate Finance Committee advanced SB 201 (8–4 vote).",
+    "### Federal — Members, Votes, Hearings",
+    "NO SIGNAL THIS CYCLE",
+    "### Federal — Lobbying & Disclosure Watch",
+    "NO SIGNAL THIS CYCLE",
+    "### Judicial Activity & Disclosures",
+    "NO SIGNAL THIS CYCLE",
+    "### State Legislatures & Elected Officials",
+    "NO SIGNAL THIS CYCLE",
+    "### Stated Purpose vs Observed Beneficiary",
+    "NO SIGNAL THIS CYCLE",
+    "### Geopolitical Context",
+    "NO GEOPOLITICAL OVERLAP THIS CYCLE",
+    "### Story Leads",
+    "NO STORY LEADS THIS CYCLE",
+])
+
+
+def test_generate_brief_legislative_mode_returns_string():
+    from spec1_engine.briefing import generator
+    records = [make_record()]
+    stats = make_cycle_stats()
+    mock_resp = make_mock_claude_response(LEG_SAMPLE_BRIEF)
+    with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
+        with patch("anthropic.Anthropic") as MockClient:
+            MockClient.return_value.messages.create.return_value = mock_resp
+            brief, prompts = generator.generate_brief(records, stats, mode="legislative")
+    assert isinstance(brief, str)
+    assert "LEGISLATIVE & JUDICIAL DESK" in brief
+
+
+def test_generate_brief_legislative_mode_uses_leg_system_prompt():
+    from spec1_engine.briefing import generator
+    from spec1_engine.briefing.templates import LEG_SYSTEM_PROMPT
+    records = [make_record()]
+    stats = make_cycle_stats()
+    mock_resp = make_mock_claude_response(LEG_SAMPLE_BRIEF)
+    with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
+        with patch("anthropic.Anthropic") as MockClient:
+            MockClient.return_value.messages.create.return_value = mock_resp
+            generator.generate_brief(records, stats, mode="legislative")
+            call_kwargs = MockClient.return_value.messages.create.call_args[1]
+    assert call_kwargs["system"] == LEG_SYSTEM_PROMPT
+
+
+def test_build_prompt_legislative_mode_uses_leg_template():
+    from spec1_engine.briefing.generator import _build_prompt
+    records = [make_record()]
+    stats = make_cycle_stats()
+    prompt = _build_prompt(records, stats, mode="legislative")
+    assert "LEGISLATIVE & JUDICIAL DESK" in prompt
+
+
+def test_leg_system_prompt_constant_is_string():
+    from spec1_engine.briefing.templates import LEG_SYSTEM_PROMPT
+    assert isinstance(LEG_SYSTEM_PROMPT, str)
+    assert len(LEG_SYSTEM_PROMPT) > 0
+
+
+def test_leg_user_prompt_template_has_required_placeholders():
+    from spec1_engine.briefing.templates import LEG_USER_PROMPT_TEMPLATE
+    for placeholder in ("{run_id}", "{elevated_records}", "{standard_records}", "{date}"):
+        assert placeholder in LEG_USER_PROMPT_TEMPLATE
