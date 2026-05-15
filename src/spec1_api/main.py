@@ -22,6 +22,7 @@ from spec1_api.routers import (
     intel,
     leads,
     psyop,
+    publication,
     signals,
     verdicts,
 )
@@ -119,6 +120,7 @@ def create_app() -> FastAPI:
 
         app.include_router(nodes.router)
         app.include_router(ingest.router)
+
 
     return app
 

@@ -312,6 +312,7 @@ def run_cycle(
     last_run_state["record_count"] = records_stored
 
     # ── Briefing ──────────────────────────────────────────────────────────────
+    brief_md = ''
     try:
         from spec1_engine.briefing.generator import generate_brief
         from spec1_engine.briefing.templates import SYSTEM_PROMPT, USER_PROMPT_TEMPLATE

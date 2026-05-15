@@ -16,7 +16,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 from reportlab.platypus import (
-    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
+    SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable, PageBreak
 )
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.graphics.shapes import Drawing, Line, Circle, Polygon, String
@@ -33,6 +33,9 @@ BORDER = colors.HexColor('#cccccc')
 LIGHT  = colors.HexColor('#f2f1ed')
 MONO   = 'Courier'
 MONO_B = 'Courier-Bold'
+
+
+_ISSUE_RE = re.compile(r'spec1_issue_(\d+)')
 
 
 def _styles() -> dict:
@@ -86,11 +89,13 @@ def _page_canvas(c, doc) -> None:
     # Top border
     c.setFillColor(BLACK)
     c.rect(0, H - 3, W, 3, fill=1, stroke=0)
+
     # Masthead box
     box_h = 1.1 * inch
     c.setStrokeColor(BLACK)
     c.setLineWidth(1)
     c.rect(M, H - M - box_h, W - 2 * M, box_h, fill=0, stroke=1)
+
     # SPEC-1 title in box
     c.setFont(MONO_B, 28)
     c.setFillColor(BLACK)
@@ -98,6 +103,7 @@ def _page_canvas(c, doc) -> None:
     c.setFont(MONO, 8)
     c.setFillColor(DIM)
     c.drawCentredString(W / 2, H - M - 0.78 * inch, 'SIGNAL INTELLIGENCE ENGINE  ·  OSINT')
+
     # Issue and date below box
     issue_n  = getattr(doc, '_issue_number', '001')
     date_str = getattr(doc, '_issue_date', datetime.now(timezone.utc).strftime('%B %d, %Y').upper())
@@ -105,6 +111,7 @@ def _page_canvas(c, doc) -> None:
     c.setFillColor(DIM)
     c.drawString(M, H - M - box_h - 0.25 * inch, f'ISSUE {issue_n}')
     c.drawRightString(W - M, H - M - box_h - 0.25 * inch, date_str)
+
     # Footer
     c.setStrokeColor(BORDER)
     c.setLineWidth(0.4)
@@ -115,6 +122,7 @@ def _page_canvas(c, doc) -> None:
         'SPEC-1 is an independent OSINT intelligence engine operated by EVASTARARCANA LLC')
     c.drawCentredString(W / 2, 0.26 * inch,
         'Signal processing follows append-only, failure-first architecture principles')
+
     c.restoreState()
 
 
@@ -127,9 +135,10 @@ def _gate_box(gates: dict, s: dict) -> list:
     gate_lines = []
     for gate_name, result in gates.items():
         status = 'PASSED' if result.get('pass') else 'FAILED'
-        reason = result.get('reason', '')
+        reason = _xml_escape(result.get('reason', ''))
         gate_lines.append(
-            Paragraph(f'{gate_name} Gate: {status} ({reason})', s['gate_item'])
+            Paragraph(f'{_xml_escape(gate_name)} Gate: {status} ({reason})', s['gate_item'])
+
         )
     table_data = [[g] for g in gate_lines]
     t = Table(table_data, colWidths=[W - 2 * M - 0.4 * inch])
@@ -154,14 +163,24 @@ def _build_signals_page(records: list, s: dict) -> list:
     story.append(Paragraph('SIGNALS', s['section_label']))
     story.append(_hr(BORDER, 0.4, 0, 10))
 
-    # Top 2 records
-    for rec in records[:2]:
-        content      = rec.get('content', rec.get('pattern', 'No content'))
-        source       = rec.get('source', rec.get('signal_source', 'UNKNOWN'))
-        credibility  = rec.get('credibility_score', 0.0)
-        cred_label   = 'HIGH' if credibility >= 0.8 else 'MEDIUM' if credibility >= 0.6 else 'LOW'
-        classification = rec.get('classification', rec.get('outcome_classification', 'INVESTIGATE'))
-        velocity     = rec.get('velocity_label', 'STANDARD')
+    top_records = records[:2] if records else []
+
+    if not top_records:
+        story.append(Paragraph('No signals available for this cycle.', s['body']))
+        return story
+
+    for rec in top_records:
+        # Prefer hypothesis (rich investigation text) over pattern (short label).
+        content = rec.get('hypothesis', rec.get('content', rec.get('pattern', 'No content')))
+        source  = rec.get('source', rec.get('signal_source', 'UNKNOWN'))
+        credibility = rec.get('credibility_score', rec.get('outcome_confidence', 0.0))
+        cred_label = 'HIGH' if credibility >= 0.8 else 'MEDIUM' if credibility >= 0.6 else 'LOW'
+        velocity = rec.get('velocity_label', 'STANDARD')
+
+        # Escape XML special chars — ReportLab Paragraph uses an XML parser.
+        safe_content = _xml_escape(content)
+        safe_source  = _xml_escape(source.upper())
+        safe_velocity = _xml_escape(velocity.upper())
 
         headline = _xml_escape(content[:80].strip())
         if len(content) > 80:
@@ -169,29 +188,32 @@ def _build_signals_page(records: list, s: dict) -> list:
 
         story.append(Paragraph(headline, s['story_headline']))
         story.append(Paragraph(
-            f'SOURCE: {_xml_escape(source.upper())}  ·  CREDIBILITY: {cred_label}  ·  VELOCITY: {_xml_escape(velocity.upper())}',
+            f'SOURCE: {safe_source}  ·  CREDIBILITY: {cred_label}  ·  VELOCITY: {safe_velocity}',
             s['story_source']
         ))
-        story.append(Paragraph(_xml_escape(content), s['body']))
+        story.append(Paragraph(safe_content, s['body']))
 
-        # Build gate trace from gate_results if gate_trace not present
-        gates = rec.get('gate_trace')
-        if not gates:
-            gate_results = rec.get('gate_results', {})
-            if gate_results:
-                gates = {
-                    k: {'pass': bool(v), 'reason': 'passed' if v else 'failed'}
-                    for k, v in gate_results.items()
-                }
-            else:
-                gates = {
-                    'Credibility': {'pass': True, 'reason': 'Primary source, verifiable'},
-                    'Volume':      {'pass': True, 'reason': 'Sufficient content depth'},
-                    'Velocity':    {'pass': True, 'reason': 'Within recency threshold'},
-                    'Novelty':     {'pass': True, 'reason': 'High-value domain keyword match'},
-                }
+        # Gate box — handle both real engine shape (dict[str, bool]) and
+        # enriched shape (dict[str, {passed, reason}]).
+        gate_results = rec.get('gate_results', {})
+        if gate_results:
+            gates = {}
+            for name, res in gate_results.items():
+                if isinstance(res, dict):
+                    gates[name.title()] = {'pass': res.get('passed', True), 'reason': res.get('reason', '')}
+                else:
+                    gates[name.title()] = {'pass': bool(res), 'reason': ''}
+        else:
+            gates = {
+                'Credibility': {'pass': True, 'reason': 'Primary source, verifiable'},
+                'Volume':      {'pass': True, 'reason': 'Sufficient content depth'},
+                'Velocity':    {'pass': True, 'reason': 'Within recency threshold'},
+                'Novelty':     {'pass': True, 'reason': 'High-value domain keyword match'},
+            }
+
         story.extend(_gate_box(gates, s))
         story.append(_hr(BORDER, 0.4, 4, 10))
+
     return story
 
 
@@ -203,15 +225,21 @@ def _build_intelligence_page(brief_text: str, cycle_stats: dict, s: dict) -> lis
     story.append(Paragraph('INTELLIGENCE', s['section_label']))
     story.append(_hr(BORDER, 0.4, 0, 10))
 
-    pattern_text = _xml_escape(brief_text[:600].strip()) if brief_text else 'Pattern analysis pending.'
+    raw_text     = brief_text[:600].strip() if brief_text else 'Pattern analysis pending.'
+    pattern_text = _xml_escape(raw_text)
 
     psyop_class  = cycle_stats.get('psyop_classification', 'NOISE')
     patterns     = cycle_stats.get('psyop_patterns_fired', [])
-    pattern_name = patterns[0] if patterns else 'Signal Convergence'
+    raw_name     = patterns[0] if patterns else 'Signal Convergence'
+    pattern_name = _xml_escape(raw_name.replace('_', ' ').title())
 
-    story.append(Paragraph(f'Pattern: {_xml_escape(pattern_name.replace("_", " ").title())}', s['pattern_title']))
     story.append(Paragraph(
-        f'ANALYST: SYSTEMS ARCHITECT  ·  CONFIDENCE: {"MEDIUM-HIGH" if psyop_class != "NOISE" else "MEDIUM"}',
+        f'Pattern: {pattern_name}',
+        s['pattern_title']
+    ))
+    story.append(Paragraph(
+        f'ANALYST: SYSTEMS ARCHITECT  ·  CONFIDENCE: '
+        f'{"MEDIUM-HIGH" if psyop_class != "NOISE" else "MEDIUM"}',
         s['analyst_meta']
     ))
     story.append(Paragraph(pattern_text, s['body']))
@@ -224,10 +252,11 @@ def _build_intelligence_page(brief_text: str, cycle_stats: dict, s: dict) -> lis
             'Temporal clustering analysis pending cross-reference with legislative calendar.',
             s['body']
         ))
+
     return story
 
 
-def _draw_hexagon_cover(run_date: str, domain_scores: dict) -> Drawing:
+def _draw_hexagon_cover(domain_scores: dict) -> Drawing:
     """
     Draw the World State Brief hexagon radar cover.
     Six nodes: POWER · SECURITY · ECONOMICS · CONFLICT · DIPLOMACY · ALLIANCES
@@ -298,6 +327,18 @@ def _draw_hexagon_cover(run_date: str, domain_scores: dict) -> Drawing:
     return d
 
 
+def _derive_domain_scores(cycle_stats: dict) -> dict:
+    """Derive and clamp the six radar domain scores to [0.0, 1.0]."""
+    return {
+        'power':     min(1.0, max(0.0, cycle_stats.get('signals_harvested', 100) / 300)),
+        'security':  min(1.0, max(0.0, cycle_stats.get('confidence_avg', 0.6))),
+        'economics': 0.5,
+        'conflict':  min(1.0, max(0.0, cycle_stats.get('psyop_score', 2) / 10)),
+        'diplomacy': 0.4,
+        'alliances': 0.35,
+    }
+
+
 def generate_publication(
     records: list,
     brief_text: str,
@@ -325,16 +366,24 @@ def generate_publication(
 
     if issue_number is None:
         existing = list(Path(output_dir).glob('spec1_issue_*.pdf'))
-        # Parse max NNN from existing filenames to avoid gaps/collisions
-        parsed = []
+        max_n = 0
         for p in existing:
-            m = re.match(r'spec1_issue_(\d+)_', p.name)
+            m = _ISSUE_RE.search(p.stem)
             if m:
-                parsed.append(int(m.group(1)))
-        issue_number = (max(parsed) + 1) if parsed else 1
-    issue_str = str(issue_number).zfill(3)
+                max_n = max(max_n, int(m.group(1)))
+        issue_number = max_n + 1
 
-    out_path = str(Path(output_dir) / f'spec1_issue_{issue_str}_{file_date}.pdf')
+    # Bump issue number until we find a path that doesn't exist (never overwrites).
+    for _ in range(10_000):
+        issue_str = str(issue_number).zfill(3)
+        out_path = str(Path(output_dir) / f'spec1_issue_{issue_str}_{file_date}.pdf')
+        if not Path(out_path).exists():
+            break
+        issue_number += 1
+    else:
+        raise RuntimeError(
+            f"Could not find an unused issue number after 10000 attempts in {output_dir!r}"
+        )
 
     doc = SimpleDocTemplate(
         out_path,
@@ -352,24 +401,17 @@ def generate_publication(
 
     # ── PAGE 1: SIGNALS ──
     story.extend(_build_signals_page(records, s))
+    story.append(PageBreak())
 
     # ── PAGE 2: INTELLIGENCE ──
     story.extend(_build_intelligence_page(brief_text, cycle_stats, s))
+    story.append(PageBreak())
 
-    # ── COVER (Page 3) ──
+    # ── PAGE 3: WORLD STATE BRIEF COVER ──
     story.append(Spacer(1, 1.85 * inch))
     story.append(_hr(BLACK, 1, 0, 16))
 
-    domain_scores = {
-        'power':     min(1.0, cycle_stats.get('signals_harvested', 100) / 300),
-        'security':  min(1.0, max(0.0, cycle_stats.get('confidence_avg', 0.6))),
-        'economics': 0.5,
-        'conflict':  min(1.0, cycle_stats.get('psyop_score', 2) / 10),
-        'diplomacy': 0.4,
-        'alliances': 0.35,
-    }
-
-    hex_drawing = _draw_hexagon_cover(date_str, domain_scores)
+    hex_drawing = _draw_hexagon_cover(_derive_domain_scores(cycle_stats))
     story.append(hex_drawing)
 
     title_data = [[
