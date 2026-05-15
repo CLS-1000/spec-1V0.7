@@ -16,7 +16,7 @@ def _safe_pdf_path(p: Path) -> Path:
     """Resolve path and ensure it stays within _BRIEFS_DIR (no symlink escape)."""
     resolved = p.resolve()
     base = _BRIEFS_DIR.resolve()
-    if p.is_symlink() or not str(resolved).startswith(str(base)):
+    if p.is_symlink() or not resolved.is_relative_to(base):
         raise HTTPException(status_code=403, detail="Access denied")
     return resolved
 
@@ -24,7 +24,10 @@ def _safe_pdf_path(p: Path) -> Path:
 @router.get("/latest")
 def get_latest_publication() -> FileResponse:
     """Return the most recently generated publication PDF."""
-    pdfs = list(_BRIEFS_DIR.glob("spec1_issue_*.pdf")) if _BRIEFS_DIR.exists() else []
+    pdfs = (
+        [p for p in _BRIEFS_DIR.glob("spec1_issue_*.pdf") if not p.is_symlink()]
+        if _BRIEFS_DIR.exists() else []
+    )
     if not pdfs:
         raise HTTPException(status_code=404, detail="No publication PDFs found")
     latest = max(pdfs, key=lambda p: p.stat().st_mtime)

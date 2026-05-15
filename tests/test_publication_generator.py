@@ -259,6 +259,29 @@ def test_publication_latest_returns_404_when_no_pdfs(tmp_path, monkeypatch):
     assert resp.status_code == 404
 
 
+def test_publication_latest_returns_pdf_when_exists(tmp_path, monkeypatch, sample_records, sample_brief_text, sample_cycle_stats):
+    """GET /publication/latest must return 200 with application/pdf when a PDF exists."""
+    from spec1_engine.tools.publication_generator import generate_publication
+    import spec1_api.routers.publication as pub_mod
+    monkeypatch.setattr(pub_mod, '_BRIEFS_DIR', tmp_path)
+
+    generate_publication(
+        records=sample_records,
+        brief_text=sample_brief_text,
+        cycle_stats=sample_cycle_stats,
+        output_dir=str(tmp_path),
+        issue_number=1,
+    )
+
+    from fastapi.testclient import TestClient
+    from spec1_api.main import create_app
+    client = TestClient(create_app())
+    resp = client.get('/publication/latest')
+    assert resp.status_code == 200
+    assert resp.headers['content-type'] == 'application/pdf'
+    assert 'spec1_issue_001' in resp.headers.get('content-disposition', '')
+
+
 def test_publication_list_returns_stable_shape(tmp_path, monkeypatch, sample_records, sample_brief_text, sample_cycle_stats):
     """GET /publication/list must return {total, items} and order newest first."""
     from spec1_engine.tools.publication_generator import generate_publication

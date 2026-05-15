@@ -12,8 +12,6 @@ from pathlib import Path
 from typing import Optional
 from xml.sax.saxutils import escape as _xml_escape
 
-_ISSUE_RE = re.compile(r'spec1_issue_(\d+)')
-
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.lib import colors
@@ -35,6 +33,8 @@ BORDER = colors.HexColor('#cccccc')
 LIGHT  = colors.HexColor('#f2f1ed')
 MONO   = 'Courier'
 MONO_B = 'Courier-Bold'
+
+_ISSUE_RE = re.compile(r'spec1_issue_(\d+)')
 
 
 def _styles() -> dict:
