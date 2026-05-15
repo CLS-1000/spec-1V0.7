@@ -225,14 +225,16 @@ def _build_intelligence_page(brief_text: str, cycle_stats: dict, s: dict) -> lis
     story.append(Paragraph('INTELLIGENCE', s['section_label']))
     story.append(_hr(BORDER, 0.4, 0, 10))
 
-    pattern_text = brief_text[:600].strip() if brief_text else 'Pattern analysis pending.'
+    raw_text     = brief_text[:600].strip() if brief_text else 'Pattern analysis pending.'
+    pattern_text = _xml_escape(raw_text)
 
     psyop_class  = cycle_stats.get('psyop_classification', 'NOISE')
     patterns     = cycle_stats.get('psyop_patterns_fired', [])
-    pattern_name = patterns[0] if patterns else 'Signal Convergence'
+    raw_name     = patterns[0] if patterns else 'Signal Convergence'
+    pattern_name = _xml_escape(raw_name.replace('_', ' ').title())
 
     story.append(Paragraph(
-        f'Pattern: {pattern_name.replace("_", " ").title()}',
+        f'Pattern: {pattern_name}',
         s['pattern_title']
     ))
     story.append(Paragraph(
