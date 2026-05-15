@@ -20,7 +20,7 @@ from reportlab.platypus import (
 )
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.graphics.shapes import Drawing, Line, Circle, Polygon, String
-from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
+from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 
 W, H = letter
 M = 0.7 * inch
@@ -33,6 +33,7 @@ BORDER = colors.HexColor('#cccccc')
 LIGHT  = colors.HexColor('#f2f1ed')
 MONO   = 'Courier'
 MONO_B = 'Courier-Bold'
+
 
 _ISSUE_RE = re.compile(r'spec1_issue_(\d+)')
 
@@ -85,7 +86,6 @@ def _hr(color=BORDER, thickness=0.5, sb=4, sa=4) -> HRFlowable:
 def _page_canvas(c, doc) -> None:
     """Draw masthead and footer on every page."""
     c.saveState()
-
     # Top border
     c.setFillColor(BLACK)
     c.rect(0, H - 3, W, 3, fill=1, stroke=0)
@@ -100,10 +100,9 @@ def _page_canvas(c, doc) -> None:
     c.setFont(MONO_B, 28)
     c.setFillColor(BLACK)
     c.drawCentredString(W / 2, H - M - 0.55 * inch, 'S P E C - 1')
-
     c.setFont(MONO, 8)
     c.setFillColor(DIM)
-    c.drawCentredString(W / 2, H - M - 0.78 * inch, 'SIGNAL INTELLIGENCE ENGINE  \xb7  OSINT')
+    c.drawCentredString(W / 2, H - M - 0.78 * inch, 'SIGNAL INTELLIGENCE ENGINE  ·  OSINT')
 
     # Issue and date below box
     issue_n  = getattr(doc, '_issue_number', '001')
@@ -139,6 +138,7 @@ def _gate_box(gates: dict, s: dict) -> list:
         reason = _xml_escape(result.get('reason', ''))
         gate_lines.append(
             Paragraph(f'{_xml_escape(gate_name)} Gate: {status} ({reason})', s['gate_item'])
+
         )
     table_data = [[g] for g in gate_lines]
     t = Table(table_data, colWidths=[W - 2 * M - 0.4 * inch])
@@ -188,7 +188,7 @@ def _build_signals_page(records: list, s: dict) -> list:
 
         story.append(Paragraph(headline, s['story_headline']))
         story.append(Paragraph(
-            f'SOURCE: {safe_source}  \xb7  CREDIBILITY: {cred_label}  \xb7  VELOCITY: {safe_velocity}',
+            f'SOURCE: {safe_source}  ·  CREDIBILITY: {cred_label}  ·  VELOCITY: {safe_velocity}',
             s['story_source']
         ))
         story.append(Paragraph(safe_content, s['body']))
@@ -238,7 +238,7 @@ def _build_intelligence_page(brief_text: str, cycle_stats: dict, s: dict) -> lis
         s['pattern_title']
     ))
     story.append(Paragraph(
-        f'ANALYST: SYSTEMS ARCHITECT  \xb7  CONFIDENCE: '
+        f'ANALYST: SYSTEMS ARCHITECT  ·  CONFIDENCE: '
         f'{"MEDIUM-HIGH" if psyop_class != "NOISE" else "MEDIUM"}',
         s['analyst_meta']
     ))
@@ -303,14 +303,12 @@ def _draw_hexagon_cover(domain_scores: dict) -> Drawing:
         spoke = Line(cx, cy, nx, ny,
                      strokeColor=colors.HexColor('#cccccc'), strokeWidth=0.5)
         d.add(spoke)
-
         dot = Circle(nx, ny, 7,
                      fillColor=WHITE,
                      strokeColor=colors.HexColor('#111110'), strokeWidth=1)
         d.add(dot)
         inner = Circle(nx, ny, 2.5, fillColor=colors.HexColor('#111110'))
         d.add(inner)
-
         label_r = r + 22
         lx = cx + label_r * math.cos(angle)
         ly = cy + label_r * math.sin(angle)
@@ -352,19 +350,18 @@ def generate_publication(
     Generate a Psyche-Ops publication PDF from cycle output.
 
     Args:
-        records:      List of IntelligenceRecord dicts (top scored).
-        brief_text:   The full brief markdown text.
-        cycle_stats:  Cycle run summary dict.
-        output_dir:   Directory to write PDF to.
-        issue_number: Issue number (auto-increments if None).
+        records:      List of IntelligenceRecord dicts (top scored)
+        brief_text:   The full brief markdown text
+        cycle_stats:  Cycle run summary dict
+        output_dir:   Directory to write PDF to
+        issue_number: Issue number (auto-increments if None)
 
     Returns:
-        Path to the generated PDF.
+        Path to the generated PDF
     """
     Path(output_dir).mkdir(parents=True, exist_ok=True)
-
     run_date = datetime.now(timezone.utc)
-    date_str  = run_date.strftime('%B %d, %Y').upper()
+    date_str = run_date.strftime('%B %d, %Y').upper()
     file_date = run_date.strftime('%Y-%m-%d')
 
     if issue_number is None:
@@ -390,7 +387,7 @@ def generate_publication(
         leftMargin=M, rightMargin=M,
         topMargin=0.55 * inch, bottomMargin=0.8 * inch,
         title=f'SPEC-1 Issue {issue_str}',
-        author='SPEC-1 \xb7 EVASTARARCANA LLC',
+        author='SPEC-1 · EVASTARARCANA LLC',
     )
     doc._issue_number = issue_str
     doc._issue_date   = date_str
@@ -424,9 +421,8 @@ def generate_publication(
         ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
     ]))
     story.append(tt)
-
     story.append(Paragraph(
-        'GEOPOLITICAL INTELLIGENCE  \xb7  DAILY ANALYSIS',
+        'GEOPOLITICAL INTELLIGENCE  ·  DAILY ANALYSIS',
         ParagraphStyle('wsub', fontName=MONO, fontSize=9, textColor=DIM,
                        leading=13, alignment=TA_CENTER, letterSpacing=3, spaceAfter=16)
     ))

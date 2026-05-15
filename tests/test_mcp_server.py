@@ -412,3 +412,4 @@ class TestHandleRequest:
         mcp_server.handle_request(line)
         out = capsys.readouterr().out
         assert out == ""
+

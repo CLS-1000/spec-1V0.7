@@ -13,6 +13,7 @@ router = APIRouter(prefix="/publication", tags=["publication"])
 _BRIEFS_DIR = Path("generated/briefs")
 
 
+
 def _safe_pdf_path(p: Path) -> Path:
     """Resolve path and ensure it stays within _BRIEFS_DIR (no symlink escape)."""
     resolved = p.resolve()
@@ -58,3 +59,4 @@ def list_publications() -> dict:
     pdfs = sorted(_real_pdfs(), key=lambda t: (t[1].st_mtime, t[0].name), reverse=True)
     items = [{"filename": p.name, "size_bytes": st.st_size} for p, st in pdfs]
     return {"total": len(items), "items": items}
+

@@ -2,7 +2,6 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.so
-.Python
 build/
 develop-eggs/
 dist/
@@ -20,25 +19,40 @@ wheels/
 *.egg
 MANIFEST
 .env
+.envrc
 .venv
+
+# Shell init files — never commit; high risk of leaking secrets via env exports
+.bashrc
+.zshrc
+.bash_profile
+.profile
 env/
 venv/
 ENV/
-env.bak/
-venv.bak/
 .pytest_cache/
 .coverage
 htmlcov/
 *.jsonl
 *.log
+*.db
 .DS_Store
+
+# SQLite databases — runtime artifacts, never committed
+*.db
 
 # Generated artifacts — briefs, historical outputs, logs
 # Write these to generated/ or a dedicated branch, not main
 generated/
-data/psyop_signals.jsonl
-
-# Generated brief and prompt markdown files — never committed to main
 briefs/
 workspace/
 .mcp.json
+
+# Loose runtime artifacts at root — exports, rendered HTML, kill files
+/spec1_intelligence_export.json
+/spec1_portfolio.html
+/spec1_ui.html
+/.kill_cycle
+
+# Personal scratch scripts — not part of the project
+/get_signals.py

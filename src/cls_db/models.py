@@ -163,6 +163,31 @@ VERDICTS_RECORD_ID_INDEX_DDL = (
     "CREATE INDEX IF NOT EXISTS idx_verdicts_record_id ON verdicts(record_id)"
 )
 
+POLITICAL_SIGNALS_DDL = """
+CREATE TABLE IF NOT EXISTS political_signals (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    signal_id        TEXT    UNIQUE NOT NULL,
+    node_id          TEXT    NOT NULL,
+    run_id           TEXT    NOT NULL,
+    headline         TEXT    NOT NULL,
+    summary          TEXT    NOT NULL,
+    source_url       TEXT    NOT NULL,
+    source_domain    TEXT    NOT NULL,
+    published_at     TEXT    NOT NULL,
+    retrieved_at     TEXT    NOT NULL,
+    gate_status      TEXT    NOT NULL,
+    gate_credibility REAL    NOT NULL,
+    gate_volume      REAL    NOT NULL,
+    gate_velocity    REAL    NOT NULL,
+    gate_novelty     REAL    NOT NULL,
+    signal_age_hours REAL    NOT NULL,
+    freshness_label  TEXT    NOT NULL,
+    analyst_voice    TEXT,
+    conflict_score   REAL,
+    tags             TEXT    DEFAULT '[]'
+)
+"""
+
 # Ordered list of all DDL statements (for migration runner)
 ALL_DDL: list[tuple[str, str]] = [
     ("signals", SIGNALS_DDL),
@@ -175,9 +200,14 @@ ALL_DDL: list[tuple[str, str]] = [
     ("psyop_scores", PSYOP_SCORES_DDL),
     ("quant_signals", QUANT_SIGNALS_DDL),
     ("verdicts", VERDICTS_DDL),
+    ("political_signals", POLITICAL_SIGNALS_DDL),
 ]
 
 # Auxiliary DDL — indexes and other idempotent statements run after table creation.
 AUX_DDL: list[str] = [
     VERDICTS_RECORD_ID_INDEX_DDL,
+    "CREATE INDEX IF NOT EXISTS idx_ps_node_id ON political_signals (node_id)",
+    "CREATE INDEX IF NOT EXISTS idx_ps_gate_status ON political_signals (gate_status)",
+    "CREATE INDEX IF NOT EXISTS idx_ps_published_at ON political_signals (published_at)",
+    "CREATE INDEX IF NOT EXISTS idx_ps_node_gate_pub ON political_signals (node_id, gate_status, published_at)",
 ]

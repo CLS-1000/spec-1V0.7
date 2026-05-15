@@ -34,7 +34,7 @@ I picked this because I wanted the durability story to be obvious: the source of
 
 ### 4. Test discipline as a calibration anchor
 
-The repo has 708 passing tests across the engine, OSINT adapters, psyop detection, briefing, persistence, the API, and the MCP server. Test coverage isn't the story — what's in the tests is. Most of them encode a specific decision: this is the threshold we chose, this is the boundary case it has to handle, this is the failure mode we don't want to regress.
+The repo has roughly 825 collected pytest tests across 30 files — covering the engine, OSINT adapters, psyop detection, briefing, persistence, the API, the MCP server, and the operator tools. Test coverage isn't the story — what's in the tests is. Most of them encode a specific decision: this is the threshold we chose, this is the boundary case it has to handle, this is the failure mode we don't want to regress.
 
 When a calibration changes, the tests check that nothing else moved silently. That's the property I needed: I can adjust thresholds without lying awake wondering what I broke.
 

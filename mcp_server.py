@@ -13,6 +13,9 @@ Tools exposed:
   - file_verdict       File a human verdict on an intelligence record
   - get_verdicts       Return verdicts (optionally for a single record)
   - get_calibration    Produce a calibration drift report from intel + verdicts
+  - run_psyop          Score every intelligence record for psyop patterns (operator tool)
+  - generate_brief     Build a daily brief for one run_id (operator tool, Claude + fallback)
+  - generate_leads     Derive Lead objects from intelligence records (operator tool)
 
 This server uses a simple JSON-RPC 2.0 over stdio protocol compatible
 with the Claude MCP specification.
@@ -72,21 +75,19 @@ def _read_jsonl(path: Path, limit: int = 20) -> list[dict]:
 
 
 def tool_run_cycle(args: dict) -> dict:
-    """Run a full SPEC-1 intelligence cycle."""
-    from spec1_engine.core.engine import Engine, EngineConfig
+    """Run a full SPEC-1 intelligence cycle (all steps: psyop, brief, publication, workspace)."""
+    from spec1_engine.app.cycle import run_cycle
 
     max_signals = args.get("max_signals")
     environment = args.get("environment", "production")
     store_path = _store_path("SPEC1_STORE_PATH", "spec1_intelligence.jsonl")
 
-    config = EngineConfig(
-        environment=environment,
+    return run_cycle(
         store_path=store_path,
+        environment=environment,
         max_signals=int(max_signals) if max_signals else None,
+        verbose=False,
     )
-    engine = Engine(config)
-    stats = engine.run()
-    return stats.to_dict()
 
 
 def tool_get_signals(args: dict) -> list[dict]:
@@ -226,6 +227,123 @@ def tool_get_verdicts(args: dict) -> list[dict]:
         return store.for_record(str(record_id))
     # Tail of the JSONL — last `limit` verdicts in insertion order.
     return list(store.read_all())[-limit:]
+
+
+def tool_run_psyop(args: dict) -> dict:
+    """Score every intelligence record for psyop patterns and persist the scores.
+
+    Reads from $SPEC1_STORE_PATH (default spec1_intelligence.jsonl) and
+    writes one PsyopScore per scored record to the configured psyop store.
+    """
+    from cls_psyop.scorer import filter_risky, score_records
+    from cls_psyop.store import PsyopStore
+
+    intel_path = _store_path("SPEC1_STORE_PATH", "spec1_intelligence.jsonl")
+    out_path = Path(args.get("out") or os.environ.get("SPEC1_PSYOP_PATH", "generated/psyop_scores.jsonl"))
+    min_classification = args.get("min_classification", "CLEAN")
+
+    records = _read_jsonl(intel_path, limit=10**9)
+    scores = score_records(records)
+    if min_classification != "CLEAN":
+        scores = filter_risky(scores, min_classification=min_classification)
+
+    written = PsyopStore(out_path).save_batch(scores)
+    by_class: dict[str, int] = {}
+    for s in scores:
+        by_class[s.classification] = by_class.get(s.classification, 0) + 1
+
+    return {
+        "intel_path": str(intel_path),
+        "out_path": str(out_path),
+        "records_read": len(records),
+        "scores_kept": len(scores),
+        "scores_written": len(written),
+        "by_classification": by_class,
+    }
+
+
+def tool_generate_brief(args: dict) -> dict:
+    """Generate a daily intelligence brief for one run_id (default: latest).
+
+    Tries Claude Sonnet first; falls back to the rule-based producer on failure
+    or when ANTHROPIC_API_KEY is unset. Writes to generated/briefs/ by default.
+    """
+    from spec1_engine.tools.generate_brief import (
+        _cycle_stats_for,
+        _group_by_run_id,
+        _pick_run,
+        _read_jsonl as _read_intel_jsonl,
+        _rule_based_fallback,
+        _try_claude,
+        _write_outputs,
+    )
+
+    intel_path = _store_path("SPEC1_STORE_PATH", "spec1_intelligence.jsonl")
+    out_dir = Path(args.get("out_dir") or os.environ.get("SPEC1_BRIEFS_DIR", "generated/briefs"))
+    run_id_arg = args.get("run_id", "latest")
+    rule_based = bool(args.get("rule_based", False))
+
+    records = _read_intel_jsonl(intel_path)
+    if not records:
+        return {"records_read": 0, "out_path": None, "note": "no records"}
+
+    groups = _group_by_run_id(records)
+    run_id, run_records = _pick_run(groups, run_id_arg)
+    cycle_stats = _cycle_stats_for(run_id, run_records)
+
+    brief_md = ""
+    prompts = ""
+    used_fallback = False
+    if not rule_based:
+        result = _try_claude(run_records, cycle_stats)
+        if result is not None:
+            brief_md, prompts = result
+    if not brief_md:
+        brief_md = _rule_based_fallback(run_records)
+        used_fallback = True
+
+    out_path = _write_outputs(out_dir, brief_md, prompts, run_id, cycle_stats["finished_at"])
+    return {
+        "run_id": run_id,
+        "records_used": len(run_records),
+        "word_count": len(brief_md.split()),
+        "source": "rule-based" if used_fallback else "claude",
+        "out_path": str(out_path),
+    }
+
+
+def tool_generate_leads(args: dict) -> dict:
+    """Derive Lead objects from intelligence records and persist them.
+
+    Reads from $SPEC1_STORE_PATH and writes Lead JSONL to the configured leads store.
+    """
+    from cls_leads.generator import generate_leads
+    from cls_leads.store import LeadStore
+
+    intel_path = _store_path("SPEC1_STORE_PATH", "spec1_intelligence.jsonl")
+    out_path = Path(args.get("out") or os.environ.get("SPEC1_LEADS_PATH", "generated/leads.jsonl"))
+    min_confidence = float(args.get("min_confidence", 0.3))
+    max_leads = int(args.get("max_leads", 50))
+    priority_filter = args.get("priority")
+
+    records = _read_jsonl(intel_path, limit=10**9)
+    leads = generate_leads(records, min_confidence=min_confidence, max_leads=max_leads)
+    if priority_filter:
+        leads = [lead for lead in leads if lead.priority == priority_filter]
+
+    written = LeadStore(out_path).save_batch(leads)
+    by_priority: dict[str, int] = {}
+    for lead in leads:
+        by_priority[lead.priority] = by_priority.get(lead.priority, 0) + 1
+
+    return {
+        "intel_path": str(intel_path),
+        "out_path": str(out_path),
+        "records_read": len(records),
+        "leads_kept": len(leads),
+        "leads_written": len(written),
+        "by_priority": by_priority,
+    }
 
 
 def tool_get_calibration(args: dict) -> dict:
@@ -393,6 +511,55 @@ TOOLS: dict[str, dict] = {
             },
         },
         "fn": tool_get_calibration,
+    },
+    "run_psyop": {
+        "description": (
+            "Score every intelligence record for psyop patterns and append the scores to "
+            "the psyop store. Operator tool — runs out of band from the cycle."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "out": {"type": "string", "description": "Output JSONL path (default generated/psyop_scores.jsonl)"},
+                "min_classification": {
+                    "type": "string",
+                    "enum": ["CLEAN", "LOW_RISK", "MEDIUM_RISK", "HIGH_RISK"],
+                    "default": "CLEAN",
+                },
+            },
+        },
+        "fn": tool_run_psyop,
+    },
+    "generate_brief": {
+        "description": (
+            "Generate a daily intelligence brief for one run_id (default: latest run). "
+            "Tries Claude Sonnet first; falls back to the rule-based producer."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "run_id": {"type": "string", "default": "latest"},
+                "out_dir": {"type": "string", "description": "Output directory (default generated/briefs)"},
+                "rule_based": {"type": "boolean", "default": False, "description": "Skip Claude entirely"},
+            },
+        },
+        "fn": tool_generate_brief,
+    },
+    "generate_leads": {
+        "description": (
+            "Derive actionable Lead objects from intelligence records and persist them. "
+            "Operator tool — runs out of band from the cycle."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "out": {"type": "string", "description": "Output JSONL path (default generated/leads.jsonl)"},
+                "min_confidence": {"type": "number", "default": 0.3},
+                "max_leads": {"type": "integer", "default": 50},
+                "priority": {"type": "string", "enum": ["CRITICAL", "HIGH", "MEDIUM", "LOW"]},
+            },
+        },
+        "fn": tool_generate_leads,
     },
 }
 
