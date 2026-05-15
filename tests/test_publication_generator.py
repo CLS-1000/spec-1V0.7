@@ -174,7 +174,7 @@ def test_generate_publication_domain_scores_capped(tmp_path, sample_records, sam
 
 
 def test_generate_publication_explicit_issue_number(tmp_path, sample_records, sample_brief_text, sample_cycle_stats):
-    """Explicit issue_number parameter must be used verbatim in the filename."""
+    """Explicit issue_number appears in the filename when no collision exists."""
     from spec1_engine.tools.publication_generator import generate_publication
 
     out = generate_publication(
@@ -284,25 +284,28 @@ def test_publication_latest_returns_pdf_when_exists(tmp_path, monkeypatch, sampl
 
 def test_publication_list_returns_stable_shape(tmp_path, monkeypatch, sample_records, sample_brief_text, sample_cycle_stats):
     """GET /publication/list must return {total, items} and order newest first."""
+    import os
     from spec1_engine.tools.publication_generator import generate_publication
     import spec1_api.routers.publication as pub_mod
     monkeypatch.setattr(pub_mod, '_BRIEFS_DIR', tmp_path)
 
-    # Generate two PDFs with different issue numbers.
-    generate_publication(
+    out1 = generate_publication(
         records=sample_records,
         brief_text=sample_brief_text,
         cycle_stats=sample_cycle_stats,
         output_dir=str(tmp_path),
         issue_number=1,
     )
-    generate_publication(
+    out2 = generate_publication(
         records=sample_records,
         brief_text=sample_brief_text,
         cycle_stats=sample_cycle_stats,
         output_dir=str(tmp_path),
         issue_number=2,
     )
+    # Force distinct mtimes so ordering is deterministic across all filesystems.
+    os.utime(out1, (1_000_000, 1_000_000))
+    os.utime(out2, (2_000_000, 2_000_000))
 
     from fastapi.testclient import TestClient
     from spec1_api.main import create_app
@@ -314,5 +317,5 @@ def test_publication_list_returns_stable_shape(tmp_path, monkeypatch, sample_rec
     assert 'items' in body
     assert body['total'] == 2
     assert len(body['items']) == 2
-    # Newest first — issue 002 should appear before issue 001.
+    # Newest first — issue 002 (mtime=2_000_000) should appear before issue 001.
     assert 'spec1_issue_002' in body['items'][0]['filename']
