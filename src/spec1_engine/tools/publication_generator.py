@@ -374,12 +374,16 @@ def generate_publication(
         issue_number = max_n + 1
 
     # Bump issue number until we find a path that doesn't exist (never overwrites).
-    while True:
+    for _ in range(10_000):
         issue_str = str(issue_number).zfill(3)
         out_path = str(Path(output_dir) / f'spec1_issue_{issue_str}_{file_date}.pdf')
         if not Path(out_path).exists():
             break
         issue_number += 1
+    else:
+        raise RuntimeError(
+            f"Could not find an unused issue number after 10000 attempts in {output_dir!r}"
+        )
 
     doc = SimpleDocTemplate(
         out_path,
