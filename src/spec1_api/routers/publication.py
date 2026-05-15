@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
@@ -21,16 +22,19 @@ def _safe_pdf_path(p: Path) -> Path:
     return resolved
 
 
-def _real_pdfs() -> list[Path]:
-    """Return non-symlink spec1_issue_*.pdf paths under _BRIEFS_DIR."""
+def _real_pdfs() -> list[tuple[Path, os.stat_result]]:
+    """Return (path, stat) pairs for non-symlink PDFs; files deleted mid-scan are skipped."""
     if not _BRIEFS_DIR.exists():
         return []
-    return [p for p in _BRIEFS_DIR.glob("spec1_issue_*.pdf") if not p.is_symlink()]
-
-
-def _pdf_sort_key(p: Path) -> tuple:
-    """Sort key: (mtime, filename) — mtime for recency, filename for stable tie-break."""
-    return (p.stat().st_mtime, p.name)
+    result = []
+    for p in _BRIEFS_DIR.glob("spec1_issue_*.pdf"):
+        if p.is_symlink():
+            continue
+        try:
+            result.append((p, p.stat()))
+        except OSError:
+            pass
+    return result
 
 
 @router.get("/latest")
@@ -39,7 +43,7 @@ def get_latest_publication() -> FileResponse:
     pdfs = _real_pdfs()
     if not pdfs:
         raise HTTPException(status_code=404, detail="No publication PDFs found")
-    latest = max(pdfs, key=_pdf_sort_key)
+    latest, _ = max(pdfs, key=lambda t: (t[1].st_mtime, t[0].name))
     safe = _safe_pdf_path(latest)
     return FileResponse(
         path=str(safe),
@@ -51,6 +55,6 @@ def get_latest_publication() -> FileResponse:
 @router.get("/list")
 def list_publications() -> dict:
     """Return metadata for all generated publication PDFs, newest first."""
-    pdfs = sorted(_real_pdfs(), key=_pdf_sort_key, reverse=True)
-    items = [{"filename": p.name, "size_bytes": p.stat().st_size} for p in pdfs]
+    pdfs = sorted(_real_pdfs(), key=lambda t: (t[1].st_mtime, t[0].name), reverse=True)
+    items = [{"filename": p.name, "size_bytes": st.st_size} for p, st in pdfs]
     return {"total": len(items), "items": items}
