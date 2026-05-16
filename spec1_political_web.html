@@ -324,7 +324,7 @@
       </div>
       <div class="nav-divider"></div>
       <div class="nav-section">Filters (active)</div>
-      <div id="active-filters" style="padding:8px 16px;font-size:11px;color:var(--text-muted);line-height:1.8">
+      <div id="active-filters" style="padding:8px 16px;font-size:11px;color:var(--text-muted);line-height:1.8;white-space:pre-line">
         None
       </div>
     </nav>
@@ -437,6 +437,13 @@ function fmtConf(c) {
   return typeof c === 'number' ? (c * 100).toFixed(0) + '%' : '—';
 }
 
+function safeHref(url) {
+  try {
+    const u = new URL(url);
+    return (u.protocol === 'http:' || u.protocol === 'https:') ? url : null;
+  } catch { return null; }
+}
+
 // ── Load data ─────────────────────────────────────────────────────────────────
 
 async function loadData() {
@@ -451,7 +458,10 @@ async function loadData() {
       `<div style="padding:24px;border:1px solid rgba(255,255,255,.2);font-size:13px;color:var(--text-muted)">
         Failed to load intelligence data: ${esc(e.message)}<br><br>
         Make sure <code style="font-family:var(--mono);color:var(--text-secondary)">spec1_intelligence_export.json</code>
-        is in the same directory as this file.
+        is in the same directory and serve via a local HTTP server — browsers block
+        <code style="font-family:var(--mono);color:var(--text-secondary)">fetch()</code>
+        over <code style="font-family:var(--mono);color:var(--text-secondary)">file://</code>:<br><br>
+        <code style="font-family:var(--mono);color:var(--text-secondary)">python3 -m http.server 8080</code>
       </div>`;
     document.getElementById('header-status').textContent = 'Data load failed';
   }
@@ -581,9 +591,10 @@ function renderCard(r) {
   ).join('');
 
   const hypo = r.hypothesis ? r.hypothesis.slice(0, 280) + (r.hypothesis.length > 280 ? '…' : '') : '—';
+  const urlSafe = r.signal_url ? safeHref(r.signal_url) : null;
 
   return `
-    <div class="intel-card" id="card-${esc(rid)}" onclick="toggleCard('${esc(rid)}')">
+    <div class="intel-card" id="card-${esc(rid)}" data-rid="${esc(rid)}">
       <div class="card-header">
         <div style="flex:1;min-width:0">
           <div class="card-source">${esc(src)} · ${esc(date)}</div>
@@ -614,7 +625,10 @@ function renderCard(r) {
         ${r.signal_url ? `
         <div class="detail-row">
           <div class="detail-label">Signal URL</div>
-          <div class="detail-val"><a href="${esc(r.signal_url)}" target="_blank" rel="noopener">${esc(r.signal_url)}</a></div>
+          <div class="detail-val">${urlSafe
+            ? `<a href="${esc(urlSafe)}" target="_blank" rel="noopener noreferrer">${esc(r.signal_url)}</a>`
+            : esc(r.signal_url)
+          }</div>
         </div>` : ''}
         <div class="detail-row">
           <div class="detail-label">4-Gate Results</div>
@@ -642,6 +656,12 @@ function toggleCard(rid) {
   const el = document.getElementById('card-' + rid);
   if (el) el.classList.toggle('expanded');
 }
+
+// Delegated click handler — avoids inline onclick with unescaped record IDs
+document.getElementById('feed-content').addEventListener('click', function(e) {
+  const card = e.target.closest('.intel-card');
+  if (card && card.dataset.rid) toggleCard(card.dataset.rid);
+});
 
 function renderPaginator(cur, total) {
   if (total <= 1) return '';
