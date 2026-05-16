@@ -45,6 +45,7 @@
   nav { width: 210px; flex-shrink: 0; background: rgba(10,10,10,.96); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; padding: 12px 0; }
   .nav-section { padding: 8px 16px 4px; font-size: 10px; font-weight: 600; letter-spacing: .14em; color: var(--text-muted); text-transform: uppercase; }
   .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px 16px; cursor: pointer; font-size: 12px; color: var(--text-muted); border-left: 2px solid transparent; transition: all .12s; user-select: none; letter-spacing: .04em; }
+  a.nav-item { text-decoration: none; }
   .nav-item:hover { color: var(--text-secondary); }
   .nav-item.active { color: var(--text-primary); border-left-color: var(--border); }
   .nav-glyph { font-size: 11px; width: 18px; text-align: center; }
@@ -346,6 +347,15 @@
       <div class="nav-item" data-panel="panel-local" onclick="showPanel('panel-local')">
         <span class="nav-glyph">▷</span> Local Access
       </div>
+
+      <div class="nav-divider"></div>
+      <div class="nav-section">Political</div>
+      <a class="nav-item" href="/portland-web" target="_blank" rel="noopener noreferrer">
+        <span class="nav-glyph">⊛</span> Portland Web ↗
+      </a>
+      <a class="nav-item" href="/spec1_political_web.html" target="_blank" rel="noopener noreferrer">
+        <span class="nav-glyph">◈</span> Intel Viewer ↗
+      </a>
     </nav>
 
     <!-- ── Main content ── -->
@@ -605,6 +615,22 @@ python -m spec1_engine.app.cycle</pre>
             <div class="cmd-body">
               <pre>cd ~/spec-1 &amp;&amp; PYTHONPATH=src pytest tests/ -v --tb=short</pre>
               <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && PYTHONPATH=src pytest tests/ -v --tb=short')">Copy</button>
+            </div>
+          </div>
+
+          <div class="cmd-block">
+            <div class="cmd-label">Open Portland Political Web</div>
+            <div class="cmd-body">
+              <pre>http://localhost:8000/portland-web</pre>
+              <button class="copy-btn" onclick="copyText(this, 'http://localhost:8000/portland-web')">Copy</button>
+            </div>
+          </div>
+
+          <div class="cmd-block">
+            <div class="cmd-label">Open Political Intel Viewer</div>
+            <div class="cmd-body">
+              <pre>http://localhost:8000/spec1_political_web.html</pre>
+              <button class="copy-btn" onclick="copyText(this, 'http://localhost:8000/spec1_political_web.html')">Copy</button>
             </div>
           </div>
 

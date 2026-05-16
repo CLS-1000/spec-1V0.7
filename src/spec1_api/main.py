@@ -95,6 +95,23 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=404, detail="UI not found")
         return FileResponse(path, media_type="text/html")
 
+    @app.get("/spec1_political_web.html", include_in_schema=False)
+    async def political_intel_viewer() -> FileResponse:
+        """Serve the standalone political intelligence viewer."""
+        path = _STATIC_DIR / "spec1_political_web.html"
+        if not path.is_file():
+            raise HTTPException(status_code=404, detail="Political intel viewer not found")
+        return FileResponse(path, media_type="text/html")
+
+    @app.get("/spec1_intelligence_export.json", include_in_schema=False)
+    async def political_intel_data() -> FileResponse:
+        """Serve the intelligence export JSON for the political intel viewer."""
+        repo_root = Path(__file__).parent.parent.parent
+        path = repo_root / "spec1_intelligence_export.json"
+        if not path.is_file():
+            raise HTTPException(status_code=404, detail="Intelligence export not found")
+        return FileResponse(path, media_type="application/json")
+
     app.include_router(health.router)
     app.include_router(signals.router)
     app.include_router(intel.router)
