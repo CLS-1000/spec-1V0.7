@@ -285,7 +285,7 @@
         <span class="logo-badge">S1</span>
         SPEC-1 Intelligence Engine
       </div>
-      <div class="logo-tagline">Real-time OSINT · harvest → score → investigate → analyze</div>
+      <div class="logo-tagline">Real-time OSINT · AI-powered by Claude · harvest → score → investigate → analyze</div>
     </div>
     <div id="api-status">
       <span class="status-geo offline" id="status-dot"></span>
@@ -327,6 +327,12 @@
       </div>
       <div class="nav-item" data-panel="panel-fara" onclick="showPanel('panel-fara')">
         <span class="nav-glyph">⊡</span> FARA
+      </div>
+      <div class="nav-item" data-panel="panel-congress" onclick="showPanel('panel-congress')">
+        <span class="nav-glyph">⊠</span> Congress &amp; Policy
+      </div>
+      <div class="nav-item" data-panel="panel-anomaly" onclick="showPanel('panel-anomaly')">
+        <span class="nav-glyph">△</span> Anomaly Detection
       </div>
 
       <div class="nav-divider"></div>
@@ -422,6 +428,8 @@
             <option value="fara">FARA</option>
             <option value="psyop">PSYOP</option>
             <option value="quant">QUANT</option>
+            <option value="congressional">CONGRESSIONAL</option>
+            <option value="policy">POLICY</option>
           </select>
           <button class="filter-btn" onclick="loadLeads(0)">Filter</button>
           <button class="filter-btn" onclick="document.getElementById('leads-pri').value='';document.getElementById('leads-cat').value='';loadLeads(0)">Clear</button>
@@ -478,6 +486,57 @@
           <button class="filter-btn" onclick="document.getElementById('fara-country').value='';document.getElementById('fara-reg').value='';loadFara(0)">Clear</button>
         </div>
         <div id="fara-content"><div class="loading">Loading FARA records…</div></div>
+      </div>
+
+      <!-- ─────────────────────────── Congress & Policy Desk ──────────────── -->
+      <div class="panel" id="panel-congress">
+        <div class="panel-title">⊠ Congress &amp; Policy Desk</div>
+        <div class="panel-sub">Congressional trading disclosures, conflict-of-interest scoring, and policy-driven intelligence — analyzed by Claude</div>
+
+        <div class="section-heading">Trading Disclosures</div>
+        <div class="filter-bar">
+          <label>Politician</label>
+          <input id="cong-politician" class="filter-input" placeholder="Name fragment" style="width:160px">
+          <label>Ticker</label>
+          <input id="cong-ticker" class="filter-input" placeholder="e.g. LMT" style="width:90px">
+          <label>Trade</label>
+          <select id="cong-trade" class="filter-select" style="width:120px">
+            <option value="">All</option>
+            <option value="Purchase">Purchase</option>
+            <option value="Sale">Sale</option>
+          </select>
+          <button class="filter-btn" onclick="loadCongress(0)">Filter</button>
+          <button class="filter-btn" onclick="document.getElementById('cong-politician').value='';document.getElementById('cong-ticker').value='';document.getElementById('cong-trade').value='';loadCongress(0)">Clear</button>
+        </div>
+        <div id="congress-signals-content"><div class="loading">Loading congressional signals…</div></div>
+
+        <div class="section-sep"></div>
+        <div class="section-heading">COI Intelligence Records</div>
+        <div id="congress-intel-content"><div class="loading">Loading COI records…</div></div>
+      </div>
+
+      <!-- ─────────────────────────── Anomaly Detection ───────────────────── -->
+      <div class="panel" id="panel-anomaly">
+        <div class="panel-title">△ Anomaly Detection</div>
+        <div class="panel-sub">Quant and behavioral anomaly patterns — breakouts, volume spikes, momentum shifts, and structural deviations detected by Claude Sonnet</div>
+
+        <div class="filter-bar">
+          <label>Pattern type</label>
+          <select id="anomaly-type" class="filter-select" style="width:180px">
+            <option value="">All Anomalies</option>
+            <option value="HIGH_VOL_BREAKOUT">Breakout (High Vol)</option>
+            <option value="HIGH_VOL_BREAKDOWN">Breakdown (High Vol)</option>
+            <option value="VOLUME_SPIKE">Volume Spike</option>
+            <option value="MOMENTUM_UP">Momentum Up</option>
+            <option value="MOMENTUM_DOWN">Momentum Down</option>
+            <option value="ELEVATED_VOLUME">Elevated Volume</option>
+          </select>
+          <label>Min confidence</label>
+          <input id="anomaly-conf" class="filter-input" type="number" min="0" max="1" step="0.05" value="0" style="width:80px">
+          <button class="filter-btn" onclick="loadAnomalies(0)">Filter</button>
+          <button class="filter-btn" onclick="document.getElementById('anomaly-type').value='';document.getElementById('anomaly-conf').value='0';loadAnomalies(0)">Clear</button>
+        </div>
+        <div id="anomaly-content"><div class="loading">Loading anomaly records…</div></div>
       </div>
 
       <!-- ─────────────────────────── Cycle ───────────────────────────────── -->
@@ -809,6 +868,8 @@ const _panelLoaders = {
   'panel-leads':       () => loadLeads(0),
   'panel-psyop':       () => loadPsyop(0),
   'panel-fara':        () => loadFara(0),
+  'panel-congress':    () => loadCongress(0),
+  'panel-anomaly':     () => loadAnomalies(0),
   'panel-cycle':       () => loadCycleStatus(),
   'panel-verdicts':    () => loadVerdicts(0),
   'panel-calibration': () => loadCalibration(),
@@ -1131,6 +1192,142 @@ async function loadFara(offset) {
       <tbody>${rows}</tbody>
     </table>
   </div>` + pager(data.total||items.length, offset, PAGE, 'loadFara');
+}
+
+// ── Congress & Policy panel ───────────────────────────────────────────────────
+
+let _congOff = 0;
+async function loadCongress(offset) {
+  if (offset < 0) offset = 0;
+  _congOff = offset;
+
+  const sigEl   = document.getElementById('congress-signals-content');
+  const intelEl = document.getElementById('congress-intel-content');
+  sigEl.innerHTML   = '<div class="loading">Loading congressional signals…</div>';
+  intelEl.innerHTML = '<div class="loading">Loading COI records…</div>';
+
+  const politician = document.getElementById('cong-politician').value.trim();
+  const ticker     = document.getElementById('cong-ticker').value.trim().toUpperCase();
+  const trade      = document.getElementById('cong-trade').value;
+
+  // Fetch congressional OSINT signals
+  const sigData = await apiFetch(`/signals?limit=500&offset=0&source_type=CONGRESSIONAL`);
+  let sigItems = sigData ? (sigData.items || []) : [];
+  if (politician) sigItems = sigItems.filter(r => (r.metadata?.politician || r.source || '').toLowerCase().includes(politician.toLowerCase()));
+  if (ticker)     sigItems = sigItems.filter(r => (r.metadata?.ticker || '').toUpperCase().includes(ticker));
+  if (trade)      sigItems = sigItems.filter(r => (r.metadata?.trade_type || '').toLowerCase().includes(trade.toLowerCase()));
+
+  const total = sigItems.length;
+  const page  = sigItems.slice(offset, offset + PAGE);
+
+  if (!page.length) {
+    sigEl.innerHTML = emptyState('No congressional trading disclosures found. Run an intelligence cycle to harvest data.');
+  } else {
+    const rows = page.map(r => {
+      const m = r.metadata || {};
+      const amount = m.amount ? `$${Number(m.amount).toLocaleString()}` : '—';
+      return `<tr>
+        <td><span class="cell-trunc" title="${esc(m.politician||r.source||'')}">${esc(trunc(m.politician||r.source||'—',36))}</span></td>
+        <td><strong>${esc(m.ticker||'—')}</strong></td>
+        <td>${badge(m.trade_type||'')}</td>
+        <td>${esc(amount)}</td>
+        <td><span class="cell-trunc">${esc(trunc(m.committee||'—',30))}</span></td>
+        <td>${ts(m.trade_date||r.published_at||'')}</td>
+      </tr>`;
+    }).join('');
+    sigEl.innerHTML = `<div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Politician</th><th>Ticker</th><th>Trade</th><th>Amount</th><th>Committee</th><th>Date</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>` + pager(total, offset, PAGE, 'loadCongress');
+  }
+
+  // Fetch COI intel records
+  const intelData = await apiFetch(`/intel?limit=500&offset=0`);
+  const coiRecords = (intelData?.items || []).filter(r =>
+    (r.pattern || '').includes('[COI]') ||
+    (r.pattern || '').toLowerCase().includes('congress') ||
+    (r.pattern || '').toLowerCase().includes('senator') ||
+    (r.pattern || '').toLowerCase().includes('representative')
+  );
+
+  if (!coiRecords.length) {
+    intelEl.innerHTML = emptyState('No COI intelligence records found. Congressional trade COI scoring runs as part of the intelligence cycle.');
+  } else {
+    const coiRows = coiRecords.map(r => `<tr>
+      <td><span class="mono-id">${esc(trunc(r.record_id||'',22))}</span></td>
+      <td><span class="cell-trunc" title="${esc(r.pattern||'')}">${esc(trunc(r.pattern||'—',100))}</span></td>
+      <td>${badge(r.classification||'')}</td>
+      <td>${confBar(r.confidence)}</td>
+      <td>${confBar(r.source_weight)}</td>
+    </tr>`).join('');
+    intelEl.innerHTML = `<div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>COI Pattern</th><th>Class</th><th>Confidence</th><th>Src Wt</th></tr></thead>
+        <tbody>${coiRows}</tbody>
+      </table>
+    </div>`;
+  }
+}
+
+// ── Anomaly Detection panel ───────────────────────────────────────────────────
+
+const _ANOMALY_KEYWORDS = ['HIGH_VOL_BREAKOUT','HIGH_VOL_BREAKDOWN','VOLUME_SPIKE','MOMENTUM_UP','MOMENTUM_DOWN','ELEVATED_VOLUME','ANOMALY'];
+let _anomalyOff = 0;
+
+async function loadAnomalies(offset) {
+  if (offset < 0) offset = 0;
+  _anomalyOff = offset;
+  const el = document.getElementById('anomaly-content');
+  el.innerHTML = '<div class="loading">Loading anomaly records…</div>';
+
+  const typeFilter = document.getElementById('anomaly-type').value;
+  const minConf    = parseFloat(document.getElementById('anomaly-conf').value) || 0;
+
+  const intelData = await apiFetch('/intel?limit=500&offset=0');
+  if (!intelData) { el.innerHTML = emptyState('API offline — cannot load anomaly records.'); return; }
+
+  let records = (intelData.items || []).filter(r => {
+    const pat = (r.pattern || '').toUpperCase();
+    return _ANOMALY_KEYWORDS.some(k => pat.includes(k));
+  });
+
+  if (typeFilter) {
+    records = records.filter(r => (r.pattern || '').toUpperCase().includes(typeFilter));
+  }
+  if (minConf > 0) {
+    records = records.filter(r => parseFloat(r.confidence || 0) >= minConf);
+  }
+
+  const total = records.length;
+  const page  = records.slice(offset, offset + PAGE);
+
+  if (!page.length) {
+    el.innerHTML = emptyState('No anomaly patterns detected. Anomaly records are generated during quant intelligence cycles.');
+    return;
+  }
+
+  const rows = page.map(r => {
+    const pat = (r.pattern || '');
+    // Extract the anomaly type label from the pattern string
+    const typeLabel = _ANOMALY_KEYWORDS.find(k => pat.toUpperCase().includes(k)) || 'ANOMALY';
+    return `<tr>
+      <td><span class="mono-id">${esc(trunc(r.record_id||'',22))}</span></td>
+      <td>${badge(typeLabel)}</td>
+      <td><span class="cell-trunc" title="${esc(pat)}">${esc(trunc(pat,100))}</span></td>
+      <td>${badge(r.classification||'')}</td>
+      <td>${confBar(r.confidence)}</td>
+      <td>${confBar(r.analyst_weight)}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `<div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>ID</th><th>Type</th><th>Pattern</th><th>Class</th><th>Confidence</th><th>Ana Wt</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>` + pager(total, offset, PAGE, 'loadAnomalies');
 }
 
 // ── Cycle panel ───────────────────────────────────────────────────────────────
