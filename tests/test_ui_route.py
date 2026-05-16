@@ -78,3 +78,22 @@ def test_portland_web_contains_title_when_enabled(client_with_political_web):
 def test_portland_web_contains_d3_script_when_enabled(client_with_political_web):
     r = client_with_political_web.get("/portland-web")
     assert "d3" in r.text
+
+
+# ─── Political intel viewer (always available) ────────────────────────────────
+
+def test_political_intel_viewer_returns_html(client):
+    r = client.get("/spec1_political_web.html")
+    assert r.status_code == 200
+    assert "text/html" in r.headers["content-type"]
+
+
+def test_political_intel_viewer_contains_title(client):
+    r = client.get("/spec1_political_web.html")
+    assert "SPEC-1 Political Intelligence" in r.text
+
+
+def test_political_intel_data_returns_json(client):
+    r = client.get("/spec1_intelligence_export.json")
+    assert r.status_code == 200
+    assert "application/json" in r.headers["content-type"]
