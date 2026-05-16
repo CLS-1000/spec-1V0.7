@@ -84,14 +84,14 @@ def _cycle_stats_for(run_id: str, records: list[dict]) -> dict:
     }
 
 
-def _try_claude(records: list[dict], cycle_stats: dict) -> tuple[str, str] | None:
+def _try_claude(records: list[dict], cycle_stats: dict, mode: str = "standard") -> tuple[str, str] | None:
     try:
         from spec1_engine.briefing.generator import generate_brief
     except Exception as exc:
         print(f"[generate_brief] briefing.generator unavailable: {exc}", file=sys.stderr)
         return None
     try:
-        brief_md, prompts_text = generate_brief(records, cycle_stats)
+        brief_md, prompts_text = generate_brief(records, cycle_stats, mode=mode)
         return brief_md, prompts_text
     except Exception as exc:
         print(f"[generate_brief] Claude path failed: {exc}", file=sys.stderr)
@@ -158,6 +158,12 @@ def build_argparser() -> argparse.ArgumentParser:
         action="store_true",
         help="Skip Claude and use the rule-based producer directly",
     )
+    p.add_argument(
+        "--mode",
+        default="standard",
+        choices=["standard", "geopolitics", "legislative"],
+        help="Brief template: standard (default), geopolitics, or legislative",
+    )
     return p
 
 
@@ -180,7 +186,7 @@ def main(argv: list[str] | None = None) -> int:
     used_fallback = False
 
     if not args.rule_based:
-        result = _try_claude(run_records, cycle_stats)
+        result = _try_claude(run_records, cycle_stats, mode=args.mode)
         if result is not None:
             brief_md, prompts = result
 
