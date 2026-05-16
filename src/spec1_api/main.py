@@ -25,6 +25,7 @@ from spec1_api.routers import (
     publication,
     signals,
     verdicts,
+    workspace,
 )
 from spec1_api.routers import publication
 from spec1_api.scheduler import maybe_run_on_start, start_scheduler, stop_scheduler
@@ -123,6 +124,7 @@ def create_app() -> FastAPI:
     app.include_router(verdicts.router)
     app.include_router(calibration.router)
     app.include_router(publication.router)
+    app.include_router(workspace.router)
 
     if _political_web_enabled():
         from spec1_api.routers import ingest, nodes
