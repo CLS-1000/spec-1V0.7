@@ -7,6 +7,13 @@
 
 **Landing:** [mjlak1000.github.io/spec-1](https://mjlak1000.github.io/spec-1/) · **Dashboard:** [/ui](https://mjlak1000.github.io/spec-1/ui/)
 
+## Portfolio entry points
+
+- **Landing page:** [mjlak1000.github.io/spec-1](https://mjlak1000.github.io/spec-1/)
+- **Interactive dashboard:** [mjlak1000.github.io/spec-1/ui](https://mjlak1000.github.io/spec-1/ui/)
+- **Portfolio summary:** [docs/portfolio.md](docs/portfolio.md)
+- **Case study (engineering decisions):** [docs/case_study.md](docs/case_study.md)
+
 The bottleneck in intelligence work is attention, not information. SPEC-1 handles the triage: it monitors a curated set of authoritative national security sources continuously, scores every new signal through a four-gate deterministic filter, and hands only the survivors to Claude for investigation and verification. What reaches the analyst is already classified, scored, and structured — ready for a decision, not a digest.
 
 **Canonical cycle** — runs automatically on cron or on-demand via `POST /cycle/run`. Produces one artifact: append-only `IntelligenceRecord` objects in `spec1_intelligence.jsonl`.
