@@ -1,5 +1,7 @@
 # SPEC-1 — Case Study
 
+**Portfolio references:** [Landing page](https://mjlak1000.github.io/spec-1/) · [Portfolio summary](portfolio.md) · [README](../README.md)
+
 ## Who I am
 
 I'm a career switcher. My work history is unusual for a software role: about seventeen years in restaurants and roughly two years at Apple retail during the original iPhone launch. I'm not pretending those add up to a CS degree. They add up to something different — a long stretch of operating under pressure, training people on systems they've never seen before, and triaging information faster than it arrives.
@@ -34,7 +36,7 @@ I picked this because I wanted the durability story to be obvious: the source of
 
 ### 4. Test discipline as a calibration anchor
 
-The repo has roughly 825 collected pytest tests across 30 files — covering the engine, OSINT adapters, psyop detection, briefing, persistence, the API, the MCP server, and the operator tools. Test coverage isn't the story — what's in the tests is. Most of them encode a specific decision: this is the threshold we chose, this is the boundary case it has to handle, this is the failure mode we don't want to regress.
+The repo has roughly 780 collected pytest tests across 27 files — covering the engine, OSINT adapters, psyop detection, briefing, persistence, the API, the MCP server, and the operator tools. Test coverage isn't the story — what's in the tests is. Most of them encode a specific decision: this is the threshold we chose, this is the boundary case it has to handle, this is the failure mode we don't want to regress.
 
 When a calibration changes, the tests check that nothing else moved silently. That's the property I needed: I can adjust thresholds without lying awake wondering what I broke.
 
