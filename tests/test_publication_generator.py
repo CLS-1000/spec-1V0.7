@@ -128,6 +128,28 @@ def test_generate_publication_issue_number_auto_increments(tmp_path, sample_reco
     assert "spec1_issue_002" in name2, f"Second issue should be 002, got {name2}"
 
 
+def test_generate_publication_raises_when_issue_space_exhausted(
+    tmp_path,
+    sample_records,
+    sample_brief_text,
+    sample_cycle_stats,
+    monkeypatch,
+):
+    """Issue collision search must fail with RuntimeError after bounded attempts."""
+    import spec1_engine.tools.publication_generator as pub_mod
+
+    monkeypatch.setattr(pub_mod.Path, "exists", lambda self: True)
+
+    with pytest.raises(RuntimeError, match="Could not find an unused issue number"):
+        pub_mod.generate_publication(
+            records=sample_records,
+            brief_text=sample_brief_text,
+            cycle_stats=sample_cycle_stats,
+            output_dir=str(tmp_path),
+            issue_number=1,
+        )
+
+
 def test_generate_publication_empty_records(tmp_path, sample_brief_text, sample_cycle_stats):
     """generate_publication() must not crash when records list is empty."""
     from spec1_engine.tools.publication_generator import generate_publication
