@@ -9,8 +9,10 @@ Procedures for running, maintaining, and debugging SPEC-1 in production.
 ### Check last cycle output
 
 ```bash
-# Latest brief
-cat briefs/spec1_brief_latest.md
+# Latest brief (new canonical path)
+cat generated/briefs/spec1_brief_latest.md
+# Legacy path written by `make cycle` rich CLI:
+# cat briefs/spec1_brief_latest.md
 
 # Intelligence records from last run
 tail -n 20 spec1_intelligence.jsonl | python -m json.tool
