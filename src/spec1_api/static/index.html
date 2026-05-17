@@ -410,6 +410,9 @@
       <div class="nav-item" data-panel="panel-congress" onclick="showPanel('panel-congress')">
         <span class="nav-glyph">⊠</span> Congress &amp; Policy
       </div>
+      <div class="nav-item" data-panel="panel-leg-jud" onclick="showPanel('panel-leg-jud')">
+        <span class="nav-glyph">⚖</span> Leg &amp; Judicial
+      </div>
       <div class="nav-item" data-panel="panel-anomaly" onclick="showPanel('panel-anomaly')">
         <span class="nav-glyph">△</span> Anomaly Detection
       </div>
@@ -569,6 +572,8 @@
           </select>
           <button class="filter-btn" onclick="loadPsyop(0)">Filter</button>
           <button class="filter-btn" onclick="document.getElementById('psyop-cls').value='';loadPsyop(0)">Clear</button>
+          <button class="action-btn" id="psyop-run-btn" onclick="runPsyopDetection()" style="margin-left:auto">Run Detection</button>
+          <span id="psyop-run-msg" style="font-size:12px;color:var(--text-muted)"></span>
         </div>
         <div id="psyop-content"><div class="loading">Loading psyop scores…</div></div>
       </div>
@@ -717,6 +722,71 @@
         <div class="panel-title">⊞ Calibration</div>
         <div class="panel-sub">Accuracy drift surfacing across confidence, source weight, and classification — descriptive only, never auto-applied</div>
         <div id="calibration-content"><div class="loading">Loading calibration report…</div></div>
+      </div>
+
+      <!-- ──────────────────── Legislative & Judicial Desk ──────────────────── -->
+      <div class="panel" id="panel-leg-jud">
+        <div class="panel-title">⚖ Legislative &amp; Judicial Desk</div>
+        <div class="panel-sub">Daily brief, judicial disclosures, and state legislative records</div>
+
+        <div class="tab-bar" role="tablist">
+          <button class="tab-btn active" onclick="switchTab('lj-tab-brief', this)">Brief</button>
+          <button class="tab-btn" onclick="switchTab('lj-tab-judicial', this)">Judicial Records</button>
+          <button class="tab-btn" onclick="switchTab('lj-tab-state', this)">State Legislation</button>
+        </div>
+
+        <!-- Brief tab -->
+        <div class="tab-pane active" id="lj-tab-brief">
+          <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
+            <button class="action-btn" onclick="loadLegJudBrief()">Refresh Brief</button>
+            <span id="lj-brief-meta" style="font-size:12px;color:var(--text-muted)"></span>
+          </div>
+          <div id="lj-brief-content"><div class="loading">Loading Legislative &amp; Judicial brief…</div></div>
+        </div>
+
+        <!-- Judicial records tab -->
+        <div class="tab-pane" id="lj-tab-judicial">
+          <div class="filter-bar">
+            <label>Judge</label>
+            <input id="lj-judge-filter" class="filter-input" placeholder="Name…" style="width:140px">
+            <label>Action</label>
+            <select id="lj-action-filter" class="filter-select" style="width:140px">
+              <option value="">All</option>
+              <option value="ruling">Ruling</option>
+              <option value="recusal">Recusal</option>
+              <option value="disclosure">Disclosure</option>
+              <option value="gift">Gift</option>
+              <option value="speaking_engagement">Speaking Engagement</option>
+            </select>
+            <label>Court</label>
+            <input id="lj-court-filter" class="filter-input" placeholder="Court…" style="width:120px">
+            <button class="filter-btn" onclick="loadJudicial(0)">Filter</button>
+            <button class="filter-btn" onclick="clearJudicialFilters()">Clear</button>
+          </div>
+          <div id="lj-judicial-content"><div class="loading">Loading judicial records…</div></div>
+        </div>
+
+        <!-- State legislation tab -->
+        <div class="tab-pane" id="lj-tab-state">
+          <div class="filter-bar">
+            <label>State</label>
+            <input id="lj-state-filter" class="filter-input" placeholder="CA, TX…" style="width:80px">
+            <label>Chamber</label>
+            <select id="lj-chamber-filter" class="filter-select" style="width:120px">
+              <option value="">All</option>
+              <option value="SENATE">Senate</option>
+              <option value="HOUSE">House</option>
+              <option value="JOINT">Joint</option>
+            </select>
+            <label>
+              <input type="checkbox" id="lj-gap-filter" onchange="loadStateLeg(0)">
+              Disclosure gaps only
+            </label>
+            <button class="filter-btn" onclick="loadStateLeg(0)">Filter</button>
+            <button class="filter-btn" onclick="clearStateLegFilters()">Clear</button>
+          </div>
+          <div id="lj-state-content"><div class="loading">Loading state legislation…</div></div>
+        </div>
       </div>
 
       <!-- ─────────────────────────── Work Bench ─────────────────────────── -->
@@ -1051,6 +1121,7 @@ const _panelLoaders = {
   'panel-psyop':       () => loadPsyop(0),
   'panel-fara':        () => loadFara(0),
   'panel-congress':    () => loadCongress(0),
+  'panel-leg-jud':     () => loadLegJudBrief(),
   'panel-anomaly':     () => loadAnomalies(0),
   'panel-cycle':       () => loadCycleStatus(),
   'panel-verdicts':    () => loadVerdicts(0),
@@ -1956,10 +2027,143 @@ async function loadPolicyDesk() {
 }
 
 function switchTab(tabId, button) {
-  document.querySelectorAll('#panel-policy .tab-pane').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('#panel-policy .tab-btn').forEach(b => b.classList.remove('active'));
+  const panel = button.closest('.panel') || document.getElementById('panel-policy');
+  panel.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  panel.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(tabId).classList.add('active');
   button.classList.add('active');
+  // Lazy-load tab content on first activation
+  if (tabId === 'lj-tab-judicial') loadJudicial(0);
+  if (tabId === 'lj-tab-state') loadStateLeg(0);
+}
+
+// ── Psyop batch run ───────────────────────────────────────────────────────────
+
+async function runPsyopDetection() {
+  const btn = document.getElementById('psyop-run-btn');
+  const msg = document.getElementById('psyop-run-msg');
+  btn.disabled = true;
+  btn.textContent = 'Running…';
+  msg.textContent = '';
+  const res = await apiPost('/psyop/run', {});
+  btn.disabled = false;
+  btn.textContent = 'Run Detection';
+  if (res.ok) {
+    const s = res.data || {};
+    msg.textContent = `✓ ${s.records_analysed ?? '?'} records analysed, ${s.risky_detected ?? '?'} risky detected`;
+    loadPsyop(0);
+  } else {
+    msg.textContent = `Failed: ${res.data?.detail || res.status}`;
+  }
+}
+
+// ── Legislative & Judicial Desk ───────────────────────────────────────────────
+
+const LJ_PAGE = 20;
+
+async function loadLegJudBrief() {
+  const el = document.getElementById('lj-brief-content');
+  const meta = document.getElementById('lj-brief-meta');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">Loading brief…</div>';
+  const data = await apiFetch('/leg_jud/brief');
+  if (!data || !data.brief) {
+    el.innerHTML = emptyState('No Legislative & Judicial brief generated yet. Run a cycle to produce one.');
+    return;
+  }
+  const b = data.brief;
+  meta.textContent = `run_id: ${(b.run_id||'').slice(0,8)} · ${b.eligible_records ?? 0} eligible records · ${b.date || ''}`;
+  const sections = (b.sections || []).map(s => `
+    <div class="state-box" style="margin-bottom:16px">
+      <div style="font-weight:600;margin-bottom:6px;color:var(--accent)">${esc(s.title || s.kind)}</div>
+      <div style="white-space:pre-wrap;font-size:13px">${esc(s.body || 'NO SIGNAL THIS CYCLE')}</div>
+    </div>`).join('');
+  el.innerHTML = sections || emptyState('No sections in this brief.');
+}
+
+async function loadJudicial(offset) {
+  const el = document.getElementById('lj-judicial-content');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">Loading…</div>';
+  const judge = (document.getElementById('lj-judge-filter')?.value || '').trim();
+  const action = document.getElementById('lj-action-filter')?.value || '';
+  const court = (document.getElementById('lj-court-filter')?.value || '').trim();
+  let qs = `/leg_jud/judicial?limit=${LJ_PAGE}&offset=${offset}`;
+  if (judge) qs += `&judge=${encodeURIComponent(judge)}`;
+  if (action) qs += `&action=${encodeURIComponent(action)}`;
+  if (court) qs += `&court=${encodeURIComponent(court)}`;
+  const data = await apiFetch(qs);
+  if (!data) { el.innerHTML = emptyState('No judicial records found.'); return; }
+  const items = data.items || [];
+  if (!items.length) { el.innerHTML = emptyState('No judicial records match the current filters.'); return; }
+  const rows = items.map(r => {
+    const m = r.metadata || {};
+    const ties = (m.disclosed_ties || []).join('; ') || '—';
+    return `<tr>
+      <td>${esc(m.judge || '—')}</td>
+      <td>${esc(m.court || '—')}</td>
+      <td><span class="badge badge-blue">${esc(m.action_type || '—')}</span></td>
+      <td>${esc(m.case_ref || '—')}</td>
+      <td style="max-width:280px">${esc(trunc(m.ruling_summary || '—', 120))}</td>
+      <td style="max-width:200px;font-size:11px">${esc(ties)}</td>
+      <td>${esc(m.filed_at || '—')}</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = `<table class="data-table"><thead><tr>
+    <th>Judge</th><th>Court</th><th>Action</th><th>Case Ref</th><th>Summary</th><th>Disclosed Ties</th><th>Filed</th>
+  </tr></thead><tbody>${rows}</tbody></table>
+  ${pager(data.total || items.length, offset, LJ_PAGE, 'loadJudicial')}`;
+}
+
+async function loadStateLeg(offset) {
+  const el = document.getElementById('lj-state-content');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">Loading…</div>';
+  const state = (document.getElementById('lj-state-filter')?.value || '').trim();
+  const chamber = document.getElementById('lj-chamber-filter')?.value || '';
+  const gapOnly = document.getElementById('lj-gap-filter')?.checked;
+  let qs = `/leg_jud/state_leg?limit=${LJ_PAGE}&offset=${offset}`;
+  if (state) qs += `&state=${encodeURIComponent(state)}`;
+  if (chamber) qs += `&chamber=${encodeURIComponent(chamber)}`;
+  if (gapOnly) qs += `&disclosure_gap=true`;
+  const data = await apiFetch(qs);
+  if (!data) { el.innerHTML = emptyState('No state legislative records found.'); return; }
+  const items = data.items || [];
+  if (!items.length) { el.innerHTML = emptyState('No state legislative records match the current filters.'); return; }
+  const rows = items.map(r => {
+    const m = r.metadata || {};
+    const gapBadge = m.disclosure_gap
+      ? `<span class="badge badge-orange" title="Disclosure data structurally unavailable">DISCLOSURE GAP</span>`
+      : `<span class="badge badge-green">${esc(m.disclosure_regime || 'FULL')}</span>`;
+    return `<tr>
+      <td>${esc(m.state || '—')}</td>
+      <td>${esc(m.bill_id || '—')}</td>
+      <td style="max-width:220px">${esc(trunc(m.title || '—', 80))}</td>
+      <td>${esc(m.sponsor || '—')}</td>
+      <td>${esc(m.chamber || '—')}</td>
+      <td><span class="badge badge-blue">${esc(m.status || '—')}</span></td>
+      <td>${gapBadge}</td>
+      <td>${esc(m.filed_at || '—')}</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = `<table class="data-table"><thead><tr>
+    <th>State</th><th>Bill</th><th>Title</th><th>Sponsor</th><th>Chamber</th><th>Status</th><th>Disclosure</th><th>Filed</th>
+  </tr></thead><tbody>${rows}</tbody></table>
+  ${pager(data.total || items.length, offset, LJ_PAGE, 'loadStateLeg')}`;
+}
+
+function clearJudicialFilters() {
+  document.getElementById('lj-judge-filter').value = '';
+  document.getElementById('lj-action-filter').value = '';
+  document.getElementById('lj-court-filter').value = '';
+  loadJudicial(0);
+}
+
+function clearStateLegFilters() {
+  document.getElementById('lj-state-filter').value = '';
+  document.getElementById('lj-chamber-filter').value = '';
+  document.getElementById('lj-gap-filter').checked = false;
+  loadStateLeg(0);
 }
 
 // ── Copy helper ───────────────────────────────────────────────────────────────
