@@ -440,6 +440,9 @@
       <div class="nav-item" data-panel="panel-local" onclick="showPanel('panel-local')">
         <span class="nav-glyph">▷</span> Local Access
       </div>
+      <div class="nav-item" data-panel="panel-publications" onclick="showPanel('panel-publications')">
+        <span class="nav-glyph">◫</span> Issue Generator
+      </div>
 
       <div class="nav-divider"></div>
       <div class="nav-section">Political</div>
@@ -717,6 +720,18 @@
       </div>
 
       <!-- ─────────────────────────── Work Bench ─────────────────────────── -->
+      <!-- ──────────────────────────── Issue Generator ────────────────────────── -->
+      <div class="panel" id="panel-publications">
+        <div class="panel-title">◫ Issue Generator</div>
+        <div class="panel-sub">Convert current intelligence output into a publication PDF</div>
+        <div style="display:flex;gap:10px;margin-bottom:18px;align-items:center;flex-wrap:wrap">
+          <button class="action-btn" id="pub-generate-btn" onclick="triggerGenerate()">Generate New Issue</button>
+          <a class="action-btn" href="/publication/latest" target="_blank" rel="noopener noreferrer" id="pub-download-btn" style="display:none">Download Latest ↗</a>
+        </div>
+        <div id="pub-status" style="margin-bottom:14px"></div>
+        <div id="pub-list-content"><div class="loading">Loading publications…</div></div>
+      </div>
+
       <div class="panel" id="panel-workbench">
         <div class="panel-title">⊞ Work Bench</div>
         <div class="panel-sub">Active investigation cases — open, track, and close case files</div>
@@ -1040,6 +1055,7 @@ const _panelLoaders = {
   'panel-cycle':       () => loadCycleStatus(),
   'panel-verdicts':    () => loadVerdicts(0),
   'panel-calibration': () => loadCalibration(),
+  'panel-publications': () => loadPublications(),
   'panel-workbench':   () => loadWorkbench(0),
   'panel-policy':      () => loadPolicyDesk(),
   'panel-local':       () => {},
@@ -1689,6 +1705,45 @@ async function loadCalibration() {
       Generated: ${ts(data.generated_at||'')} &nbsp;·&nbsp;
       Calibration is descriptive — adjustments require explicit human code changes.
     </p>`;
+}
+
+// ── Issue Generator ───────────────────────────────────────────────────────────
+
+async function loadPublications() {
+  const el = document.getElementById('pub-list-content');
+  const data = await apiFetch('/publication/list');
+  if (!data || !data.items?.length) {
+    el.innerHTML = emptyState('No publications yet. Click "Generate New Issue" to create one.');
+    return;
+  }
+  document.getElementById('pub-download-btn').style.display = '';
+  el.innerHTML = data.items.map(p => `
+    <div class="intel-card" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+      <div style="min-width:0">
+        <div class="intel-title">${esc(p.filename)}</div>
+        <div class="intel-meta">${(p.size_bytes / 1024).toFixed(1)} KB</div>
+      </div>
+      <a class="action-btn" href="/publication/${esc(p.filename)}" target="_blank" rel="noopener noreferrer" style="white-space:nowrap">Download ↗</a>
+    </div>`).join('');
+}
+
+async function triggerGenerate() {
+  const btn    = document.getElementById('pub-generate-btn');
+  const status = document.getElementById('pub-status');
+  btn.disabled    = true;
+  btn.textContent = 'Generating…';
+  status.innerHTML = '';
+  const res = await apiPost('/publication/generate', {});
+  btn.disabled    = false;
+  btn.textContent = 'Generate New Issue';
+  if (res.ok) {
+    status.innerHTML = `<span style="color:var(--text)">✓ ${esc(res.data?.filename || 'Issue generated')}</span>`;
+    document.getElementById('pub-download-btn').style.display = '';
+    loadPublications();
+  } else {
+    const detail = res.data?.detail || String(res.status);
+    status.innerHTML = `<span class="form-err" style="display:inline">Failed: ${esc(detail)}</span>`;
+  }
 }
 
 // ── Work Bench ────────────────────────────────────────────────────────────────
