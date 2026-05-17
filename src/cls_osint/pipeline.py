@@ -13,14 +13,18 @@ from typing import Optional
 
 from cls_osint.adapters import fara as fara_adapter
 from cls_osint.adapters import congressional as congressional_adapter
+from cls_osint.adapters import judicial as judicial_adapter
 from cls_osint.adapters import narrative as narrative_adapter
+from cls_osint.adapters import state_legislative as state_leg_adapter
 from cls_osint.adapters import verifier as verifier_adapter
 from cls_osint.feed import fetch_all_rss
 from cls_osint.schemas import (
     CongressRecord,
     FaraRecord,
+    JudicialRecord,
     NarrativeRecord,
     OSINTRecord,
+    StateLegRecord,
 )
 from cls_osint.sources import get_sources_by_type
 from cls_osint.store import OsintStore
@@ -36,6 +40,8 @@ class PipelineStats:
     fara_records: int = 0
     congress_records: int = 0
     narrative_records: int = 0
+    judicial_records: int = 0
+    state_leg_records: int = 0
     stored: int = 0
     errors: list[str] = field(default_factory=list)
     finished_at: Optional[str] = None
@@ -52,6 +58,8 @@ class PipelineStats:
             "fara_records": self.fara_records,
             "congress_records": self.congress_records,
             "narrative_records": self.narrative_records,
+            "judicial_records": self.judicial_records,
+            "state_leg_records": self.state_leg_records,
             "stored": self.stored,
             "errors": self.errors,
         }
@@ -76,6 +84,8 @@ class OsintPipeline:
         collect_fara: bool = True,
         collect_congress: bool = True,
         detect_narratives: bool = True,
+        collect_judicial: bool = True,
+        collect_state_leg: bool = True,
     ) -> PipelineStats:
         """Execute the full OSINT pipeline."""
         stats = PipelineStats(
@@ -128,7 +138,35 @@ class OsintPipeline:
             except Exception as exc:
                 stats.errors.append(f"congress_collection:{exc}")
 
-        # 4. Narrative detection
+        # 4. Judicial collection
+        if collect_judicial:
+            try:
+                j_records: list[JudicialRecord] = judicial_adapter.collect(
+                    timeout=self.feed_timeout
+                )
+                stats.judicial_records = len(j_records)
+                for jr in j_records:
+                    osint_r = jr.to_osint_record()
+                    all_osint.append(osint_r)
+                    batch.append(osint_r.to_dict())
+            except Exception as exc:
+                stats.errors.append(f"judicial_collection:{exc}")
+
+        # 5. State legislative collection
+        if collect_state_leg:
+            try:
+                sl_records: list[StateLegRecord] = state_leg_adapter.collect(
+                    timeout=self.feed_timeout
+                )
+                stats.state_leg_records = len(sl_records)
+                for slr in sl_records:
+                    osint_r = slr.to_osint_record()
+                    all_osint.append(osint_r)
+                    batch.append(osint_r.to_dict())
+            except Exception as exc:
+                stats.errors.append(f"state_leg_collection:{exc}")
+
+        # 6. Narrative detection
         if detect_narratives and all_osint:
             try:
                 narrative_records: list[NarrativeRecord] = narrative_adapter.detect_narratives(
@@ -141,7 +179,7 @@ class OsintPipeline:
             except Exception as exc:
                 stats.errors.append(f"narrative_detection:{exc}")
 
-        # 5. Store all records
+        # 7. Store all records
         if batch:
             try:
                 written = self.store.append_batch(batch)
