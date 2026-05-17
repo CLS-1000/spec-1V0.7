@@ -7,16 +7,20 @@ from typing import Annotated, Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, Field
+from pydantic import StringConstraints
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/workspace", tags=["workspace"])
 
+_Title = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]
+_Tag   = Annotated[str, StringConstraints(strip_whitespace=True, max_length=100)]
+
 
 class OpenCaseRequest(BaseModel):
-    title: Annotated[str, Field(min_length=1, max_length=500, strip_whitespace=True)]
-    question: Annotated[str, Field(min_length=1, max_length=500, strip_whitespace=True)]
-    tags: Annotated[list[Annotated[str, Field(max_length=100, strip_whitespace=True)]], Field(max_length=20)] = []
+    title: _Title
+    question: _Title
+    tags: Annotated[list[_Tag], Field(max_length=20)] = []
 
 
 @router.get("/cases")
