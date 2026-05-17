@@ -583,7 +583,7 @@ def handle_initialize(request_id: Any, params: dict) -> dict:
     return _make_response(request_id, {
         "protocolVersion": "2024-11-05",
         "capabilities": {"tools": {}},
-        "serverInfo": {"name": "spec1-mcp-server", "version": "0.4.0"},
+        "serverInfo": {"name": "spec1-mcp-server", "version": "0.5.0"},
     })
 
 
