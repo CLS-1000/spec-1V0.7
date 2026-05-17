@@ -21,6 +21,7 @@ from spec1_api.routers import (
     health,
     intel,
     leads,
+    leg_jud,
     psyop,
     publication,
     signals,
@@ -125,6 +126,7 @@ def create_app() -> FastAPI:
     app.include_router(calibration.router)
     app.include_router(publication.router)
     app.include_router(workspace.router)
+    app.include_router(leg_jud.router)
 
     if _political_web_enabled():
         from spec1_api.routers import ingest, nodes

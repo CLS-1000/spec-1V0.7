@@ -76,3 +76,27 @@ CATEGORY_GEOPOLITICAL = "GEOPOLITICAL"
 CATEGORY_FARA         = "FARA"
 CATEGORY_PSYOP        = "PSYOP"
 CATEGORY_QUANT        = "QUANT"
+
+# ── Legislative & Judicial Desk — source types ────────────────────────────────
+SOURCE_JUDICIAL  = "JUDICIAL"
+SOURCE_STATE_LEG = "STATE_LEG"
+
+# ── Legislative & Judicial Desk — domain prefixes ─────────────────────────────
+DOMAIN_CONGRESS_VOTE       = "congress.vote"
+DOMAIN_CONGRESS_HEARING    = "congress.hearing"
+DOMAIN_CONGRESS_SPONSOR    = "congress.sponsor"
+DOMAIN_FARA_FILING         = "fara.filing"
+DOMAIN_LDA_FILING          = "lda.filing"
+DOMAIN_JUDICIAL_RULING     = "judicial.ruling"
+DOMAIN_JUDICIAL_RECUSAL    = "judicial.recusal"
+DOMAIN_JUDICIAL_DISCLOSURE = "judicial.disclosure"
+DOMAIN_JUDICIAL_GIFT       = "judicial.gift"
+DOMAIN_JUDICIAL_ENGAGEMENT = "judicial.speaking_engagement"
+DOMAIN_STATE_LEG_BILL      = "state_leg.bill"
+DOMAIN_STATE_LEG_VOTE      = "state_leg.vote"
+
+# ── Disclosure regime ─────────────────────────────────────────────────────────
+DISCLOSURE_FULL       = "FULL"
+DISCLOSURE_PARTIAL    = "PARTIAL"
+DISCLOSURE_NONE       = "NONE"
+DISCLOSURE_GAP_MARKER = "DISCLOSURE GAP"
