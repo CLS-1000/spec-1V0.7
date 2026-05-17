@@ -1,7 +1,8 @@
 """Investigation Verifier.
 
-Makes a real Claude API call to assess the investigation hypothesis and
-produce an Outcome record. Falls back gracefully on any API or parse error.
+Uses the three-tier LLM fallback client (Claude → Ollama → rule-based mock)
+to assess the investigation hypothesis and produce an Outcome record.
+Falls back gracefully on any error.
 """
 
 from __future__ import annotations
@@ -63,29 +64,18 @@ def _fallback_outcome() -> Outcome:
 
 
 def verify_investigation(investigation: Investigation) -> Outcome:
-    """Call Claude to verify an investigation hypothesis. Never raises."""
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        logger.warning("ANTHROPIC_API_KEY not set — using fallback outcome")
-        return _fallback_outcome()
+    """Verify an investigation hypothesis via 3-tier LLM fallback. Never raises."""
+    from spec1_engine.llm.fallback_client import FallbackLLMClient
 
     try:
-        import anthropic  # lazy import — optional dependency
-        client = anthropic.Anthropic(api_key=api_key)
-        message = client.messages.create(
-            model=MODEL,
-            max_tokens=512,
+        llm = FallbackLLMClient()
+        raw = llm.complete(
+            prompt=_build_user_prompt(investigation),
             system=_SYSTEM_PROMPT,
-            messages=[
-                {"role": "user", "content": _build_user_prompt(investigation)}
-            ],
         )
-        raw = message.content[0].text.strip()
-        # Claude sometimes wraps the response in markdown fences despite the
-        # system prompt; strip them before parsing.
+        # Strip markdown fences that some tiers may include.
         if raw.startswith("```"):
             parts = raw.split("```")
-            # parts[0] is empty, parts[1] is "json\n{...}", parts[2] is ""
             inner = parts[1] if len(parts) >= 2 else raw
             if "\n" in inner:
                 tag, body = inner.split("\n", 1)
@@ -93,7 +83,7 @@ def verify_investigation(investigation: Investigation) -> Outcome:
             else:
                 raw = inner.strip()
     except Exception as exc:
-        logger.error("Claude API call failed: %s", exc)
+        logger.error("LLM fallback chain error: %s", exc)
         return _fallback_outcome()
 
     try:
@@ -106,7 +96,7 @@ def verify_investigation(investigation: Investigation) -> Outcome:
         verified = bool(data.get("verified", False))
         reasoning = str(data.get("reasoning", ""))
         evidence = [
-            f"Claude assessment: {reasoning}",
+            f"LLM assessment: {reasoning}",
             f"Verified: {verified}",
             f"Confidence: {confidence}",
             f"Hypothesis: {investigation.hypothesis}",
