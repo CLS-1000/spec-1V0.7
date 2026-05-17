@@ -120,17 +120,36 @@ cp .env.example .env  # edit — set ANTHROPIC_API_KEY at minimum
 |--------|------|-------------|
 | GET | /health | Health check |
 | GET | /signals | Latest harvested signals |
+| POST | /signals/ingest | Ingest a signal manually |
 | GET | /intel | Intelligence records |
 | GET | /leads | Actionable leads |
 | POST | /leads/generate | Generate leads from current records |
 | GET | /brief | Latest world brief |
+| GET | /brief/latest | Latest brief (alias) |
+| GET | /brief/history | All briefs, newest first |
+| GET | /brief/index | Brief index (run_ids + dates) |
+| GET | /brief/{date} | Brief by date or run_id |
+| POST | /brief/generate | Generate brief for a run_id |
 | GET | /psyop | PsyOp detections |
+| POST | /psyop/analyse | Score text for psyop patterns |
 | POST | /psyop/run | Score all records for psyop patterns |
 | GET | /fara | FARA filings |
 | GET | /verdicts | Filed verdicts |
+| GET | /verdicts/{record_id} | Verdicts for a specific record |
 | POST | /verdicts | File a verdict |
 | GET | /calibration/report | Calibration drift report (descriptive) |
 | GET | /calibration/proposals | Suggested threshold adjustments |
+| GET | /cycle/status | Last cycle status |
 | POST | /cycle/run | Trigger one canonical cycle |
+| GET | /publication/latest | Download latest publication |
+| GET | /publication/list | List all publications |
+| POST | /publication/generate | Generate a new publication |
+| GET | /publication/{filename} | Download publication by filename |
+| GET | /workspace/cases | List investigation cases |
+| POST | /workspace/cases | Open a new case |
+| GET | /workspace/cases/{case_id} | Get case detail |
+| POST | /workspace/cases/{case_id}/close | Close a case |
+
+> Routes `GET /nodes/{node_id}/signal` and `POST /ingest/signal` are conditionally mounted when `SPEC1_POLITICAL_WEB_ENABLED=true`.
 
 The canonical cycle produces intelligence records only. Briefs, leads, and psyop scores require their operator tools — see Quick Start.
