@@ -103,10 +103,8 @@ def generate_publication_endpoint(intel_store: IntelStoreDep) -> dict:
 @router.get("/{filename}")
 def get_publication_by_name(filename: str) -> FileResponse:
     """Serve a specific publication PDF by filename."""
-    if not filename.endswith(".pdf") or "/" in filename or ".." in filename:
-        raise HTTPException(status_code=400, detail="Invalid filename")
-    p = _BRIEFS_DIR / filename
-    if not p.exists():
-        raise HTTPException(status_code=404, detail="Not found")
-    safe = _safe_pdf_path(p)
-    return FileResponse(str(safe), media_type="application/pdf", filename=filename)
+    # Resolve path only from the pre-scanned trusted list — never build a path from user input.
+    for p, _ in _real_pdfs():
+        if p.name == filename:
+            return FileResponse(str(p), media_type="application/pdf", filename=p.name)
+    raise HTTPException(status_code=404, detail="Not found")
