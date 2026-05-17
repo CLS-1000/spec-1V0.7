@@ -107,8 +107,8 @@ def create_app() -> FastAPI:
     @app.get("/spec1_intelligence_export.json", include_in_schema=False)
     async def political_intel_data() -> FileResponse:
         """Serve the intelligence export JSON for the political intel viewer."""
-        repo_root = Path(__file__).parent.parent.parent
-        path = repo_root / "spec1_intelligence_export.json"
+        store = os.environ.get("SPEC1_STORE_PATH", "spec1_intelligence.jsonl")
+        path = Path(store).parent / "spec1_intelligence_export.json"
         if not path.is_file():
             raise HTTPException(status_code=404, detail="Intelligence export not found")
         return FileResponse(path, media_type="application/json")

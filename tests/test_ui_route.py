@@ -93,7 +93,16 @@ def test_political_intel_viewer_contains_title(client):
     assert "SPEC-1 Political Intelligence" in r.text
 
 
-def test_political_intel_data_returns_json(client):
-    r = client.get("/spec1_intelligence_export.json")
+def test_political_intel_data_returns_json(client, tmp_path, monkeypatch):
+    export = tmp_path / "spec1_intelligence_export.json"
+    export.write_text('[]')
+    monkeypatch.setenv("SPEC1_STORE_PATH", str(tmp_path / "spec1_intelligence.jsonl"))
+    # Re-import so the route picks up the patched env var
+    import importlib
+    import spec1_api.main as main_mod
+    importlib.reload(main_mod)
+    from fastapi.testclient import TestClient
+    with TestClient(main_mod.app) as c:
+        r = c.get("/spec1_intelligence_export.json")
     assert r.status_code == 200
     assert "application/json" in r.headers["content-type"]
