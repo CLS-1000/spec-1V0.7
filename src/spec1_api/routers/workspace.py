@@ -2,18 +2,21 @@
 
 from __future__ import annotations
 
-from typing import Optional
+import logging
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/workspace", tags=["workspace"])
 
 
 class OpenCaseRequest(BaseModel):
-    title: str
-    question: str
-    tags: list[str] = []
+    title: Annotated[str, Field(min_length=1, max_length=500, strip_whitespace=True)]
+    question: Annotated[str, Field(min_length=1, max_length=500, strip_whitespace=True)]
+    tags: Annotated[list[Annotated[str, Field(max_length=100, strip_whitespace=True)]], Field(max_length=20)] = []
 
 
 @router.get("/cases")
@@ -27,7 +30,8 @@ def list_cases(
         from spec1_engine.workspace.case import list_cases as _list
         cases = _list(status=status.upper() if status else None)
     except Exception:
-        cases = []
+        logger.exception("Failed to load workspace cases")
+        raise HTTPException(status_code=500, detail="Could not load cases") from None
     total = len(cases)
     page = cases[offset: offset + limit]
     return {"total": total, "limit": limit, "offset": offset, "items": [c.to_dict() for c in page]}
@@ -41,7 +45,7 @@ def open_case(req: OpenCaseRequest) -> dict:
         case = _open(title=req.title, question=req.question, tags=req.tags)
         return case.to_dict()
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @router.get("/cases/{case_id}")
@@ -50,8 +54,8 @@ def get_case(case_id: str) -> dict:
     try:
         from spec1_engine.workspace.case import get_case as _get
         return _get(case_id).to_dict()
-    except ValueError:
-        raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=f"Case {case_id} not found") from exc
 
 
 @router.post("/cases/{case_id}/close")
@@ -60,7 +64,7 @@ def close_case(case_id: str) -> dict:
     try:
         from spec1_engine.workspace.case import close_case as _close
         return _close(case_id).to_dict()
-    except ValueError:
-        raise HTTPException(status_code=404, detail=f"Case {case_id} not found")
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=f"Case {case_id} not found") from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=500, detail=str(exc)) from exc

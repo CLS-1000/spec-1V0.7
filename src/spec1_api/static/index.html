@@ -1721,14 +1721,6 @@ async function loadWorkbench(offset) {
   }).join('');
 
   el.innerHTML = `<div id="wb-cards">${cards}</div>${pager(data.total||items.length, offset, PAGE, 'loadWorkbench')}`;
-
-  // Delegated handlers
-  document.getElementById('wb-cards').addEventListener('click', function(e) {
-    const closeBtn = e.target.closest('[data-close]');
-    if (closeBtn) { e.stopPropagation(); closeCase(closeBtn.dataset.close); return; }
-    const card = e.target.closest('.case-card');
-    if (card) card.classList.toggle('expanded');
-  });
 }
 
 function setWbFilter(status) {
@@ -1780,12 +1772,22 @@ async function submitNewCase() {
 
 async function closeCase(cid) {
   const res = await apiPost(`/workspace/cases/${encodeURIComponent(cid)}/close`, {});
-  if (res.ok) { loadWorkbench(_wbOff); }
+  if (res.ok) {
+    loadWorkbench(_wbOff);
+  } else {
+    const detail = res.data?.detail || res.status || 'Unknown error';
+    const el = document.getElementById('workbench-content');
+    const errDiv = document.createElement('div');
+    errDiv.className = 'form-err';
+    errDiv.style.cssText = 'display:block;margin:8px 0';
+    errDiv.textContent = 'Failed to close case: ' + detail;
+    el.prepend(errDiv);
+  }
 }
 
 // ── Policy Desk ───────────────────────────────────────────────────────────────
 
-const POLICY_KEYWORDS = ['congress','senate','house','fara','legislation','bill','amendment','lobbying','legislat','foreign agent','appropriat','committee'];
+const POLICY_KEYWORDS = ['congress','senate','house','fara','bill','amendment','lobbying','legislat','foreign agent','appropriat','committee'];
 
 function _isPolicyRecord(r) {
   const hay = [r.hypothesis||'', r.pattern||'', r.signal_source||'', r.signal_url||''].join(' ').toLowerCase();
@@ -1810,7 +1812,7 @@ async function loadPolicyDesk() {
   summaryEl.innerHTML = `
     <div class="policy-stat"><div class="policy-stat-num">${faraData?.total ?? faraItems.length}</div><div class="policy-stat-label">FARA Records</div></div>
     <div class="policy-stat"><div class="policy-stat-num">${leadsData?.total ?? leadsItems.length}</div><div class="policy-stat-label">Leads</div></div>
-    <div class="policy-stat"><div class="policy-stat-num">${policyIntel.length}</div><div class="policy-stat-label">Policy Intel</div></div>`;
+    <div class="policy-stat"><div class="policy-stat-num">${policyIntel.length}</div><div class="policy-stat-label">Policy Intel (last 200)</div></div>`;
 
   // FARA tab
   const faraEl = document.getElementById('tab-fara');
@@ -1906,9 +1908,23 @@ function fallbackCopy(text) {
   await checkStatus();
   loadLatestBrief();
   setInterval(checkStatus, 30000);
-  document.getElementById('case-modal').addEventListener('click', e => {
-    if (e.target === e.currentTarget) closeNewCaseModal();
-  });
+
+  const caseModal = document.getElementById('case-modal');
+  if (caseModal) {
+    caseModal.addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeNewCaseModal();
+    });
+  }
+
+  const wbContent = document.getElementById('workbench-content');
+  if (wbContent) {
+    wbContent.addEventListener('click', function(e) {
+      const closeBtn = e.target.closest('[data-close]');
+      if (closeBtn) { e.stopPropagation(); closeCase(closeBtn.dataset.close); return; }
+      const card = e.target.closest('.case-card');
+      if (card) card.classList.toggle('expanded');
+    });
+  }
 })();
 </script>
 <!-- ── New Case modal ── -->
