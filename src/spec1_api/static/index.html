@@ -443,7 +443,7 @@
 
       <div class="nav-divider"></div>
       <div class="nav-section">Political</div>
-      <a class="nav-item" href="/portland-web" target="_blank" rel="noopener noreferrer">
+      <a class="nav-item" id="nav-portland-web" href="/portland-web" target="_blank" rel="noopener noreferrer">
         <span class="nav-glyph">⊛</span> Portland Web ↗
       </a>
       <a class="nav-item" href="/spec1_political_web.html" target="_blank" rel="noopener noreferrer">
@@ -839,6 +839,30 @@ python -m spec1_engine.app.cycle</pre>
     <div style="display:flex; gap:10px;">
       <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && PYTHONPATH=src python -m spec1_api.main')">Copy command</button>
       <button class="copy-btn" onclick="closeOverlay()" style="margin-left:auto;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── New Case modal ── -->
+<div class="modal-overlay" id="case-modal">
+  <div class="modal-box">
+    <div class="modal-title">Open New Case</div>
+    <div class="form-row">
+      <div class="form-label">Title</div>
+      <input class="form-input" id="case-title" placeholder="Investigation title…">
+    </div>
+    <div class="form-row">
+      <div class="form-label">Question</div>
+      <input class="form-input" id="case-question" placeholder="Core investigation question…">
+    </div>
+    <div class="form-row">
+      <div class="form-label">Tags (comma-separated)</div>
+      <input class="form-input" id="case-tags" placeholder="fara, senate, legislation…">
+    </div>
+    <div class="form-err" id="case-form-err"></div>
+    <div class="form-actions">
+      <button class="action-btn" onclick="submitNewCase()">Open Case</button>
+      <button class="action-btn" onclick="closeNewCaseModal()" style="margin-left:auto">Cancel</button>
     </div>
   </div>
 </div>
@@ -1925,30 +1949,15 @@ function fallbackCopy(text) {
       if (card) card.classList.toggle('expanded');
     });
   }
+
+  // Hide Portland Web nav link if the feature is not enabled on this server
+  fetch('/portland-web', { method: 'HEAD' }).then(r => {
+    if (r.status === 404) {
+      const link = document.getElementById('nav-portland-web');
+      if (link) link.style.display = 'none';
+    }
+  }).catch(() => {});
 })();
 </script>
-<!-- ── New Case modal ── -->
-<div class="modal-overlay" id="case-modal">
-  <div class="modal-box">
-    <div class="modal-title">Open New Case</div>
-    <div class="form-row">
-      <div class="form-label">Title</div>
-      <input class="form-input" id="case-title" placeholder="Investigation title…">
-    </div>
-    <div class="form-row">
-      <div class="form-label">Question</div>
-      <input class="form-input" id="case-question" placeholder="Core investigation question…">
-    </div>
-    <div class="form-row">
-      <div class="form-label">Tags (comma-separated)</div>
-      <input class="form-input" id="case-tags" placeholder="fara, senate, legislation…">
-    </div>
-    <div class="form-err" id="case-form-err"></div>
-    <div class="form-actions">
-      <button class="action-btn" onclick="submitNewCase()">Open Case</button>
-      <button class="action-btn" onclick="closeNewCaseModal()" style="margin-left:auto">Cancel</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>
