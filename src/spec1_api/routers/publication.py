@@ -1,12 +1,17 @@
-"""Publication router — GET /publication/latest, GET /publication/list."""
+"""Publication router — GET /publication/latest, GET /publication/list, POST /publication/generate."""
 
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import FileResponse
+
+from spec1_api.dependencies import IntelStoreDep
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/publication", tags=["publication"])
 
@@ -58,3 +63,50 @@ def list_publications() -> dict:
     pdfs = sorted(_real_pdfs(), key=lambda t: (t[1].st_mtime, t[0].name), reverse=True)
     items = [{"filename": p.name, "size_bytes": st.st_size} for p, st in pdfs]
     return {"total": len(items), "items": items}
+
+
+@router.post("/generate")
+def generate_publication_endpoint(intel_store: IntelStoreDep) -> dict:
+    """Generate a new publication PDF from the latest brief and current intelligence records."""
+    from spec1_engine.tools.publication_generator import generate_publication as _gen
+
+    briefs_dir = Path(os.environ.get("SPEC1_BRIEFS_DIR", "briefs"))
+    brief_path = briefs_dir / "spec1_brief_latest.md"
+    brief_text = brief_path.read_text(encoding="utf-8") if brief_path.is_file() else ""
+
+    try:
+        all_records = list(intel_store.read_all())
+    except Exception:
+        logger.exception("Failed to load intel records for publication")
+        all_records = []
+
+    records = sorted(
+        all_records,
+        key=lambda r: float(r.get("confidence", 0)),
+        reverse=True,
+    )[:20]
+
+    cycle_stats = {"records_stored": len(records)}
+
+    try:
+        pdf_path = _gen(records, brief_text, cycle_stats)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+    return {
+        "filename": Path(pdf_path).name,
+        "url": "/publication/latest",
+        "message": "Publication generated successfully",
+    }
+
+
+@router.get("/{filename}")
+def get_publication_by_name(filename: str) -> FileResponse:
+    """Serve a specific publication PDF by filename."""
+    if not filename.endswith(".pdf") or "/" in filename or ".." in filename:
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    p = _BRIEFS_DIR / filename
+    if not p.exists():
+        raise HTTPException(status_code=404, detail="Not found")
+    safe = _safe_pdf_path(p)
+    return FileResponse(str(safe), media_type="application/pdf", filename=filename)
