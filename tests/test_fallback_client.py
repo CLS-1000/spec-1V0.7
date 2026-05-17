@@ -463,3 +463,99 @@ class TestFenceStripping:
                 result = client.analyze(CLEAR_SIGNAL)
 
         assert result["tier_used"] == "claude"
+
+
+# ── SPEC1_DEV_MODE ────────────────────────────────────────────────────────────
+
+class TestDevMode:
+    def test_dev_mode_skips_claude_goes_to_ollama(self, tmp_path):
+        ollama_json = json.dumps({"confidence": 0.6, "classification": "INVESTIGATE",
+                                  "reasoning": "Ollama in dev mode."})
+
+        with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key",
+                                        "SPEC1_DEV_MODE": "true"}):
+            client = make_client(tmp_path)
+            with patch("anthropic.Anthropic") as MockCls:
+                with patch("spec1_engine.llm.ollama_manager.is_running", return_value=True):
+                    with patch("spec1_engine.llm.ollama_manager.ensure_model", return_value=True):
+                        with patch("spec1_engine.llm.ollama_manager.chat", return_value=ollama_json):
+                            result = client.analyze(ANOMALY_SIGNAL)
+
+        MockCls.assert_not_called()
+        assert result["tier_used"] == "ollama"
+
+    def test_dev_mode_complete_skips_claude(self, tmp_path):
+        ollama_json = json.dumps({"confidence": 0.5, "classification": "MONITOR",
+                                  "reasoning": "ok"})
+
+        with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key",
+                                        "SPEC1_DEV_MODE": "true"}):
+            client = make_client(tmp_path)
+            with patch("anthropic.Anthropic") as MockCls:
+                with patch("spec1_engine.llm.ollama_manager.is_running", return_value=True):
+                    with patch("spec1_engine.llm.ollama_manager.ensure_model", return_value=True):
+                        with patch("spec1_engine.llm.ollama_manager.chat", return_value=ollama_json):
+                            result = client.complete(CLEAR_SIGNAL)
+
+        MockCls.assert_not_called()
+        assert result == ollama_json
+
+    def test_dev_mode_falls_to_tier3_when_ollama_down(self, tmp_path):
+        with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key",
+                                        "SPEC1_DEV_MODE": "true"}):
+            client = make_client(tmp_path)
+            with patch("anthropic.Anthropic") as MockCls:
+                with patch("spec1_engine.llm.ollama_manager.is_running", return_value=False):
+                    with patch("spec1_engine.llm.ollama_manager.spawn", return_value=False):
+                        result = client.analyze(THREAT_SIGNAL)
+
+        MockCls.assert_not_called()
+        assert result["tier_used"] == "mock"
+        assert result["verdict"] in {"THREAT", "ANOMALY", "CLEAR"}
+
+    def test_dev_mode_prints_alert(self, tmp_path, capsys):
+        with patch.dict("os.environ", {"SPEC1_DEV_MODE": "true"}):
+            make_client(tmp_path)
+
+        captured = capsys.readouterr()
+        assert "DEV MODE" in captured.out
+        assert "Tier 1" in captured.out
+
+    def test_no_dev_mode_no_alert(self, tmp_path, capsys):
+        with patch.dict("os.environ", {"SPEC1_DEV_MODE": "false"}):
+            make_client(tmp_path)
+
+        captured = capsys.readouterr()
+        assert "DEV MODE" not in captured.out
+
+    def test_dev_mode_cost_is_zero(self, tmp_path):
+        ollama_json = json.dumps({"confidence": 0.5, "classification": "MONITOR",
+                                  "reasoning": "ok"})
+
+        with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key",
+                                        "SPEC1_DEV_MODE": "true"}):
+            client = make_client(tmp_path)
+            with patch("spec1_engine.llm.ollama_manager.is_running", return_value=True):
+                with patch("spec1_engine.llm.ollama_manager.ensure_model", return_value=True):
+                    with patch("spec1_engine.llm.ollama_manager.chat", return_value=ollama_json):
+                        client.analyze(CLEAR_SIGNAL)
+
+        assert client.get_cost_estimate() == 0.0
+
+    def test_output_schema_identical_in_dev_mode(self, tmp_path):
+        required = {"verdict", "confidence", "analysis", "tier_used",
+                    "latency_ms", "cost_estimate_usd"}
+        ollama_json = json.dumps({"confidence": 0.7, "classification": "ESCALATE",
+                                  "reasoning": "Dev mode result."})
+
+        with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key",
+                                        "SPEC1_DEV_MODE": "true"}):
+            client = make_client(tmp_path)
+            with patch("spec1_engine.llm.ollama_manager.is_running", return_value=True):
+                with patch("spec1_engine.llm.ollama_manager.ensure_model", return_value=True):
+                    with patch("spec1_engine.llm.ollama_manager.chat", return_value=ollama_json):
+                        result = client.analyze(THREAT_SIGNAL)
+
+        assert required.issubset(result.keys())
+        assert result["verdict"] in {"THREAT", "ANOMALY", "CLEAR"}
+        assert 0.0 <= result["confidence"] <= 1.0

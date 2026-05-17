@@ -63,9 +63,17 @@ class FallbackLLMClient:
             or ollama_manager.preferred_model()
         )
         self._log_path = log_path or Path(env("SPEC1_LLM_LOG_PATH", str(_DEFAULT_LOG_PATH)))
+        self._dev_mode = env("SPEC1_DEV_MODE", "").lower() == "true"
         self._active_tier = "claude"
         self._session_cost: float = 0.0
         self._session_id = uuid.uuid4().hex[:8]
+
+        if self._dev_mode:
+            print(
+                "[DEV MODE] Bypassing Tier 1 (Claude) -> "
+                "Short-circuiting directly to Tier 2 (Local Ollama)"
+            )
+            logger.info("SPEC1_DEV_MODE active — Tier 1 skipped")
 
     # ── Public API ────────────────────────────────────────────────────────────
 
@@ -73,13 +81,14 @@ class FallbackLLMClient:
         """Return raw LLM text from the first available tier. Never raises."""
         t0 = time.monotonic()
 
-        # Tier 1
-        try:
-            text = self._claude_complete(prompt, system)
-            self._record("claude", t0, len(prompt + text), success=True)
-            return text
-        except Exception as exc:
-            logger.warning("Tier 1 (Claude) failed: %s — trying Ollama", exc)
+        # Tier 1 (skipped in dev mode)
+        if not self._dev_mode:
+            try:
+                text = self._claude_complete(prompt, system)
+                self._record("claude", t0, len(prompt + text), success=True)
+                return text
+            except Exception as exc:
+                logger.warning("Tier 1 (Claude) failed: %s — trying Ollama", exc)
 
         # Tier 2
         try:
@@ -99,18 +108,19 @@ class FallbackLLMClient:
         """Run analysis and return the standard output dict. Never raises."""
         t0 = time.monotonic()
 
-        # Tier 1
-        try:
-            raw = self._claude_complete(prompt, system)
-            result = self._parse_to_spec(raw, "claude")
-            latency_ms = int((time.monotonic() - t0) * 1000)
-            cost = self._estimate_cost(prompt, raw)
-            self._session_cost += cost
-            result.update(latency_ms=latency_ms, cost_estimate_usd=cost)
-            self._record("claude", t0, len(prompt + raw), success=True)
-            return result
-        except Exception as exc:
-            logger.warning("Tier 1 (Claude) failed: %s — trying Ollama", exc)
+        # Tier 1 (skipped in dev mode)
+        if not self._dev_mode:
+            try:
+                raw = self._claude_complete(prompt, system)
+                result = self._parse_to_spec(raw, "claude")
+                latency_ms = int((time.monotonic() - t0) * 1000)
+                cost = self._estimate_cost(prompt, raw)
+                self._session_cost += cost
+                result.update(latency_ms=latency_ms, cost_estimate_usd=cost)
+                self._record("claude", t0, len(prompt + raw), success=True)
+                return result
+            except Exception as exc:
+                logger.warning("Tier 1 (Claude) failed: %s — trying Ollama", exc)
 
         # Tier 2
         try:
