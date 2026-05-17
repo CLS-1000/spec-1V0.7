@@ -197,12 +197,60 @@ def test_get_case_retrieves_case_by_id(temp_workspace):
 
 
 def test_get_case_raises_on_missing_case(temp_workspace):
-    """Test: get_case raises ValueError for missing case."""
+    """Test: get_case raises ValueError for a well-formed but absent case ID."""
     with pytest.raises(ValueError):
-        get_case("case-nonexistent")
+        get_case("case-000000000000")
 
 
-# ── Signal matching tests ─────────────────────────────────────────────────────
+# ── Path-traversal rejection tests ───────────────────────────────────────────
+
+@pytest.mark.parametrize("bad_id", [
+    "../../../etc/passwd",
+    "case-../../../etc/shadow",
+    "../../etc/hostname",
+    "case_../../secret",
+    "",
+    "CASE-aabbccddeeff",
+    "case-AABBCCDDEEFF",
+    "case-toolongid12345",
+    "case-short",
+    "case-aabbccddee;rm -rf /",
+])
+def test_get_case_rejects_invalid_case_id(temp_workspace, bad_id):
+    """Test: get_case raises ValueError for any invalid / traversal case_id."""
+    with pytest.raises(ValueError, match="Invalid case_id"):
+        get_case(bad_id)
+
+
+def test_get_case_raises_on_valid_format_but_absent(temp_workspace):
+    """Test: get_case raises ValueError for a well-formed ID that doesn't exist on disk."""
+    with pytest.raises(ValueError, match="not found"):
+        get_case("case-999999999999")
+
+
+@pytest.mark.parametrize("bad_id", [
+    "../../../etc/passwd",
+    "case-../../../etc/shadow",
+    "../../etc/hostname",
+])
+def test_close_case_rejects_path_traversal(temp_workspace, bad_id):
+    """Test: close_case raises ValueError for path-traversal case_id."""
+    with pytest.raises(ValueError, match="Invalid case_id"):
+        close_case(bad_id)
+
+
+@pytest.mark.parametrize("bad_id", [
+    "../../../etc/passwd",
+    "case-../../../etc/shadow",
+    "../../etc/hostname",
+])
+def test_update_case_rejects_path_traversal(temp_workspace, bad_id, sample_signal):
+    """Test: update_case raises ValueError for path-traversal case_id."""
+    with pytest.raises(ValueError, match="Invalid case_id"):
+        update_case(bad_id, [sample_signal], "finding")
+
+
+
 
 def test_tracker_matches_signal_to_case_by_tag(temp_workspace, apt29_signal):
     """Test: tracker matches signal to case by tag."""
