@@ -443,7 +443,7 @@
 
       <div class="nav-divider"></div>
       <div class="nav-section">Political</div>
-      <a class="nav-item" href="/portland-web" target="_blank" rel="noopener noreferrer">
+      <a class="nav-item" id="nav-portland-web" href="/portland-web" target="_blank" rel="noopener noreferrer">
         <span class="nav-glyph">⊛</span> Portland Web ↗
       </a>
       <a class="nav-item" href="/spec1_political_web.html" target="_blank" rel="noopener noreferrer">
@@ -839,6 +839,30 @@ python -m spec1_engine.app.cycle</pre>
     <div style="display:flex; gap:10px;">
       <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && PYTHONPATH=src python -m spec1_api.main')">Copy command</button>
       <button class="copy-btn" onclick="closeOverlay()" style="margin-left:auto;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── New Case modal ── -->
+<div class="modal-overlay" id="case-modal">
+  <div class="modal-box">
+    <div class="modal-title">Open New Case</div>
+    <div class="form-row">
+      <div class="form-label">Title</div>
+      <input class="form-input" id="case-title" placeholder="Investigation title…">
+    </div>
+    <div class="form-row">
+      <div class="form-label">Question</div>
+      <input class="form-input" id="case-question" placeholder="Core investigation question…">
+    </div>
+    <div class="form-row">
+      <div class="form-label">Tags (comma-separated)</div>
+      <input class="form-input" id="case-tags" placeholder="fara, senate, legislation…">
+    </div>
+    <div class="form-err" id="case-form-err"></div>
+    <div class="form-actions">
+      <button class="action-btn" onclick="submitNewCase()">Open Case</button>
+      <button class="action-btn" onclick="closeNewCaseModal()" style="margin-left:auto">Cancel</button>
     </div>
   </div>
 </div>
@@ -1721,14 +1745,6 @@ async function loadWorkbench(offset) {
   }).join('');
 
   el.innerHTML = `<div id="wb-cards">${cards}</div>${pager(data.total||items.length, offset, PAGE, 'loadWorkbench')}`;
-
-  // Delegated handlers
-  document.getElementById('wb-cards').addEventListener('click', function(e) {
-    const closeBtn = e.target.closest('[data-close]');
-    if (closeBtn) { e.stopPropagation(); closeCase(closeBtn.dataset.close); return; }
-    const card = e.target.closest('.case-card');
-    if (card) card.classList.toggle('expanded');
-  });
 }
 
 function setWbFilter(status) {
@@ -1780,12 +1796,22 @@ async function submitNewCase() {
 
 async function closeCase(cid) {
   const res = await apiPost(`/workspace/cases/${encodeURIComponent(cid)}/close`, {});
-  if (res.ok) { loadWorkbench(_wbOff); }
+  if (res.ok) {
+    loadWorkbench(_wbOff);
+  } else {
+    const detail = res.data?.detail || res.status || 'Unknown error';
+    const el = document.getElementById('workbench-content');
+    const errDiv = document.createElement('div');
+    errDiv.className = 'form-err';
+    errDiv.style.cssText = 'display:block;margin:8px 0';
+    errDiv.textContent = 'Failed to close case: ' + detail;
+    el.prepend(errDiv);
+  }
 }
 
 // ── Policy Desk ───────────────────────────────────────────────────────────────
 
-const POLICY_KEYWORDS = ['congress','senate','house','fara','legislation','bill','amendment','lobbying','legislat','foreign agent','appropriat','committee'];
+const POLICY_KEYWORDS = ['congress','senate','house','fara','bill','amendment','lobbying','legislat','foreign agent','appropriat','committee'];
 
 function _isPolicyRecord(r) {
   const hay = [r.hypothesis||'', r.pattern||'', r.signal_source||'', r.signal_url||''].join(' ').toLowerCase();
@@ -1810,7 +1836,7 @@ async function loadPolicyDesk() {
   summaryEl.innerHTML = `
     <div class="policy-stat"><div class="policy-stat-num">${faraData?.total ?? faraItems.length}</div><div class="policy-stat-label">FARA Records</div></div>
     <div class="policy-stat"><div class="policy-stat-num">${leadsData?.total ?? leadsItems.length}</div><div class="policy-stat-label">Leads</div></div>
-    <div class="policy-stat"><div class="policy-stat-num">${policyIntel.length}</div><div class="policy-stat-label">Policy Intel</div></div>`;
+    <div class="policy-stat"><div class="policy-stat-num">${policyIntel.length}</div><div class="policy-stat-label">Policy Intel (last 200)</div></div>`;
 
   // FARA tab
   const faraEl = document.getElementById('tab-fara');
@@ -1906,33 +1932,32 @@ function fallbackCopy(text) {
   await checkStatus();
   loadLatestBrief();
   setInterval(checkStatus, 30000);
-  document.getElementById('case-modal').addEventListener('click', e => {
-    if (e.target === e.currentTarget) closeNewCaseModal();
-  });
+
+  const caseModal = document.getElementById('case-modal');
+  if (caseModal) {
+    caseModal.addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeNewCaseModal();
+    });
+  }
+
+  const wbContent = document.getElementById('workbench-content');
+  if (wbContent) {
+    wbContent.addEventListener('click', function(e) {
+      const closeBtn = e.target.closest('[data-close]');
+      if (closeBtn) { e.stopPropagation(); closeCase(closeBtn.dataset.close); return; }
+      const card = e.target.closest('.case-card');
+      if (card) card.classList.toggle('expanded');
+    });
+  }
+
+  // Hide Portland Web nav link if the feature is not enabled on this server
+  fetch('/portland-web', { method: 'HEAD' }).then(r => {
+    if (r.status === 404) {
+      const link = document.getElementById('nav-portland-web');
+      if (link) link.style.display = 'none';
+    }
+  }).catch(() => {});
 })();
 </script>
-<!-- ── New Case modal ── -->
-<div class="modal-overlay" id="case-modal">
-  <div class="modal-box">
-    <div class="modal-title">Open New Case</div>
-    <div class="form-row">
-      <div class="form-label">Title</div>
-      <input class="form-input" id="case-title" placeholder="Investigation title…">
-    </div>
-    <div class="form-row">
-      <div class="form-label">Question</div>
-      <input class="form-input" id="case-question" placeholder="Core investigation question…">
-    </div>
-    <div class="form-row">
-      <div class="form-label">Tags (comma-separated)</div>
-      <input class="form-input" id="case-tags" placeholder="fara, senate, legislation…">
-    </div>
-    <div class="form-err" id="case-form-err"></div>
-    <div class="form-actions">
-      <button class="action-btn" onclick="submitNewCase()">Open Case</button>
-      <button class="action-btn" onclick="closeNewCaseModal()" style="margin-left:auto">Cancel</button>
-    </div>
-  </div>
-</div>
 </body>
 </html>

@@ -718,7 +718,10 @@ function barChart(items, maxVal) {
 
 function renderStats() {
   const data = ALL_RECORDS;
-  if (!data.length) return;
+  if (!data.length) {
+    document.getElementById('stats-content').innerHTML = '<div class="empty-state">No records loaded.</div>';
+    return;
+  }
 
   // Classification counts
   const cls = {};
@@ -856,7 +859,10 @@ function buildTimeline(dateMap) {
 
 function renderSources() {
   const data = ALL_RECORDS;
-  if (!data.length) return;
+  if (!data.length) {
+    document.getElementById('sources-content').innerHTML = '<div class="empty-state">No records loaded.</div>';
+    return;
+  }
 
   const bySource = {};
   for (const r of data) {
