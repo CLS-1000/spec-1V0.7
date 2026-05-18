@@ -24,6 +24,7 @@
 
 1. **Fix Pages build break**
    - Remove Jekyll parsing exposure for operational brief artifacts by moving runtime brief outputs to `generated/briefs/` (gitignored) per repository policy.
+   - Treat current `briefs/` contents as legacy cleanup and prevent any new runtime runs from writing there.
    - Ensure Pages source only includes intended web assets.
    - Re-run pages workflow and confirm build/deploy success.
 
