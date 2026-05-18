@@ -23,12 +23,12 @@
 ## Repair Plan (implementation PR)
 
 1. **Fix Pages build break**
-   - Remove Jekyll parsing exposure for operational brief artifacts (move/segregate generated brief history from site build inputs).
+   - Remove Jekyll parsing exposure for operational brief artifacts by moving runtime brief outputs to `generated/briefs/` (gitignored) per repository policy.
    - Ensure Pages source only includes intended web assets.
    - Re-run pages workflow and confirm build/deploy success.
 
 2. **Enforce generated-artifact policy**
-   - Stop committing runtime/generated brief outputs to tracked source paths used by Pages.
+   - Stop committing runtime/generated brief outputs to tracked source paths used by Pages; keep them in `generated/briefs/` or a dedicated generated branch.
    - Add a guard (CI or repository rule) that blocks future commits of generated brief/log artifacts in protected paths.
 
 3. **Harden LLM fallback reliability (PR #65/#66 follow-up)**
