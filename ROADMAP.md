@@ -11,6 +11,30 @@
 **Timeline:** 26 weeks (6 months)  
 **Resource Estimate:** 1 FTE engineering + 0.5 FTE sales/marketing (Phase 2+)
 ---
+## REPOSITORY STRATEGY
+
+```
+Phase 1-2 (NOW):
+mjlak1000/spec-1                    ← everything here (code, API, tests, docs)
+  └── src/
+      ├── spec1_core/               ← organizationally separated (same repo)
+      ├── spec1_analytics/          ← organizationally separated (same repo)
+      └── spec1_api/
+
+Phase 2 Week 9 (new repo, marketing only):
+mjlak1000/spec-1                    ← code, unchanged
+mjlak1000/spec-1-marketing          ← NEW: portfolio site (Next.js + Vercel)
+
+Phase 3+ (optional — only if licensing or team boundaries justify it):
+spec-1-core                         ← AGPL open-source engine (extracted)
+spec-1-analytics                    ← Proprietary analytics layer (extracted)
+spec-1-saas                         ← Proprietary SaaS layer (extracted)
+```
+
+**Default assumption:** monorepo (`mjlak1000/spec-1`) is fine through Phase 3.
+A repo split is a deliberate decision gate, not an automatic outcome.
+
+---
 ## PHASE 1: CONSOLIDATION & CLARITY (Weeks 1-8)
 ### Goal: Fix architectural loose ends and prepare for external users
 ### Week 1-2: Foundation Fixes
@@ -307,55 +331,62 @@
 ## PHASE 2: POSITIONING & COMMERCIAL PATHS (Weeks 9-16)
 ### Goal: Build distinct positioning for core engine vs. analytics; enable multiple monetization paths
 ### Week 9: Repo Organization & Planning
-#### TASK 2.1: Reorganize for Future Modularity
-- **Status:** 🟡 MEDIUM (organizational change, no functional changes)
-- **Goal:** Signal future separation of core engine + analytics without splitting yet
+#### TASK 2.1: Reorganize `src/` for Future Modularity (in-repo only)
+- **Status:** 🟡 MEDIUM (folder rename within `mjlak1000/spec-1` — no repo split yet)
+- **Goal:** Reorganize `src/` so `spec1_core` and `spec1_analytics` are visually distinct,
+  making a future optional repo split straightforward without requiring one now.
+- **Scope:** Folder renames inside `mjlak1000/spec-1` only. No new repositories.
 - **Time Estimate:** 2-3 days
-- **Changes (Folder Structure Only):**
+- **Repo layout after this task:**
   ```
-  Current:
-  src/
-  ├── spec1_engine/
-  └── cls_*/
-  
-  Reorganize to:
-  src/
-  ├── spec1_core/           ← harvest → verify → store (canonical cycle)
-  │   ├── signal/
-  │   ├── investigation/
-  │   ├── intelligence/
-  │   └── core/
-  ├── spec1_analytics/      ← briefs, leads, psyop, quant
-  │   ├── cls_world_brief/
-  │   ├── cls_leads/
-  │   ├── cls_psyop/
-  │   └── cls_quant/
-  ├── spec1_api/            ← HTTP + MCP surfaces
-  ├── cls_osint/            ← adapters (keep top-level)
-  ├── cls_verdicts/         ← feedback (keep top-level)
-  ├── cls_calibration/      ← feedback (keep top-level)
-  └── cls_db/               ← persistence (keep top-level)
+  mjlak1000/spec-1          ← everything stays here (Phase 1 & 2)
+  └── src/
+      ├── spec1_core/           ← harvest → verify → store (canonical cycle)
+      │   ├── signal/
+      │   ├── investigation/
+      │   ├── intelligence/
+      │   └── core/
+      ├── spec1_analytics/      ← briefs, leads, psyop
+      │   ├── cls_world_brief/
+      │   ├── cls_leads/
+      │   └── cls_psyop/
+      ├── spec1_api/            ← HTTP + MCP surfaces
+      ├── cls_osint/            ← adapters
+      ├── cls_verdicts/         ← feedback
+      ├── cls_calibration/      ← feedback
+      └── cls_db/               ← persistence
   ```
-- **Rationale:** Prepares for future `spec-1-core` (open-source engine) vs. `spec-1-analytics` (commercial)
+- **Future repo split (Phase 3+, optional — only if justified):**
+  ```
+  spec-1-core        ← AGPL open-source engine (extracted from spec1_core/)
+  spec-1-analytics   ← Proprietary analytics layer (extracted from spec1_analytics/)
+  spec-1-saas        ← Proprietary SaaS/hosting layer
+  ```
+  Monorepo is equally valid; split only if licensing or team boundaries demand it.
 - **Deliverables:**
-  - [ ] Folders reorganized as above
-  - [ ] All imports updated
+  - [ ] `src/spec1_engine/` → `src/spec1_core/` (rename + update all imports)
+  - [ ] `src/cls_world_brief/`, `src/cls_leads/`, `src/cls_psyop/` → `src/spec1_analytics/`
+  - [ ] All other top-level packages (`cls_osint`, `cls_verdicts`, etc.) remain at `src/`
+  - [ ] All imports updated throughout codebase
   - [ ] All tests passing
-  - [ ] docs/architecture.md updated to show structure
+  - [ ] docs/architecture.md updated to show new structure
   - [ ] No functional changes
 - **Commits:**
-  - `refactor: reorganize src/ to signal future core/analytics separation`
+  - `refactor: reorganize src/ into spec1_core/ and spec1_analytics/ (in-repo)`
 ---
 #### TASK 2.2: Plan Independent Portfolio Site
 - **Status:** 🟡 MEDIUM (planning + design, no code yet)
-- **Goal:** Design separate marketing site (not GitHub Pages) with positioning
+- **Goal:** Design separate marketing site (not GitHub Pages) with positioning.
+  Lives in a **new repo `mjlak1000/spec-1-marketing`** — completely separate from the
+  code repo so marketing changes never touch the engine.
 - **Time Estimate:** 3-5 days (planning + design)
 - **Deliverables:**
   - [ ] Domain name selected (e.g., spec1.ai, spec1intelligence.io)
+  - [ ] `mjlak1000/spec-1-marketing` repo created (Next.js skeleton, README, deploy config)
   - [ ] Site architecture documented (landing, features, pricing, blog, docs, case studies)
   - [ ] Positioning content drafted (open-source core vs. commercial analytics)
   - [ ] Pricing tiers documented (free, pro, enterprise)
-  - [ ] Hosting provider selected (Vercel, Netlify, AWS, etc.)
+  - [ ] Hosting provider selected (Vercel recommended — native Next.js support)
   - [ ] Design mockups (sacred geometry aesthetic consistent with brand)
   - [ ] Blog content plan (3-5 posts on signal detection, triage automation, etc.)
 - **Content Outline:**
@@ -364,15 +395,17 @@
   - Pricing page: Free tier (always), Pro tier ($200/mo), Enterprise (custom)
   - Blog: Thought leadership on OSINT, signal detection, triage
   - Case studies: 2-3 public case studies (journalist, nonprofit, threat intel)
-  - Docs link: Pointing to GitHub repo for technical docs
-- **Commits:**
+  - Docs link: Pointing to `mjlak1000/spec-1` GitHub repo for technical docs
+- **Commits (in `spec-1-marketing`):**
+  - `chore: init spec-1-marketing repo (Next.js + Vercel)`
   - `docs: add portfolio site planning document`
 ---
 ### Week 9-12: Portfolio Site Build
-#### TASK 2.3: Build Independent Portfolio Site
+#### TASK 2.3: Build Independent Portfolio Site (`mjlak1000/spec-1-marketing`)
 - **Status:** 🟡 MEDIUM (2-3 weeks of design + development)
+- **Repo:** `mjlak1000/spec-1-marketing` (separate from code repo — created in Task 2.2)
 - **Time Estimate:** 8-10 days
-- **Tech Stack Recommendation:** Next.js + Vercel (fast, low-friction, good for SaaS sites)
+- **Tech Stack:** Next.js + Vercel (fast, low-friction, native Next.js support)
 - **Deliverables:**
   - [ ] Domain registered and DNS configured
   - [ ] Site deployed and live at spec1.ai (or chosen domain)
