@@ -35,4 +35,29 @@ where = ["src"]
 "spec1_api" = ["static/*.html"]
 
 [tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
 pythonpath = ["src"]
+addopts = "--strict-markers -q"
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+omit = ["*/test_*", "*/__pycache__/*"]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+
+[tool.ruff]
+target-version = "py39"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "C901"]
+exclude = [".venv", ".git", "build", "dist"]
+
+[tool.bandit]
+severity_level = "medium"
+skips = ["B101"]

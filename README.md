@@ -41,7 +41,7 @@ RSS / FARA / Congress / Narrative
   cls_osint.feed ─────────── cls_osint.adapters (fara, congressional, narrative)
         │
         ▼
-  spec1_engine  (harvest → parse → score → investigate → verify → analyze)
+  spec1_core  (harvest → parse → score → investigate → verify → analyze)
         │
         ▼
   IntelligenceRecord  →  spec1_intelligence.jsonl  (append-only)

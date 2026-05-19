@@ -39,7 +39,7 @@ pip install -e ".[dev]"
 Verify:
 
 ```bash
-python -c "import spec1_engine; print('ok')"
+python -c "import spec1_core; print('ok')"
 ```
 
 ---
@@ -70,7 +70,7 @@ and writes intelligence records to JSONL + SQLite.
 ```bash
 make cycle
 # or
-PYTHONPATH=src python -m spec1_engine.app.cycle
+PYTHONPATH=src python -m spec1_core.app.cycle
 ```
 
 Expected output (numbers will vary):
