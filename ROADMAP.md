@@ -387,6 +387,55 @@ A repo split is a deliberate decision gate, not an automatic outcome.
   - [ ] Positioning content drafted (open-source core vs. commercial analytics)
   - [ ] Pricing tiers documented (free, pro, enterprise)
   - [ ] Hosting provider selected (Vercel recommended — native Next.js support)
+#### TASK 2.1: Reorganize for Future Modularity
+- **Status:** 🟡 MEDIUM (organizational change, no functional changes)
+- **Goal:** Signal future separation of core engine + analytics without splitting yet
+- **Time Estimate:** 2-3 days
+- **Changes (Folder Structure Only):**
+  ```
+  Current:
+  src/
+  ├── spec1_engine/
+  └── cls_*/
+  
+  Reorganize to:
+  src/
+  ├── spec1_core/           ← harvest → verify → store (canonical cycle)
+  │   ├── signal/
+  │   ├── investigation/
+  │   ├── intelligence/
+  │   └── core/
+  ├── spec1_analytics/      ← briefs, leads, psyop, quant
+  │   ├── cls_world_brief/
+  │   ├── cls_leads/
+  │   ├── cls_psyop/
+  │   └── cls_quant/
+  ├── spec1_api/            ← HTTP + MCP surfaces
+  ├── cls_osint/            ← adapters (keep top-level)
+  ├── cls_verdicts/         ← feedback (keep top-level)
+  ├── cls_calibration/      ← feedback (keep top-level)
+  └── cls_db/               ← persistence (keep top-level)
+  ```
+- **Rationale:** Prepares for future `spec-1-core` (open-source engine) vs. `spec-1-analytics` (commercial)
+- **Deliverables:**
+  - [ ] Folders reorganized as above
+  - [ ] All imports updated
+  - [ ] All tests passing
+  - [ ] docs/architecture.md updated to show structure
+  - [ ] No functional changes
+- **Commits:**
+  - `refactor: reorganize src/ to signal future core/analytics separation`
+---
+#### TASK 2.2: Plan Independent Portfolio Site
+- **Status:** 🟡 MEDIUM (planning + design, no code yet)
+- **Goal:** Design separate marketing site (not GitHub Pages) with positioning
+- **Time Estimate:** 3-5 days (planning + design)
+- **Deliverables:**
+  - [ ] Domain name selected (e.g., spec1.ai, spec1intelligence.io)
+  - [ ] Site architecture documented (landing, features, pricing, blog, docs, case studies)
+  - [ ] Positioning content drafted (open-source core vs. commercial analytics)
+  - [ ] Pricing tiers documented (free, pro, enterprise)
+  - [ ] Hosting provider selected (Vercel, Netlify, AWS, etc.)
   - [ ] Design mockups (sacred geometry aesthetic consistent with brand)
   - [ ] Blog content plan (3-5 posts on signal detection, triage automation, etc.)
 - **Content Outline:**
@@ -406,6 +455,15 @@ A repo split is a deliberate decision gate, not an automatic outcome.
 - **Repo:** `mjlak1000/spec-1-marketing` (separate from code repo — created in Task 2.2)
 - **Time Estimate:** 8-10 days
 - **Tech Stack:** Next.js + Vercel (fast, low-friction, native Next.js support)
+  - Docs link: Pointing to GitHub repo for technical docs
+- **Commits:**
+  - `docs: add portfolio site planning document`
+---
+### Week 9-12: Portfolio Site Build
+#### TASK 2.3: Build Independent Portfolio Site
+- **Status:** 🟡 MEDIUM (2-3 weeks of design + development)
+- **Time Estimate:** 8-10 days
+- **Tech Stack Recommendation:** Next.js + Vercel (fast, low-friction, good for SaaS sites)
 - **Deliverables:**
   - [ ] Domain registered and DNS configured
   - [ ] Site deployed and live at spec1.ai (or chosen domain)
