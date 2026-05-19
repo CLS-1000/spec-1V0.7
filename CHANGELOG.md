@@ -6,13 +6,6 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [Unreleased]
-
-### Removed
-- `cls_quant` — quantitative market intelligence module removed (out of scope for core triage mission; market demand not validated). `SPEC1_QUANT_ENABLED` env var, `install-quant` Makefile target, and numpy/yfinance optional deps have all been cleaned up.
-
----
-
 ## [0.6.0] — 2026-05-19
 
 ### Added
@@ -29,6 +22,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - `README.md`: Removed `SPEC1_QUANT_ENABLED` row from env var table.
 
 ### Removed
+- `cls_quant` — quantitative market intelligence module removed (out of scope for core triage mission; market demand not validated). numpy/yfinance optional deps, `SPEC1_QUANT_ENABLED` env var, and `install-quant` Makefile target all cleaned up.
 - `cls_quant` references across docs, Makefile, and env templates (code was never shipped).
 
 ---
