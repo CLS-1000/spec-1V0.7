@@ -60,12 +60,6 @@ cp .env.example .env           # then set ANTHROPIC_API_KEY
 make test                      # pytest + flake8
 ```
 
-Without `numpy` installed, ignore the quant tests:
-
-```bash
-pytest tests/ --ignore tests/test_quant.py
-```
-
 ## Tests
 
 - Use `tmp_path` fixtures; mock all external network and Anthropic calls.
