@@ -9,7 +9,7 @@ from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, HTTPException
+from fastapi import HTTPException
 from fastapi.responses import FileResponse
 
 from spec1_api import __version__
@@ -28,7 +28,6 @@ from spec1_api.routers import (
     verdicts,
     workspace,
 )
-from spec1_api.routers import publication
 from spec1_api.scheduler import maybe_run_on_start, start_scheduler, stop_scheduler
 
 logger = logging.getLogger(__name__)

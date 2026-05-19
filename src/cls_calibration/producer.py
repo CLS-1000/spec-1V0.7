@@ -16,6 +16,7 @@ from cls_calibration.schemas import (
     CalibrationBucket,
     CalibrationReport,
 )
+from spec1_labels import VERIF_PARTIAL
 
 
 def _bucket_label(value: float, step: float = 0.1) -> str:
@@ -43,7 +44,7 @@ def _build_buckets(
         bucket_data[label]["records"] += 1
         outcomes = verdict_index.get(rec.get("record_id", ""), [])
         bucket_data[label]["verdicts"] += len(outcomes)
-        bucket_data[label]["tp"] += sum(1 for o in outcomes if o in ("TP", "PARTIAL"))
+        bucket_data[label]["tp"] += sum(1 for o in outcomes if o in ("TP", VERIF_PARTIAL))
         bucket_data[label]["fp"] += sum(1 for o in outcomes if o == "FP")
 
     buckets: List[CalibrationBucket] = []

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
-from pathlib import Path
 
 import pytest
 
@@ -755,7 +754,7 @@ def test_velocity_score_novelty_many_hits():
 
 # ─── Signal parser additional tests ──────────────────────────────────────────
 
-from spec1_core.signal.parser import _truncate, parse_batch
+from spec1_core.signal.parser import _truncate
 
 
 def test_truncate_long_text():

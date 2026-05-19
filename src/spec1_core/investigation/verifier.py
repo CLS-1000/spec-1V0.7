@@ -9,23 +9,23 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import uuid
 
 from spec1_core.schemas.models import Investigation, Outcome
+from spec1_labels import VERIF_CORROBORATED, VERIF_CONFLICTED
 
 logger = logging.getLogger(__name__)
 
 MODEL = "claude-haiku-4-5-20251001"
 VALID_CLASSIFICATIONS = {
-    "CORROBORATED", "ESCALATE", "INVESTIGATE", "MONITOR", "CONFLICTED", "ARCHIVE"
+    VERIF_CORROBORATED, "ESCALATE", "INVESTIGATE", "MONITOR", VERIF_CONFLICTED, "ARCHIVE"
 }
 
 _SYSTEM_PROMPT = (
     "You are an intelligence analyst verifying a hypothesis. "
     "Respond with JSON only — no prose, no markdown fences. "
     'Schema: {"verified": bool, "confidence": float, "reasoning": str, '
-    '"classification": "CORROBORATED"|"ESCALATE"|"INVESTIGATE"|"MONITOR"|"CONFLICTED"|"ARCHIVE"}'
+    '"classification": "' + VERIF_CORROBORATED + '"|"ESCALATE"|"INVESTIGATE"|"MONITOR"|"' + VERIF_CONFLICTED + '"|"ARCHIVE"}'
 )
 
 

@@ -290,7 +290,7 @@ def test_classify_domain_geo():
 
 def test_standard_top10_capped():
     from spec1_core.briefing.generator import _build_prompt
-    records = [make_record(source=f"rand", confidence=i * 0.05) for i in range(20)]
+    records = [make_record(source="rand", confidence=i * 0.05) for i in range(20)]
     stats = make_cycle_stats()
     prompt = _build_prompt(records, stats)
     # Prompt should reference at most 10 standard records
@@ -502,7 +502,6 @@ def test_write_brief_prompts_latest_overwritten_each_run(tmp_path):
 
 @pytest.fixture(scope="module")
 def api_client():
-    import spec1_core.api.app  # pre-import so patch can resolve the module
     with patch("spec1_core.api.app.build_scheduler") as mock_build, \
          patch("spec1_core.api.app.maybe_run_on_start"):
         mock_sched = MagicMock()

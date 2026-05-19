@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-import io
 import ssl
 from datetime import datetime, timezone
-from pathlib import Path
-from unittest.mock import MagicMock, patch, mock_open
+from unittest.mock import MagicMock, patch
 
 import feedparser
 import pytest
@@ -19,10 +17,8 @@ from spec1_core.signal.harvester import (
     _fetch_raw_no_ssl,
     _parse_feed,
     _SSL_UNVERIFIED,
-    _SANITIZE_XML,
     fetch_feed,
     harvest_all,
-    DEFAULT_FEEDS,
     _make_signal_id,
     _ILLEGAL_XML_RE,
 )
@@ -256,7 +252,6 @@ def test_parse_feed_sanitize_xml_uses_raw_sanitized():
     """SANITIZE_XML sources use _fetch_raw_sanitized."""
     # Temporarily add a test source to _SANITIZE_XML
     import spec1_core.signal.harvester as h_mod
-    original = set(h_mod._SANITIZE_XML)
     h_mod._SANITIZE_XML.add("test_sanitize_source")
     try:
         fake_bytes = b"<rss/>"
@@ -337,16 +332,6 @@ def test_harvest_all_records_error_when_fetch_raises():
 
 def test_harvest_all_partial_failure():
     """harvest_all succeeds for good feeds even if one fails."""
-    fake_xml = """<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0"><channel>
-  <item>
-    <title>Good Article</title>
-    <link>https://good.com/art</link>
-    <description>Good content here.</description>
-  </item>
-</channel></rss>"""
-    good_parsed = feedparser.parse(fake_xml)
-
     def _side_effect(name, url, **kwargs):
         if name == "good":
             return iter([Signal(

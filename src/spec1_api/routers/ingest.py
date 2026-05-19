@@ -31,7 +31,6 @@ from spec1_api.schemas.node_signal import (
     IngestResult,
 )
 from spec1_core.signal.gates import (
-    GATE_THRESHOLD,
     score_credibility,
     score_novelty,
     score_velocity,

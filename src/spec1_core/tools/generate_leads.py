@@ -21,6 +21,7 @@ from pathlib import Path
 
 from spec1_analytics.cls_leads.generator import generate_leads
 from spec1_analytics.cls_leads.store import LeadStore
+from spec1_labels import PRIORITY_CRITICAL, PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_LOW
 
 
 def _read_jsonl(path: Path) -> list[dict]:
@@ -65,7 +66,7 @@ def build_argparser() -> argparse.ArgumentParser:
     )
     p.add_argument(
         "--priority",
-        choices=["CRITICAL", "HIGH", "MEDIUM", "LOW"],
+        choices=[PRIORITY_CRITICAL, PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_LOW],
         default=None,
         help="Filter to a single priority level (default: keep all)",
     )

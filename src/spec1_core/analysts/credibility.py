@@ -5,11 +5,10 @@ Scores signals based on known-analyst authorship.
 
 from __future__ import annotations
 
-import re
 from typing import Optional
 
-from spec1_core.analysts.registry import load_all, get_credibility
-from spec1_core.schemas.models import AnalystRecord, Signal, ParsedSignal
+from spec1_core.analysts.registry import load_all
+from spec1_core.schemas.models import AnalystRecord, Signal
 
 
 class CredibilityAnalyst:

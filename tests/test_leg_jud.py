@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -362,7 +361,7 @@ class TestLegJudFormatter:
 
     def test_section_to_markdown_standalone(self):
         from cls_leg_jud.producer import produce_brief
-        from cls_leg_jud.formatter import section_to_markdown, to_markdown
+        from cls_leg_jud.formatter import section_to_markdown
         records = [
             {
                 "record_id": "r1",

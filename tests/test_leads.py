@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from pathlib import Path
 
-import pytest
 
 from spec1_analytics.cls_leads.schemas import Lead
 from spec1_analytics.cls_leads.generator import generate_leads, _score_record, _build_action_items

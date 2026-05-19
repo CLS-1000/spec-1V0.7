@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
-import pytest
 
 from spec1_analytics.cls_psyop.evidence import EvidenceChain, EvidenceStore
 from spec1_core.psyop.scorer import (

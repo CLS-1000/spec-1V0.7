@@ -2,13 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from pathlib import Path
 
-import pytest
 
-from spec1_analytics.cls_psyop.schemas import PsyopPattern, PsyopScore
-from spec1_analytics.cls_psyop.patterns import PATTERNS, PATTERN_INDEX, get_pattern, get_patterns_by_category
+from spec1_analytics.cls_psyop.schemas import PsyopScore
+from spec1_analytics.cls_psyop.patterns import PATTERNS, get_pattern, get_patterns_by_category
 from spec1_analytics.cls_psyop.scorer import score_text, score_records, filter_risky, _classify_score
 from spec1_analytics.cls_psyop.pipeline import PsyopPipeline, PsyopPipelineStats, run_pipeline
 from spec1_analytics.cls_psyop.store import PsyopStore

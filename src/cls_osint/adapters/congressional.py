@@ -15,7 +15,6 @@ from datetime import datetime, timezone
 from typing import Iterator
 
 import feedparser
-import requests
 
 from cls_osint.schemas import CongressRecord
 

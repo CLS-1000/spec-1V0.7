@@ -25,6 +25,7 @@ from typing import Any
 
 from spec1_analytics.cls_psyop.evidence import EvidenceChain, EvidenceStore
 from spec1_core.intelligence.store import JsonlStore
+from spec1_labels import PSYOP_CLEAN
 
 # ─── Pattern name constants (strings) ────────────────────────────────────────
 NARRATIVE_CLUSTER = "NARRATIVE_CLUSTER"
@@ -93,7 +94,7 @@ def _validate_input(signal: Any) -> None:
 
 def _classify(score: int) -> str:
     if score == 0:
-        return "CLEAN"
+        return PSYOP_CLEAN
     if score >= THRESHOLD_CONFIRMED:
         return "PSYOP_CONFIRMED"
     if score >= THRESHOLD_CANDIDATE:

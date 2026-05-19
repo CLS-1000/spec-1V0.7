@@ -3,23 +3,19 @@
 from __future__ import annotations
 
 import json
-import threading
 from datetime import datetime, timezone
-from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from spec1_core.schemas.models import (
-    Signal, ParsedSignal, Opportunity, Investigation, Outcome, IntelligenceRecord,
+    Signal, ParsedSignal, Opportunity, Outcome,
 )
-from spec1_core.signal.harvester import harvest_all, fetch_feed, DEFAULT_FEEDS
+from spec1_core.signal.harvester import harvest_all, DEFAULT_FEEDS
 from spec1_core.signal.parser import parse_signal, parse_batch
 from spec1_core.signal.scorer import score_signal, score_batch
 from spec1_core.investigation.generator import generate_investigation
 from spec1_core.investigation.verifier import verify_investigation
-from spec1_core.intelligence.analyzer import analyze
 from spec1_core.intelligence.store import JsonlStore
 from spec1_core.app.cycle import run_cycle
 from spec1_core.core.ids import run_id as new_run_id
@@ -695,7 +691,7 @@ def test_run_cycle_updates_last_run_state(tmp_path):
     rich_signal = _make_rich_signal("sig-last-state")
     mock_result = {"signals": [rich_signal], "errors": {}}
     with patch("spec1_core.app.cycle.harvest_all", return_value=mock_result):
-        stats = run_cycle(
+        run_cycle(
             store_path=tmp_path / "last_state.jsonl",
             run_id="run-state-test",
             verbose=False,

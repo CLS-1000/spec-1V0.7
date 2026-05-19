@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -11,10 +10,7 @@ from typing import Optional
 from spec1_core.core.ids import run_id as new_run_id
 from spec1_core.core.logging_utils import get_logger
 from spec1_core.schemas.models import (
-    IntelligenceRecord,
-    Investigation,
     Opportunity,
-    Outcome,
     ParsedSignal,
     Signal,
 )

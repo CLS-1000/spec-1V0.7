@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 import threading
-import time
 from pathlib import Path
 
 import pytest
@@ -338,7 +337,6 @@ def test_module_default_store_reinit_for_different_path(tmp_path):
 def test_read_all_skips_empty_lines(tmp_path):
     """read_all skips empty lines in the file."""
     store_path = tmp_path / "empty_lines.jsonl"
-    import json
     with store_path.open("w") as fh:
         fh.write('{"a": 1}\n')
         fh.write("\n")  # empty line — should be skipped (line 63)

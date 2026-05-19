@@ -6,7 +6,6 @@ using a rule-based approach (no LLM required; LLM path is optional).
 
 from __future__ import annotations
 
-import os
 from datetime import datetime, timezone
 from typing import Sequence
 

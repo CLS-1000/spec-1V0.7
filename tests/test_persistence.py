@@ -2,16 +2,13 @@
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
 
-import pytest
 
 from cls_db.database import Database
-from cls_db.models import ALL_DDL, SIGNALS_DDL, LEADS_DDL
+from cls_db.models import ALL_DDL
 from cls_db.repository import Repository, _serialize, _row_to_dict
 from cls_db.migrate import ensure_schema, run_migrations, drop_all, reset_schema
-from cls_db.dual_write import DualWriter, make_dual_writer
+from cls_db.dual_write import make_dual_writer
 
 
 class TestDatabase:
@@ -129,7 +126,7 @@ class TestMigrations:
         db = Database(tmp_path / "test.db")
         ensure_schema(db)
         db.execute("INSERT INTO signals (signal_id, source) VALUES ('s1', 'test')")
-        report = reset_schema(db)
+        reset_schema(db)
         # After reset, table exists but old data is gone
         assert db.table_exists("signals")
         rows = db.fetchall("SELECT * FROM signals")
@@ -255,7 +252,6 @@ class TestDualWriter:
         assert writer.count_jsonl() == 5
 
     def test_read_jsonl_returns_records(self, tmp_path):
-        jsonl_path = tmp_path / "data.jsonl"
         writer = make_dual_writer(tmp_path / "data.jsonl", tmp_path / "db.db", "leads")
         writer.write({"lead_id": "l1", "title": "Lead 1"})
         jsonl_data = writer.read_jsonl()

@@ -10,7 +10,6 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from cls_calibration.aggregator import produce_report
 from cls_calibration.formatter import to_markdown
 from cls_calibration.proposer import (
     CLASSIFICATION_WEIGHTS,

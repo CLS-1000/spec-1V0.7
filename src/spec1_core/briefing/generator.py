@@ -18,6 +18,7 @@ from datetime import datetime, timezone
 
 import anthropic
 
+from spec1_labels import VERIF_CORROBORATED
 from spec1_core.briefing.templates import (
     GEO_SYSTEM_PROMPT,
     GEO_USER_PROMPT_TEMPLATE,
@@ -73,7 +74,7 @@ def _build_prompt(records: list[dict], cycle_stats: dict, mode: str = "standard"
     """Build the filled prompt template string for the given mode."""
     elevated = [
         r for r in records
-        if r.get("outcome_classification", r.get("classification", "")) in ("CORROBORATED", "ESCALATE")
+        if r.get("outcome_classification", r.get("classification", "")) in (VERIF_CORROBORATED, "ESCALATE")
     ]
     remaining = [r for r in records if r not in elevated]
     standard_top10 = sorted(

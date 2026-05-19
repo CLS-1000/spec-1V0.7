@@ -18,7 +18,33 @@ ALLOWLIST = {
     "cls_verdicts/schemas.py",
     "cls_psyop/schemas.py",
     "cls_leads/schemas.py",
+    # disclosure regime lookup — uses DISCLOSURE_* values, not VERIF_*/PSYOP_*
+    "cls_osint/adapters/state_legislative.py",
 }
+
+
+def _strip_comment(line: str) -> str:
+    """Return the non-comment portion of a line (before any # that isn't in a string)."""
+    in_string: str | None = None
+    for i, ch in enumerate(line):
+        if ch in ('"', "'") and in_string is None:
+            in_string = ch
+        elif ch == in_string:
+            in_string = None
+        elif ch == "#" and in_string is None:
+            return line[:i]
+    return line
+
+
+def _scannable_lines(content: str) -> list[tuple[int, str]]:
+    """Return (line_num, code_portion) pairs, skipping blank and comment-only lines."""
+    result = []
+    for i, line in enumerate(content.splitlines()):
+        stripped = line.lstrip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        result.append((i + 1, _strip_comment(line)))
+    return result
 
 
 def check_file(path: Path) -> list[str]:
@@ -26,10 +52,10 @@ def check_file(path: Path) -> list[str]:
         return []
     content = path.read_text(encoding="utf-8", errors="ignore")
     errors = []
-    for pattern, msg in HARDCODED_PATTERNS.items():
-        for match in re.finditer(pattern, content):
-            line_num = content[: match.start()].count("\n") + 1
-            errors.append(f"{path}:{line_num}: {msg} (found {match.group()!r})")
+    for line_num, code in _scannable_lines(content):
+        for pattern, msg in HARDCODED_PATTERNS.items():
+            for match in re.finditer(pattern, code):
+                errors.append(f"{path}:{line_num}: {msg} (found {match.group()!r})")
     return errors
 
 

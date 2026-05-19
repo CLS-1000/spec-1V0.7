@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from pathlib import Path
 
-import pytest
 
 from spec1_analytics.cls_world_brief.schemas import WorldBrief, BriefSection
-from spec1_analytics.cls_world_brief.producer import produce_brief, _build_headline, _build_summary
+from spec1_analytics.cls_world_brief.producer import produce_brief
 from spec1_analytics.cls_world_brief.formatter import to_markdown, to_plain_text, to_json_summary
 from spec1_analytics.cls_world_brief.store import BriefStore
 

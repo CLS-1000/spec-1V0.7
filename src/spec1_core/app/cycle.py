@@ -17,15 +17,11 @@ from typing import Optional
 from dotenv import load_dotenv
 load_dotenv(encoding="utf-8-sig")  # utf-8-sig strips PowerShell BOM if present
 
-from collections import Counter
 
 from spec1_core.core.ids import run_id as new_run_id
 from spec1_core.core.logging_utils import configure_root, get_logger
 from spec1_core.schemas.models import (
-    IntelligenceRecord,
-    Investigation,
     Opportunity,
-    Outcome,
     ParsedSignal,
     Signal,
 )
@@ -133,7 +129,7 @@ def run_cycle(
 
     if verbose:
         print(f"\n{'='*60}")
-        print(f"  SPEC-1 Intelligence Engine — Cycle Start")
+        print("  SPEC-1 Intelligence Engine — Cycle Start")
         print(f"  run_id    : {run_id}")
         print(f"  environment: {environment}")
         print(f"  store     : {store_path}")
@@ -203,7 +199,7 @@ def run_cycle(
 
     # ── Psyop scoring ──────────────────────────────────────────────────────────
     if verbose:
-        print(f"\n[Psyop] Scoring signal batch for psyop patterns...")
+        print("\n[Psyop] Scoring signal batch for psyop patterns...")
     try:
         from spec1_core.psyop.scorer import score_psyop
         psyop_signal = _build_psyop_signal(signals, parsed_signals)
@@ -223,7 +219,7 @@ def run_cycle(
 
     # ── Step 3: Score — 4 gates ───────────────────────────────────────────────
     if verbose:
-        print(f"\n[3/7] Scoring through 4 gates (credibility/volume/velocity/novelty)...")
+        print("\n[3/7] Scoring through 4 gates (credibility/volume/velocity/novelty)...")
 
     opportunities: list[tuple[Signal, ParsedSignal, Opportunity]] = []
     blocked = 0
@@ -242,7 +238,7 @@ def run_cycle(
     if verbose:
         print(f"      Opportunities: {len(opportunities)} | Blocked: {blocked}")
         if opportunities:
-            print(f"      Priority breakdown:")
+            print("      Priority breakdown:")
             for prio in ("ELEVATED", "STANDARD", "MONITOR"):
                 n = sum(1 for _, _, o in opportunities if o.priority == prio)
                 if n:
@@ -250,9 +246,9 @@ def run_cycle(
 
     # ── Steps 4–7: Investigate → Verify → Analyze → Store ───────────────────
     if verbose:
-        print(f"\n[4/7] Generating investigations...")
-        print(f"[5/7] Verifying investigations...")
-        print(f"[6/7] Analyzing into intelligence records...")
+        print("\n[4/7] Generating investigations...")
+        print("[5/7] Verifying investigations...")
+        print("[6/7] Analyzing into intelligence records...")
         print(f"[7/7] Writing to JSONL store: {store_path}\n")
 
     records_stored = 0
@@ -315,10 +311,9 @@ def run_cycle(
     brief_md = ''
     try:
         from spec1_core.briefing.generator import generate_brief
-        from spec1_core.briefing.templates import SYSTEM_PROMPT, USER_PROMPT_TEMPLATE
         from spec1_core.briefing.writer import write_brief
         if verbose:
-            print(f"\n[Briefing] Generating daily intelligence brief...")
+            print("\n[Briefing] Generating daily intelligence brief...")
         brief_md, brief_prompts = generate_brief(stored_records, stats)
         brief_path = write_brief(brief_md, run_id, stats["finished_at"], brief_prompts)
         brief_word_count = len(brief_md.split())
@@ -333,7 +328,7 @@ def run_cycle(
             from spec1_analytics.cls_world_brief.producer import produce_brief
             from spec1_analytics.cls_world_brief.formatter import to_markdown
             if verbose:
-                print(f"\n[Briefing] Claude API unavailable — using rule-based brief fallback...")
+                print("\n[Briefing] Claude API unavailable — using rule-based brief fallback...")
             fallback_brief = produce_brief(stored_records)
             brief_md = to_markdown(fallback_brief)
             stats["brief_word_count"] = len(brief_md.split())
@@ -378,7 +373,7 @@ def run_cycle(
         from spec1_core.workspace.case import update_case, list_cases as list_open_cases
 
         if verbose:
-            print(f"\n[Workspace] Processing investigation cases...")
+            print("\n[Workspace] Processing investigation cases...")
 
         open_cases = list_open_cases(status="OPEN")
         cases_updated = 0
@@ -408,7 +403,7 @@ def run_cycle(
 
     if verbose:
         print(f"\n{'='*60}")
-        print(f"  Cycle Complete")
+        print("  Cycle Complete")
         print(f"  Records stored : {records_stored}")
         print(f"  Errors         : {len(stats['errors'])}")
         print(f"  Store file     : {store_path}")

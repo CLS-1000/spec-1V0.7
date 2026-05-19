@@ -22,6 +22,8 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.graphics.shapes import Drawing, Line, Circle, Polygon, String
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
 
+from spec1_labels import THREAT_MEDIUM
+
 W, H = letter
 M = 0.7 * inch
 
@@ -239,7 +241,7 @@ def _build_intelligence_page(brief_text: str, cycle_stats: dict, s: dict) -> lis
     ))
     story.append(Paragraph(
         f'ANALYST: SYSTEMS ARCHITECT  \xb7  CONFIDENCE: '
-        f'{"MEDIUM-HIGH" if psyop_class != "NOISE" else "MEDIUM"}',
+        f'{"MEDIUM-HIGH" if psyop_class != "NOISE" else THREAT_MEDIUM}',
         s['analyst_meta']
     ))
     story.append(Paragraph(pattern_text, s['body']))

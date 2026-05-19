@@ -251,7 +251,7 @@ def close_case_endpoint(case_id: str) -> dict:
     """Close an investigation case and generate final report."""
     try:
         from spec1_core.workspace.case import close_case
-        case = close_case(case_id)
+        close_case(case_id)
         return {
             "case_id": case_id,
             "status": "CLOSED",

@@ -7,7 +7,7 @@ from typing import Optional
 from fastapi import APIRouter, Body, Query
 
 from spec1_api.dependencies import OsintStoreDep, PsyopStoreDep
-from spec1_analytics.cls_psyop.scorer import score_records, score_text
+from spec1_analytics.cls_psyop.scorer import score_text
 from spec1_analytics.cls_psyop.pipeline import PsyopPipeline
 
 router = APIRouter(prefix="/psyop", tags=["psyop"])

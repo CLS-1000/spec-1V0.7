@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import time
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -188,7 +187,7 @@ class TestTier2OllamaFallback:
                 with patch("spec1_core.llm.ollama_manager.is_running", return_value=True):
                     with patch("spec1_core.llm.ollama_manager.ensure_model", return_value=True):
                         with patch("spec1_core.llm.ollama_manager.chat", return_value=ollama_json):
-                            result = client.complete(CLEAR_SIGNAL, system="")
+                            client.complete(CLEAR_SIGNAL, system="")
 
         assert client.get_active_tier() == "ollama"
 

@@ -360,7 +360,6 @@ def test_guarded_cycle_runs_when_no_kill_file():
     with patch("spec1_core.api.scheduler.run_cycle" if False else "spec1_core.app.cycle.run_cycle") as mock_run:
         mock_run.return_value = {"signals_harvested": 0, "records_stored": 0}
         # Import inside to get the actual function
-        import importlib
         import spec1_core.api.scheduler as sched_mod
         with patch.object(sched_mod, "_guarded_cycle", wraps=_guarded_cycle):
             pass  # just verifying no error

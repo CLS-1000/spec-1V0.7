@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from typing import Sequence
 
 from spec1_analytics.cls_leads.schemas import Lead
-from spec1_labels import PRIORITY_CRITICAL, PRIORITY_HIGH, PRIORITY_LOW, PRIORITY_MEDIUM
+from spec1_labels import PRIORITY_CRITICAL, PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_LOW
 
 # Priority rules: (keywords, priority, category)
 _PRIORITY_RULES: list[tuple[list[str], str, str]] = [

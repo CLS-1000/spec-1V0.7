@@ -9,7 +9,7 @@ from typing import Optional
 from fastapi import APIRouter, BackgroundTasks, Query
 
 from spec1_api.dependencies import IntelStoreDep, OsintStoreDep
-from spec1_api.schemas import IngestResponse, SignalIngestRequest
+from spec1_api.schemas import SignalIngestRequest
 from spec1_core.intelligence.store import JsonlStore
 from spec1_core.signal.complexity import complexity_score, route as complexity_route
 from spec1_core.signal.parser import parse_signal

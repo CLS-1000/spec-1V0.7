@@ -111,7 +111,7 @@ def run_congressional_cycle(
 
     if verbose:
         print(f"\n{'='*60}")
-        print(f"  SPEC-1 Congressional Trade Pipeline")
+        print("  SPEC-1 Congressional Trade Pipeline")
         print(f"  run_id   : {run_id}")
         print(f"  mode     : {'sample' if sample else 'live'}")
         print(f"  store    : {store_path}")
@@ -149,7 +149,7 @@ def run_congressional_cycle(
 
     # ── Step 2: Parse → Signals ───────────────────────────────────────────────
     if verbose:
-        print(f"[2/4] Parsing into Signal objects...")
+        print("[2/4] Parsing into Signal objects...")
 
     signals = parse_batch(raw_trades, run_id=run_id, environment="congressional")
     stats["signals_parsed"] = len(signals)
@@ -158,7 +158,7 @@ def run_congressional_cycle(
 
     # ── Step 3: Score — 4 gates ───────────────────────────────────────────────
     if verbose:
-        print(f"[3/4] Scoring (credibility / amount / recency / novelty)...")
+        print("[3/4] Scoring (credibility / amount / recency / novelty)...")
 
     opportunities = []
     blocked = 0
@@ -179,7 +179,7 @@ def run_congressional_cycle(
 
     # ── Step 4: Investigate → Verify → Analyze → Store ───────────────────────
     if verbose:
-        print(f"[4/4] Investigating, verifying, analyzing...\n")
+        print("[4/4] Investigating, verifying, analyzing...\n")
 
     records_stored = 0
     for sig, opp in opportunities:
@@ -244,7 +244,7 @@ def run_congressional_cycle(
 
     if verbose:
         print(f"\n{'='*60}")
-        print(f"  Congressional Cycle Complete")
+        print("  Congressional Cycle Complete")
         print(f"  Trades fetched    : {stats['trades_fetched']}")
         print(f"  Signals parsed    : {stats['signals_parsed']}")
         print(f"  Opportunities     : {stats['opportunities_found']}")

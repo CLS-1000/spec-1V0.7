@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Any
 
 from spec1_core.llm import ollama_manager, tier3_rules
+from spec1_labels import VERIF_CORROBORATED, VERIF_CONFLICTED, THREAT_HIGH, THREAT_MEDIUM, THREAT_LOW
 
 logger = logging.getLogger(__name__)
 
@@ -35,10 +36,10 @@ _OUTPUT_COST_PER_1K = 0.00125
 
 # Maps SPEC-1 verifier classifications → coarse verdict
 _CLASSIFICATION_TO_VERDICT: dict[str, str] = {
-    "CORROBORATED": "THREAT",
+    VERIF_CORROBORATED: "THREAT",
     "ESCALATE": "THREAT",
     "INVESTIGATE": "ANOMALY",
-    "CONFLICTED": "ANOMALY",
+    VERIF_CONFLICTED: "ANOMALY",
     "MONITOR": "CLEAR",
     "ARCHIVE": "CLEAR",
 }
@@ -152,7 +153,7 @@ class FallbackLLMClient:
         system = (
             "You are an OSINT analyst. Identify key entities, assess threat level, "
             "and return JSON only: "
-            '{"entities": [], "threat_level": "HIGH"|"MEDIUM"|"LOW", '
+            '{"entities": [], "threat_level": "' + THREAT_HIGH + '"|"' + THREAT_MEDIUM + '"|"' + THREAT_LOW + '", '
             '"assessment": str, "confidence": float}'
         )
         return self.analyze(prompt=query, system=system)

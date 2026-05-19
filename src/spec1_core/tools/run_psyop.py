@@ -21,6 +21,7 @@ from pathlib import Path
 
 from spec1_analytics.cls_psyop.scorer import filter_risky, score_records
 from spec1_analytics.cls_psyop.store import PsyopStore
+from spec1_labels import PSYOP_CLEAN, PSYOP_LOW_RISK, PSYOP_MEDIUM_RISK, PSYOP_HIGH_RISK
 
 
 def _read_jsonl(path: Path) -> list[dict]:
@@ -53,8 +54,8 @@ def build_argparser() -> argparse.ArgumentParser:
     )
     p.add_argument(
         "--min-classification",
-        choices=["CLEAN", "LOW_RISK", "MEDIUM_RISK", "HIGH_RISK"],
-        default="CLEAN",
+        choices=[PSYOP_CLEAN, PSYOP_LOW_RISK, PSYOP_MEDIUM_RISK, PSYOP_HIGH_RISK],
+        default=PSYOP_CLEAN,
         help="Only persist scores at or above this classification (default: CLEAN — keep all)",
     )
     return p
@@ -71,7 +72,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     scores = score_records(records)
-    if args.min_classification != "CLEAN":
+    if args.min_classification != PSYOP_CLEAN:
         scores = filter_risky(scores, min_classification=args.min_classification)
 
     store = PsyopStore(out_path)
