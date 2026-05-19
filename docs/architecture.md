@@ -101,9 +101,26 @@ RSS / FARA / Congress / Narrative
 
 ═════ Persistence reality ═════════════════════════════════════════════════════
   JSONL is the source of truth across every store (append-only, immutable).
-  cls_db.dual_write currently writes both JSONL and SQLite **only for verdicts**.
-  Every other store is JSONL-only today; broader dual-write coverage is a roadmap
-  goal, not a current property.
+  cls_db.dual_write writes both JSONL and SQLite for:
+    - cls_verdicts (verdicts.jsonl ↔ verdicts table)
+    - cls_leads (leads.jsonl ↔ leads table)      [opt-in via db= kwarg]
+    - cls_psyop (psyop_scores.jsonl ↔ psyop_scores table) [opt-in via db= kwarg]
+  JSONL-only stores: intelligence/store.py, cls_world_brief, cls_osint adapters.
+
+  Scalable read helpers (cls_db):
+    - cls_db.cursor_reader.JSONLCursorReader — cursor-based forward pagination
+      over large JSONL files without loading them entirely into memory.
+    - cls_db.indexed_queries.IndexedQueryLayer — composable, limit-enforced
+      queries over SQLite (wraps Repository).
+    - DualWriter.read_chunked(limit) — iterate JSONL in chunks via cursor reader.
+    - DualWriter.indexed_queries() — get an IndexedQueryLayer for the SQLite backend.
+    - JsonlStore.read_chunk(offset, limit) — simple offset/limit slice for
+      spec1_engine/intelligence/store.py.
+
+  Migration / backfill:
+    - spec1_engine.tools.backfill_jsonl_to_db — CLI to backfill any JSONL file
+      into its SQLite table (idempotent; INSERT OR REPLACE semantics).
+      Includes --verify mode for parity checks without writing.
 
 
 ═════ Surfaces ════════════════════════════════════════════════════════════════

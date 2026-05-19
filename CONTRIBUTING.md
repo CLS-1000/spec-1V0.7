@@ -66,6 +66,28 @@ Without `numpy` installed, ignore the quant tests:
 pytest tests/ --ignore tests/test_quant.py
 ```
 
+### Hardcoded label check
+
+```bash
+python .github/scripts/check_hardcoded_labels.py --src-dir src
+```
+
+CI runs this step automatically.  It exits 0 when no hardcoded label strings
+are found.
+
+### JSONL → SQLite backfill
+
+If a store JSONL is ahead of its SQLite table, backfill it:
+
+```bash
+PYTHONPATH=src python -m spec1_engine.tools.backfill_jsonl_to_db \
+    --jsonl leads.jsonl --table leads --pk lead_id
+
+# Verify parity without writing:
+PYTHONPATH=src python -m spec1_engine.tools.backfill_jsonl_to_db \
+    --jsonl leads.jsonl --table leads --pk lead_id --verify
+```
+
 ## Tests
 
 - Use `tmp_path` fixtures; mock all external network and Anthropic calls.

@@ -362,3 +362,46 @@ def test_read_all_skips_invalid_json_lines(tmp_path):
     assert len(records) == 2
     assert records[0]["good"] is True
     assert records[1]["also_good"] == 42
+
+
+def test_read_chunk_first_page(tmp_path):
+    """read_chunk returns a limited subset starting from offset 0."""
+    store = JsonlStore(tmp_path / "test.jsonl")
+    for i in range(10):
+        store.append({"record_id": f"r{i}", "val": i})
+
+    page = store.read_chunk(offset=0, limit=5)
+    assert len(page) == 5
+    assert page[0]["record_id"] == "r0"
+    assert page[4]["record_id"] == "r4"
+
+
+def test_read_chunk_with_offset(tmp_path):
+    """read_chunk respects offset correctly."""
+    store = JsonlStore(tmp_path / "test.jsonl")
+    for i in range(10):
+        store.append({"record_id": f"r{i}", "val": i})
+
+    page = store.read_chunk(offset=5, limit=5)
+    assert len(page) == 5
+    assert page[0]["record_id"] == "r5"
+
+
+def test_read_chunk_beyond_end(tmp_path):
+    """read_chunk returns empty list when offset exceeds record count."""
+    store = JsonlStore(tmp_path / "test.jsonl")
+    for i in range(3):
+        store.append({"record_id": f"r{i}", "val": i})
+
+    page = store.read_chunk(offset=10, limit=5)
+    assert page == []
+
+
+def test_read_chunk_partial_page(tmp_path):
+    """read_chunk returns fewer records than limit when near EOF."""
+    store = JsonlStore(tmp_path / "test.jsonl")
+    for i in range(7):
+        store.append({"record_id": f"r{i}", "val": i})
+
+    page = store.read_chunk(offset=5, limit=10)
+    assert len(page) == 2

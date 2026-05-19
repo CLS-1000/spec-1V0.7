@@ -1,14 +1,26 @@
-"""Psyop score persistence — JSONL store."""
+"""Psyop score persistence — JSONL store, with optional SQLite dual-write.
+
+PsyopStore can run in two modes:
+
+- **JSONL-only** (``PsyopStore(path)``) — append-only file, source of truth.
+  This is the back-compat path; existing code and tests use it.
+- **Dual-write** (``PsyopStore(path, db=database)``) — writes to JSONL *and*
+  the ``psyop_scores`` SQLite table via :class:`cls_db.dual_write.DualWriter`.
+  The JSONL remains the source of truth; SQLite failures are non-fatal.
+"""
 
 from __future__ import annotations
 
 import json
+import logging
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Optional
 
 from cls_psyop.schemas import PsyopScore
+
+logger = logging.getLogger(__name__)
 
 
 def _now() -> str:
@@ -16,13 +28,29 @@ def _now() -> str:
 
 
 class PsyopStore:
-    """Thread-safe JSONL store for PsyopScore records."""
+    """Thread-safe JSONL store for PsyopScore records, with optional SQLite dual-write."""
 
-    def __init__(self, path: Path = Path("psyop_scores.jsonl")) -> None:
+    def __init__(
+        self,
+        path: Path = Path("psyop_scores.jsonl"),
+        db: Optional["Database"] = None,  # noqa: F821
+    ) -> None:
         self.path = Path(path)
         self._lock = threading.Lock()
+        self._dual_writer = None
+        if db is not None:
+            from cls_db.dual_write import DualWriter
+
+            self._dual_writer = DualWriter(
+                jsonl_path=self.path,
+                db=db,
+                table="psyop_scores",
+                pk_field="score_id",
+            )
 
     def save(self, score: PsyopScore) -> dict:
+        if self._dual_writer is not None:
+            return self._dual_writer.write(score.to_dict())
         entry = {**score.to_dict(), "written_at": _now()}
         with self._lock:
             self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -33,6 +61,8 @@ class PsyopStore:
     def save_batch(self, scores: list[PsyopScore]) -> list[dict]:
         if not scores:
             return []
+        if self._dual_writer is not None:
+            return self._dual_writer.write_batch([s.to_dict() for s in scores])
         now = _now()
         written: list[dict] = []
         with self._lock:

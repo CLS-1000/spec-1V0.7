@@ -11,6 +11,7 @@ from cls_psyop.patterns import PATTERNS
 from cls_psyop.scorer import filter_risky, score_records, score_text
 from cls_psyop.schemas import PsyopScore
 from cls_psyop.store import PsyopStore
+from spec1_labels import PSYOP_HIGH_RISK, PSYOP_MEDIUM_RISK, PSYOP_LOW_RISK
 
 
 @dataclass
@@ -51,7 +52,7 @@ class PsyopPipeline:
         self,
         store_path: Path = Path("psyop_scores.jsonl"),
         run_id: str = "",
-        min_classification: str = "LOW_RISK",
+        min_classification: str = PSYOP_LOW_RISK,
     ) -> None:
         self.store = PsyopStore(store_path)
         self.run_id = run_id or datetime.now(timezone.utc).strftime("run_%Y%m%d_%H%M%S")
@@ -71,9 +72,9 @@ class PsyopPipeline:
             all_scores = score_records(records_list)
             risky = filter_risky(all_scores, self.min_classification)
             stats.risky_detected = len(risky)
-            stats.high_risk = sum(1 for s in risky if s.classification == "HIGH_RISK")
-            stats.medium_risk = sum(1 for s in risky if s.classification == "MEDIUM_RISK")
-            stats.low_risk = sum(1 for s in risky if s.classification == "LOW_RISK")
+            stats.high_risk = sum(1 for s in risky if s.classification == PSYOP_HIGH_RISK)
+            stats.medium_risk = sum(1 for s in risky if s.classification == PSYOP_MEDIUM_RISK)
+            stats.low_risk = sum(1 for s in risky if s.classification == PSYOP_LOW_RISK)
 
             if risky:
                 written = self.store.save_batch(risky)
@@ -90,7 +91,7 @@ class PsyopPipeline:
 
     def get_high_risk(self) -> list[dict]:
         """Return stored HIGH_RISK scores."""
-        return list(self.store.by_classification("HIGH_RISK"))
+        return list(self.store.by_classification(PSYOP_HIGH_RISK))
 
 
 def run_pipeline(

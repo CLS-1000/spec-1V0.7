@@ -7,6 +7,7 @@ tactics, techniques, and procedures (TTPs).
 from __future__ import annotations
 
 from cls_psyop.schemas import PsyopPattern
+from spec1_labels import THREAT_HIGH, THREAT_MEDIUM, THREAT_LOW
 
 # Registry of known psyop patterns
 PATTERNS: list[PsyopPattern] = [
@@ -19,7 +20,7 @@ PATTERNS: list[PsyopPattern] = [
             "millions will die", "total collapse", "end of civilization",
             "unprecedented danger", "existential threat",
         ],
-        threat_level="HIGH",
+        threat_level=THREAT_HIGH,
         category="fear",
     ),
     PsyopPattern(
@@ -31,7 +32,7 @@ PATTERNS: list[PsyopPattern] = [
             "false flag operation", "fake attack", "manufactured incident",
             "deep state", "inside job",
         ],
-        threat_level="HIGH",
+        threat_level=THREAT_HIGH,
         category="disinformation",
     ),
     PsyopPattern(
@@ -43,7 +44,7 @@ PATTERNS: list[PsyopPattern] = [
             "elites vs ordinary", "globalists", "patriots vs traitors",
             "civil war", "revolution is coming", "take our country back",
         ],
-        threat_level="HIGH",
+        threat_level=THREAT_HIGH,
         category="wedge",
     ),
     PsyopPattern(
@@ -55,7 +56,7 @@ PATTERNS: list[PsyopPattern] = [
             "thousands of accounts", "astroturfing", "coordinated inauthentic",
             "bot network", "sock puppet",
         ],
-        threat_level="HIGH",
+        threat_level=THREAT_HIGH,
         category="amplification",
     ),
     PsyopPattern(
@@ -67,7 +68,7 @@ PATTERNS: list[PsyopPattern] = [
             "enemies within", "enemy agent", "foreign operatives",
             "spies", "infiltrators",
         ],
-        threat_level="HIGH",
+        threat_level=THREAT_HIGH,
         category="framing",
     ),
     PsyopPattern(
@@ -79,7 +80,7 @@ PATTERNS: list[PsyopPattern] = [
             "they don't want you to know", "hidden truth", "what they're hiding",
             "suppressed", "censored by mainstream",
         ],
-        threat_level="MEDIUM",
+        threat_level=THREAT_MEDIUM,
         category="disinformation",
     ),
     PsyopPattern(
@@ -91,7 +92,7 @@ PATTERNS: list[PsyopPattern] = [
             "insider reveals", "senior official confirmed",
             "leaked from pentagon", "classified report shows",
         ],
-        threat_level="MEDIUM",
+        threat_level=THREAT_MEDIUM,
         category="framing",
     ),
     PsyopPattern(
@@ -103,7 +104,7 @@ PATTERNS: list[PsyopPattern] = [
             "impossible to know what's real", "information overload",
             "nobody knows the truth", "all sides are lying",
         ],
-        threat_level="MEDIUM",
+        threat_level=THREAT_MEDIUM,
         category="disinformation",
     ),
     PsyopPattern(
@@ -115,7 +116,7 @@ PATTERNS: list[PsyopPattern] = [
             "double standard", "they do it too", "western hypocrisy",
             "who are you to say", "your country also",
         ],
-        threat_level="LOW",
+        threat_level=THREAT_LOW,
         category="framing",
     ),
     PsyopPattern(
@@ -127,7 +128,7 @@ PATTERNS: list[PsyopPattern] = [
             "experts unanimously", "consensus is clear",
             "undeniable fact", "universally accepted",
         ],
-        threat_level="LOW",
+        threat_level=THREAT_LOW,
         category="amplification",
     ),
     PsyopPattern(
@@ -138,7 +139,7 @@ PATTERNS: list[PsyopPattern] = [
             "vermin", "cockroaches", "animals", "parasites", "infestation",
             "plague", "disease", "subhuman", "degenerates", "filth",
         ],
-        threat_level="HIGH",
+        threat_level=THREAT_HIGH,
         category="wedge",
     ),
     PsyopPattern(
@@ -150,7 +151,7 @@ PATTERNS: list[PsyopPattern] = [
             "systematic discrimination", "they want to destroy us",
             "targeted by the media", "silenced",
         ],
-        threat_level="MEDIUM",
+        threat_level=THREAT_MEDIUM,
         category="framing",
     ),
     # ── DPRK-specific patterns ────────────────────────────────────────────────
@@ -167,7 +168,7 @@ PATTERNS: list[PsyopPattern] = [
             "energy self-sufficiency", "domestic fuel production",
             "we need no outside help", "korean-made energy",
         ],
-        threat_level="MEDIUM",
+        threat_level=THREAT_MEDIUM,
         category="disinformation",
     ),
     PsyopPattern(
@@ -184,7 +185,7 @@ PATTERNS: list[PsyopPattern] = [
             "fuel and ammunition fully stocked", "ready to strike at any moment",
             "no logistics vulnerabilities", "sanctions cannot weaken us",
         ],
-        threat_level="HIGH",
+        threat_level=THREAT_HIGH,
         category="disinformation",
     ),
 ]

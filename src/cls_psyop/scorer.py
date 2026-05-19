@@ -5,6 +5,15 @@ from __future__ import annotations
 import hashlib
 from cls_psyop.patterns import PATTERNS, PsyopPattern
 from cls_psyop.schemas import PsyopScore
+from spec1_labels import (
+    PSYOP_HIGH_RISK,
+    PSYOP_MEDIUM_RISK,
+    PSYOP_LOW_RISK,
+    PSYOP_CLEAN,
+    THREAT_HIGH,
+    THREAT_MEDIUM,
+    THREAT_LOW,
+)
 
 
 def _hash_text(text: str) -> str:
@@ -18,12 +27,12 @@ def _count_indicators(text: str, indicators: list[str]) -> int:
 
 def _classify_score(score: float, matched_count: int) -> str:
     if score >= 0.6 or matched_count >= 3:
-        return "HIGH_RISK"
+        return PSYOP_HIGH_RISK
     if score >= 0.3 or matched_count >= 2:
-        return "MEDIUM_RISK"
+        return PSYOP_MEDIUM_RISK
     if score > 0 or matched_count >= 1:
-        return "LOW_RISK"
-    return "CLEAN"
+        return PSYOP_LOW_RISK
+    return PSYOP_CLEAN
 
 
 def score_text(text: str, patterns: list[PsyopPattern] | None = None) -> PsyopScore:
@@ -47,7 +56,7 @@ def score_text(text: str, patterns: list[PsyopPattern] | None = None) -> PsyopSc
             matched_names.append(pattern.name)
             matched_categories.add(pattern.category)
             # Weight by threat level
-            weight = {"HIGH": 3, "MEDIUM": 2, "LOW": 1}.get(pattern.threat_level, 1)
+            weight = {THREAT_HIGH: 3, THREAT_MEDIUM: 2, THREAT_LOW: 1}.get(pattern.threat_level, 1)
             total_indicator_hits += hits * weight
 
     # Normalise to 0–1 (cap at 1.0)
@@ -84,8 +93,8 @@ def score_records(records: list[dict]) -> list[PsyopScore]:
     return results
 
 
-def filter_risky(scores: list[PsyopScore], min_classification: str = "LOW_RISK") -> list[PsyopScore]:
+def filter_risky(scores: list[PsyopScore], min_classification: str = PSYOP_LOW_RISK) -> list[PsyopScore]:
     """Return only scores at or above the given risk threshold."""
-    order = {"CLEAN": 0, "LOW_RISK": 1, "MEDIUM_RISK": 2, "HIGH_RISK": 3}
+    order = {PSYOP_CLEAN: 0, PSYOP_LOW_RISK: 1, PSYOP_MEDIUM_RISK: 2, PSYOP_HIGH_RISK: 3}
     threshold = order.get(min_classification, 1)
     return [s for s in scores if order.get(s.classification, 0) >= threshold]

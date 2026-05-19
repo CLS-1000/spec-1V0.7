@@ -222,6 +222,54 @@ class TestPsyopStore:
         assert store.count() == 0
 
 
+class TestPsyopStoreDualWrite:
+    def test_dual_write_persists_to_both_backends(self, tmp_path):
+        from cls_db.database import Database
+        from cls_db.migrate import ensure_schema
+        from cls_db.repository import Repository
+
+        db = Database(tmp_path / "spec1.db")
+        ensure_schema(db)
+        store = PsyopStore(tmp_path / "psyop.jsonl", db=db)
+
+        score = PsyopScore("s_dw_001", "h1", "text", ["P001"], ["Fear"], 0.9, "HIGH_RISK", ["fear"])
+        store.save(score)
+
+        jsonl_rows = list(store.read_all())
+        assert len(jsonl_rows) == 1
+        assert jsonl_rows[0]["score_id"] == "s_dw_001"
+
+        repo = Repository(db, "psyop_scores", pk_field="score_id")
+        db_rows = repo.all()
+        assert len(db_rows) == 1
+        assert db_rows[0]["score_id"] == "s_dw_001"
+
+    def test_dual_write_batch(self, tmp_path):
+        from cls_db.database import Database
+        from cls_db.migrate import ensure_schema
+        from cls_db.repository import Repository
+
+        db = Database(tmp_path / "spec1.db")
+        ensure_schema(db)
+        store = PsyopStore(tmp_path / "psyop.jsonl", db=db)
+
+        scores = [
+            PsyopScore(f"s_b_{i}", f"h{i}", "t", [], [], 0.5, "MEDIUM_RISK", [])
+            for i in range(3)
+        ]
+        store.save_batch(scores)
+
+        assert list(store.read_all()).__len__() == 3
+        repo = Repository(db, "psyop_scores", pk_field="score_id")
+        assert repo.count() == 3
+
+    def test_jsonl_only_mode_still_works(self, tmp_path):
+        store = PsyopStore(tmp_path / "psyop.jsonl")
+        assert store._dual_writer is None
+        store.save(PsyopScore("s1", "h1", "t", [], [], 0.0, "CLEAN", []))
+        assert store.count() == 1
+
+
 class TestPsyopPipeline:
     def test_run_scores_records(self, tmp_path):
         store_path = tmp_path / "psyop.jsonl"

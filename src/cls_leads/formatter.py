@@ -3,19 +3,20 @@
 from __future__ import annotations
 
 from cls_leads.schemas import Lead
+from spec1_labels import PRIORITY_CRITICAL, PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_LOW
 
 _PRIORITY_ICONS = {
-    "CRITICAL": "[!!!]",
-    "HIGH": "[!!]",
-    "MEDIUM": "[!]",
-    "LOW": "[-]",
+    PRIORITY_CRITICAL: "[!!!]",
+    PRIORITY_HIGH: "[!!]",
+    PRIORITY_MEDIUM: "[!]",
+    PRIORITY_LOW: "[-]",
 }
 
 _PRIORITY_COLORS = {
-    "CRITICAL": "red",
-    "HIGH": "orange",
-    "MEDIUM": "yellow",
-    "LOW": "blue",
+    PRIORITY_CRITICAL: "red",
+    PRIORITY_HIGH: "orange",
+    PRIORITY_MEDIUM: "yellow",
+    PRIORITY_LOW: "blue",
 }
 
 

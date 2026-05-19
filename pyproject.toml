@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7.4", "pytest-cov", "pytest-asyncio>=0.23", "httpx>=0.27"]
+dev = ["pytest>=7.4", "pytest-cov", "pytest-asyncio>=0.23", "httpx>=0.27", "bandit>=1.7", "mypy>=1.8"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -35,3 +35,13 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
+
+[tool.mypy]
+python_version = "3.9"
+ignore_missing_imports = true
+warn_unused_ignores = true
+no_implicit_reexport = false
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", "node_modules"]
+skips = ["B101"]

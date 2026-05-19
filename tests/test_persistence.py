@@ -278,3 +278,95 @@ class TestDualWriter:
 
         # JSONL should have both records
         assert writer.count_jsonl() == 2
+
+    def test_read_chunked_iterates_all(self, tmp_path):
+        writer = make_dual_writer(tmp_path / "data.jsonl", tmp_path / "data.db", "leads")
+        for i in range(25):
+            writer.write({"lead_id": f"l{i:04d}", "title": f"Lead {i}"})
+
+        all_records: list = []
+        for chunk in writer.read_chunked(limit=10):
+            all_records.extend(chunk)
+
+        assert len(all_records) == 25
+
+    def test_indexed_queries_returns_layer(self, tmp_path):
+        from cls_db.indexed_queries import IndexedQueryLayer
+
+        writer = make_dual_writer(tmp_path / "data.jsonl", tmp_path / "data.db", "leads")
+        writer.write({"lead_id": "l1", "title": "Test"})
+
+        q = writer.indexed_queries()
+        assert isinstance(q, IndexedQueryLayer)
+        assert q.count() == 1
+
+
+class TestBackfillTool:
+    def test_backfill_inserts_all_records(self, tmp_path):
+        import json
+        from spec1_engine.tools.backfill_jsonl_to_db import backfill
+
+        jsonl_path = tmp_path / "data.jsonl"
+        records = [{"lead_id": f"l{i}", "title": f"Lead {i}", "priority": "HIGH"} for i in range(5)]
+        with jsonl_path.open("w") as fh:
+            for rec in records:
+                fh.write(json.dumps(rec) + "\n")
+
+        result = backfill(
+            jsonl_path=jsonl_path,
+            db_path=tmp_path / "spec1.db",
+            table="leads",
+            pk_field="lead_id",
+        )
+        assert result["inserted"] == 5
+        assert result["db_count_after"] == 5
+
+    def test_backfill_idempotent(self, tmp_path):
+        import json
+        from spec1_engine.tools.backfill_jsonl_to_db import backfill
+
+        jsonl_path = tmp_path / "data.jsonl"
+        records = [{"lead_id": "l1", "title": "Lead 1", "priority": "HIGH"}]
+        with jsonl_path.open("w") as fh:
+            fh.write(json.dumps(records[0]) + "\n")
+
+        db_path = tmp_path / "spec1.db"
+        backfill(jsonl_path=jsonl_path, db_path=db_path, table="leads", pk_field="lead_id")
+        result2 = backfill(jsonl_path=jsonl_path, db_path=db_path, table="leads", pk_field="lead_id")
+        assert result2["db_count_after"] == 1
+
+    def test_verify_parity_in_sync(self, tmp_path):
+        import json
+        from spec1_engine.tools.backfill_jsonl_to_db import backfill, verify_parity
+
+        jsonl_path = tmp_path / "data.jsonl"
+        db_path = tmp_path / "spec1.db"
+        records = [{"lead_id": f"l{i}", "title": f"Lead {i}"} for i in range(3)]
+        with jsonl_path.open("w") as fh:
+            for rec in records:
+                fh.write(json.dumps(rec) + "\n")
+
+        backfill(jsonl_path=jsonl_path, db_path=db_path, table="leads", pk_field="lead_id")
+        report = verify_parity(jsonl_path=jsonl_path, db_path=db_path, table="leads")
+
+        assert report["in_sync"] is True
+        assert report["delta"] == 0
+
+    def test_verify_parity_mismatch(self, tmp_path):
+        import json
+        from spec1_engine.tools.backfill_jsonl_to_db import verify_parity
+
+        jsonl_path = tmp_path / "data.jsonl"
+        records = [{"lead_id": f"l{i}", "title": f"Lead {i}"} for i in range(5)]
+        with jsonl_path.open("w") as fh:
+            for rec in records:
+                fh.write(json.dumps(rec) + "\n")
+
+        # Don't backfill — DB is empty
+        report = verify_parity(
+            jsonl_path=jsonl_path,
+            db_path=tmp_path / "empty.db",
+            table="leads",
+        )
+        assert report["in_sync"] is False
+        assert report["delta"] == 5
