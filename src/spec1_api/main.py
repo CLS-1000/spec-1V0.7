@@ -114,19 +114,27 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=404, detail="Intelligence export not found")
         return FileResponse(path, media_type="application/json")
 
-    app.include_router(health.router)
-    app.include_router(signals.router)
-    app.include_router(intel.router)
-    app.include_router(leads.router)
-    app.include_router(brief.router)
-    app.include_router(psyop.router)
-    app.include_router(fara.router)
-    app.include_router(cycle.router)
-    app.include_router(verdicts.router)
-    app.include_router(calibration.router)
-    app.include_router(publication.router)
-    app.include_router(workspace.router)
-    app.include_router(leg_jud.router)
+    app.include_router(health.router, prefix="/api/v1")
+    app.include_router(signals.router, prefix="/api/v1")
+    app.include_router(intel.router, prefix="/api/v1")
+    app.include_router(leads.router, prefix="/api/v1")
+    app.include_router(brief.router, prefix="/api/v1")
+    app.include_router(psyop.router, prefix="/api/v1")
+    app.include_router(fara.router, prefix="/api/v1")
+    app.include_router(cycle.router, prefix="/api/v1")
+    app.include_router(verdicts.router, prefix="/api/v1")
+    app.include_router(calibration.router, prefix="/api/v1")
+    app.include_router(publication.router, prefix="/api/v1")
+    app.include_router(workspace.router, prefix="/api/v1")
+    app.include_router(leg_jud.router, prefix="/api/v1")
+
+    @app.get("/verdicts/", include_in_schema=False)
+    async def verdicts_ui() -> FileResponse:
+        """Serve the verdict-filing web UI."""
+        path = _STATIC_DIR / "verdicts.html"
+        if not path.is_file():
+            raise HTTPException(status_code=404, detail="Verdicts UI not found")
+        return FileResponse(path, media_type="text/html")
 
     if _political_web_enabled():
         from spec1_api.routers import ingest, nodes
@@ -139,8 +147,8 @@ def create_app() -> FastAPI:
                 raise HTTPException(status_code=404, detail="Portland Political Web not found")
             return FileResponse(path, media_type="text/html")
 
-        app.include_router(nodes.router)
-        app.include_router(ingest.router)
+        app.include_router(nodes.router, prefix="/api/v1")
+        app.include_router(ingest.router, prefix="/api/v1")
 
     return app
 

@@ -106,3 +106,21 @@ def test_political_intel_data_returns_json(client, tmp_path, monkeypatch):
         r = c.get("/spec1_intelligence_export.json")
     assert r.status_code == 200
     assert "application/json" in r.headers["content-type"]
+
+
+# ── Verdict filing UI ─────────────────────────────────────────────────────────
+
+def test_verdicts_ui_returns_html(client):
+    r = client.get("/verdicts/")
+    assert r.status_code == 200
+    assert "text/html" in r.headers["content-type"]
+
+
+def test_verdicts_ui_contains_form(client):
+    r = client.get("/verdicts/")
+    assert "verdict-form" in r.text
+
+
+def test_verdicts_ui_references_api_v1(client):
+    r = client.get("/verdicts/")
+    assert "/api/v1/verdicts" in r.text

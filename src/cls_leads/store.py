@@ -1,4 +1,4 @@
-"""Lead persistence — JSONL store for Lead objects."""
+"""Lead persistence — JSONL store for Lead objects, with optional SQLite dual-write."""
 
 from __future__ import annotations
 
@@ -16,14 +16,37 @@ def _now() -> str:
 
 
 class LeadStore:
-    """Thread-safe JSONL store for Lead records."""
+    """Thread-safe JSONL store for Lead records, with optional SQLite dual-write.
 
-    def __init__(self, path: Path = Path("leads.jsonl")) -> None:
+    Modes:
+    - **JSONL-only** (``LeadStore(path)``) — default; append-only file.
+    - **Dual-write** (``LeadStore(path, db=database)``) — writes to both JSONL
+      and the ``leads`` SQLite table via :class:`cls_db.dual_write.DualWriter`.
+      JSONL remains the source of truth; SQLite failures are logged and non-fatal.
+    """
+
+    def __init__(
+        self,
+        path: Path = Path("leads.jsonl"),
+        db: Optional["Database"] = None,  # noqa: F821
+    ) -> None:
         self.path = Path(path)
         self._lock = threading.Lock()
+        self._dual_writer = None
+        if db is not None:
+            from cls_db.dual_write import DualWriter
+
+            self._dual_writer = DualWriter(
+                jsonl_path=self.path,
+                db=db,
+                table="leads",
+                pk_field="lead_id",
+            )
 
     def save(self, lead: Lead) -> dict:
         """Append a single lead to the store."""
+        if self._dual_writer is not None:
+            return self._dual_writer.write(lead.to_dict())
         entry = {**lead.to_dict(), "written_at": _now()}
         with self._lock:
             self.path.parent.mkdir(parents=True, exist_ok=True)
@@ -35,6 +58,8 @@ class LeadStore:
         """Append multiple leads atomically."""
         if not leads:
             return []
+        if self._dual_writer is not None:
+            return self._dual_writer.write_batch([lead.to_dict() for lead in leads])
         now = _now()
         written: list[dict] = []
         with self._lock:
