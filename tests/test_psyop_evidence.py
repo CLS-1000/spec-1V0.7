@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 
 from cls_psyop.evidence import EvidenceChain, EvidenceStore
-from spec1_engine.cls_psyop.scorer import (
+from spec1_engine.psyop.scorer import (
     NARRATIVE_CLUSTER,
     CONSENSUS_SPIKE,
     score_psyop,

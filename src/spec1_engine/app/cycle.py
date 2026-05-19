@@ -205,7 +205,7 @@ def run_cycle(
     if verbose:
         print(f"\n[Psyop] Scoring signal batch for psyop patterns...")
     try:
-        from spec1_engine.cls_psyop.scorer import score_psyop
+        from spec1_engine.psyop.scorer import score_psyop
         psyop_signal = _build_psyop_signal(signals, parsed_signals)
         psyop_result = score_psyop(psyop_signal, run_id=run_id)
         stats["psyop_classification"] = psyop_result["classification"]
@@ -330,8 +330,8 @@ def run_cycle(
         logger.error("Briefing step failed: %s — trying rule-based fallback", exc)
         stats["errors"].append(f"briefing:{exc}")
         try:
-            from spec1_engine.cls_world_brief.producer import produce_brief
-            from spec1_engine.cls_world_brief.formatter import to_markdown
+            from cls_world_brief.producer import produce_brief
+            from cls_world_brief.formatter import to_markdown
             if verbose:
                 print(f"\n[Briefing] Claude API unavailable — using rule-based brief fallback...")
             fallback_brief = produce_brief(stored_records)

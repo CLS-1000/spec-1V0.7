@@ -530,7 +530,6 @@
             <option value="geopolitical">GEOPOLITICAL</option>
             <option value="fara">FARA</option>
             <option value="psyop">PSYOP</option>
-            <option value="quant">QUANT</option>
             <option value="congressional">CONGRESSIONAL</option>
             <option value="policy">POLICY</option>
           </select>
@@ -1560,7 +1559,7 @@ async function loadAnomalies(offset) {
   const page  = records.slice(offset, offset + PAGE);
 
   if (!page.length) {
-    el.innerHTML = emptyState('No anomaly patterns detected. Anomaly records are generated during quant intelligence cycles.');
+    el.innerHTML = emptyState('No anomaly patterns detected.');
     return;
   }
 
