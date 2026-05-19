@@ -199,3 +199,145 @@ class TestFetchAllRss:
         result = fetch_all_rss([])
         assert result["records"] == []
         assert result["errors"] == {}
+
+
+# ── Async feed fetching ────────────────────────────────────────────────────────
+
+class TestFetchAllRssAsync:
+    """Tests for fetch_all_rss_async — concurrent httpx-based fetching."""
+
+    def _make_httpx_response(self, text: str, status_code: int = 200):
+        """Build a minimal mock httpx response."""
+        resp = MagicMock()
+        resp.text = text
+        resp.status_code = status_code
+        resp.raise_for_status = MagicMock()
+        if status_code >= 400:
+            import httpx
+            resp.raise_for_status.side_effect = httpx.HTTPStatusError(
+                "error", request=MagicMock(), response=resp
+            )
+        return resp
+
+    def _make_feed_xml(self, title="Test", link="https://example.com/art", summary="Body"):
+        return f"""<?xml version="1.0"?>
+<rss version="2.0">
+  <channel>
+    <title>Test Feed</title>
+    <item>
+      <title>{title}</title>
+      <link>{link}</link>
+      <description>{summary}</description>
+    </item>
+  </channel>
+</rss>"""
+
+    def test_empty_sources_returns_empty(self):
+        import asyncio
+        from cls_osint.feed import fetch_all_rss_async
+
+        result = asyncio.run(fetch_all_rss_async([]))
+        assert result["records"] == []
+        assert result["errors"] == {}
+
+    def test_returns_records_from_feeds(self):
+        import asyncio
+        from cls_osint.feed import fetch_all_rss_async
+
+        xml = self._make_feed_xml()
+        source = _make_source("async_src")
+
+        async def fake_get(self, url, **kwargs):
+            return self._make_httpx_response(xml)
+
+        # Patch httpx.AsyncClient.get at the instance level
+        import httpx
+
+        class _FakeAsyncClient:
+            def __init__(self, *a, **kw):
+                pass
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *a):
+                pass
+
+            async def get(self, url, **kw):
+                resp = MagicMock()
+                resp.text = xml
+                resp.status_code = 200
+                resp.raise_for_status = MagicMock()
+                return resp
+
+        with patch("httpx.AsyncClient", _FakeAsyncClient):
+            result = asyncio.run(fetch_all_rss_async([source]))
+
+        assert len(result["records"]) >= 1
+        assert result["errors"] == {}
+
+    def test_per_source_errors_captured(self):
+        import asyncio
+        from cls_osint.feed import fetch_all_rss_async
+
+        source = _make_source("err_src")
+
+        class _FailAsyncClient:
+            def __init__(self, *a, **kw):
+                pass
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *a):
+                pass
+
+            async def get(self, url, **kw):
+                raise RuntimeError("simulated network error")
+
+        with patch("httpx.AsyncClient", _FailAsyncClient):
+            result = asyncio.run(fetch_all_rss_async([source], max_retries=0))
+
+        assert "err_src" in result["errors"]
+
+    def test_concurrent_multiple_sources(self):
+        import asyncio
+        from cls_osint.feed import fetch_all_rss_async
+
+        xml = self._make_feed_xml()
+        sources = [_make_source(f"async_src_{i}", f"https://example.com/feed{i}") for i in range(3)]
+
+        class _OkAsyncClient:
+            def __init__(self, *a, **kw):
+                pass
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *a):
+                pass
+
+            async def get(self, url, **kw):
+                resp = MagicMock()
+                resp.text = xml
+                resp.status_code = 200
+                resp.raise_for_status = MagicMock()
+                return resp
+
+        with patch("httpx.AsyncClient", _OkAsyncClient):
+            result = asyncio.run(fetch_all_rss_async(sources))
+
+        assert len(result["records"]) == 3
+        assert result["errors"] == {}
+
+    def test_returns_same_structure_as_sync(self):
+        """fetch_all_rss_async returns a dict with 'records' and 'errors' keys."""
+        import asyncio
+        from cls_osint.feed import fetch_all_rss_async
+
+        result = asyncio.run(fetch_all_rss_async([]))
+        assert isinstance(result, dict)
+        assert "records" in result
+        assert "errors" in result
+        assert isinstance(result["records"], list)
+        assert isinstance(result["errors"], dict)

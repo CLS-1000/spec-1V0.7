@@ -4,16 +4,20 @@ from __future__ import annotations
 
 import logging
 import os
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, HTTPException
+from fastapi import HTTPException
 from fastapi.responses import FileResponse
 
 from spec1_api import __version__
+from spec1_api import metrics as _metrics
+from spec1_api.auth import ApiKeyMiddleware
 from spec1_api.routers import (
+    adapters,
     brief,
     calibration,
     cycle,
@@ -22,6 +26,7 @@ from spec1_api.routers import (
     intel,
     leads,
     leg_jud,
+    metrics,
     psyop,
     publication,
     signals,
@@ -89,6 +94,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(ApiKeyMiddleware)
     @app.get("/", include_in_schema=False)
     async def ui_root() -> FileResponse:
         """Serve the SPEC-1 UI."""
@@ -114,6 +120,20 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=404, detail="Intelligence export not found")
         return FileResponse(path, media_type="application/json")
 
+    # ── Request-latency middleware ─────────────────────────────────────────────
+    @app.middleware("http")
+    async def _metrics_middleware(request: Request, call_next):
+        start = time.perf_counter()
+        response = await call_next(request)
+        duration = time.perf_counter() - start
+        _metrics.record_request(
+            method=request.method,
+            path=request.url.path,
+            status_code=response.status_code,
+            duration=duration,
+        )
+        return response
+
     app.include_router(health.router)
     app.include_router(signals.router)
     app.include_router(intel.router)
@@ -127,6 +147,8 @@ def create_app() -> FastAPI:
     app.include_router(publication.router)
     app.include_router(workspace.router)
     app.include_router(leg_jud.router)
+    app.include_router(metrics.router)
+    app.include_router(adapters.router)
 
     if _political_web_enabled():
         from spec1_api.routers import ingest, nodes
