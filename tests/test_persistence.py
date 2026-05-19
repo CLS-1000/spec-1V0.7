@@ -278,3 +278,225 @@ class TestDualWriter:
 
         # JSONL should have both records
         assert writer.count_jsonl() == 2
+
+
+# ── Store-level dual-write tests ───────────────────────────────────────────
+
+
+class TestLeadStoreDualWrite:
+    """Verify LeadStore writes to both JSONL and SQLite when db is provided."""
+
+    def _db(self, tmp_path):
+        from cls_db.database import Database
+        from cls_db.migrate import ensure_schema
+
+        db = Database(tmp_path / "spec1.db")
+        ensure_schema(db)
+        return db
+
+    def _make_lead(self, lead_id: str = "lead-001"):
+        from cls_leads.schemas import Lead
+
+        return Lead(
+            lead_id=lead_id,
+            title="Test Lead",
+            summary="Summary text",
+            priority="HIGH",
+            category="diplomatic",
+            source_record_ids=[],
+            action_items=[],
+            confidence=0.8,
+        )
+
+    def test_dual_write_saves_to_jsonl(self, tmp_path):
+        from cls_leads.store import LeadStore
+
+        db = self._db(tmp_path)
+        store = LeadStore(tmp_path / "leads.jsonl", db=db)
+        lead = self._make_lead("lead-dw-001")
+        store.save(lead)
+        rows = list(store.read_all())
+        assert len(rows) == 1
+        assert rows[0]["lead_id"] == "lead-dw-001"
+
+    def test_dual_write_saves_to_sqlite(self, tmp_path):
+        from cls_leads.store import LeadStore
+        from cls_db.repository import Repository
+
+        db = self._db(tmp_path)
+        store = LeadStore(tmp_path / "leads.jsonl", db=db)
+        lead = self._make_lead("lead-dw-002")
+        store.save(lead)
+        repo = Repository(db, "leads", "lead_id")
+        rows = repo.all()
+        assert any(r["lead_id"] == "lead-dw-002" for r in rows)
+
+    def test_batch_dual_write(self, tmp_path):
+        from cls_leads.store import LeadStore
+
+        db = self._db(tmp_path)
+        store = LeadStore(tmp_path / "leads.jsonl", db=db)
+        leads = [self._make_lead(f"lead-b-{i:03d}") for i in range(3)]
+        result = store.save_batch(leads)
+        assert len(result) == 3
+        assert store.count() == 3
+
+    def test_jsonl_only_still_works(self, tmp_path):
+        from cls_leads.store import LeadStore
+
+        store = LeadStore(tmp_path / "leads.jsonl")
+        lead = self._make_lead("lead-jl-001")
+        entry = store.save(lead)
+        assert "written_at" in entry
+        assert store.count() == 1
+
+
+class TestPsyopStoreDualWrite:
+    """Verify PsyopStore writes to both JSONL and SQLite when db is provided."""
+
+    def _db(self, tmp_path):
+        from cls_db.database import Database
+        from cls_db.migrate import ensure_schema
+
+        db = Database(tmp_path / "spec1.db")
+        ensure_schema(db)
+        return db
+
+    def _make_score(self, score_id: str = "score-001"):
+        from cls_psyop.schemas import PsyopScore
+
+        return PsyopScore(
+            score_id=score_id,
+            text_hash="abc123",
+            text_excerpt="Test excerpt.",
+            patterns_matched=[],
+            pattern_names=[],
+            score=0.3,
+            classification="LOW",
+            threat_categories=[],
+        )
+
+    def test_dual_write_saves_to_jsonl(self, tmp_path):
+        from cls_psyop.store import PsyopStore
+
+        db = self._db(tmp_path)
+        store = PsyopStore(tmp_path / "psyop.jsonl", db=db)
+        score = self._make_score("score-dw-001")
+        store.save(score)
+        rows = list(store.read_all())
+        assert len(rows) == 1
+        assert rows[0]["score_id"] == "score-dw-001"
+
+    def test_dual_write_saves_to_sqlite(self, tmp_path):
+        from cls_psyop.store import PsyopStore
+        from cls_db.repository import Repository
+
+        db = self._db(tmp_path)
+        store = PsyopStore(tmp_path / "psyop.jsonl", db=db)
+        score = self._make_score("score-dw-002")
+        store.save(score)
+        repo = Repository(db, "psyop_scores", "score_id")
+        rows = repo.all()
+        assert any(r["score_id"] == "score-dw-002" for r in rows)
+
+    def test_batch_dual_write(self, tmp_path):
+        from cls_psyop.store import PsyopStore
+
+        db = self._db(tmp_path)
+        store = PsyopStore(tmp_path / "psyop.jsonl", db=db)
+        scores = [self._make_score(f"score-b-{i:03d}") for i in range(4)]
+        result = store.save_batch(scores)
+        assert len(result) == 4
+        assert store.count() == 4
+
+    def test_jsonl_only_still_works(self, tmp_path):
+        from cls_psyop.store import PsyopStore
+
+        store = PsyopStore(tmp_path / "psyop.jsonl")
+        score = self._make_score("score-jl-001")
+        entry = store.save(score)
+        assert "written_at" in entry
+        assert store.count() == 1
+
+
+class TestBriefStoreDualWrite:
+    """Verify BriefStore writes to both JSONL and SQLite when db is provided."""
+
+    def _db(self, tmp_path):
+        from cls_db.database import Database
+        from cls_db.migrate import ensure_schema
+
+        db = Database(tmp_path / "spec1.db")
+        ensure_schema(db)
+        return db
+
+    def _make_brief(self, brief_id: str = "brief-001"):
+        from cls_world_brief.schemas import WorldBrief
+
+        return WorldBrief(
+            brief_id=brief_id,
+            date="2026-01-01",
+            headline="Test headline",
+            summary="Test summary.",
+            sections=[],
+            sources=[],
+            confidence=0.75,
+        )
+
+    def test_dual_write_saves_to_jsonl(self, tmp_path):
+        from cls_world_brief.store import BriefStore
+
+        db = self._db(tmp_path)
+        store = BriefStore(
+            jsonl_path=tmp_path / "briefs.jsonl",
+            briefs_dir=tmp_path / "briefs",
+            db=db,
+        )
+        brief = self._make_brief("brief-dw-001")
+        store.save(brief, write_markdown=False)
+        rows = list(store.read_all())
+        assert len(rows) == 1
+        assert rows[0]["brief_id"] == "brief-dw-001"
+
+    def test_dual_write_saves_to_sqlite(self, tmp_path):
+        from cls_world_brief.store import BriefStore
+        from cls_db.repository import Repository
+
+        db = self._db(tmp_path)
+        store = BriefStore(
+            jsonl_path=tmp_path / "briefs.jsonl",
+            briefs_dir=tmp_path / "briefs",
+            db=db,
+        )
+        brief = self._make_brief("brief-dw-002")
+        store.save(brief, write_markdown=False)
+        repo = Repository(db, "briefs", "brief_id")
+        rows = repo.all()
+        assert any(r["brief_id"] == "brief-dw-002" for r in rows)
+
+    def test_markdown_still_written_with_dual_write(self, tmp_path):
+        from cls_world_brief.store import BriefStore
+
+        db = self._db(tmp_path)
+        briefs_dir = tmp_path / "briefs"
+        store = BriefStore(
+            jsonl_path=tmp_path / "briefs.jsonl",
+            briefs_dir=briefs_dir,
+            db=db,
+        )
+        brief = self._make_brief("brief-md-001")
+        store.save(brief, write_markdown=True)
+        assert (briefs_dir / "2026-01-01.md").exists()
+        assert (briefs_dir / "latest.md").exists()
+
+    def test_jsonl_only_still_works(self, tmp_path):
+        from cls_world_brief.store import BriefStore
+
+        store = BriefStore(
+            jsonl_path=tmp_path / "briefs.jsonl",
+            briefs_dir=tmp_path / "briefs",
+        )
+        brief = self._make_brief("brief-jl-001")
+        entry = store.save(brief, write_markdown=False)
+        assert "written_at" in entry
+        assert store.count() == 1

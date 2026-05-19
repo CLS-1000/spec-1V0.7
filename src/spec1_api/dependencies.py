@@ -38,20 +38,20 @@ def get_osint_store() -> OsintStore:
 @lru_cache(maxsize=1)
 def get_lead_store() -> LeadStore:
     path = _env_path("SPEC1_LEADS_PATH", "leads.jsonl")
-    return LeadStore(path)
+    return LeadStore(path, db=get_database())
 
 
 @lru_cache(maxsize=1)
 def get_psyop_store() -> PsyopStore:
     path = _env_path("SPEC1_PSYOP_PATH", "psyop_scores.jsonl")
-    return PsyopStore(path)
+    return PsyopStore(path, db=get_database())
 
 
 @lru_cache(maxsize=1)
 def get_brief_store() -> BriefStore:
     jsonl = _env_path("SPEC1_BRIEFS_PATH", "world_briefs.jsonl")
     briefs_dir = _env_path("SPEC1_BRIEFS_DIR", "briefs")
-    return BriefStore(jsonl_path=jsonl, briefs_dir=briefs_dir)
+    return BriefStore(jsonl_path=jsonl, briefs_dir=briefs_dir, db=get_database())
 
 
 @lru_cache(maxsize=1)

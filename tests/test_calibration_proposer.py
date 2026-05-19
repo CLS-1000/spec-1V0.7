@@ -263,7 +263,7 @@ def test_proposals_endpoint(tmp_path: Path):
     app.dependency_overrides[get_verdict_store] = lambda: verdicts
     try:
         c = TestClient(app)
-        r = c.get("/calibration/proposals")
+        r = c.get("/api/v1/calibration/proposals")
         assert r.status_code == 200, r.text
         body = r.json()
         assert body["sample_floor"] == 5
@@ -273,7 +273,7 @@ def test_proposals_endpoint(tmp_path: Path):
         assert any(a["target_id"] == "CORROBORATED" for a in body["adjustments"])
 
         # Tighten the floors and verify they get echoed back
-        r2 = c.get("/calibration/proposals", params={"sample_floor": 100, "delta_floor": 0.9})
+        r2 = c.get("/api/v1/calibration/proposals", params={"sample_floor": 100, "delta_floor": 0.9})
         assert r2.status_code == 200
         assert r2.json()["adjustments"] == []
     finally:

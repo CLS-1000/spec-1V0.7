@@ -102,7 +102,6 @@ cp .env.example .env  # edit — set ANTHROPIC_API_KEY at minimum
 | `SPEC1_TIMEZONE` | `America/Los_Angeles` | Scheduler timezone |
 | `SPEC1_FEED_TIMEOUT` | `15` | Feed fetch timeout (seconds) |
 | `SPEC1_RUN_ON_START` | `false` | Run one cycle immediately on API startup |
-| `SPEC1_QUANT_ENABLED` | `false` | Enable quantitative market signal pipeline |
 
 ## Key Sources
 

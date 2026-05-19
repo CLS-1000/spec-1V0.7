@@ -1,4 +1,4 @@
-.PHONY: install install-quant test test-fast test-cov lint run mcp cycle backfill calibration workspace clean help brief leads psyop
+.PHONY: install test test-fast test-cov lint run mcp cycle backfill calibration workspace clean help brief leads psyop
 
 PYTHONPATH := src
 PYTHON     := PYTHONPATH=$(PYTHONPATH) python
@@ -23,9 +23,6 @@ help:
 
 install:
 	pip install -e ".[dev]"
-
-install-quant:
-	pip install -e ".[dev,quant]"
 
 test:
 	$(PYTEST) tests/ -v --tb=short

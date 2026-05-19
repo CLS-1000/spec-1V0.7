@@ -430,18 +430,18 @@ class TestLegJudAPIRoutes:
             yield c
 
     def test_leg_jud_brief_returns_200(self, client):
-        r = client.get("/leg_jud/brief")
+        r = client.get("/api/v1/leg_jud/brief")
         assert r.status_code == 200
 
     def test_leg_jud_judicial_returns_200(self, client):
-        r = client.get("/leg_jud/judicial")
+        r = client.get("/api/v1/leg_jud/judicial")
         assert r.status_code == 200
         data = r.json()
         assert "total" in data
         assert "items" in data
 
     def test_leg_jud_state_leg_returns_200(self, client):
-        r = client.get("/leg_jud/state_leg")
+        r = client.get("/api/v1/leg_jud/state_leg")
         assert r.status_code == 200
         data = r.json()
         assert "total" in data
@@ -479,7 +479,7 @@ class TestLegJudAPIRoutes:
         importlib.reload(main_mod)
         from fastapi.testclient import TestClient
         with TestClient(main_mod.app) as c:
-            r = c.get("/leg_jud/judicial?judge=test")
+            r = c.get("/api/v1/leg_jud/judicial?judge=test")
         assert r.status_code == 200
         data = r.json()
         assert data["total"] == 1

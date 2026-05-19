@@ -39,21 +39,15 @@ A repo split is a deliberate decision gate, not an automatic outcome.
 ### Goal: Fix architectural loose ends and prepare for external users
 ### Week 1-2: Foundation Fixes
 #### TASK 1.1: Resolve Quant Module Decision
-- **Status:** ⚠️ BLOCKING (decision required before proceeding)
-- **Decision Options:**
-  - A) **Remove entirely** (recommended): Delete `cls_quant/`, remove numpy from dev deps, remove yfinance
-  - B) **Commit fully**: Make numpy required, document watchlist, integrate into briefs, add dashboard
-- **Recommendation:** **REMOVE** — orthogonal to core triage mission; market demand not validated
-- **Time Estimate:** 1-2 days
+- **Status:** ✅ DONE — Decision: **REMOVE** (option A)
+- **Decision:** Remove entirely — orthogonal to core triage mission; market demand not validated
 - **Deliverables:**
-  - [ ] Decision documented in CHANGELOG
-  - [ ] Code removed or committed fully
-  - [ ] All tests passing
-  - [ ] pyproject.toml updated
-- **Testing:** `pytest tests/ -v --tb=short` (no quant imports)
+  - [x] Decision documented in CHANGELOG
+  - [x] Code removed (cls_quant never shipped; references cleaned from docs, Makefile, .env.example, README)
+  - [x] All tests passing
+  - [x] pyproject.toml has no quant extras
 - **Commits:**
-  - `chore: remove quant module (out of scope for v0.5)`
-  - Or: `feat: commit to quant module; make numpy required`
+  - `chore: remove quant module references (out of scope)`
 ---
 #### TASK 1.2: Consolidate Module Naming (Remove Re-export Shims)
 - **Status:** 🔴 CRITICAL
