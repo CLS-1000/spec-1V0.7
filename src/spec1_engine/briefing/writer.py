@@ -106,10 +106,13 @@ def write_brief(
     extracted_prompts = _extract_prompts(brief)
     if extracted_prompts:
         prompts_doc = _build_prompts_doc(extracted_prompts, date_str, timestamp)
-    elif prompts:
+        prompt_count = len(extracted_prompts)
+    elif prompts and prompts.strip():
         prompts_doc = _build_prompt_payload_doc(prompts, date_str, timestamp)
+        prompt_count = 1
     else:
         prompts_doc = _build_prompts_doc([], date_str, timestamp)
+        prompt_count = 0
 
     with _lock:
         dated_path.write_text(brief, encoding="utf-8")
@@ -127,7 +130,7 @@ def write_brief(
         with index_path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(index_entry) + "\n")
 
-    logger.info("Brief written to %s (%d words, %d prompts)", dated_path, word_count, len(extracted_prompts))
+    logger.info("Brief written to %s (%d words, %d prompts)", dated_path, word_count, prompt_count)
     return str(dated_path)
 
 
