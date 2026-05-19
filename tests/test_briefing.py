@@ -456,6 +456,35 @@ def test_write_brief_without_prompts_still_creates_prompts_files(tmp_path):
         writer.BRIEFS_DIR = original_dir
 
 
+def test_write_brief_uses_prompt_payload_when_brief_has_no_prompt_blocks(tmp_path):
+    from spec1_engine.briefing import writer
+    original_dir = writer.BRIEFS_DIR
+    writer.BRIEFS_DIR = tmp_path / "briefs"
+    payload = "## SYSTEM PROMPT\n\nsystem text\n\n## USER PROMPT\n\nuser text"
+    try:
+        writer.write_brief(SAMPLE_BRIEF, "run-001", "2026-04-11T06:00:00+00:00", payload)
+        content = (writer.BRIEFS_DIR / "spec1_prompts_latest.md").read_text(encoding="utf-8")
+        assert "SPEC-1 Investigation Prompts" in content
+        assert "## Prompt Payload" in content
+        assert "## SYSTEM PROMPT" in content
+        assert "## USER PROMPT" in content
+    finally:
+        writer.BRIEFS_DIR = original_dir
+
+
+def test_write_brief_ignores_whitespace_prompt_payload_when_brief_has_no_prompt_blocks(tmp_path):
+    from spec1_engine.briefing import writer
+    original_dir = writer.BRIEFS_DIR
+    writer.BRIEFS_DIR = tmp_path / "briefs"
+    try:
+        writer.write_brief(SAMPLE_BRIEF, "run-001", "2026-04-11T06:00:00+00:00", "   \n\t  ")
+        content = (writer.BRIEFS_DIR / "spec1_prompts_latest.md").read_text(encoding="utf-8")
+        assert "## Prompt Payload" not in content
+        assert "No Claude investigation prompts" in content
+    finally:
+        writer.BRIEFS_DIR = original_dir
+
+
 def test_write_brief_prompts_latest_overwritten_each_run(tmp_path):
     from spec1_engine.briefing import writer
     original_dir = writer.BRIEFS_DIR
@@ -798,6 +827,64 @@ def test_write_brief_prompts_doc_no_blocks_placeholder(tmp_path):
         writer.write_brief(SAMPLE_BRIEF, "run-001", "2026-04-12T06:00:00+00:00")
         content = (writer.BRIEFS_DIR / "spec1_prompts_latest.md").read_text(encoding="utf-8")
         assert "No Claude investigation prompts" in content
+    finally:
+        writer.BRIEFS_DIR = original_dir
+
+
+def test_write_brief_uses_payload_fallback_when_no_blocks(tmp_path):
+    from spec1_engine.briefing import writer
+    original_dir = writer.BRIEFS_DIR
+    writer.BRIEFS_DIR = tmp_path / "briefs"
+    try:
+        brief_no_blocks = "# Brief\n\nSome content with no blockquotes.\n"
+        payload = "## SYSTEM PROMPT\n\nhello\n\n---\n\n## USER PROMPT\n\nworld\n"
+        writer.write_brief(brief_no_blocks, "run-fb1", "2026-01-01T00:00:00", prompts=payload)
+        content = (writer.BRIEFS_DIR / "spec1_prompts_latest.md").read_text(encoding="utf-8")
+        assert "## Prompt Payload" in content
+        assert "SYSTEM PROMPT" in content
+        assert "USER PROMPT" in content
+        assert "No Claude investigation prompts" not in content
+    finally:
+        writer.BRIEFS_DIR = original_dir
+
+
+def test_write_brief_payload_fallback_preserves_header(tmp_path):
+    from spec1_engine.briefing import writer
+    original_dir = writer.BRIEFS_DIR
+    writer.BRIEFS_DIR = tmp_path / "briefs"
+    try:
+        brief_no_blocks = "# Brief\n\nNo prompts here.\n"
+        payload = "## SYSTEM PROMPT\n\ntest\n"
+        writer.write_brief(brief_no_blocks, "run-fb2", "2026-01-01T00:00:00", prompts=payload)
+        content = (writer.BRIEFS_DIR / "spec1_prompts_latest.md").read_text(encoding="utf-8")
+        assert content.startswith("# SPEC-1 Investigation Prompts")
+    finally:
+        writer.BRIEFS_DIR = original_dir
+
+
+def test_write_brief_no_payload_no_blocks_uses_placeholder(tmp_path):
+    from spec1_engine.briefing import writer
+    original_dir = writer.BRIEFS_DIR
+    writer.BRIEFS_DIR = tmp_path / "briefs"
+    try:
+        brief_no_blocks = "# Brief\n\nNo prompts.\n"
+        writer.write_brief(brief_no_blocks, "run-fb3", "2026-01-01T00:00:00", prompts=None)
+        content = (writer.BRIEFS_DIR / "spec1_prompts_latest.md").read_text(encoding="utf-8")
+        assert "No Claude investigation prompts" in content
+    finally:
+        writer.BRIEFS_DIR = original_dir
+
+
+def test_write_brief_blocks_take_priority_over_payload(tmp_path):
+    from spec1_engine.briefing import writer
+    original_dir = writer.BRIEFS_DIR
+    writer.BRIEFS_DIR = tmp_path / "briefs"
+    try:
+        payload = "## SYSTEM PROMPT\n\nshould be ignored\n"
+        writer.write_brief(SAMPLE_BRIEF_WITH_PROMPTS, "run-fb4", "2026-04-12T06:00:00+00:00", prompts=payload)
+        content = (writer.BRIEFS_DIR / "spec1_prompts_latest.md").read_text(encoding="utf-8")
+        assert "## Prompt 1" in content
+        assert "should be ignored" not in content
     finally:
         writer.BRIEFS_DIR = original_dir
 
