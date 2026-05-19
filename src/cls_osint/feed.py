@@ -274,6 +274,9 @@ async def fetch_all_rss_async(
     records: list[OSINTRecord] = []
     errors: dict[str, str] = {}
 
+    def _sync_fetch(src: OsintSource) -> list[OSINTRecord]:
+        return list(fetch_feed(src, timeout=timeout, max_retries=max_retries))
+
     for source, raw, error in results:
         if error is not None:
             errors[source.name] = error
@@ -281,8 +284,9 @@ async def fetch_all_rss_async(
             # httpx unavailable sentinel — run sync in executor
             loop = asyncio.get_event_loop()
             try:
+                import functools
                 batch = await loop.run_in_executor(
-                    None, lambda s=source: list(fetch_feed(s, timeout=timeout, max_retries=max_retries))
+                    None, functools.partial(_sync_fetch, source)
                 )
                 records.extend(batch)
             except Exception as exc:

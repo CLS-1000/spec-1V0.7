@@ -86,8 +86,9 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
-    # CORS middleware must be registered before ApiKeyMiddleware so that
-    # pre-flight responses still carry CORS headers even when auth is rejected.
+    # Starlette executes middleware in reverse registration order (last-registered
+    # runs outermost).  We register CORS first so it wraps everything, ensuring
+    # CORS headers are present even on 403 responses from ApiKeyMiddleware.
     cors_origins = _build_cors_origins()
     app.add_middleware(
         CORSMiddleware,

@@ -38,7 +38,6 @@ class TestFireCycleNoUrls:
 
 def _wait_all_threads(timeout: float = 2.0) -> None:
     """Wait for all non-main daemon threads to complete (up to timeout)."""
-    import threading
     deadline = time.time() + timeout
     for t in threading.enumerate():
         if t is threading.main_thread() or not t.daemon:

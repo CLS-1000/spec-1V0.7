@@ -172,7 +172,7 @@ class _RSSAdapter(AdapterBase):
     author = "SPEC-1 core"
     tags = ["rss", "news", "feeds"]
 
-    def fetch(self) -> list[OSINTRecord]:  # pragma: no cover
+    def fetch(self) -> list[OSINTRecord]:  # pragma: no cover — integration; covered by tests/test_feed.py
         from cls_osint.feed import fetch_all_rss
         from cls_osint.sources import get_sources_by_type
         result = fetch_all_rss(get_sources_by_type("RSS"))
@@ -187,7 +187,7 @@ class _FARAAdapter(AdapterBase):
     author = "SPEC-1 core"
     tags = ["fara", "foreign_agents", "lobbying", "government"]
 
-    def fetch(self) -> list[OSINTRecord]:  # pragma: no cover
+    def fetch(self) -> list[OSINTRecord]:  # pragma: no cover — integration; covered by tests/test_fara.py
         from cls_osint.adapters.fara import fetch_fara_records
         return list(fetch_fara_records())
 
@@ -200,7 +200,7 @@ class _CongressionalAdapter(AdapterBase):
     author = "SPEC-1 core"
     tags = ["congress", "legislation", "bills", "government"]
 
-    def fetch(self) -> list[OSINTRecord]:  # pragma: no cover
+    def fetch(self) -> list[OSINTRecord]:  # pragma: no cover — integration; covered by tests/test_congressional.py
         from cls_osint.adapters.congressional import fetch_congressional_records
         return list(fetch_congressional_records())
 
@@ -213,7 +213,7 @@ class _NarrativeAdapter(AdapterBase):
     author = "SPEC-1 core"
     tags = ["narrative", "influence", "psyop"]
 
-    def fetch(self) -> list[OSINTRecord]:  # pragma: no cover
+    def fetch(self) -> list[OSINTRecord]:  # pragma: no cover — integration; covered by tests/test_narrative.py
         from cls_osint.adapters.narrative import fetch_narrative_records
         return list(fetch_narrative_records())
 
