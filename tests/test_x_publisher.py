@@ -1,4 +1,4 @@
-"""Tests for spec1_engine.app.publishers.x — XPublisher and helpers."""
+"""Tests for spec1_core.app.publishers.x — XPublisher and helpers."""
 
 from __future__ import annotations
 
@@ -9,14 +9,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spec1_engine.app.publishers.x import (
+from spec1_core.app.publishers.x import (
     MAX_POST_CHARS,
     PublishResult,
     XPublisher,
     _render_section,
     _truncate,
 )
-from spec1_engine.schemas.brief import BriefSection, WorldStateBrief
+from spec1_core.schemas.brief import BriefSection, WorldStateBrief
 
 
 # ---------------------------------------------------------------------------

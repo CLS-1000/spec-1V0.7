@@ -6,16 +6,16 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 from datetime import datetime
 
-from spec1_engine.schemas.models import Signal, CaseFile
-from spec1_engine.workspace.case import (
+from spec1_core.schemas.models import Signal, CaseFile
+from spec1_core.workspace.case import (
     open_case,
     update_case,
     close_case,
     list_cases,
     get_case,
 )
-from spec1_engine.workspace.tracker import match_signals_to_cases
-from spec1_engine.workspace.researcher import run_research
+from spec1_core.workspace.tracker import match_signals_to_cases
+from spec1_core.workspace.researcher import run_research
 
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
@@ -27,7 +27,7 @@ def temp_workspace(tmp_path, monkeypatch):
     workspace_dir.mkdir()
 
     # Monkey patch the workspace paths
-    import spec1_engine.workspace.case as case_module
+    import spec1_core.workspace.case as case_module
     case_module.WORKSPACE_DIR = workspace_dir
     case_module.CASES_DIR = workspace_dir / "cases"
     case_module.REPORTS_DIR = workspace_dir / "reports"
@@ -372,7 +372,7 @@ def test_researcher_returns_empty_for_no_signals():
     assert result == ""
 
 
-@patch("spec1_engine.workspace.researcher._anthropic")
+@patch("spec1_core.workspace.researcher._anthropic")
 def test_researcher_calls_claude_sonnet_4(mock_anthropic):
     """Test: researcher calls Claude Sonnet 4 model."""
     mock_client = MagicMock()
@@ -417,7 +417,7 @@ def test_researcher_calls_claude_sonnet_4(mock_anthropic):
     assert call_kwargs["max_tokens"] == 2000
 
 
-@patch("spec1_engine.workspace.researcher._anthropic")
+@patch("spec1_core.workspace.researcher._anthropic")
 def test_researcher_returns_fallback_on_api_error(mock_anthropic):
     """Test: researcher returns fallback on API failure."""
     mock_client = MagicMock()

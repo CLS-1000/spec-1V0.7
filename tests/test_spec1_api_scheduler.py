@@ -33,7 +33,7 @@ def kill_file_in_tmp(tmp_path, monkeypatch):
 
 def test_run_cycle_job_skips_when_kill_file_present(kill_file_in_tmp, caplog):
     kill_file_in_tmp.write_text("")
-    with patch("spec1_engine.app.cycle.run_cycle") as mock_run:
+    with patch("spec1_core.app.cycle.run_cycle") as mock_run:
         sched._run_cycle_job()
         mock_run.assert_not_called()
     assert "Kill file present" in caplog.text
@@ -41,14 +41,14 @@ def test_run_cycle_job_skips_when_kill_file_present(kill_file_in_tmp, caplog):
 
 def test_run_cycle_job_runs_engine_when_no_kill_file(kill_file_in_tmp):
     assert not kill_file_in_tmp.exists()
-    with patch("spec1_engine.app.cycle.run_cycle") as mock_run:
+    with patch("spec1_core.app.cycle.run_cycle") as mock_run:
         mock_run.return_value = {"records_stored": 3, "errors": []}
         sched._run_cycle_job()
         mock_run.assert_called_once()
 
 
 def test_run_cycle_job_swallows_engine_errors(kill_file_in_tmp, caplog):
-    with patch("spec1_engine.app.cycle.run_cycle") as mock_run:
+    with patch("spec1_core.app.cycle.run_cycle") as mock_run:
         mock_run.side_effect = RuntimeError("boom")
         sched._run_cycle_job()  # must not raise
     assert "Scheduled cycle failed" in caplog.text

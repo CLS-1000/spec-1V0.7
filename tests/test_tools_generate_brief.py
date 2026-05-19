@@ -1,4 +1,4 @@
-"""Tests for spec1_engine.tools.generate_brief CLI."""
+"""Tests for spec1_core.tools.generate_brief CLI."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from unittest.mock import patch
 
-from spec1_engine.tools.generate_brief import main
+from spec1_core.tools.generate_brief import main
 
 
 def _write_jsonl(path: Path, records: list[dict]) -> None:
@@ -100,7 +100,7 @@ def test_claude_path_used_when_not_rule_based(tmp_path):
     ])
     fake_brief = "# Mocked Claude Brief\n\nThis is the LLM output."
     fake_prompts = "## SYSTEM\n\nfake system\n\n## USER\n\nfake user\n"
-    with patch("spec1_engine.briefing.generator.generate_brief",
+    with patch("spec1_core.briefing.generator.generate_brief",
                return_value=(fake_brief, fake_prompts)) as mock_gen:
         rc = main([
             "--intel", str(intel),
@@ -121,7 +121,7 @@ def test_claude_failure_falls_back(tmp_path):
         {"record_id": "r1", "content": "test event", "run_id": "r",
          "written_at": "2026-05-01T00:00:00+00:00"},
     ])
-    with patch("spec1_engine.briefing.generator.generate_brief",
+    with patch("spec1_core.briefing.generator.generate_brief",
                side_effect=RuntimeError("api dead")):
         rc = main([
             "--intel", str(intel),

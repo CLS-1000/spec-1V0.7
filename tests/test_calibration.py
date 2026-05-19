@@ -11,7 +11,7 @@ from cls_calibration.aggregator import _bucket_label, produce_report, score_verd
 from cls_calibration.schemas import Bucket, CalibrationReport
 from cls_verdicts.store import VerdictStore
 from cls_verdicts.schemas import Verdict
-from spec1_engine.intelligence.store import JsonlStore
+from spec1_core.intelligence.store import JsonlStore
 from spec1_api.dependencies import get_intel_store, get_verdict_store
 from spec1_api.main import app
 

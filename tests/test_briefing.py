@@ -110,7 +110,7 @@ def make_mock_claude_response(text: str) -> MagicMock:
 # ─── generator.py — unit tests ────────────────────────────────────────────────
 
 def test_generate_brief_returns_string():
-    from spec1_engine.briefing import generator
+    from spec1_core.briefing import generator
     records = [make_record()]
     stats = make_cycle_stats()
     mock_resp = make_mock_claude_response(SAMPLE_BRIEF)
@@ -123,7 +123,7 @@ def test_generate_brief_returns_string():
 
 
 def test_generate_brief_returns_prompts_text():
-    from spec1_engine.briefing.generator import generate_brief
+    from spec1_core.briefing.generator import generate_brief
     records = [make_record()]
     stats = make_cycle_stats()
     mock_resp = make_mock_claude_response(SAMPLE_BRIEF)
@@ -137,7 +137,7 @@ def test_generate_brief_returns_prompts_text():
 
 
 def test_generate_brief_contains_executive_summary():
-    from spec1_engine.briefing import generator
+    from spec1_core.briefing import generator
     records = [make_record()]
     stats = make_cycle_stats()
     mock_resp = make_mock_claude_response(SAMPLE_BRIEF)
@@ -149,7 +149,7 @@ def test_generate_brief_contains_executive_summary():
 
 
 def test_generate_brief_contains_all_required_sections():
-    from spec1_engine.briefing import generator
+    from spec1_core.briefing import generator
     records = [make_record()]
     stats = make_cycle_stats()
     mock_resp = make_mock_claude_response(SAMPLE_BRIEF)
@@ -162,7 +162,7 @@ def test_generate_brief_contains_all_required_sections():
 
 
 def test_generate_brief_story_leads_present_with_elevated():
-    from spec1_engine.briefing import generator
+    from spec1_core.briefing import generator
     records = [make_record(classification="CORROBORATED", priority="ELEVATED")]
     stats = make_cycle_stats()
     mock_resp = make_mock_claude_response(SAMPLE_BRIEF)
@@ -174,7 +174,7 @@ def test_generate_brief_story_leads_present_with_elevated():
 
 
 def test_generate_brief_api_failure_returns_fallback():
-    from spec1_engine.briefing import generator
+    from spec1_core.briefing import generator
     records = [make_record()]
     stats = make_cycle_stats()
     with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
@@ -186,7 +186,7 @@ def test_generate_brief_api_failure_returns_fallback():
 
 
 def test_generate_brief_api_failure_no_exception():
-    from spec1_engine.briefing import generator
+    from spec1_core.briefing import generator
     records = [make_record()]
     stats = make_cycle_stats()
     with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
@@ -199,7 +199,7 @@ def test_generate_brief_api_failure_no_exception():
 
 
 def test_generate_brief_no_api_key_returns_fallback():
-    from spec1_engine.briefing.generator import generate_brief
+    from spec1_core.briefing.generator import generate_brief
     import os
     records = [make_record()]
     stats = make_cycle_stats()
@@ -212,7 +212,7 @@ def test_generate_brief_no_api_key_returns_fallback():
 
 
 def test_generate_brief_fallback_contains_date():
-    from spec1_engine.briefing.generator import _fallback_brief
+    from spec1_core.briefing.generator import _fallback_brief
     stats = make_cycle_stats()
     result = _fallback_brief(stats)
     today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -220,7 +220,7 @@ def test_generate_brief_fallback_contains_date():
 
 
 def test_generate_brief_elevated_count_in_prompt():
-    from spec1_engine.briefing.generator import _build_prompt
+    from spec1_core.briefing.generator import _build_prompt
     records = [
         make_record(classification="CORROBORATED"),
         make_record(classification="ESCALATE", source="rand"),
@@ -232,7 +232,7 @@ def test_generate_brief_elevated_count_in_prompt():
 
 
 def test_generate_brief_standard_records_in_prompt():
-    from spec1_engine.briefing.generator import _build_prompt
+    from spec1_core.briefing.generator import _build_prompt
     records = [make_record() for _ in range(5)]
     stats = make_cycle_stats()
     prompt = _build_prompt(records, stats)
@@ -240,7 +240,7 @@ def test_generate_brief_standard_records_in_prompt():
 
 
 def test_generate_brief_geo_count_in_prompt():
-    from spec1_engine.briefing.generator import _build_prompt
+    from spec1_core.briefing.generator import _build_prompt
     records = [make_record(source="war_on_the_rocks"), make_record(source="rand")]
     stats = make_cycle_stats()
     prompt = _build_prompt(records, stats)
@@ -248,7 +248,7 @@ def test_generate_brief_geo_count_in_prompt():
 
 
 def test_generate_brief_cyber_count_in_prompt():
-    from spec1_engine.briefing.generator import _build_prompt
+    from spec1_core.briefing.generator import _build_prompt
     records = [make_record(source="cipher_brief"), make_record(source="just_security")]
     stats = make_cycle_stats()
     prompt = _build_prompt(records, stats)
@@ -256,40 +256,40 @@ def test_generate_brief_cyber_count_in_prompt():
 
 
 def test_format_record_contains_source():
-    from spec1_engine.briefing.generator import _format_record
+    from spec1_core.briefing.generator import _format_record
     rec = make_record(source="war_on_the_rocks")
     result = _format_record(rec)
     assert "WAR_ON_THE_ROCKS" in result
 
 
 def test_format_record_contains_confidence():
-    from spec1_engine.briefing.generator import _format_record
+    from spec1_core.briefing.generator import _format_record
     rec = make_record(confidence=0.73)
     result = _format_record(rec)
     assert "confidence=0.73" in result
 
 
 def test_format_record_contains_classification():
-    from spec1_engine.briefing.generator import _format_record
+    from spec1_core.briefing.generator import _format_record
     rec = make_record(classification="ESCALATE")
     result = _format_record(rec)
     assert "classification=ESCALATE" in result
 
 
 def test_classify_domain_cyber():
-    from spec1_engine.briefing.generator import _classify_domain
+    from spec1_core.briefing.generator import _classify_domain
     assert _classify_domain({"signal_source": "cipher_brief"}) == "cyber"
     assert _classify_domain({"signal_source": "just_security"}) == "cyber"
 
 
 def test_classify_domain_geo():
-    from spec1_engine.briefing.generator import _classify_domain
+    from spec1_core.briefing.generator import _classify_domain
     assert _classify_domain({"signal_source": "war_on_the_rocks"}) == "geo"
     assert _classify_domain({"signal_source": "rand"}) == "geo"
 
 
 def test_standard_top10_capped():
-    from spec1_engine.briefing.generator import _build_prompt
+    from spec1_core.briefing.generator import _build_prompt
     records = [make_record(source=f"rand", confidence=i * 0.05) for i in range(20)]
     stats = make_cycle_stats()
     prompt = _build_prompt(records, stats)
@@ -300,7 +300,7 @@ def test_standard_top10_capped():
 # ─── writer.py — unit tests ───────────────────────────────────────────────────
 
 def test_write_brief_creates_dated_file(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -312,7 +312,7 @@ def test_write_brief_creates_dated_file(tmp_path):
 
 
 def test_write_brief_creates_latest_file(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -325,7 +325,7 @@ def test_write_brief_creates_latest_file(tmp_path):
 
 
 def test_write_brief_dated_file_content(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -337,7 +337,7 @@ def test_write_brief_dated_file_content(tmp_path):
 
 
 def test_write_brief_appends_index(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -351,7 +351,7 @@ def test_write_brief_appends_index(tmp_path):
 
 
 def test_write_brief_index_has_correct_fields(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -368,7 +368,7 @@ def test_write_brief_index_has_correct_fields(tmp_path):
 
 
 def test_write_brief_word_count_in_index(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -381,7 +381,7 @@ def test_write_brief_word_count_in_index(tmp_path):
 
 
 def test_write_brief_returns_filepath_string(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -393,7 +393,7 @@ def test_write_brief_returns_filepath_string(tmp_path):
 
 
 def test_write_brief_creates_dir_if_missing(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     briefs_dir = tmp_path / "new_briefs_dir"
     writer.BRIEFS_DIR = briefs_dir
@@ -408,7 +408,7 @@ def test_write_brief_creates_dir_if_missing(tmp_path):
 # ─── writer.py — prompts artifact tests ──────────────────────────────────────
 
 def test_write_brief_with_prompts_creates_dated_prompts_file(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -419,7 +419,7 @@ def test_write_brief_with_prompts_creates_dated_prompts_file(tmp_path):
 
 
 def test_write_brief_with_prompts_creates_latest_prompts_file(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -432,7 +432,7 @@ def test_write_brief_with_prompts_creates_latest_prompts_file(tmp_path):
 
 
 def test_write_brief_with_prompts_dated_file_content(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -445,7 +445,7 @@ def test_write_brief_with_prompts_dated_file_content(tmp_path):
 
 
 def test_write_brief_without_prompts_still_creates_prompts_files(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -457,7 +457,7 @@ def test_write_brief_without_prompts_still_creates_prompts_files(tmp_path):
 
 
 def test_write_brief_uses_prompt_payload_when_brief_has_no_prompt_blocks(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     payload = "## SYSTEM PROMPT\n\nsystem text\n\n## USER PROMPT\n\nuser text"
@@ -473,7 +473,7 @@ def test_write_brief_uses_prompt_payload_when_brief_has_no_prompt_blocks(tmp_pat
 
 
 def test_write_brief_ignores_whitespace_prompt_payload_when_brief_has_no_prompt_blocks(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -486,7 +486,7 @@ def test_write_brief_ignores_whitespace_prompt_payload_when_brief_has_no_prompt_
 
 
 def test_write_brief_prompts_latest_overwritten_each_run(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -502,26 +502,26 @@ def test_write_brief_prompts_latest_overwritten_each_run(tmp_path):
 
 @pytest.fixture(scope="module")
 def api_client():
-    import spec1_engine.api.app  # pre-import so patch can resolve the module
-    with patch("spec1_engine.api.app.build_scheduler") as mock_build, \
-         patch("spec1_engine.api.app.maybe_run_on_start"):
+    import spec1_core.api.app  # pre-import so patch can resolve the module
+    with patch("spec1_core.api.app.build_scheduler") as mock_build, \
+         patch("spec1_core.api.app.maybe_run_on_start"):
         mock_sched = MagicMock()
         mock_sched.running = True
         mock_build.return_value = mock_sched
-        from spec1_engine.api.app import app
+        from spec1_core.api.app import app
         with TestClient(app) as c:
             yield c
 
 
 def _patch_briefs_dir(briefs_dir):
     """Context manager that patches BRIEFS_DIR in both writer and routes modules."""
-    import spec1_engine.briefing.writer as _w
-    import spec1_engine.api.routes as _r  # noqa: F401 (unused but needed to trigger import)
+    import spec1_core.briefing.writer as _w
+    import spec1_core.api.routes as _r  # noqa: F401 (unused but needed to trigger import)
     return patch.object(_w, "BRIEFS_DIR", briefs_dir)
 
 
 def test_brief_latest_404_when_no_file(api_client, tmp_path):
-    import spec1_engine.briefing.writer as _w
+    import spec1_core.briefing.writer as _w
     empty = tmp_path / "empty_briefs"
     empty.mkdir()
     with patch.object(_w, "BRIEFS_DIR", empty):
@@ -530,7 +530,7 @@ def test_brief_latest_404_when_no_file(api_client, tmp_path):
 
 
 def test_brief_latest_200_when_file_exists(api_client, tmp_path):
-    import spec1_engine.briefing.writer as _w
+    import spec1_core.briefing.writer as _w
     briefs_dir = tmp_path / "briefs_test"
     briefs_dir.mkdir()
     (briefs_dir / "spec1_brief_latest.md").write_text(SAMPLE_BRIEF, encoding="utf-8")
@@ -548,7 +548,7 @@ def test_brief_latest_200_when_file_exists(api_client, tmp_path):
 
 
 def test_brief_latest_returns_run_id(api_client, tmp_path):
-    import spec1_engine.briefing.writer as _w
+    import spec1_core.briefing.writer as _w
     briefs_dir = tmp_path / "briefs_runid"
     briefs_dir.mkdir()
     (briefs_dir / "spec1_brief_latest.md").write_text(SAMPLE_BRIEF, encoding="utf-8")
@@ -563,7 +563,7 @@ def test_brief_latest_returns_run_id(api_client, tmp_path):
 
 
 def test_brief_by_date_404_missing(api_client, tmp_path):
-    import spec1_engine.briefing.writer as _w
+    import spec1_core.briefing.writer as _w
     briefs_dir = tmp_path / "briefs_date_miss"
     briefs_dir.mkdir()
     with patch.object(_w, "BRIEFS_DIR", briefs_dir):
@@ -572,7 +572,7 @@ def test_brief_by_date_404_missing(api_client, tmp_path):
 
 
 def test_brief_by_date_200_when_exists(api_client, tmp_path):
-    import spec1_engine.briefing.writer as _w
+    import spec1_core.briefing.writer as _w
     briefs_dir = tmp_path / "briefs_date_ok"
     briefs_dir.mkdir()
     (briefs_dir / "spec1_brief_2026-04-11.md").write_text(SAMPLE_BRIEF, encoding="utf-8")
@@ -584,7 +584,7 @@ def test_brief_by_date_200_when_exists(api_client, tmp_path):
 
 
 def test_brief_index_empty_list_when_no_file(api_client, tmp_path):
-    import spec1_engine.briefing.writer as _w
+    import spec1_core.briefing.writer as _w
     briefs_dir = tmp_path / "briefs_empty_idx"
     briefs_dir.mkdir()
     with patch.object(_w, "BRIEFS_DIR", briefs_dir):
@@ -594,7 +594,7 @@ def test_brief_index_empty_list_when_no_file(api_client, tmp_path):
 
 
 def test_brief_index_returns_newest_first(api_client, tmp_path):
-    import spec1_engine.briefing.writer as _w
+    import spec1_core.briefing.writer as _w
     briefs_dir = tmp_path / "briefs_idx_order"
     briefs_dir.mkdir()
     entries = [
@@ -618,7 +618,7 @@ SAMPLE_PROMPTS = "## SYSTEM PROMPT\n\nYou are an intelligence editor.\n"
 
 
 def test_write_brief_creates_prompts_files_when_provided(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -632,7 +632,7 @@ def test_write_brief_creates_prompts_files_when_provided(tmp_path):
 
 
 def test_write_brief_prompts_file_content(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -648,7 +648,7 @@ def test_write_brief_prompts_file_content(tmp_path):
 
 def test_write_brief_prompts_files_always_created(tmp_path):
     """write_brief always creates prompts files (extraction from brief)."""
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -660,7 +660,7 @@ def test_write_brief_prompts_files_always_created(tmp_path):
 
 
 def test_write_brief_prompts_latest_overwritten(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -677,7 +677,7 @@ def test_write_brief_prompts_latest_overwritten(tmp_path):
 
 def test_write_brief_invalid_timestamp_falls_back_to_today(tmp_path):
     """write_brief falls back to today's date when timestamp is invalid."""
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     from datetime import datetime, timezone
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs_inv_ts"
@@ -742,26 +742,26 @@ SAMPLE_BRIEF_WITH_PROMPTS = "\n".join([
 
 
 def test_extract_prompts_empty_when_no_blocks():
-    from spec1_engine.briefing.writer import _extract_prompts
+    from spec1_core.briefing.writer import _extract_prompts
     result = _extract_prompts(SAMPLE_BRIEF)
     assert result == []
 
 
 def test_extract_prompts_finds_all_blocks():
-    from spec1_engine.briefing.writer import _extract_prompts
+    from spec1_core.briefing.writer import _extract_prompts
     result = _extract_prompts(SAMPLE_BRIEF_WITH_PROMPTS)
     assert len(result) == 2
 
 
 def test_extract_prompts_each_block_starts_with_marker():
-    from spec1_engine.briefing.writer import _extract_prompts
+    from spec1_core.briefing.writer import _extract_prompts
     result = _extract_prompts(SAMPLE_BRIEF_WITH_PROMPTS)
     for block in result:
         assert "**CLAUDE PROMPT:**" in block
 
 
 def test_extract_prompts_block_contains_lead_title():
-    from spec1_engine.briefing.writer import _extract_prompts
+    from spec1_core.briefing.writer import _extract_prompts
     result = _extract_prompts(SAMPLE_BRIEF_WITH_PROMPTS)
     assert any("Pentagon Budget Leak" in b for b in result)
     assert any("Cyber Intrusion Pattern" in b for b in result)
@@ -770,7 +770,7 @@ def test_extract_prompts_block_contains_lead_title():
 # ─── writer.py — prompts file tests ──────────────────────────────────────────
 
 def test_write_brief_creates_prompts_latest_file(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -782,7 +782,7 @@ def test_write_brief_creates_prompts_latest_file(tmp_path):
 
 
 def test_write_brief_creates_prompts_dated_file(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -794,7 +794,7 @@ def test_write_brief_creates_prompts_dated_file(tmp_path):
 
 
 def test_write_brief_prompts_doc_contains_header(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -806,7 +806,7 @@ def test_write_brief_prompts_doc_contains_header(tmp_path):
 
 
 def test_write_brief_prompts_doc_with_blocks(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -820,7 +820,7 @@ def test_write_brief_prompts_doc_with_blocks(tmp_path):
 
 
 def test_write_brief_prompts_doc_no_blocks_placeholder(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -832,7 +832,7 @@ def test_write_brief_prompts_doc_no_blocks_placeholder(tmp_path):
 
 
 def test_write_brief_uses_payload_fallback_when_no_blocks(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -849,7 +849,7 @@ def test_write_brief_uses_payload_fallback_when_no_blocks(tmp_path):
 
 
 def test_write_brief_payload_fallback_preserves_header(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -863,7 +863,7 @@ def test_write_brief_payload_fallback_preserves_header(tmp_path):
 
 
 def test_write_brief_no_payload_no_blocks_uses_placeholder(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -876,7 +876,7 @@ def test_write_brief_no_payload_no_blocks_uses_placeholder(tmp_path):
 
 
 def test_write_brief_blocks_take_priority_over_payload(tmp_path):
-    from spec1_engine.briefing import writer
+    from spec1_core.briefing import writer
     original_dir = writer.BRIEFS_DIR
     writer.BRIEFS_DIR = tmp_path / "briefs"
     try:
@@ -892,7 +892,7 @@ def test_write_brief_blocks_take_priority_over_payload(tmp_path):
 # ─── API routes — /brief/prompts/latest endpoint ─────────────────────────────
 
 def test_brief_prompts_latest_404_when_no_file(api_client, tmp_path):
-    import spec1_engine.briefing.writer as _w
+    import spec1_core.briefing.writer as _w
     empty = tmp_path / "empty_prompts"
     empty.mkdir()
     with patch.object(_w, "BRIEFS_DIR", empty):
@@ -901,7 +901,7 @@ def test_brief_prompts_latest_404_when_no_file(api_client, tmp_path):
 
 
 def test_brief_prompts_latest_200_when_file_exists(api_client, tmp_path):
-    import spec1_engine.briefing.writer as _w
+    import spec1_core.briefing.writer as _w
     briefs_dir = tmp_path / "briefs_prompts_ok"
     briefs_dir.mkdir()
     # Write prompts file and an index entry
@@ -927,7 +927,7 @@ def test_brief_prompts_latest_200_when_file_exists(api_client, tmp_path):
 
 
 def test_brief_prompts_latest_lead_count_correct(api_client, tmp_path):
-    import spec1_engine.briefing.writer as _w
+    import spec1_core.briefing.writer as _w
     briefs_dir = tmp_path / "briefs_prompts_count"
     briefs_dir.mkdir()
     prompts_content = (
@@ -965,7 +965,7 @@ GEO_SAMPLE_BRIEF = "\n".join([
 
 
 def test_generate_brief_geopolitics_mode_returns_string():
-    from spec1_engine.briefing import generator
+    from spec1_core.briefing import generator
     records = [make_record()]
     stats = make_cycle_stats()
     mock_resp = make_mock_claude_response(GEO_SAMPLE_BRIEF)
@@ -978,8 +978,8 @@ def test_generate_brief_geopolitics_mode_returns_string():
 
 
 def test_generate_brief_geopolitics_mode_uses_geo_system_prompt():
-    from spec1_engine.briefing import generator
-    from spec1_engine.briefing.templates import GEO_SYSTEM_PROMPT
+    from spec1_core.briefing import generator
+    from spec1_core.briefing.templates import GEO_SYSTEM_PROMPT
     records = [make_record()]
     stats = make_cycle_stats()
     mock_resp = make_mock_claude_response(GEO_SAMPLE_BRIEF)
@@ -992,7 +992,7 @@ def test_generate_brief_geopolitics_mode_uses_geo_system_prompt():
 
 
 def test_build_prompt_geopolitics_mode_uses_geo_template():
-    from spec1_engine.briefing.generator import _build_prompt
+    from spec1_core.briefing.generator import _build_prompt
     records = [make_record()]
     stats = make_cycle_stats()
     prompt = _build_prompt(records, stats, mode="geopolitics")
@@ -1000,7 +1000,7 @@ def test_build_prompt_geopolitics_mode_uses_geo_template():
 
 
 def test_build_prompt_standard_mode_uses_standard_template():
-    from spec1_engine.briefing.generator import _build_prompt
+    from spec1_core.briefing.generator import _build_prompt
     records = [make_record()]
     stats = make_cycle_stats()
     prompt = _build_prompt(records, stats, mode="standard")
@@ -1008,19 +1008,19 @@ def test_build_prompt_standard_mode_uses_standard_template():
 
 
 def test_geo_system_prompt_constant_is_string():
-    from spec1_engine.briefing.templates import GEO_SYSTEM_PROMPT
+    from spec1_core.briefing.templates import GEO_SYSTEM_PROMPT
     assert isinstance(GEO_SYSTEM_PROMPT, str)
     assert len(GEO_SYSTEM_PROMPT) > 0
 
 
 def test_geo_user_prompt_template_has_required_placeholders():
-    from spec1_engine.briefing.templates import GEO_USER_PROMPT_TEMPLATE
+    from spec1_core.briefing.templates import GEO_USER_PROMPT_TEMPLATE
     for placeholder in ("{run_id}", "{elevated_records}", "{standard_records}", "{date}"):
         assert placeholder in GEO_USER_PROMPT_TEMPLATE
 
 
 def test_generate_brief_standard_mode_unchanged():
-    from spec1_engine.briefing import generator
+    from spec1_core.briefing import generator
     records = [make_record()]
     stats = make_cycle_stats()
     mock_resp = make_mock_claude_response(SAMPLE_BRIEF)
@@ -1055,7 +1055,7 @@ LEG_SAMPLE_BRIEF = "\n".join([
 
 
 def test_generate_brief_legislative_mode_returns_string():
-    from spec1_engine.briefing import generator
+    from spec1_core.briefing import generator
     records = [make_record()]
     stats = make_cycle_stats()
     mock_resp = make_mock_claude_response(LEG_SAMPLE_BRIEF)
@@ -1068,8 +1068,8 @@ def test_generate_brief_legislative_mode_returns_string():
 
 
 def test_generate_brief_legislative_mode_uses_leg_system_prompt():
-    from spec1_engine.briefing import generator
-    from spec1_engine.briefing.templates import LEG_SYSTEM_PROMPT
+    from spec1_core.briefing import generator
+    from spec1_core.briefing.templates import LEG_SYSTEM_PROMPT
     records = [make_record()]
     stats = make_cycle_stats()
     mock_resp = make_mock_claude_response(LEG_SAMPLE_BRIEF)
@@ -1082,7 +1082,7 @@ def test_generate_brief_legislative_mode_uses_leg_system_prompt():
 
 
 def test_build_prompt_legislative_mode_uses_leg_template():
-    from spec1_engine.briefing.generator import _build_prompt
+    from spec1_core.briefing.generator import _build_prompt
     records = [make_record()]
     stats = make_cycle_stats()
     prompt = _build_prompt(records, stats, mode="legislative")
@@ -1090,12 +1090,12 @@ def test_build_prompt_legislative_mode_uses_leg_template():
 
 
 def test_leg_system_prompt_constant_is_string():
-    from spec1_engine.briefing.templates import LEG_SYSTEM_PROMPT
+    from spec1_core.briefing.templates import LEG_SYSTEM_PROMPT
     assert isinstance(LEG_SYSTEM_PROMPT, str)
     assert len(LEG_SYSTEM_PROMPT) > 0
 
 
 def test_leg_user_prompt_template_has_required_placeholders():
-    from spec1_engine.briefing.templates import LEG_USER_PROMPT_TEMPLATE
+    from spec1_core.briefing.templates import LEG_USER_PROMPT_TEMPLATE
     for placeholder in ("{run_id}", "{elevated_records}", "{standard_records}", "{date}"):
         assert placeholder in LEG_USER_PROMPT_TEMPLATE

@@ -417,10 +417,10 @@ class TestLegJudAPIRoutes:
             if mod not in sys.modules:
                 sys.modules[mod] = MagicMock()
 
-        # Stub spec1_engine.app.cycle to avoid its heavy import chain
+        # Stub spec1_core.app.cycle to avoid its heavy import chain
         mock_cycle = MagicMock()
         mock_cycle.run_cycle.return_value = {"run_id": "test", "records_stored": 0}
-        monkeypatch.setitem(sys.modules, "spec1_engine.app.cycle", mock_cycle)
+        monkeypatch.setitem(sys.modules, "spec1_core.app.cycle", mock_cycle)
 
         import importlib
         import spec1_api.main as main_mod
@@ -455,7 +455,7 @@ class TestLegJudAPIRoutes:
                 sys.modules[mod] = MagicMock()
         mock_cycle = MagicMock()
         mock_cycle.run_cycle.return_value = {"run_id": "test", "records_stored": 0}
-        monkeypatch.setitem(sys.modules, "spec1_engine.app.cycle", mock_cycle)
+        monkeypatch.setitem(sys.modules, "spec1_core.app.cycle", mock_cycle)
 
         osint_path = tmp_path / "osint2.jsonl"
         record = {

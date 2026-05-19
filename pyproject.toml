@@ -30,7 +30,8 @@ dev = ["pytest>=7.4", "pytest-cov", "pytest-asyncio>=0.23", "httpx>=0.27"]
 where = ["src"]
 
 [tool.setuptools.package-data]
-"spec1_engine" = ["core/prompts/*.md"]
+"spec1_core" = ["core/prompts/*.md"]
+"spec1_analytics" = ["**/*.py"]
 "spec1_api" = ["static/*.html"]
 
 [tool.pytest.ini_options]

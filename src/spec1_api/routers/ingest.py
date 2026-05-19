@@ -9,7 +9,7 @@ Invariants:
   - Duplicate signal_id: silent skip, written=False
   - All datetimes UTC
   - run_id on every written row
-  - Gate threshold imported from spec1_engine.signal.gates (never hardcoded)
+  - Gate threshold imported from spec1_core.signal.gates (never hardcoded)
 """
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ from spec1_api.schemas.node_signal import (
     GateStatus,
     IngestResult,
 )
-from spec1_engine.signal.gates import (
+from spec1_core.signal.gates import (
     GATE_THRESHOLD,
     score_credibility,
     score_novelty,

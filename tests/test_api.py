@@ -15,13 +15,13 @@ from fastapi.testclient import TestClient
 @pytest.fixture(scope="module")
 def client():
     """TestClient with scheduler mocked out so no real APScheduler runs."""
-    with patch("spec1_engine.api.app.build_scheduler") as mock_build, \
-         patch("spec1_engine.api.app.maybe_run_on_start"):
+    with patch("spec1_core.api.app.build_scheduler") as mock_build, \
+         patch("spec1_core.api.app.maybe_run_on_start"):
         mock_sched = MagicMock()
         mock_sched.running = True
         mock_build.return_value = mock_sched
 
-        from spec1_engine.api.app import app
+        from spec1_core.api.app import app
         with TestClient(app) as c:
             yield c
 
@@ -71,21 +71,21 @@ def test_health_returns_json(client):
 # ─── POST /cycle/run ──────────────────────────────────────────────────────────
 
 def test_cycle_run_returns_200(client):
-    with patch("spec1_engine.api.routes.threading.Thread") as mock_thread:
+    with patch("spec1_core.api.routes.threading.Thread") as mock_thread:
         mock_thread.return_value = MagicMock()
         r = client.post("/api/v1/cycle/run")
     assert r.status_code == 200
 
 
 def test_cycle_run_status_triggered(client):
-    with patch("spec1_engine.api.routes.threading.Thread") as mock_thread:
+    with patch("spec1_core.api.routes.threading.Thread") as mock_thread:
         mock_thread.return_value = MagicMock()
         r = client.post("/api/v1/cycle/run")
     assert r.json()["status"] == "triggered"
 
 
 def test_cycle_run_has_run_id(client):
-    with patch("spec1_engine.api.routes.threading.Thread") as mock_thread:
+    with patch("spec1_core.api.routes.threading.Thread") as mock_thread:
         mock_thread.return_value = MagicMock()
         r = client.post("/api/v1/cycle/run")
     assert "run_id" in r.json()
@@ -93,14 +93,14 @@ def test_cycle_run_has_run_id(client):
 
 
 def test_cycle_run_has_timestamp(client):
-    with patch("spec1_engine.api.routes.threading.Thread") as mock_thread:
+    with patch("spec1_core.api.routes.threading.Thread") as mock_thread:
         mock_thread.return_value = MagicMock()
         r = client.post("/api/v1/cycle/run")
     assert "timestamp" in r.json()
 
 
 def test_cycle_run_spawns_thread(client):
-    with patch("spec1_engine.api.routes.threading.Thread") as mock_thread:
+    with patch("spec1_core.api.routes.threading.Thread") as mock_thread:
         instance = MagicMock()
         mock_thread.return_value = instance
         client.post("/api/v1/cycle/run")
@@ -108,7 +108,7 @@ def test_cycle_run_spawns_thread(client):
 
 
 def test_cycle_run_unique_run_ids(client):
-    with patch("spec1_engine.api.routes.threading.Thread") as mock_thread:
+    with patch("spec1_core.api.routes.threading.Thread") as mock_thread:
         mock_thread.return_value = MagicMock()
         r1 = client.post("/api/v1/cycle/run")
         r2 = client.post("/api/v1/cycle/run")
@@ -132,7 +132,7 @@ def test_cycle_status_has_required_keys(client):
 
 
 def test_cycle_status_reflects_last_run(client):
-    import spec1_engine.app.cycle as cycle_mod
+    import spec1_core.app.cycle as cycle_mod
     cycle_mod.last_run_state.update({
         "run_id": "run-testxyz",
         "timestamp": "2026-04-11T00:00:00+00:00",
@@ -213,7 +213,7 @@ def _mock_store(records: list[dict]):
     """Return a context manager that patches JsonlStore.read_all."""
     mock_inst = MagicMock()
     mock_inst.read_all.return_value = records
-    return patch("spec1_engine.api.routes.JsonlStore", return_value=mock_inst)
+    return patch("spec1_core.api.routes.JsonlStore", return_value=mock_inst)
 
 
 def test_signals_latest_returns_200(client):
@@ -321,9 +321,9 @@ def test_scheduler_started_on_app_startup():
     mock_sched = MagicMock()
     mock_sched.running = True
 
-    with patch("spec1_engine.api.app.build_scheduler", return_value=mock_sched), \
-         patch("spec1_engine.api.app.maybe_run_on_start"):
-        from spec1_engine.api.app import app
+    with patch("spec1_core.api.app.build_scheduler", return_value=mock_sched), \
+         patch("spec1_core.api.app.maybe_run_on_start"):
+        from spec1_core.api.app import app
         with TestClient(app):
             mock_sched.start.assert_called_once()
 
@@ -333,9 +333,9 @@ def test_scheduler_shutdown_on_app_shutdown():
     mock_sched = MagicMock()
     mock_sched.running = True
 
-    with patch("spec1_engine.api.app.build_scheduler", return_value=mock_sched), \
-         patch("spec1_engine.api.app.maybe_run_on_start"):
-        from spec1_engine.api.app import app
+    with patch("spec1_core.api.app.build_scheduler", return_value=mock_sched), \
+         patch("spec1_core.api.app.maybe_run_on_start"):
+        from spec1_core.api.app import app
         with TestClient(app):
             pass  # context exit triggers shutdown
         mock_sched.shutdown.assert_called_once_with(wait=False)
@@ -343,10 +343,10 @@ def test_scheduler_shutdown_on_app_shutdown():
 
 def test_kill_file_blocks_guarded_cycle(tmp_path):
     """_guarded_cycle skips execution when kill file exists."""
-    from spec1_engine.api.scheduler import _guarded_cycle, KILL_FILE
+    from spec1_core.api.scheduler import _guarded_cycle, KILL_FILE
     KILL_FILE.touch()
     try:
-        with patch("spec1_engine.app.cycle.run_cycle") as mock_run:
+        with patch("spec1_core.app.cycle.run_cycle") as mock_run:
             _guarded_cycle()
             mock_run.assert_not_called()
     finally:
@@ -355,13 +355,13 @@ def test_kill_file_blocks_guarded_cycle(tmp_path):
 
 def test_guarded_cycle_runs_when_no_kill_file():
     """_guarded_cycle calls run_cycle when no kill file present."""
-    from spec1_engine.api.scheduler import _guarded_cycle, KILL_FILE
+    from spec1_core.api.scheduler import _guarded_cycle, KILL_FILE
     KILL_FILE.unlink(missing_ok=True)
-    with patch("spec1_engine.api.scheduler.run_cycle" if False else "spec1_engine.app.cycle.run_cycle") as mock_run:
+    with patch("spec1_core.api.scheduler.run_cycle" if False else "spec1_core.app.cycle.run_cycle") as mock_run:
         mock_run.return_value = {"signals_harvested": 0, "records_stored": 0}
         # Import inside to get the actual function
         import importlib
-        import spec1_engine.api.scheduler as sched_mod
+        import spec1_core.api.scheduler as sched_mod
         with patch.object(sched_mod, "_guarded_cycle", wraps=_guarded_cycle):
             pass  # just verifying no error
 
@@ -370,10 +370,10 @@ def test_maybe_run_on_start_triggers_thread():
     """SPEC1_RUN_ON_START=true spawns a daemon thread."""
     import os
     with patch.dict(os.environ, {"SPEC1_RUN_ON_START": "true"}):
-        with patch("spec1_engine.api.scheduler.threading.Thread") as mock_thread:
+        with patch("spec1_core.api.scheduler.threading.Thread") as mock_thread:
             instance = MagicMock()
             mock_thread.return_value = instance
-            from spec1_engine.api.scheduler import maybe_run_on_start
+            from spec1_core.api.scheduler import maybe_run_on_start
             maybe_run_on_start()
         instance.start.assert_called_once()
 
@@ -382,8 +382,8 @@ def test_maybe_run_on_start_no_thread_when_false():
     """SPEC1_RUN_ON_START=false does not spawn a thread."""
     import os
     with patch.dict(os.environ, {"SPEC1_RUN_ON_START": "false"}):
-        with patch("spec1_engine.api.scheduler.threading.Thread") as mock_thread:
-            from spec1_engine.api.scheduler import maybe_run_on_start
+        with patch("spec1_core.api.scheduler.threading.Thread") as mock_thread:
+            from spec1_core.api.scheduler import maybe_run_on_start
             maybe_run_on_start()
         mock_thread.assert_not_called()
 
@@ -392,13 +392,13 @@ def test_maybe_run_on_start_no_thread_when_false():
 
 def test_guarded_cycle_skips_when_kill_file_present(tmp_path):
     """_guarded_cycle skips run_cycle when kill file exists."""
-    from spec1_engine.api import scheduler as sched_mod
+    from spec1_core.api import scheduler as sched_mod
     original_kill = sched_mod.KILL_FILE
     kill_path = tmp_path / ".cls_kill"
     kill_path.touch()
     sched_mod.KILL_FILE = kill_path
     try:
-        with patch("spec1_engine.app.cycle.run_cycle") as mock_run:
+        with patch("spec1_core.app.cycle.run_cycle") as mock_run:
             sched_mod._guarded_cycle()
             mock_run.assert_not_called()
     finally:
@@ -407,14 +407,14 @@ def test_guarded_cycle_skips_when_kill_file_present(tmp_path):
 
 def test_guarded_cycle_calls_run_cycle_when_no_kill_file(tmp_path):
     """_guarded_cycle calls run_cycle when kill file is absent."""
-    from spec1_engine.api import scheduler as sched_mod
+    from spec1_core.api import scheduler as sched_mod
     original_kill = sched_mod.KILL_FILE
     kill_path = tmp_path / ".cls_kill"
     kill_path.unlink(missing_ok=True)
     sched_mod.KILL_FILE = kill_path
     try:
         # run_cycle is imported inside _guarded_cycle, so patch via app.cycle
-        with patch("spec1_engine.app.cycle.run_cycle",
+        with patch("spec1_core.app.cycle.run_cycle",
                    return_value={"signals_harvested": 0, "records_stored": 0}):
             sched_mod._guarded_cycle()
     finally:
@@ -423,14 +423,14 @@ def test_guarded_cycle_calls_run_cycle_when_no_kill_file(tmp_path):
 
 def test_guarded_cycle_handles_run_cycle_exception(tmp_path):
     """_guarded_cycle logs error when run_cycle raises but does not re-raise."""
-    from spec1_engine.api import scheduler as sched_mod
+    from spec1_core.api import scheduler as sched_mod
     original_kill = sched_mod.KILL_FILE
     kill_path = tmp_path / ".cls_kill"
     kill_path.unlink(missing_ok=True)
     sched_mod.KILL_FILE = kill_path
     try:
         # run_cycle is imported inside _guarded_cycle, so patch via app.cycle
-        with patch("spec1_engine.app.cycle.run_cycle",
+        with patch("spec1_core.app.cycle.run_cycle",
                    side_effect=RuntimeError("cycle error")):
             sched_mod._guarded_cycle()
     finally:
@@ -440,14 +440,14 @@ def test_guarded_cycle_handles_run_cycle_exception(tmp_path):
 def test_build_scheduler_returns_background_scheduler():
     """build_scheduler returns a configured BackgroundScheduler."""
     from apscheduler.schedulers.background import BackgroundScheduler
-    from spec1_engine.api.scheduler import build_scheduler
+    from spec1_core.api.scheduler import build_scheduler
     scheduler = build_scheduler()
     assert isinstance(scheduler, BackgroundScheduler)
 
 
 def test_build_scheduler_has_daily_cycle_job():
     """build_scheduler adds a 'daily_cycle' job."""
-    from spec1_engine.api.scheduler import build_scheduler
+    from spec1_core.api.scheduler import build_scheduler
     scheduler = build_scheduler()
     job_ids = [job.id for job in scheduler.get_jobs()]
     assert "daily_cycle" in job_ids
@@ -457,10 +457,10 @@ def test_maybe_run_on_start_true_spawns_thread():
     """SPEC1_RUN_ON_START=true spawns a daemon thread."""
     import os
     with patch.dict(os.environ, {"SPEC1_RUN_ON_START": "true"}):
-        with patch("spec1_engine.api.scheduler.threading.Thread") as mock_thread:
+        with patch("spec1_core.api.scheduler.threading.Thread") as mock_thread:
             instance = MagicMock()
             mock_thread.return_value = instance
-            from spec1_engine.api import scheduler as sched_mod
+            from spec1_core.api import scheduler as sched_mod
             sched_mod.maybe_run_on_start()
         instance.start.assert_called_once()
 
@@ -469,8 +469,8 @@ def test_maybe_run_on_start_false_no_thread():
     """SPEC1_RUN_ON_START=false does not spawn a thread."""
     import os
     with patch.dict(os.environ, {"SPEC1_RUN_ON_START": "false"}):
-        with patch("spec1_engine.api.scheduler.threading.Thread") as mock_thread:
-            from spec1_engine.api import scheduler as sched_mod
+        with patch("spec1_core.api.scheduler.threading.Thread") as mock_thread:
+            from spec1_core.api import scheduler as sched_mod
             sched_mod.maybe_run_on_start()
         mock_thread.assert_not_called()
 
@@ -482,7 +482,7 @@ def test_cycle_run_background_error_logged(client):
     import time
 
     # Start the thread and let it run; patch run_cycle to raise
-    with patch("spec1_engine.app.cycle.run_cycle",
+    with patch("spec1_core.app.cycle.run_cycle",
                side_effect=RuntimeError("background error")):
         r = client.post("/api/v1/cycle/run")
         # Give thread a moment to execute
@@ -497,7 +497,7 @@ def test_cycle_run_background_error_logged(client):
 
 def test_brief_index_skips_invalid_json_lines(client, tmp_path):
     """brief_index silently skips malformed JSONL lines."""
-    import spec1_engine.briefing.writer as _w
+    import spec1_core.briefing.writer as _w
     briefs_dir = tmp_path / "briefs_bad_json"
     briefs_dir.mkdir()
     (briefs_dir / "brief_index.jsonl").write_text(

@@ -7,10 +7,10 @@ from pathlib import Path
 
 import pytest
 
-from cls_leads.schemas import Lead
-from cls_leads.generator import generate_leads, _score_record, _build_action_items
-from cls_leads.formatter import lead_to_text, leads_to_text, lead_to_markdown, leads_to_markdown, leads_to_json
-from cls_leads.store import LeadStore
+from spec1_analytics.cls_leads.schemas import Lead
+from spec1_analytics.cls_leads.generator import generate_leads, _score_record, _build_action_items
+from spec1_analytics.cls_leads.formatter import lead_to_text, leads_to_text, lead_to_markdown, leads_to_markdown, leads_to_json
+from spec1_analytics.cls_leads.store import LeadStore
 from spec1_labels import PRIORITY_CRITICAL, PRIORITY_HIGH, PRIORITY_LOW, PRIORITY_MEDIUM
 
 
