@@ -6,7 +6,7 @@ Scans ``src/`` for bare string literals that should be imported from
 
 Usage::
 
-    python .github/scripts/check_hardcoded_labels.py [--src-dir src] [--strict]
+    python .github/scripts/check_hardcoded_labels.py [--src-dir src]
 
 In CI::
 
@@ -129,11 +129,6 @@ def _build_parser() -> argparse.ArgumentParser:
         default=Path("src"),
         help="Source directory to scan (default: src/).",
     )
-    p.add_argument(
-        "--strict",
-        action="store_true",
-        help="Exit 1 on any violation (useful in CI).",
-    )
     return p
 
 
@@ -157,7 +152,7 @@ def main(argv: list[str] | None = None) -> int:
         for lineno, label, reason in violations:
             print(f"  {path}:{lineno}: {reason}")
 
-    return 1 if args.strict else 0
+    return 1
 
 
 if __name__ == "__main__":
