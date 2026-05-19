@@ -472,6 +472,19 @@ def test_write_brief_uses_prompt_payload_when_brief_has_no_prompt_blocks(tmp_pat
         writer.BRIEFS_DIR = original_dir
 
 
+def test_write_brief_ignores_whitespace_prompt_payload_when_brief_has_no_prompt_blocks(tmp_path):
+    from spec1_engine.briefing import writer
+    original_dir = writer.BRIEFS_DIR
+    writer.BRIEFS_DIR = tmp_path / "briefs"
+    try:
+        writer.write_brief(SAMPLE_BRIEF, "run-001", "2026-04-11T06:00:00+00:00", "   \n\t  ")
+        content = (writer.BRIEFS_DIR / "spec1_prompts_latest.md").read_text(encoding="utf-8")
+        assert "## Prompt Payload" not in content
+        assert "No Claude investigation prompts" in content
+    finally:
+        writer.BRIEFS_DIR = original_dir
+
+
 def test_write_brief_prompts_latest_overwritten_each_run(tmp_path):
     from spec1_engine.briefing import writer
     original_dir = writer.BRIEFS_DIR
