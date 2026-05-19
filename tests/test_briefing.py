@@ -456,6 +456,22 @@ def test_write_brief_without_prompts_still_creates_prompts_files(tmp_path):
         writer.BRIEFS_DIR = original_dir
 
 
+def test_write_brief_uses_prompt_payload_when_brief_has_no_prompt_blocks(tmp_path):
+    from spec1_engine.briefing import writer
+    original_dir = writer.BRIEFS_DIR
+    writer.BRIEFS_DIR = tmp_path / "briefs"
+    payload = "## SYSTEM PROMPT\n\nsystem text\n\n## USER PROMPT\n\nuser text"
+    try:
+        writer.write_brief(SAMPLE_BRIEF, "run-001", "2026-04-11T06:00:00+00:00", payload)
+        content = (writer.BRIEFS_DIR / "spec1_prompts_latest.md").read_text(encoding="utf-8")
+        assert "SPEC-1 Investigation Prompts" in content
+        assert "## Prompt Payload" in content
+        assert "## SYSTEM PROMPT" in content
+        assert "## USER PROMPT" in content
+    finally:
+        writer.BRIEFS_DIR = original_dir
+
+
 def test_write_brief_prompts_latest_overwritten_each_run(tmp_path):
     from spec1_engine.briefing import writer
     original_dir = writer.BRIEFS_DIR

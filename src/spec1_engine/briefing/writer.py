@@ -56,6 +56,19 @@ def _build_prompts_doc(prompts: list[str], date_str: str, timestamp: str) -> str
     return "\n".join(lines)
 
 
+def _build_prompt_payload_doc(payload: str, date_str: str, timestamp: str) -> str:
+    """Build a prompts document from the raw prompts payload text."""
+    return "\n".join([
+        f"# SPEC-1 Investigation Prompts — {date_str}",
+        f"Generated: {timestamp}",
+        "",
+        "## Prompt Payload",
+        "",
+        payload.strip(),
+        "",
+    ])
+
+
 def write_brief(
     brief: str,
     run_id: str,
@@ -88,9 +101,18 @@ def write_brief(
 
     word_count = len(brief.split())
 
-    # Extract and format investigation prompts from brief
+    # Extract and format investigation prompts from brief.
+    # If the brief does not contain prompt blocks, fall back to explicit prompt payload.
     extracted_prompts = _extract_prompts(brief)
-    prompts_doc = _build_prompts_doc(extracted_prompts, date_str, timestamp)
+    if extracted_prompts:
+        prompts_doc = _build_prompts_doc(extracted_prompts, date_str, timestamp)
+        prompt_count = len(extracted_prompts)
+    elif prompts and prompts.strip():
+        prompts_doc = _build_prompt_payload_doc(prompts, date_str, timestamp)
+        prompt_count = 1
+    else:
+        prompts_doc = _build_prompts_doc([], date_str, timestamp)
+        prompt_count = 0
 
     with _lock:
         dated_path.write_text(brief, encoding="utf-8")
@@ -108,7 +130,7 @@ def write_brief(
         with index_path.open("a", encoding="utf-8") as fh:
             fh.write(json.dumps(index_entry) + "\n")
 
-    logger.info("Brief written to %s (%d words, %d prompts)", dated_path, word_count, len(extracted_prompts))
+    logger.info("Brief written to %s (%d words, %d prompts)", dated_path, word_count, prompt_count)
     return str(dated_path)
 
 
