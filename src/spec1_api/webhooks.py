@@ -106,6 +106,10 @@ def fire_cycle_completed(stats: dict) -> None:
     }
 
     for url in urls:
+        # Daemon threads are intentionally fire-and-forget: they do not block
+        # the API response and are automatically reaped if the process exits.
+        # Trade-off: a webhook in-flight at shutdown may be lost.  Operators
+        # that need guaranteed delivery should configure an external queue.
         t = threading.Thread(
             target=_deliver_one,
             args=(url, payload, secret, timeout),

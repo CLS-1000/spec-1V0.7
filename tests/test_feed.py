@@ -203,24 +203,8 @@ class TestFetchAllRss:
 
 # ── Async feed fetching ────────────────────────────────────────────────────────
 
-class TestFetchAllRssAsync:
-    """Tests for fetch_all_rss_async — concurrent httpx-based fetching."""
-
-    def _make_httpx_response(self, text: str, status_code: int = 200):
-        """Build a minimal mock httpx response."""
-        resp = MagicMock()
-        resp.text = text
-        resp.status_code = status_code
-        resp.raise_for_status = MagicMock()
-        if status_code >= 400:
-            import httpx
-            resp.raise_for_status.side_effect = httpx.HTTPStatusError(
-                "error", request=MagicMock(), response=resp
-            )
-        return resp
-
-    def _make_feed_xml(self, title="Test", link="https://example.com/art", summary="Body"):
-        return f"""<?xml version="1.0"?>
+def _make_feed_xml(title="Test", link="https://example.com/art", summary="Body"):
+    return f"""<?xml version="1.0"?>
 <rss version="2.0">
   <channel>
     <title>Test Feed</title>
@@ -231,6 +215,53 @@ class TestFetchAllRssAsync:
     </item>
   </channel>
 </rss>"""
+
+
+def _make_ok_async_client_cls(xml: str):
+    """Return a fake httpx.AsyncClient class that always returns *xml*."""
+    class _OkAsyncClient:
+        def __init__(self, *a, **kw):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *a):
+            pass
+
+        async def get(self, url, **kw):
+            resp = MagicMock()
+            resp.text = xml
+            resp.status_code = 200
+            resp.raise_for_status = MagicMock()
+            return resp
+
+    return _OkAsyncClient
+
+
+def _make_fail_async_client_cls(exc=None):
+    """Return a fake httpx.AsyncClient class that always raises *exc*."""
+    if exc is None:
+        exc = RuntimeError("simulated network error")
+
+    class _FailAsyncClient:
+        def __init__(self, *a, **kw):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *a):
+            pass
+
+        async def get(self, url, **kw):
+            raise exc
+
+    return _FailAsyncClient
+
+
+class TestFetchAllRssAsync:
+    """Tests for fetch_all_rss_async — concurrent httpx-based fetching."""
 
     def test_empty_sources_returns_empty(self):
         import asyncio
@@ -244,33 +275,10 @@ class TestFetchAllRssAsync:
         import asyncio
         from cls_osint.feed import fetch_all_rss_async
 
-        xml = self._make_feed_xml()
+        xml = _make_feed_xml()
         source = _make_source("async_src")
 
-        async def fake_get(self, url, **kwargs):
-            return self._make_httpx_response(xml)
-
-        # Patch httpx.AsyncClient.get at the instance level
-        import httpx
-
-        class _FakeAsyncClient:
-            def __init__(self, *a, **kw):
-                pass
-
-            async def __aenter__(self):
-                return self
-
-            async def __aexit__(self, *a):
-                pass
-
-            async def get(self, url, **kw):
-                resp = MagicMock()
-                resp.text = xml
-                resp.status_code = 200
-                resp.raise_for_status = MagicMock()
-                return resp
-
-        with patch("httpx.AsyncClient", _FakeAsyncClient):
+        with patch("httpx.AsyncClient", _make_ok_async_client_cls(xml)):
             result = asyncio.run(fetch_all_rss_async([source]))
 
         assert len(result["records"]) >= 1
@@ -282,20 +290,7 @@ class TestFetchAllRssAsync:
 
         source = _make_source("err_src")
 
-        class _FailAsyncClient:
-            def __init__(self, *a, **kw):
-                pass
-
-            async def __aenter__(self):
-                return self
-
-            async def __aexit__(self, *a):
-                pass
-
-            async def get(self, url, **kw):
-                raise RuntimeError("simulated network error")
-
-        with patch("httpx.AsyncClient", _FailAsyncClient):
+        with patch("httpx.AsyncClient", _make_fail_async_client_cls()):
             result = asyncio.run(fetch_all_rss_async([source], max_retries=0))
 
         assert "err_src" in result["errors"]
@@ -304,29 +299,11 @@ class TestFetchAllRssAsync:
         import asyncio
         from cls_osint.feed import fetch_all_rss_async
 
-        xml = self._make_feed_xml()
+        xml = _make_feed_xml()
         sources = [_make_source(f"async_src_{i}", f"https://example.com/feed{i}") for i in range(3)]
 
-        class _OkAsyncClient:
-            def __init__(self, *a, **kw):
-                pass
-
-            async def __aenter__(self):
-                return self
-
-            async def __aexit__(self, *a):
-                pass
-
-            async def get(self, url, **kw):
-                resp = MagicMock()
-                resp.text = xml
-                resp.status_code = 200
-                resp.raise_for_status = MagicMock()
-                return resp
-
-        with patch("httpx.AsyncClient", _OkAsyncClient):
+        with patch("httpx.AsyncClient", _make_ok_async_client_cls(xml)):
             result = asyncio.run(fetch_all_rss_async(sources))
-
         assert len(result["records"]) == 3
         assert result["errors"] == {}
 

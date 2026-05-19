@@ -86,6 +86,8 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    # CORS middleware must be registered before ApiKeyMiddleware so that
+    # pre-flight responses still carry CORS headers even when auth is rejected.
     cors_origins = _build_cors_origins()
     app.add_middleware(
         CORSMiddleware,
