@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from spec1_engine.cls_psyop.scorer import (
+from spec1_engine.psyop.scorer import (
     NARRATIVE_CLUSTER,
     FARA_ACTIVE,
     MODEL_LEGISLATION,
