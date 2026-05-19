@@ -6,28 +6,29 @@ from datetime import datetime, timezone
 from typing import Sequence
 
 from cls_leads.schemas import Lead
+from spec1_labels import PRIORITY_CRITICAL, PRIORITY_HIGH, PRIORITY_LOW, PRIORITY_MEDIUM
 
 # Priority rules: (keywords, priority, category)
 _PRIORITY_RULES: list[tuple[list[str], str, str]] = [
     # CRITICAL
-    (["nuclear", "wmd", "dirty bomb", "radiological", "bioweapon"], "CRITICAL", "MILITARY"),
-    (["invasion", "attack", "airstrike", "missile launch", "troops cross"], "CRITICAL", "MILITARY"),
-    (["chemical attack", "chlorine", "sarin", "nerve agent"], "CRITICAL", "MILITARY"),
+    (["nuclear", "wmd", "dirty bomb", "radiological", "bioweapon"], PRIORITY_CRITICAL, "MILITARY"),
+    (["invasion", "attack", "airstrike", "missile launch", "troops cross"], PRIORITY_CRITICAL, "MILITARY"),
+    (["chemical attack", "chlorine", "sarin", "nerve agent"], PRIORITY_CRITICAL, "MILITARY"),
     # HIGH
-    (["escalation", "mobilization", "troop build", "naval blockade", "no-fly zone"], "HIGH", "MILITARY"),
-    (["apt41", "apt10", "volt typhoon", "critical infrastructure hack"], "HIGH", "CYBER"),
-    (["election interference", "voter system breach", "campaign hack"], "HIGH", "CYBER"),
-    (["sanctions", "asset freeze", "regime change"], "HIGH", "GEOPOLITICAL"),
-    (["fara", "foreign agent", "lobbying", "undisclosed foreign"], "HIGH", "FARA"),
-    (["influence operation", "disinformation campaign", "narrative injection"], "HIGH", "PSYOP"),
+    (["escalation", "mobilization", "troop build", "naval blockade", "no-fly zone"], PRIORITY_HIGH, "MILITARY"),
+    (["apt41", "apt10", "volt typhoon", "critical infrastructure hack"], PRIORITY_HIGH, "CYBER"),
+    (["election interference", "voter system breach", "campaign hack"], PRIORITY_HIGH, "CYBER"),
+    (["sanctions", "asset freeze", "regime change"], PRIORITY_HIGH, "GEOPOLITICAL"),
+    (["fara", "foreign agent", "lobbying", "undisclosed foreign"], PRIORITY_HIGH, "FARA"),
+    (["influence operation", "disinformation campaign", "narrative injection"], PRIORITY_HIGH, "PSYOP"),
     # MEDIUM
-    (["military exercise", "joint drill", "wargame", "troop deployment"], "MEDIUM", "MILITARY"),
-    (["cyber espionage", "data breach", "phishing campaign", "ransomware"], "MEDIUM", "CYBER"),
-    (["diplomatic tension", "ambassador recalled", "consulate closed"], "MEDIUM", "GEOPOLITICAL"),
-    (["propaganda", "state media", "narrative amplification"], "MEDIUM", "PSYOP"),
-    (["bill introduced", "legislation", "congressional hearing"], "MEDIUM", "GEOPOLITICAL"),
+    (["military exercise", "joint drill", "wargame", "troop deployment"], PRIORITY_MEDIUM, "MILITARY"),
+    (["cyber espionage", "data breach", "phishing campaign", "ransomware"], PRIORITY_MEDIUM, "CYBER"),
+    (["diplomatic tension", "ambassador recalled", "consulate closed"], PRIORITY_MEDIUM, "GEOPOLITICAL"),
+    (["propaganda", "state media", "narrative amplification"], PRIORITY_MEDIUM, "PSYOP"),
+    (["bill introduced", "legislation", "congressional hearing"], PRIORITY_MEDIUM, "GEOPOLITICAL"),
     # LOW (catch-all)
-    (["report", "analysis", "assessment", "intelligence"], "LOW", "GEOPOLITICAL"),
+    (["report", "analysis", "assessment", "intelligence"], PRIORITY_LOW, "GEOPOLITICAL"),
 ]
 
 
@@ -37,20 +38,20 @@ def _score_record(text: str) -> tuple[str, str]:
     for keywords, priority, category in _PRIORITY_RULES:
         if any(kw in text_lower for kw in keywords):
             return priority, category
-    return "LOW", "GEOPOLITICAL"
+    return PRIORITY_LOW, "GEOPOLITICAL"
 
 
 def _build_action_items(priority: str, category: str, text: str) -> list[str]:
     """Generate action items based on priority and category."""
     actions: list[str] = []
-    if priority == "CRITICAL":
+    if priority == PRIORITY_CRITICAL:
         actions.append("Escalate immediately to senior analyst")
         actions.append("Cross-reference with additional classified sources")
         actions.append("Prepare incident brief within 2 hours")
-    elif priority == "HIGH":
+    elif priority == PRIORITY_HIGH:
         actions.append("Review and verify within 4 hours")
         actions.append("Cross-reference with existing case files")
-    elif priority == "MEDIUM":
+    elif priority == PRIORITY_MEDIUM:
         actions.append("Include in next daily brief")
         actions.append("Monitor for further developments")
     else:
@@ -78,7 +79,7 @@ def generate_leads(
     """
     now = datetime.now(timezone.utc)
     leads: list[Lead] = []
-    priority_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
+    priority_order = {PRIORITY_CRITICAL: 0, PRIORITY_HIGH: 1, PRIORITY_MEDIUM: 2, PRIORITY_LOW: 3}
 
     for rec in records:
         confidence = float(rec.get("confidence", rec.get("reach_score", rec.get("score", 0.5))))
