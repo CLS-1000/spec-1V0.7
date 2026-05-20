@@ -103,22 +103,24 @@ class DualWriter:
     # Scalable read helpers
     # ------------------------------------------------------------------
 
+
     def read_chunked(self, limit: int = 1000):
-        """Iterate over JSONL in forward-only chunks without loading the whole file.
+        """Iterate over JSONL in forward-only chunks without loading the whole file. 
 
-        Yields successive ``list[dict]`` pages.  Each page contains at most
-        ``limit`` records.  Delegates to :class:`cls_db.cursor_reader.JSONLCursorReader`.
-
-        Parameters
-        ----------
-        limit:
-            Number of records per chunk.
-        """
-        from cls_db.cursor_reader import JSONLCursorReader
-
-        reader = JSONLCursorReader(self.jsonl_path, chunk_size=limit)
-        yield from reader.read_all_chunked(limit=limit)
-
+    Yields successive ``list[dict]`` pages. Each page contains at most
+    ``limit`` records. Delegates to :class:`cls_db.cursor_reader.JSONLCursorReader`.
+    """
+    from cls_db.cursor_reader import JSONLCursorReader
+    
+    # Enforce unique cursor tokens and stable resume behavior during batch writes
+    reader = JSONLCursorReader(
+        self.jsonl_path, 
+        chunk_size=limit, 
+        id_field=self.repo.pk_field,
+        ts_field=getattr(self.repo, 'ts_field', 'written_at')
+    )
+    yield from reader.read_all_chunked(limit=limit)
+            
     def indexed_queries(self) -> "IndexedQueryLayer":
         """Return an :class:`cls_db.indexed_queries.IndexedQueryLayer` for this writer's table.
 
