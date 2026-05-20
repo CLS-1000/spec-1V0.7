@@ -28,15 +28,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip wheel setuptools
-        python -c "
-        import re, site, os, sys
-        stub = '''import re\nfrom html.parser import HTMLParser\n\ninteresting = re.compile(\"[&<]\")\nincomplete = re.compile(\"&([a-zA-Z][a-zA-Z0-9]*|#[0-9]*)\")\nentityref = re.compile(\"&([a-zA-Z][-.a-zA-Z0-9]*)[^a-zA-Z0-9]\")\ncharref = re.compile(\"&#([0-9]+)[^0-9]\")\nstarttagopen = re.compile(\"<[>a-zA-Z]\")\nshorttagopen = re.compile(\"<[a-zA-Z][a-zA-Z0-9.-]*/\")\nshorttag = re.compile(\"<([a-zA-Z][a-zA-Z0-9.-]*)/([^/]*)//\")\npiclose = re.compile(\">\")\nendbracket = re.compile(\"[<>]\")\n\nclass SGMLParser(HTMLParser):\n    def __init__(self, verbose=0): super().__init__(convert_charrefs=False)\n    def handle_entityref(self, name): pass\n    def handle_charref(self, name): pass\n    def handle_starttag(self, tag, attrs):\n        m = getattr(self, \"start_\"+tag, None) or getattr(self, \"do_\"+tag, None)\n        if m: m(attrs)\n        else: self.unknown_starttag(tag, attrs)\n    def handle_endtag(self, tag):\n        m = getattr(self, \"end_\"+tag, None)\n        if m: m()\n        else: self.unknown_endtag(tag)\n    def unknown_starttag(self, tag, attrs): pass\n    def unknown_endtag(self, tag): pass\n'''
-        paths = site.getsitepackages() if hasattr(site, 'getsitepackages') else [site.getusersitepackages()]
-        dest = os.path.join(paths[0], 'sgmllib.py')
-        with open(dest, 'w') as f:
-            f.write(stub)
-        print('sgmllib stub written to', dest)
-        "
+        python .github/scripts/install_sgmllib_stub.py
         pip install -e ".[dev]"
         pip install ruff bandit[toml] coverage pytest-cov
 
