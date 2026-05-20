@@ -49,7 +49,9 @@ def test_read_chunk_from_start_no_limit(sample_jsonl: Path):
 
 def test_read_chunk_with_cursor(sample_jsonl: Path):
     reader = JSONLCursorReader(sample_jsonl)
-    cursor = Cursor(start_ts="2026-05-19T10:01:00+00:00", start_id="r2")
+    # Cursor semantics are exclusive: next call returns records AFTER this position.
+    # Cursor at r1 → next chunk starts from r2 onwards.
+    cursor = Cursor(start_ts="2026-05-19T10:00:00+00:00", start_id="r1")
     records, next_cursor = reader.read_chunk(cursor=cursor, limit=10)
     assert len(records) == 2
     assert records[0]["record_id"] == "r2"
