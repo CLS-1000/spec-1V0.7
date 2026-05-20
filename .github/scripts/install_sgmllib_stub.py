@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
-"""Write a minimal sgmllib.py stub to site-packages.
+"""Install a minimal sgmllib stub so feedparser can be installed without sgmllib3k.
 
-feedparser 6.x lists sgmllib3k as a dependency, but sgmllib3k 1.0.0
-(released 2013) fails to build with modern pip/setuptools. This script
-writes a minimal stub that satisfies feedparser's import requirements
-so the package can be installed without building sgmllib3k.
+feedparser 6.x depends on sgmllib3k (released 2013), which fails to build
+with modern pip/setuptools. This script:
+  1. Writes a minimal sgmllib.py to site-packages (satisfies runtime import)
+  2. Creates a fake sgmllib3k dist-info (satisfies pip's package resolver)
+
+After this script runs, `pip install feedparser` (or any package that depends
+on feedparser) will skip building sgmllib3k entirely.
 """
 import os
 import site
 import sys
 
-STUB = '''\
+STUB = """\
 import re
 from html.parser import HTMLParser
 
@@ -54,15 +57,40 @@ class SGMLParser(HTMLParser):
 
     def unknown_endtag(self, tag):
         pass
-'''
+"""
+
+DIST_INFO_METADATA = """\
+Metadata-Version: 2.1
+Name: sgmllib3k
+Version: 1.0.0
+Summary: Stub provided by install_sgmllib_stub.py
+"""
+
+DIST_INFO_RECORD = "sgmllib.py,,\n"
 
 if hasattr(site, "getsitepackages"):
-    paths = site.getsitepackages()
+    site_dir = site.getsitepackages()[0]
 else:
-    paths = [site.getusersitepackages()]
+    site_dir = site.getusersitepackages()
 
-dest = os.path.join(paths[0], "sgmllib.py")
-os.makedirs(paths[0], exist_ok=True)
-with open(dest, "w") as f:
+os.makedirs(site_dir, exist_ok=True)
+
+# 1. Write sgmllib.py module
+stub_path = os.path.join(site_dir, "sgmllib.py")
+with open(stub_path, "w") as f:
     f.write(STUB)
-print(f"sgmllib stub written to {dest}", file=sys.stderr)
+print(f"[sgmllib stub] wrote {stub_path}", file=sys.stderr)
+
+# 2. Create fake dist-info so pip's resolver sees sgmllib3k as installed
+dist_info_dir = os.path.join(site_dir, "sgmllib3k-1.0.0.dist-info")
+os.makedirs(dist_info_dir, exist_ok=True)
+
+for fname, content in [
+    ("METADATA", DIST_INFO_METADATA),
+    ("INSTALLER", "pip\n"),
+    ("RECORD", DIST_INFO_RECORD),
+]:
+    with open(os.path.join(dist_info_dir, fname), "w") as f:
+        f.write(content)
+
+print(f"[sgmllib stub] created {dist_info_dir}", file=sys.stderr)
