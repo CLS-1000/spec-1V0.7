@@ -40,7 +40,7 @@ def backfill_jsonl_to_db(
         "db_count_before": db_count_before,
         "db_count_after": db_count_after,
         "inserted": len(to_insert),
-        "skipped": len(existing_pks),
+        "skipped": len(jsonl_records) - len(to_insert),
     }
 
 

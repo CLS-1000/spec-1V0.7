@@ -28,7 +28,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip wheel setuptools
-        python .github/scripts/install_sgmllib_stub.py
+        pip install .github/sgmllib3k-1.0.0-py3-none-any.whl
         pip install -e ".[dev]"
         pip install ruff bandit[toml] coverage pytest-cov
 

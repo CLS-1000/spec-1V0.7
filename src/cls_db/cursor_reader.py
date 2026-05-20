@@ -69,7 +69,7 @@ class JSONLCursorReader:
                 if not seen_cursor_pos:
                     rec_ts = record.get("written_at", "")
                     rec_id = record.get("record_id", "")
-                    if (rec_ts, rec_id) >= (cursor.start_ts, cursor.start_id):
+                    if (rec_ts, rec_id) > (cursor.start_ts, cursor.start_id):
                         seen_cursor_pos = True
                     else:
                         continue
