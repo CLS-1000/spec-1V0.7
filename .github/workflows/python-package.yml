@@ -37,7 +37,7 @@ jobs:
       run: python .github/scripts/check_hardcoded_labels.py
 
     - name: Lint with ruff
-      run: ruff check src/ tests/ --show-source
+      run: ruff check src/ tests/
 
     - name: Security check with bandit
       run: |
