@@ -1,9 +1,9 @@
-## SPEC-1 DAILY BRIEF — 2026-05-19
+## SPEC-1 DAILY BRIEF — 2026-05-20
 
 *AI brief unavailable — API key not configured. Cycle stats below.*
 
 **Run:** run-state-test  
-**Completed:** 2026-05-19T19:55:58.007047+00:00  
+**Completed:** 2026-05-20T02:50:42.211650+00:00  
 **Signals harvested:** 1  
 **Opportunities found:** 1  
 **Records stored:** 1
