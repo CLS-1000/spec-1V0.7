@@ -1,10 +1,10 @@
-"""Tests for spec1_engine.schemas.brief — WorldStateBrief value objects."""
+"""Tests for spec1_core.schemas.brief — WorldStateBrief value objects."""
 
 from __future__ import annotations
 
 import pytest
 
-from spec1_engine.schemas.brief import BriefSection, WorldStateBrief
+from spec1_core.schemas.brief import BriefSection, WorldStateBrief
 
 
 class TestBriefSection:

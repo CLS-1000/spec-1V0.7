@@ -50,7 +50,7 @@ def load_x_publish(run_id: str) -> Any:
 
     Raises KeyError if no matching event is found.
     """
-    from spec1_engine.app.publishers.x import PublishResult  # lazy — avoids circular import
+    from spec1_core.app.publishers.x import PublishResult  # lazy — avoids circular import
 
     path = _log_path()
     if not path.exists():

@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Sequence
 
 from cls_osint.schemas import FaraRecord, CongressRecord, NarrativeRecord, OSINTRecord
+from spec1_labels import VERIF_CORROBORATED, VERIF_PARTIAL, VERIF_UNVERIFIED
 
 if TYPE_CHECKING:
     from cls_osint.schemas import JudicialRecord, StateLegRecord
@@ -72,12 +73,12 @@ def _text_overlap(claim_kw: set[str], record_text: str) -> float:
 
 def _classify(score: float, count: int) -> str:
     if score >= 0.7 and count >= 2:
-        return "CORROBORATED"
+        return VERIF_CORROBORATED
     if score >= 0.4 or count >= 2:
-        return "PARTIAL"
+        return VERIF_PARTIAL
     if score > 0 and count >= 1:
-        return "UNVERIFIED"
-    return "UNVERIFIED"
+        return VERIF_UNVERIFIED
+    return VERIF_UNVERIFIED
 
 
 def verify_claim(

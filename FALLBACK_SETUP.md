@@ -99,7 +99,7 @@ jq '.tier' logs/llm_fallback.jsonl | sort | uniq -c
 ## Verify the Chain
 
 ```python
-from spec1_engine.llm.fallback_client import FallbackLLMClient
+from spec1_core.llm.fallback_client import FallbackLLMClient
 
 llm = FallbackLLMClient()
 result = llm.analyze("Armed forces launched a missile strike.", system="")

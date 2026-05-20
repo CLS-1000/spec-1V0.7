@@ -10,7 +10,7 @@
 ```
 spec-1/
 ├── src/
-│   ├── spec1_engine/        # Core OSINT pipeline (harvest → score → investigate → analyze)
+│   ├── spec1_core/          # Core OSINT pipeline (harvest → score → investigate → analyze)
 │   │   ├── core/            # Frozen — schemas, IDs, logging, prompts
 │   │   ├── signal/          # harvester, parser, scorer, complexity
 │   │   ├── investigation/   # generator, verifier (Claude Haiku)
@@ -24,10 +24,12 @@ spec-1/
 │   │   ├── app/cycle.py     # one-shot cycle entry point
 │   │   └── main.py          # alternate entry point
 │   │
+│   ├── spec1_analytics/     # Analytics and output generation
+│   │   ├── cls_world_brief/ # Daily world intelligence brief
+│   │   ├── cls_leads/       # Actionable intelligence leads
+│   │   └── cls_psyop/       # Psychological-operation detection
+│   │
 │   ├── cls_osint/           # Extended OSINT adapters (feed, fara, congressional, narrative)
-│   ├── cls_world_brief/     # Daily world intelligence brief
-│   ├── cls_leads/           # Actionable intelligence leads
-│   ├── cls_psyop/           # Psychological-operation detection
 │   ├── cls_verdicts/        # Phase 1 feedback: human ground truth
 │   ├── cls_calibration/     # Phase 2 feedback: drift surfacing (descriptive only)
 │   ├── cls_db/              # Dual-write persistence (JSONL + SQLite)
@@ -61,18 +63,18 @@ RSS / FARA / Congress / Narrative
    cls_osint.feed ───────────────────────────────────┐
          │                                            │
          ▼                                            ▼
-  spec1_engine.signal                          cls_osint.adapters
+  spec1_core.signal                            cls_osint.adapters
   ├── harvester  → Signal[]                    ├── fara          → FaraRecord[]
   ├── parser     → ParsedSignal[]              ├── congressional → CongressRecord[]
   └── scorer     → Opportunity[]               └── narrative     → NarrativeRecord[]
          │
          ▼
-  spec1_engine.investigation
+  spec1_core.investigation
   ├── generator  → Investigation[]   (Claude Haiku)
   └── verifier   → Outcome[]
          │
          ▼
-  spec1_engine.intelligence
+  spec1_core.intelligence
   ├── analyzer   → IntelligenceRecord[]
   └── store      → spec1_intelligence.jsonl   (append-only)
 
@@ -80,12 +82,12 @@ RSS / FARA / Congress / Narrative
 ═════ Operator tools (manual, on-demand) ══════════════════════════════════════
   Each reads from spec1_intelligence.jsonl independently. None run inside the cycle.
 
-  spec1_api /psyop/run                   → psyop_scores.jsonl
-  spec1_api /brief/generate              → generated/briefs/spec1_brief_<date>.md
-                                            (Claude Sonnet → cls_world_brief fallback)
-  spec1_api /leads/generate              → leads.jsonl
-  spec1_engine.tools.calibration_propose → calibration_report.{md,jsonl}
-  spec1_engine.tools.historical_briefs   → backfill briefs for historical run_ids
+  spec1_api /psyop/run                  → psyop_scores.jsonl
+  spec1_api /brief/generate             → generated/briefs/spec1_brief_<date>.md
+                                           (Claude Sonnet → cls_world_brief fallback)
+  spec1_api /leads/generate             → leads.jsonl
+  spec1_core.tools.calibration_propose → calibration_report.{md,jsonl}
+  spec1_core.tools.historical_briefs   → backfill briefs for historical run_ids
 
 
 ═════ Feedback ════════════════════════════════════════════════════════════════
@@ -111,7 +113,7 @@ RSS / FARA / Congress / Narrative
 ## 4-Gate Scoring System
 
 Every signal must pass ALL four gates to become an `Opportunity`.
-Exact constants are in `src/spec1_engine/signal/scorer.py`.
+Exact constants are in `src/spec1_core/signal/scorer.py`.
 
 | Gate | Criterion | Constant |
 |------|-----------|----------|
@@ -128,20 +130,20 @@ Calibration drift across gates is surfaced by `cls_calibration` — **never auto
 
 | Model | Module | Description |
 |-------|--------|-------------|
-| `Signal` | `spec1_engine` | Raw RSS/OSINT item |
-| `ParsedSignal` | `spec1_engine` | Cleaned, keywords/entities extracted |
-| `Opportunity` | `spec1_engine` | Passed all 4 gates |
-| `Investigation` | `spec1_engine` | Hypothesis + queries + analyst leads |
-| `Outcome` | `spec1_engine` | Verified classification + confidence |
-| `IntelligenceRecord` | `spec1_engine` | Final record with blended confidence |
-| `AnalystRecord` | `spec1_engine` | Name, domains, credibility score |
+| `Signal` | `spec1_core` | Raw RSS/OSINT item |
+| `ParsedSignal` | `spec1_core` | Cleaned, keywords/entities extracted |
+| `Opportunity` | `spec1_core` | Passed all 4 gates |
+| `Investigation` | `spec1_core` | Hypothesis + queries + analyst leads |
+| `Outcome` | `spec1_core` | Verified classification + confidence |
+| `IntelligenceRecord` | `spec1_core` | Final record with blended confidence |
+| `AnalystRecord` | `spec1_core` | Name, domains, credibility score |
 | `OSINTRecord` | `cls_osint` | Generic extended OSINT item |
 | `FaraRecord` | `cls_osint` | FARA filing |
 | `CongressRecord` | `cls_osint` | Congressional record |
 | `NarrativeRecord` | `cls_osint` | Influence-operation narrative |
-| `WorldBrief` | `cls_world_brief` | Daily brief (headline, sections, sources) |
-| `Lead` | `cls_leads` | Actionable intelligence lead |
-| `PsyopScore` | `cls_psyop` | Psychological-operation detection score |
+| `WorldBrief` | `spec1_analytics.cls_world_brief` | Daily brief (headline, sections, sources) |
+| `Lead` | `spec1_analytics.cls_leads` | Actionable intelligence lead |
+| `PsyopScore` | `spec1_analytics.cls_psyop` | Psychological-operation detection score |
 | `Verdict` | `cls_verdicts` | Human ground-truth (`correct\|incorrect\|partial\|unclear`) |
 | `CalibrationReport` | `cls_calibration` | Descriptive drift report |
 
@@ -162,7 +164,7 @@ Calibration drift across gates is surfaced by `cls_calibration` — **never auto
 
 ## Frozen Core — Governance
 
-`src/spec1_engine/core/` is off-limits to ad-hoc edits.
+`src/spec1_core/core/` is off-limits to ad-hoc edits.
 
 - Agents may **import** from `core/` but may **not modify** it
 - Changes require explicit human approval + semantic version bump

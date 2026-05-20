@@ -10,7 +10,7 @@ from fastapi import APIRouter, BackgroundTasks
 from spec1_api import metrics as _metrics
 from spec1_api import webhooks as _webhooks
 from spec1_api.schemas import CycleRequest, CycleResponse
-from spec1_engine.app.cycle import run_cycle as _execute_cycle
+from spec1_core.app.cycle import run_cycle as _execute_cycle
 
 router = APIRouter(prefix="/cycle", tags=["cycle"])
 

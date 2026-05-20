@@ -26,13 +26,13 @@ curl http://localhost:8000/api/v1/health
 ```bash
 # Canonical lean cycle — produces intelligence records only.
 # This is what the API scheduler runs, and what `POST /cycle/run` triggers.
-PYTHONPATH=src python -m spec1_engine.core.engine    # (via Engine class — embedded use)
+PYTHONPATH=src python -m spec1_core.core.engine    # (via Engine class — embedded use)
 curl -X POST http://localhost:8000/api/v1/cycle/run
 
 # Rich CLI cycle — also runs psyop scoring + brief generation + workspace case
 # updates inline. Convenient for one-shot local runs; not what the canonical
 # scheduler executes.
-make cycle                                            # → python -m spec1_engine.app.cycle
+make cycle                                            # → python -m spec1_core.app.cycle
 ```
 
 The canonical FastAPI scheduler runs the lean cycle daily. To produce a brief,
@@ -145,13 +145,13 @@ runs automatically inside the canonical cycle.
 ```bash
 make brief
 # or:
-PYTHONPATH=src python -m spec1_engine.tools.generate_brief \
+PYTHONPATH=src python -m spec1_core.tools.generate_brief \
     --intel spec1_intelligence.jsonl \
     --run-id latest \
     --out-dir generated/briefs
 
 # Force the rule-based producer (skip Claude entirely):
-PYTHONPATH=src python -m spec1_engine.tools.generate_brief --rule-based
+PYTHONPATH=src python -m spec1_core.tools.generate_brief --rule-based
 ```
 
 Falls back to the rule-based `cls_world_brief.producer` if `ANTHROPIC_API_KEY`
@@ -163,7 +163,7 @@ is unset or the API call fails. Writes `spec1_brief_<date>.md`,
 ```bash
 make leads
 # or:
-PYTHONPATH=src python -m spec1_engine.tools.generate_leads \
+PYTHONPATH=src python -m spec1_core.tools.generate_leads \
     --intel spec1_intelligence.jsonl \
     --out generated/leads.jsonl \
     --min-confidence 0.3 --max-leads 50
@@ -174,7 +174,7 @@ PYTHONPATH=src python -m spec1_engine.tools.generate_leads \
 ```bash
 make psyop
 # or:
-PYTHONPATH=src python -m spec1_engine.tools.run_psyop \
+PYTHONPATH=src python -m spec1_core.tools.run_psyop \
     --intel spec1_intelligence.jsonl \
     --out generated/psyop_scores.jsonl \
     --min-classification MEDIUM_RISK   # optional filter
@@ -185,7 +185,7 @@ PYTHONPATH=src python -m spec1_engine.tools.run_psyop \
 ```bash
 make backfill
 # or:
-PYTHONPATH=src python -m spec1_engine.tools.historical_briefs
+PYTHONPATH=src python -m spec1_core.tools.historical_briefs
 ```
 
 ### Generate a calibration proposal report
@@ -193,7 +193,7 @@ PYTHONPATH=src python -m spec1_engine.tools.historical_briefs
 ```bash
 make calibration
 # or:
-PYTHONPATH=src python -m spec1_engine.tools.calibration_propose \
+PYTHONPATH=src python -m spec1_core.tools.calibration_propose \
     --intel spec1_intelligence.jsonl \
     --verdicts verdicts.jsonl \
     --out-dir generated/
@@ -227,7 +227,7 @@ Valid `kind` values: `correct`, `incorrect`, `partial`, `unclear`
 ```bash
 make workspace
 # or
-PYTHONPATH=src python -m spec1_engine.workspace
+PYTHONPATH=src python -m spec1_core.workspace
 ```
 
 ---

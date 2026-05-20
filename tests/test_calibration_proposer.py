@@ -10,7 +10,6 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
-from cls_calibration.aggregator import produce_report
 from cls_calibration.formatter import to_markdown
 from cls_calibration.proposer import (
     CLASSIFICATION_WEIGHTS,
@@ -27,7 +26,7 @@ from cls_verdicts.schemas import Verdict
 from cls_verdicts.store import VerdictStore
 from spec1_api.dependencies import get_intel_store, get_verdict_store
 from spec1_api.main import app
-from spec1_engine.intelligence.store import JsonlStore
+from spec1_core.intelligence.store import JsonlStore
 
 
 # ── helpers ────────────────────────────────────────────────────────────────
@@ -154,7 +153,7 @@ def test_proposer_includes_floors_in_output():
 
 def test_classification_weights_match_analyzer():
     """Sanity check — the proposer's weight table must agree with analyzer.py."""
-    from spec1_engine.intelligence.analyzer import (
+    from spec1_core.intelligence.analyzer import (
         CLASSIFICATION_WEIGHTS as ANALYZER_WEIGHTS,
     )
     assert CLASSIFICATION_WEIGHTS == ANALYZER_WEIGHTS
@@ -209,7 +208,7 @@ def test_cli_writes_markdown_and_jsonl(tmp_path: Path):
     out_dir = tmp_path / "out"
 
     result = subprocess.run(
-        [sys.executable, "-m", "spec1_engine.tools.calibration_propose",
+        [sys.executable, "-m", "spec1_core.tools.calibration_propose",
          "--intel", str(intel),
          "--verdicts", str(verdicts),
          "--out-dir", str(out_dir),
@@ -235,7 +234,7 @@ def test_cli_writes_markdown_and_jsonl(tmp_path: Path):
 
 def test_cli_help_returns_zero():
     result = subprocess.run(
-        [sys.executable, "-m", "spec1_engine.tools.calibration_propose", "--help"],
+        [sys.executable, "-m", "spec1_core.tools.calibration_propose", "--help"],
         capture_output=True, text=True, timeout=10,
     )
     assert result.returncode == 0

@@ -171,7 +171,7 @@ git push
 ### Pre-Session Checklist
 
 - [ ] Session 1 tests all passing
-- [ ] Review `spec1_engine/tools/generate_*.py` to understand write patterns
+- [ ] Review `spec1_core/tools/generate_*.py` to understand write patterns
 - [ ] Identify all JSONL write locations (`grep -r '.open("a")' src/`)
 - [ ] Check current data sizes: `du -sh data/*.jsonl`
 
@@ -430,7 +430,7 @@ Test coverage:
 **Time:** 2 hours
 
 ```python
-# src/spec1_engine/tools/generate_leads.py
+# src/spec1_core/tools/generate_leads.py
 
 # OLD:
 def _write_lead(lead: dict):
@@ -461,7 +461,7 @@ Same pattern for:
 
 ```bash
 git add src/spec1_labels.py \
-        src/spec1_engine/tools/generate_*.py \
+        src/spec1_core/tools/generate_*.py \
         src/cls_leads/generator.py \
         src/cls_psyop/patterns.py \
         tests/test_spec1_labels_compliance.py \
@@ -790,10 +790,10 @@ Git commits:
 |------|--------|
 | `src/cls_db/dual_write.py` | +20 lines |
 | `src/spec1_labels.py` | +40 lines |
-| `src/spec1_engine/tools/generate_leads.py` | ~30 lines |
-| `src/spec1_engine/tools/generate_brief.py` | ~30 lines |
-| `src/spec1_engine/tools/run_psyop.py` | ~30 lines |
-| `src/spec1_engine/tools/calibration_propose.py` | ~30 lines |
+| `src/spec1_core/tools/generate_leads.py` | ~30 lines |
+| `src/spec1_core/tools/generate_brief.py` | ~30 lines |
+| `src/spec1_core/tools/run_psyop.py` | ~30 lines |
+| `src/spec1_core/tools/calibration_propose.py` | ~30 lines |
 | `src/cls_leads/generator.py` | ~20 lines |
 | `src/cls_psyop/patterns.py` | ~20 lines |
 | `.github/workflows/python-package.yml` | Rewritten |

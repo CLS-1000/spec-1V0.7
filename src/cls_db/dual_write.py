@@ -96,6 +96,17 @@ class DualWriter:
     def count_db(self) -> int:
         return self.repo.count()
 
+    def read_chunked(self, limit: int = 100):
+        """Iterate JSONL in memory-safe chunks."""
+        from cls_db.cursor_reader import JSONLCursorReader
+        reader = JSONLCursorReader(self.jsonl_path, chunk_size=limit)
+        return reader.read_all_chunked(limit=limit)
+
+    def indexed_queries(self):
+        """Get indexed query interface."""
+        from cls_db.indexed_queries import IndexedQueryLayer
+        return IndexedQueryLayer(self.repo)
+
 
 def make_dual_writer(
     jsonl_path: Path,

@@ -31,7 +31,7 @@ def list_cases(
 ) -> dict:
     """List investigation cases, optionally filtered by status."""
     try:
-        from spec1_engine.workspace.case import list_cases as _list
+        from spec1_core.workspace.case import list_cases as _list
         cases = _list(status=status.upper() if status else None)
     except Exception:
         logger.exception("Failed to load workspace cases")
@@ -45,7 +45,7 @@ def list_cases(
 def open_case(req: OpenCaseRequest) -> dict:
     """Open a new investigation case."""
     try:
-        from spec1_engine.workspace.case import open_case as _open
+        from spec1_core.workspace.case import open_case as _open
         case = _open(title=req.title, question=req.question, tags=req.tags)
         return case.to_dict()
     except Exception as exc:
@@ -56,7 +56,7 @@ def open_case(req: OpenCaseRequest) -> dict:
 def get_case(case_id: str) -> dict:
     """Get a specific case by ID."""
     try:
-        from spec1_engine.workspace.case import get_case as _get
+        from spec1_core.workspace.case import get_case as _get
         return _get(case_id).to_dict()
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=f"Case {case_id} not found") from exc
@@ -66,7 +66,7 @@ def get_case(case_id: str) -> dict:
 def close_case(case_id: str) -> dict:
     """Close an investigation case and generate its final report."""
     try:
-        from spec1_engine.workspace.case import close_case as _close
+        from spec1_core.workspace.case import close_case as _close
         return _close(case_id).to_dict()
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=f"Case {case_id} not found") from exc

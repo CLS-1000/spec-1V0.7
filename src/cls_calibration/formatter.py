@@ -58,8 +58,8 @@ def to_markdown(report: ProposalReport) -> str:
     lines.append(
         "_This report is descriptive only. Apply changes by editing the "
         "relevant constants by hand (e.g. `CLASSIFICATION_WEIGHTS` in "
-        "`spec1_engine.intelligence.analyzer`, `SOURCE_CREDIBILITY` in "
-        "`spec1_engine.signal.scorer`) and bumping the version per "
+        "`spec1_core.intelligence.analyzer`, `SOURCE_CREDIBILITY` in "
+        "`spec1_core.signal.scorer`) and bumping the version per "
         "CLAUDE.md governance._"
     )
     lines.append("")

@@ -2,16 +2,13 @@
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
 
-import pytest
 
 from cls_db.database import Database
-from cls_db.models import ALL_DDL, SIGNALS_DDL, LEADS_DDL
+from cls_db.models import ALL_DDL
 from cls_db.repository import Repository, _serialize, _row_to_dict
 from cls_db.migrate import ensure_schema, run_migrations, drop_all, reset_schema
-from cls_db.dual_write import DualWriter, make_dual_writer
+from cls_db.dual_write import make_dual_writer
 
 
 class TestDatabase:
@@ -129,7 +126,7 @@ class TestMigrations:
         db = Database(tmp_path / "test.db")
         ensure_schema(db)
         db.execute("INSERT INTO signals (signal_id, source) VALUES ('s1', 'test')")
-        report = reset_schema(db)
+        reset_schema(db)
         # After reset, table exists but old data is gone
         assert db.table_exists("signals")
         rows = db.fetchall("SELECT * FROM signals")
@@ -255,7 +252,6 @@ class TestDualWriter:
         assert writer.count_jsonl() == 5
 
     def test_read_jsonl_returns_records(self, tmp_path):
-        jsonl_path = tmp_path / "data.jsonl"
         writer = make_dual_writer(tmp_path / "data.jsonl", tmp_path / "db.db", "leads")
         writer.write({"lead_id": "l1", "title": "Lead 1"})
         jsonl_data = writer.read_jsonl()
@@ -295,7 +291,7 @@ class TestLeadStoreDualWrite:
         return db
 
     def _make_lead(self, lead_id: str = "lead-001"):
-        from cls_leads.schemas import Lead
+        from spec1_analytics.cls_leads.schemas import Lead
 
         return Lead(
             lead_id=lead_id,
@@ -309,7 +305,7 @@ class TestLeadStoreDualWrite:
         )
 
     def test_dual_write_saves_to_jsonl(self, tmp_path):
-        from cls_leads.store import LeadStore
+        from spec1_analytics.cls_leads.store import LeadStore
 
         db = self._db(tmp_path)
         store = LeadStore(tmp_path / "leads.jsonl", db=db)
@@ -320,7 +316,7 @@ class TestLeadStoreDualWrite:
         assert rows[0]["lead_id"] == "lead-dw-001"
 
     def test_dual_write_saves_to_sqlite(self, tmp_path):
-        from cls_leads.store import LeadStore
+        from spec1_analytics.cls_leads.store import LeadStore
         from cls_db.repository import Repository
 
         db = self._db(tmp_path)
@@ -332,7 +328,7 @@ class TestLeadStoreDualWrite:
         assert any(r["lead_id"] == "lead-dw-002" for r in rows)
 
     def test_batch_dual_write(self, tmp_path):
-        from cls_leads.store import LeadStore
+        from spec1_analytics.cls_leads.store import LeadStore
 
         db = self._db(tmp_path)
         store = LeadStore(tmp_path / "leads.jsonl", db=db)
@@ -342,7 +338,7 @@ class TestLeadStoreDualWrite:
         assert store.count() == 3
 
     def test_jsonl_only_still_works(self, tmp_path):
-        from cls_leads.store import LeadStore
+        from spec1_analytics.cls_leads.store import LeadStore
 
         store = LeadStore(tmp_path / "leads.jsonl")
         lead = self._make_lead("lead-jl-001")
@@ -363,7 +359,7 @@ class TestPsyopStoreDualWrite:
         return db
 
     def _make_score(self, score_id: str = "score-001"):
-        from cls_psyop.schemas import PsyopScore
+        from spec1_analytics.cls_psyop.schemas import PsyopScore
 
         return PsyopScore(
             score_id=score_id,
@@ -377,7 +373,7 @@ class TestPsyopStoreDualWrite:
         )
 
     def test_dual_write_saves_to_jsonl(self, tmp_path):
-        from cls_psyop.store import PsyopStore
+        from spec1_analytics.cls_psyop.store import PsyopStore
 
         db = self._db(tmp_path)
         store = PsyopStore(tmp_path / "psyop.jsonl", db=db)
@@ -388,7 +384,7 @@ class TestPsyopStoreDualWrite:
         assert rows[0]["score_id"] == "score-dw-001"
 
     def test_dual_write_saves_to_sqlite(self, tmp_path):
-        from cls_psyop.store import PsyopStore
+        from spec1_analytics.cls_psyop.store import PsyopStore
         from cls_db.repository import Repository
 
         db = self._db(tmp_path)
@@ -400,7 +396,7 @@ class TestPsyopStoreDualWrite:
         assert any(r["score_id"] == "score-dw-002" for r in rows)
 
     def test_batch_dual_write(self, tmp_path):
-        from cls_psyop.store import PsyopStore
+        from spec1_analytics.cls_psyop.store import PsyopStore
 
         db = self._db(tmp_path)
         store = PsyopStore(tmp_path / "psyop.jsonl", db=db)
@@ -410,7 +406,7 @@ class TestPsyopStoreDualWrite:
         assert store.count() == 4
 
     def test_jsonl_only_still_works(self, tmp_path):
-        from cls_psyop.store import PsyopStore
+        from spec1_analytics.cls_psyop.store import PsyopStore
 
         store = PsyopStore(tmp_path / "psyop.jsonl")
         score = self._make_score("score-jl-001")
@@ -431,7 +427,7 @@ class TestBriefStoreDualWrite:
         return db
 
     def _make_brief(self, brief_id: str = "brief-001"):
-        from cls_world_brief.schemas import WorldBrief
+        from spec1_analytics.cls_world_brief.schemas import WorldBrief
 
         return WorldBrief(
             brief_id=brief_id,
@@ -444,7 +440,7 @@ class TestBriefStoreDualWrite:
         )
 
     def test_dual_write_saves_to_jsonl(self, tmp_path):
-        from cls_world_brief.store import BriefStore
+        from spec1_analytics.cls_world_brief.store import BriefStore
 
         db = self._db(tmp_path)
         store = BriefStore(
@@ -459,7 +455,7 @@ class TestBriefStoreDualWrite:
         assert rows[0]["brief_id"] == "brief-dw-001"
 
     def test_dual_write_saves_to_sqlite(self, tmp_path):
-        from cls_world_brief.store import BriefStore
+        from spec1_analytics.cls_world_brief.store import BriefStore
         from cls_db.repository import Repository
 
         db = self._db(tmp_path)
@@ -475,7 +471,7 @@ class TestBriefStoreDualWrite:
         assert any(r["brief_id"] == "brief-dw-002" for r in rows)
 
     def test_markdown_still_written_with_dual_write(self, tmp_path):
-        from cls_world_brief.store import BriefStore
+        from spec1_analytics.cls_world_brief.store import BriefStore
 
         db = self._db(tmp_path)
         briefs_dir = tmp_path / "briefs"
@@ -490,7 +486,7 @@ class TestBriefStoreDualWrite:
         assert (briefs_dir / "latest.md").exists()
 
     def test_jsonl_only_still_works(self, tmp_path):
-        from cls_world_brief.store import BriefStore
+        from spec1_analytics.cls_world_brief.store import BriefStore
 
         store = BriefStore(
             jsonl_path=tmp_path / "briefs.jsonl",

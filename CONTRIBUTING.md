@@ -11,7 +11,7 @@ of [CLAUDE.md](CLAUDE.md) — read that for the full governance contract.
 
 ## Ground rules
 
-1. **The frozen core is frozen.** `src/spec1_engine/core/` (schemas, IDs,
+1. **The frozen core is frozen.** `src/spec1_core/core/` (schemas, IDs,
    logging, prompts) cannot change without explicit approval and a `MAJOR`
    version bump. Import from it; don't edit it.
 2. **No stubs.** Every function body must be implemented. No `pass` placeholders,

@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import pytest
 
-from cls_osint.schemas import FaraRecord, CongressRecord, NarrativeRecord, OSINTRecord
+from cls_osint.schemas import FaraRecord, CongressRecord, OSINTRecord
 from cls_osint.pipeline import OsintPipeline, PipelineStats, run_pipeline
 from datetime import datetime, timezone
 
@@ -127,7 +125,7 @@ class TestOsintPipeline:
             mock_rss.return_value = {"records": records, "errors": {}}
             mock_narrative.return_value = []
 
-            stats = pipeline.run(detect_narratives=True)
+            pipeline.run(detect_narratives=True)
 
         mock_narrative.assert_called_once()
 

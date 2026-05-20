@@ -367,7 +367,7 @@ def _build_stated_purpose_vs_beneficiary(all_eligible: list[dict], run_id: str) 
         if observed_beneficiary != "Not identified in available metadata.":
             delta = f"Record summary deviates from {sector_for_delta} baseline in that {observed_beneficiary}."
         else:
-            delta = f"Insufficient metadata to determine divergence from stated purpose."
+            delta = "Insufficient metadata to determine divergence from stated purpose."
 
         subject = rec.get("subject") or rec.get("title") or rec.get("headline") or "Record"
         conf = rec.get("composite_confidence", 0.0)

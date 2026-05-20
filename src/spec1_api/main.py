@@ -33,7 +33,6 @@ from spec1_api.routers import (
     verdicts,
     workspace,
 )
-from spec1_api.routers import publication
 from spec1_api.scheduler import maybe_run_on_start, start_scheduler, stop_scheduler
 
 logger = logging.getLogger(__name__)

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -362,7 +361,7 @@ class TestLegJudFormatter:
 
     def test_section_to_markdown_standalone(self):
         from cls_leg_jud.producer import produce_brief
-        from cls_leg_jud.formatter import section_to_markdown, to_markdown
+        from cls_leg_jud.formatter import section_to_markdown
         records = [
             {
                 "record_id": "r1",
@@ -417,10 +416,10 @@ class TestLegJudAPIRoutes:
             if mod not in sys.modules:
                 sys.modules[mod] = MagicMock()
 
-        # Stub spec1_engine.app.cycle to avoid its heavy import chain
+        # Stub spec1_core.app.cycle to avoid its heavy import chain
         mock_cycle = MagicMock()
         mock_cycle.run_cycle.return_value = {"run_id": "test", "records_stored": 0}
-        monkeypatch.setitem(sys.modules, "spec1_engine.app.cycle", mock_cycle)
+        monkeypatch.setitem(sys.modules, "spec1_core.app.cycle", mock_cycle)
 
         import importlib
         import spec1_api.main as main_mod
@@ -455,7 +454,7 @@ class TestLegJudAPIRoutes:
                 sys.modules[mod] = MagicMock()
         mock_cycle = MagicMock()
         mock_cycle.run_cycle.return_value = {"run_id": "test", "records_stored": 0}
-        monkeypatch.setitem(sys.modules, "spec1_engine.app.cycle", mock_cycle)
+        monkeypatch.setitem(sys.modules, "spec1_core.app.cycle", mock_cycle)
 
         osint_path = tmp_path / "osint2.jsonl"
         record = {
