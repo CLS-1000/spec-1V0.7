@@ -18,12 +18,8 @@ spec-1/
 │   │   ├── analysts/        # registry, credibility, discovery
 │   │   ├── briefing/        # generator (Claude Sonnet) + writer + templates
 │   │   ├── congressional/   # collector, parser, scorer, analyzer, cycle
-│   │   ├── quant/           # collector, parser, scorer, analyzer, cycle
 │   │   ├── workspace/       # persistent case files (case, tracker, researcher, CLI)
 │   │   ├── tools/           # historical_briefs, calibration_propose, pdf_render
-│   │   ├── cls_leads/       # re-export shim
-│   │   ├── cls_psyop/       # re-export shim
-│   │   ├── cls_world_brief/ # re-export shim
 │   │   ├── api/             # legacy in-engine FastAPI mount
 │   │   ├── app/cycle.py     # one-shot cycle entry point
 │   │   └── main.py          # alternate entry point
@@ -32,7 +28,6 @@ spec-1/
 │   ├── cls_world_brief/     # Daily world intelligence brief
 │   ├── cls_leads/           # Actionable intelligence leads
 │   ├── cls_psyop/           # Psychological-operation detection
-│   ├── cls_quant/           # Quantitative / market intelligence
 │   ├── cls_verdicts/        # Phase 1 feedback: human ground truth
 │   ├── cls_calibration/     # Phase 2 feedback: drift surfacing (descriptive only)
 │   ├── cls_db/              # Dual-write persistence (JSONL + SQLite)
@@ -147,7 +142,6 @@ Calibration drift across gates is surfaced by `cls_calibration` — **never auto
 | `WorldBrief` | `cls_world_brief` | Daily brief (headline, sections, sources) |
 | `Lead` | `cls_leads` | Actionable intelligence lead |
 | `PsyopScore` | `cls_psyop` | Psychological-operation detection score |
-| `MarketBar` / `QuantSignal` | `cls_quant` | Market intelligence |
 | `Verdict` | `cls_verdicts` | Human ground-truth (`correct\|incorrect\|partial\|unclear`) |
 | `CalibrationReport` | `cls_calibration` | Descriptive drift report |
 

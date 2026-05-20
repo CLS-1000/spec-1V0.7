@@ -11,6 +11,7 @@ from cls_leads.schemas import Lead
 from cls_leads.generator import generate_leads, _score_record, _build_action_items
 from cls_leads.formatter import lead_to_text, leads_to_text, lead_to_markdown, leads_to_markdown, leads_to_json
 from cls_leads.store import LeadStore
+from spec1_labels import PRIORITY_CRITICAL, PRIORITY_HIGH, PRIORITY_LOW, PRIORITY_MEDIUM
 
 
 def _make_lead(
@@ -67,51 +68,51 @@ class TestLeadSchema:
 class TestScoreRecord:
     def test_nuclear_is_critical(self):
         priority, category = _score_record("Nuclear threat detected with WMD capabilities")
-        assert priority == "CRITICAL"
+        assert priority == PRIORITY_CRITICAL
 
     def test_invasion_is_critical(self):
         priority, category = _score_record("Invasion forces crossed border with airstrike support")
-        assert priority == "CRITICAL"
+        assert priority == PRIORITY_CRITICAL
 
     def test_cyber_is_high(self):
         priority, category = _score_record("APT41 breach of critical infrastructure")
-        assert priority == "HIGH"
+        assert priority == PRIORITY_HIGH
         assert category == "CYBER"
 
     def test_fara_is_high(self):
         priority, category = _score_record("FARA filing for undisclosed foreign agent lobbying")
-        assert priority == "HIGH"
+        assert priority == PRIORITY_HIGH
         assert category == "FARA"
 
     def test_psyop_is_high(self):
         priority, category = _score_record("Influence operation disinformation campaign detected")
-        assert priority == "HIGH"
+        assert priority == PRIORITY_HIGH
         assert category == "PSYOP"
 
     def test_military_exercise_is_medium(self):
         priority, category = _score_record("Military exercise and joint drill scheduled in Pacific")
-        assert priority == "MEDIUM"
+        assert priority == PRIORITY_MEDIUM
 
     def test_default_is_low(self):
         priority, category = _score_record("General intelligence assessment published")
-        assert priority == "LOW"
+        assert priority == PRIORITY_LOW
 
 
 class TestBuildActionItems:
     def test_critical_has_escalate_action(self):
-        actions = _build_action_items("CRITICAL", "MILITARY", "nuclear threat")
+        actions = _build_action_items(PRIORITY_CRITICAL, "MILITARY", "nuclear threat")
         assert any("Escalate" in a for a in actions)
 
     def test_high_has_review_action(self):
-        actions = _build_action_items("HIGH", "CYBER", "breach detected")
+        actions = _build_action_items(PRIORITY_HIGH, "CYBER", "breach detected")
         assert any("verify" in a.lower() or "review" in a.lower() for a in actions)
 
     def test_cyber_category_has_soc_action(self):
-        actions = _build_action_items("HIGH", "CYBER", "hack")
+        actions = _build_action_items(PRIORITY_HIGH, "CYBER", "hack")
         assert any("SOC" in a for a in actions)
 
     def test_fara_category_has_fara_action(self):
-        actions = _build_action_items("HIGH", "FARA", "fara filing")
+        actions = _build_action_items(PRIORITY_HIGH, "FARA", "fara filing")
         assert any("FARA" in a for a in actions)
 
 
@@ -133,7 +134,12 @@ class TestGenerateLeads:
         ]
         leads = generate_leads(records)
         priorities = [l.priority for l in leads]
-        priority_order = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
+        priority_order = {
+            PRIORITY_CRITICAL: 0,
+            PRIORITY_HIGH: 1,
+            PRIORITY_MEDIUM: 2,
+            PRIORITY_LOW: 3,
+        }
         values = [priority_order[p] for p in priorities]
         assert values == sorted(values)
 

@@ -24,7 +24,7 @@ from spec1_api.schemas.node_signal import (
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/nodes", tags=["nodes"])
+router = APIRouter(prefix="/nodes", tags=["nodes"])
 
 # ── Node registry — all 34 Portland Political Web nodes ──────────────────────
 

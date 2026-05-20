@@ -277,7 +277,7 @@ def test_publication_latest_returns_404_when_no_pdfs(tmp_path, monkeypatch):
     from fastapi.testclient import TestClient
     from spec1_api.main import create_app
     client = TestClient(create_app())
-    resp = client.get('/publication/latest')
+    resp = client.get('/api/v1/publication/latest')
     assert resp.status_code == 404
 
 
@@ -298,7 +298,7 @@ def test_publication_latest_returns_pdf_when_exists(tmp_path, monkeypatch, sampl
     from fastapi.testclient import TestClient
     from spec1_api.main import create_app
     client = TestClient(create_app())
-    resp = client.get('/publication/latest')
+    resp = client.get('/api/v1/publication/latest')
     assert resp.status_code == 200
     assert resp.headers['content-type'] == 'application/pdf'
     assert 'spec1_issue_001' in resp.headers.get('content-disposition', '')
@@ -332,7 +332,7 @@ def test_publication_list_returns_stable_shape(tmp_path, monkeypatch, sample_rec
     from fastapi.testclient import TestClient
     from spec1_api.main import create_app
     client = TestClient(create_app())
-    resp = client.get('/publication/list')
+    resp = client.get('/api/v1/publication/list')
     assert resp.status_code == 200
     body = resp.json()
     assert 'total' in body

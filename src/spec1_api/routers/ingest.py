@@ -40,7 +40,7 @@ from spec1_engine.signal.gates import (
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1/ingest", tags=["ingest"])
+router = APIRouter(prefix="/ingest", tags=["ingest"])
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────

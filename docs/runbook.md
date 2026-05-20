@@ -18,7 +18,7 @@ cat generated/briefs/spec1_brief_latest.md
 tail -n 20 spec1_intelligence.jsonl | python -m json.tool
 
 # API health
-curl http://localhost:8000/health
+curl http://localhost:8000/api/v1/health
 ```
 
 ### Trigger a manual cycle
@@ -27,7 +27,7 @@ curl http://localhost:8000/health
 # Canonical lean cycle — produces intelligence records only.
 # This is what the API scheduler runs, and what `POST /cycle/run` triggers.
 PYTHONPATH=src python -m spec1_engine.core.engine    # (via Engine class — embedded use)
-curl -X POST http://localhost:8000/cycle/run
+curl -X POST http://localhost:8000/api/v1/cycle/run
 
 # Rich CLI cycle — also runs psyop scoring + brief generation + workspace case
 # updates inline. Convenient for one-shot local runs; not what the canonical
@@ -42,7 +42,7 @@ tools below.
 ### Check scheduler status
 
 ```bash
-curl http://localhost:8000/health
+curl http://localhost:8000/api/v1/health
 # Look for: "scheduler": "running"
 ```
 
@@ -94,15 +94,6 @@ PYTHONPATH=src python mcp_server.py
 make install    # pip install -e ".[dev]"
 make test       # pytest tests/ -v --tb=short
 make lint       # flake8 src/ tests/
-```
-
-### Run the quantitative market signal pipeline
-
-```bash
-pip install -e ".[dev,quant]"
-PYTHONPATH=src python -m spec1_engine.quant.cycle
-# or
-make install-quant && scripts/run_cycle.sh --quant
 ```
 
 ### Environment setup
@@ -218,10 +209,13 @@ Verdicts are append-only. Multiple verdicts per record are allowed.
 # Via MCP (Claude session)
 # → Use the file_verdict tool
 
+# Via the web UI
+# → Visit http://localhost:8000/verdicts/ in your browser
+
 # Via API
-curl -X POST http://localhost:8000/verdicts \
+curl -X POST http://localhost:8000/api/v1/verdicts \
   -H "Content-Type: application/json" \
-  -d '{"record_id": "rec_...", "kind": "correct", "reviewer": "handle", "notes": ""}'
+  -d '{"record_id": "rec_...", "verdict": "correct", "reviewer": "handle", "notes": ""}'
 ```
 
 Valid `kind` values: `correct`, `incorrect`, `partial`, `unclear`

@@ -164,8 +164,8 @@ def create_app() -> FastAPI:
                 raise HTTPException(status_code=404, detail="Portland Political Web not found")
             return FileResponse(path, media_type="text/html")
 
-        app.include_router(nodes.router)
-        app.include_router(ingest.router)
+        app.include_router(nodes.router, prefix="/api/v1")
+        app.include_router(ingest.router, prefix="/api/v1")
 
     return app
 

@@ -6,9 +6,24 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
-## [Unreleased]
+## [0.6.0] — 2026-05-19
 
-- Repo reorganization: `docs/`, `memory/`, `Makefile`, scripts
+### Added
+- **API versioning (Task 1.3):** All `spec1_api` routes are now under `/api/v1/` prefix (e.g., `GET /api/v1/health`, `POST /api/v1/verdicts`). Resolves naming ambiguity with legacy `spec1_engine.api` which was already versioned.
+- **Verdict-filing web UI (Task 1.5):** `GET /verdicts/` serves a single-page HTML form for filing human verdicts. Loads recent intel records, lets reviewer pick a verdict kind, and submits to `POST /api/v1/verdicts`.
+- **Dual-write for leads, briefs, psyop (Task 1.6):** `LeadStore`, `BriefStore`, and `PsyopStore` now accept an optional `db` parameter. When provided, every write goes to both JSONL and SQLite via `DualWriter`. `spec1_api.dependencies` wires the database automatically. JSONL remains the source of truth.
+- **New documentation (Task 1.7):** `docs/quickstart.md`, `docs/deployment.md`, `docs/customization.md`, `docs/api-integration.md`.
+
+### Changed
+- `docs/runbook.md`: Updated API paths to `/api/v1/...`, removed quant section, added verdict web UI reference.
+- `docs/architecture.md`: Removed re-export shim rows and `cls_quant` row.
+- `Makefile`: Removed `install-quant` target.
+- `.env.example`: Removed `SPEC1_QUANT_ENABLED`.
+- `README.md`: Removed `SPEC1_QUANT_ENABLED` row from env var table.
+
+### Removed
+- `cls_quant` — quantitative market intelligence module removed (out of scope for core triage mission; market demand not validated). numpy/yfinance optional deps, `SPEC1_QUANT_ENABLED` env var, and `install-quant` Makefile target all cleaned up.
+- `cls_quant` references across docs, Makefile, and env templates (code was never shipped).
 
 ---
 
