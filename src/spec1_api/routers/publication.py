@@ -68,7 +68,7 @@ def list_publications() -> dict:
 @router.post("/generate")
 def generate_publication_endpoint(intel_store: IntelStoreDep) -> dict:
     """Generate a new publication PDF from the latest brief and current intelligence records."""
-    from spec1_engine.tools.publication_generator import generate_publication as _gen
+    from spec1_core.tools.publication_generator import generate_publication as _gen
 
     briefs_dir = Path(os.environ.get("SPEC1_BRIEFS_DIR", "briefs"))
     brief_path = briefs_dir / "spec1_brief_latest.md"

@@ -7,8 +7,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spec1_engine.schemas.models import Investigation, Outcome
-from spec1_engine.investigation.verifier import (
+from spec1_core.schemas.models import Investigation, Outcome
+from spec1_core.investigation.verifier import (
     verify_investigation,
     _build_user_prompt,
     _fallback_outcome,
@@ -17,8 +17,8 @@ from spec1_engine.investigation.verifier import (
 )
 
 # Patch target for Ollama health check used in FallbackLLMClient
-_OLLAMA_RUNNING = "spec1_engine.llm.ollama_manager.is_running"
-_OLLAMA_SPAWN = "spec1_engine.llm.ollama_manager.spawn"
+_OLLAMA_RUNNING = "spec1_core.llm.ollama_manager.is_running"
+_OLLAMA_SPAWN = "spec1_core.llm.ollama_manager.spawn"
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────

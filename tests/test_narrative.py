@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-import pytest
 
 from cls_osint.adapters.narrative import (
-    NARRATIVE_THEMES,
     _count_theme_hits,
     _detect_sentiment,
     _detect_amplifiers,
@@ -13,7 +11,7 @@ from cls_osint.adapters.narrative import (
     detect_narratives,
     analyse_corpus,
 )
-from cls_osint.schemas import NarrativeRecord, OSINTRecord
+from cls_osint.schemas import OSINTRecord
 
 
 def _make_record(record_id="r1", content="Some content", source_name="test_source"):

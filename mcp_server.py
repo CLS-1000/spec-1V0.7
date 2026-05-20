@@ -76,7 +76,7 @@ def _read_jsonl(path: Path, limit: int = 20) -> list[dict]:
 
 def tool_run_cycle(args: dict) -> dict:
     """Run a full SPEC-1 intelligence cycle (all steps: psyop, brief, publication, workspace)."""
-    from spec1_engine.app.cycle import run_cycle
+    from spec1_core.app.cycle import run_cycle
 
     max_signals = args.get("max_signals")
     environment = args.get("environment", "production")
@@ -160,7 +160,7 @@ def tool_analyse_psyop(args: dict) -> dict:
     text = args.get("text", "")
     if not text:
         return {"error": "text is required"}
-    from cls_psyop.scorer import score_text
+    from spec1_analytics.cls_psyop.scorer import score_text
     result = score_text(str(text))
     return result.to_dict()
 
@@ -234,8 +234,8 @@ def tool_run_psyop(args: dict) -> dict:
     Reads from $SPEC1_STORE_PATH (default spec1_intelligence.jsonl) and
     writes one PsyopScore per scored record to the configured psyop store.
     """
-    from cls_psyop.scorer import filter_risky, score_records
-    from cls_psyop.store import PsyopStore
+    from spec1_analytics.cls_psyop.scorer import filter_risky, score_records
+    from spec1_analytics.cls_psyop.store import PsyopStore
 
     intel_path = _store_path("SPEC1_STORE_PATH", "spec1_intelligence.jsonl")
     out_path = Path(args.get("out") or os.environ.get("SPEC1_PSYOP_PATH", "generated/psyop_scores.jsonl"))
@@ -267,7 +267,7 @@ def tool_generate_brief(args: dict) -> dict:
     Tries Claude Sonnet first; falls back to the rule-based producer on failure
     or when ANTHROPIC_API_KEY is unset. Writes to generated/briefs/ by default.
     """
-    from spec1_engine.tools.generate_brief import (
+    from spec1_core.tools.generate_brief import (
         _cycle_stats_for,
         _group_by_run_id,
         _pick_run,
@@ -317,8 +317,8 @@ def tool_generate_leads(args: dict) -> dict:
 
     Reads from $SPEC1_STORE_PATH and writes Lead JSONL to the configured leads store.
     """
-    from cls_leads.generator import generate_leads
-    from cls_leads.store import LeadStore
+    from spec1_analytics.cls_leads.generator import generate_leads
+    from spec1_analytics.cls_leads.store import LeadStore
 
     intel_path = _store_path("SPEC1_STORE_PATH", "spec1_intelligence.jsonl")
     out_path = Path(args.get("out") or os.environ.get("SPEC1_LEADS_PATH", "generated/leads.jsonl"))

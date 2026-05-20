@@ -4,16 +4,20 @@ from __future__ import annotations
 
 import logging
 import os
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, HTTPException
+from fastapi import HTTPException
 from fastapi.responses import FileResponse
 
 from spec1_api import __version__
+from spec1_api import metrics as _metrics
+from spec1_api.auth import ApiKeyMiddleware
 from spec1_api.routers import (
+    adapters,
     brief,
     calibration,
     cycle,
@@ -22,13 +26,13 @@ from spec1_api.routers import (
     intel,
     leads,
     leg_jud,
+    metrics,
     psyop,
     publication,
     signals,
     verdicts,
     workspace,
 )
-from spec1_api.routers import publication
 from spec1_api.scheduler import maybe_run_on_start, start_scheduler, stop_scheduler
 
 logger = logging.getLogger(__name__)
@@ -81,6 +85,9 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
+    # Starlette executes middleware in reverse registration order (last-registered
+    # runs outermost).  We register CORS first so it wraps everything, ensuring
+    # CORS headers are present even on 403 responses from ApiKeyMiddleware.
     cors_origins = _build_cors_origins()
     app.add_middleware(
         CORSMiddleware,
@@ -89,6 +96,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(ApiKeyMiddleware)
     @app.get("/", include_in_schema=False)
     async def ui_root() -> FileResponse:
         """Serve the SPEC-1 UI."""
@@ -114,27 +122,35 @@ def create_app() -> FastAPI:
             raise HTTPException(status_code=404, detail="Intelligence export not found")
         return FileResponse(path, media_type="application/json")
 
-    app.include_router(health.router, prefix="/api/v1")
-    app.include_router(signals.router, prefix="/api/v1")
-    app.include_router(intel.router, prefix="/api/v1")
-    app.include_router(leads.router, prefix="/api/v1")
-    app.include_router(brief.router, prefix="/api/v1")
-    app.include_router(psyop.router, prefix="/api/v1")
-    app.include_router(fara.router, prefix="/api/v1")
-    app.include_router(cycle.router, prefix="/api/v1")
-    app.include_router(verdicts.router, prefix="/api/v1")
-    app.include_router(calibration.router, prefix="/api/v1")
-    app.include_router(publication.router, prefix="/api/v1")
-    app.include_router(workspace.router, prefix="/api/v1")
-    app.include_router(leg_jud.router, prefix="/api/v1")
+    # ── Request-latency middleware ─────────────────────────────────────────────
+    @app.middleware("http")
+    async def _metrics_middleware(request: Request, call_next):
+        start = time.perf_counter()
+        response = await call_next(request)
+        duration = time.perf_counter() - start
+        _metrics.record_request(
+            method=request.method,
+            path=request.url.path,
+            status_code=response.status_code,
+            duration=duration,
+        )
+        return response
 
-    @app.get("/verdicts/", include_in_schema=False)
-    async def verdicts_ui() -> FileResponse:
-        """Serve the verdict-filing web UI."""
-        path = _STATIC_DIR / "verdicts.html"
-        if not path.is_file():
-            raise HTTPException(status_code=404, detail="Verdicts UI not found")
-        return FileResponse(path, media_type="text/html")
+    app.include_router(health.router)
+    app.include_router(signals.router)
+    app.include_router(intel.router)
+    app.include_router(leads.router)
+    app.include_router(brief.router)
+    app.include_router(psyop.router)
+    app.include_router(fara.router)
+    app.include_router(cycle.router)
+    app.include_router(verdicts.router)
+    app.include_router(calibration.router)
+    app.include_router(publication.router)
+    app.include_router(workspace.router)
+    app.include_router(leg_jud.router)
+    app.include_router(metrics.router)
+    app.include_router(adapters.router)
 
     if _political_web_enabled():
         from spec1_api.routers import ingest, nodes

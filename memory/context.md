@@ -15,10 +15,10 @@ state or active work changes significantly.
 
 | Module | Status | Notes |
 |--------|--------|-------|
-| `spec1_engine` | Active | Core pipeline — frozen core off-limits |
+| `spec1_core` | Active | Core pipeline — frozen core off-limits |
 | `cls_osint` | Active | 10 RSS feeds including 4 DPRK/Korea sources |
 | `cls_psyop` | Active | Pattern detection + evidence chains |
-| `cls_quant` | Active | Run separately: `python -m spec1_engine.quant.cycle` (requires `.[quant]` extras) |
+| `cls_quant` | Active | Run separately: `python -m spec1_core.quant.cycle` (requires `.[quant]` extras) |
 | `cls_leads` | Active | |
 | `cls_world_brief` | Active | |
 | `cls_verdicts` | Active | Append-only; currently single reviewer |
@@ -26,7 +26,7 @@ state or active work changes significantly.
 | `cls_db` | Active | Dual-write; SQLite non-fatal |
 | `spec1_api` | Active | FastAPI + APScheduler on port 8000 |
 | `mcp_server.py` | Active | 12 tools exposed to Claude |
-| `spec1_engine.workspace` | Active | Case file management |
+| `spec1_core.workspace` | Active | Case file management |
 
 ---
 
@@ -87,19 +87,19 @@ Individual credibility scores are not published (see `PORTFOLIO_SUMMARY.md`).
 ## Agent Write Surfaces
 
 Agents may freely modify:
-- `src/spec1_engine/signal/`
-- `src/spec1_engine/investigation/`
-- `src/spec1_engine/intelligence/`
-- `src/spec1_engine/briefing/` (except `templates.py` imports — edit `.md` files)
-- `src/spec1_engine/tools/`
+- `src/spec1_core/signal/`
+- `src/spec1_core/investigation/`
+- `src/spec1_core/intelligence/`
+- `src/spec1_core/briefing/` (except `templates.py` imports — edit `.md` files)
+- `src/spec1_core/tools/`
 - `src/cls_osint/`, `src/cls_psyop/`, `src/cls_quant/`, `src/cls_leads/`
 - `src/spec1_api/`
 - `tests/`
 - `docs/`, `memory/`, `scripts/`
 
 Agents must NOT modify without human approval:
-- `src/spec1_engine/core/` (any file)
-- `src/spec1_engine/core/prompts/` (any `.md` file)
+- `src/spec1_core/core/` (any file)
+- `src/spec1_core/core/prompts/` (any `.md` file)
 - `pyproject.toml` version field
 - `CLAUDE.md`
 - `.github/pull_request_template.md`

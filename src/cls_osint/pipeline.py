@@ -16,7 +16,6 @@ from cls_osint.adapters import congressional as congressional_adapter
 from cls_osint.adapters import judicial as judicial_adapter
 from cls_osint.adapters import narrative as narrative_adapter
 from cls_osint.adapters import state_legislative as state_leg_adapter
-from cls_osint.adapters import verifier as verifier_adapter
 from cls_osint.feed import fetch_all_rss
 from cls_osint.schemas import (
     CongressRecord,

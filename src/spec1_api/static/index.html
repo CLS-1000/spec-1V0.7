@@ -865,8 +865,8 @@
             <div class="cmd-body">
 <pre>cd ~/spec-1 &amp;&amp; PYTHONPATH=src \
 ANTHROPIC_API_KEY=$(grep ANTHROPIC_API_KEY .env | cut -d= -f2 | tr -d '\r') \
-python -m spec1_engine.app.cycle</pre>
-              <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && PYTHONPATH=src ANTHROPIC_API_KEY=$(grep ANTHROPIC_API_KEY .env | cut -d= -f2 | tr -d \'\\r\') python -m spec1_engine.app.cycle')">Copy</button>
+python -m spec1_core.app.cycle</pre>
+              <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && PYTHONPATH=src ANTHROPIC_API_KEY=$(grep ANTHROPIC_API_KEY .env | cut -d= -f2 | tr -d \'\\r\') python -m spec1_core.app.cycle')">Copy</button>
             </div>
           </div>
 
@@ -897,11 +897,11 @@ python -m spec1_engine.app.cycle</pre>
           <div class="cmd-block">
             <div class="cmd-label">Build calibration proposal report</div>
             <div class="cmd-body">
-<pre>cd ~/spec-1 &amp;&amp; PYTHONPATH=src python -m spec1_engine.tools.calibration_propose \
+<pre>cd ~/spec-1 &amp;&amp; PYTHONPATH=src python -m spec1_core.tools.calibration_propose \
   --intel spec1_intelligence.jsonl \
   --verdicts verdicts.jsonl \
   --out-dir generated/</pre>
-              <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && PYTHONPATH=src python -m spec1_engine.tools.calibration_propose --intel spec1_intelligence.jsonl --verdicts verdicts.jsonl --out-dir generated/')">Copy</button>
+              <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && PYTHONPATH=src python -m spec1_core.tools.calibration_propose --intel spec1_intelligence.jsonl --verdicts verdicts.jsonl --out-dir generated/')">Copy</button>
             </div>
           </div>
 

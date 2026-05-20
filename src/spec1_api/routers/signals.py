@@ -9,15 +9,15 @@ from typing import Optional
 from fastapi import APIRouter, BackgroundTasks, Query
 
 from spec1_api.dependencies import IntelStoreDep, OsintStoreDep
-from spec1_api.schemas import IngestResponse, SignalIngestRequest
-from spec1_engine.intelligence.store import JsonlStore
-from spec1_engine.signal.complexity import complexity_score, route as complexity_route
-from spec1_engine.signal.parser import parse_signal
-from spec1_engine.signal.scorer import score_signal
-from spec1_engine.schemas.models import Signal
-from spec1_engine.investigation.generator import generate_investigation
-from spec1_engine.investigation.verifier import verify_investigation
-from spec1_engine.intelligence.analyzer import analyze
+from spec1_api.schemas import SignalIngestRequest
+from spec1_core.intelligence.store import JsonlStore
+from spec1_core.signal.complexity import complexity_score, route as complexity_route
+from spec1_core.signal.parser import parse_signal
+from spec1_core.signal.scorer import score_signal
+from spec1_core.schemas.models import Signal
+from spec1_core.investigation.generator import generate_investigation
+from spec1_core.investigation.verifier import verify_investigation
+from spec1_core.intelligence.analyzer import analyze
 
 logger = logging.getLogger(__name__)
 

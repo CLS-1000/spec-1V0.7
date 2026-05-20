@@ -100,3 +100,27 @@ DISCLOSURE_FULL       = "FULL"
 DISCLOSURE_PARTIAL    = "PARTIAL"
 DISCLOSURE_NONE       = "NONE"
 DISCLOSURE_GAP_MARKER = "DISCLOSURE GAP"
+
+# ── Type aliases ──────────────────────────────────────────────────────────────
+from typing import Literal  # noqa: E402
+
+PriorityT      = Literal["CRITICAL", "HIGH", "MEDIUM", "LOW"]
+ThreatLevelT   = Literal["HIGH", "MEDIUM", "LOW"]
+PsyopRiskT     = Literal["HIGH_RISK", "MEDIUM_RISK", "LOW_RISK", "CLEAN"]
+VerificationT  = Literal["CORROBORATED", "PARTIAL", "UNVERIFIED", "CONFLICTED"]
+
+
+def is_valid_priority(value: str) -> bool:
+    return value in {PRIORITY_CRITICAL, PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_LOW}
+
+
+def is_valid_threat_level(value: str) -> bool:
+    return value in {THREAT_HIGH, THREAT_MEDIUM, THREAT_LOW}
+
+
+def is_valid_psyop_risk(value: str) -> bool:
+    return value in {PSYOP_HIGH_RISK, PSYOP_MEDIUM_RISK, PSYOP_LOW_RISK, PSYOP_CLEAN}
+
+
+def is_valid_verification(value: str) -> bool:
+    return value in {VERIF_CORROBORATED, VERIF_PARTIAL, VERIF_UNVERIFIED, VERIF_CONFLICTED}

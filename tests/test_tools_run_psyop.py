@@ -1,11 +1,11 @@
-"""Tests for spec1_engine.tools.run_psyop CLI."""
+"""Tests for spec1_core.tools.run_psyop CLI."""
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
 
-from spec1_engine.tools.run_psyop import main
+from spec1_core.tools.run_psyop import main
 
 
 def _write_jsonl(path: Path, records: list[dict]) -> None:

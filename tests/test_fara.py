@@ -5,14 +5,12 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from cls_osint.adapters.fara import (
     _make_record_id,
     _parse_date,
     _parse_activities_from_html,
     fetch_fara_api,
-    fetch_recent_filings_html,
     collect,
 )
 from cls_osint.schemas import FaraRecord

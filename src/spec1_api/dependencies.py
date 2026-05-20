@@ -9,11 +9,11 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from spec1_engine.intelligence.store import JsonlStore
+from spec1_core.intelligence.store import JsonlStore
 from cls_osint.store import OsintStore
-from cls_leads.store import LeadStore
-from cls_psyop.store import PsyopStore
-from cls_world_brief.store import BriefStore
+from spec1_analytics.cls_leads.store import LeadStore
+from spec1_analytics.cls_psyop.store import PsyopStore
+from spec1_analytics.cls_world_brief.store import BriefStore
 from cls_verdicts.store import VerdictStore
 from cls_db.database import Database
 from cls_db.migrate import ensure_schema
