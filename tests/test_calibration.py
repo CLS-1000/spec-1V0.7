@@ -8,10 +8,10 @@ import pytest
 from fastapi.testclient import TestClient
 
 from cls_calibration.aggregator import _bucket_label, produce_report, score_verdict
-from cls_calibration.schemas import Bucket, CalibrationReport
+from cls_calibration.schemas import Bucket
 from cls_verdicts.store import VerdictStore
 from cls_verdicts.schemas import Verdict
-from spec1_engine.intelligence.store import JsonlStore
+from spec1_core.intelligence.store import JsonlStore
 from spec1_api.dependencies import get_intel_store, get_verdict_store
 from spec1_api.main import app
 
@@ -190,7 +190,7 @@ def calibrated_client(tmp_path: Path):
 
 
 def test_calibration_report_endpoint(calibrated_client):
-    r = calibrated_client.get("/calibration/report")
+    r = calibrated_client.get("/api/v1/calibration/report")
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["total_records"] == 2
@@ -208,7 +208,7 @@ def test_calibration_report_with_no_data(tmp_path: Path):
     app.dependency_overrides[get_verdict_store] = lambda: verdicts
     try:
         c = TestClient(app)
-        r = c.get("/calibration/report")
+        r = c.get("/api/v1/calibration/report")
         assert r.status_code == 200
         body = r.json()
         assert body["total_records"] == 0

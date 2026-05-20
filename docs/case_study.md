@@ -24,7 +24,7 @@ The tradeoff is that calibration is manual. The benefit is that calibration is *
 
 ### 2. A frozen core with explicit governance
 
-`src/spec1_engine/core/` holds the canonical schemas, ID generation, logging utilities, and the prompt files. It is treated as off-limits to ad-hoc edits — agents (or future me) may import from it but not modify it without an explicit version bump and review. Every prompt in the system lives there as a `.md` file; no inline prompt strings allowed elsewhere.
+`src/spec1_core/core/` holds the canonical schemas, ID generation, logging utilities, and the prompt files. It is treated as off-limits to ad-hoc edits — agents (or future me) may import from it but not modify it without an explicit version bump and review. Every prompt in the system lives there as a `.md` file; no inline prompt strings allowed elsewhere.
 
 This isn't paranoia. It's the lesson of seventeen years of operations: the parts of a system that everyone touches are the parts that drift. Pulling the contracts and the prompts out of the working surface and putting a fence around them is how you keep the system coherent as it grows.
 
@@ -53,7 +53,7 @@ I'm aware "I worked in restaurants" is not a tech credential. But there is a rea
 Several things, honestly.
 
 - **The four-gate weights are calibrated against a single observer — me.** Even though the feedback loop is now wired end to end (`cls_verdicts` captures human verdicts, `cls_calibration.aggregator` produces a reliability report, `cls_calibration.proposer` surfaces drift as suggested adjustments), every verdict in the dataset so far is mine. A real signal-vs-noise framework needs multiple reviewers to detect bias I can't see in my own judgment. The infrastructure exists; the social step doesn't yet.
-- **The PDF export pipeline originally embedded `weasyprint` in-process** — native deps in the main process, real deployment friction. It's now isolated: `spec1_engine.tools.pdf_render` runs weasyprint as a subprocess so the main process never imports it and the native deps stay contained. That's how it should have started.
+- **The PDF export pipeline originally embedded `weasyprint` in-process** — native deps in the main process, real deployment friction. It's now isolated: `spec1_core.tools.pdf_render` runs weasyprint as a subprocess so the main process never imports it and the native deps stay contained. That's how it should have started.
 - **The frontend is a single static HTML file.** That was the right call for v0.4 — minimal blast radius, no build step, ships with the repo. A real version needs a proper SPA and a versioned API. I deferred both deliberately, but I know what they are.
 
 ## What I'm looking for

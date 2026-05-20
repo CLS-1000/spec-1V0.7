@@ -29,7 +29,7 @@ reading the `cls_calibration` drift report. This is intentional — see ADR-005.
 **Date:** 2026-04-11
 **Status:** Active
 
-**Decision:** `src/spec1_engine/core/` is off-limits to ad-hoc edits. Agents and
+**Decision:** `src/spec1_core/core/` is off-limits to ad-hoc edits. Agents and
 contributors may import from it but may not modify it without a semantic version bump
 and explicit human approval. All prompts live in `core/prompts/*.md` — no inline
 prompt strings anywhere else in the codebase.
@@ -122,7 +122,7 @@ itself. This is the intended design.
 **Status:** Active
 
 **Decision:** PDF generation uses `weasyprint` via a subprocess
-(`spec1_engine.tools.pdf_render`) rather than importing it directly in the API or
+(`spec1_core.tools.pdf_render`) rather than importing it directly in the API or
 engine process.
 
 **Rationale:** `weasyprint` carries heavy native dependencies (Cairo, Pango, etc.)
@@ -162,12 +162,12 @@ SQLite) is the coordination layer.
 investigate → verify → analyze → write `IntelligenceRecord` to JSONL. Brief
 generation, lead derivation, psyop scoring, calibration proposals, and workspace
 case processing are operator-invoked through the richer app/API entrypoints
-(`spec1_engine.app.cycle`, `POST /brief/generate`, `POST /leads/generate`,
+(`spec1_core.app.cycle`, `POST /brief/generate`, `POST /leads/generate`,
 `POST /psyop/run`), each reading from the intelligence JSONL on demand.
 
 **Rationale:** An audit found the docs claimed the canonical cycle automatically
 produced briefs, leads, and psyop scores, but the actual `Engine.run()` produced
-only intelligence records. The richer behaviour lived in `spec1_engine.app.cycle`
+only intelligence records. The richer behaviour lived in `spec1_core.app.cycle`
 and related API routes rather than in the canonical scheduler path. The
 split-then-rejoin pattern preserves the trustworthy core, makes downstream artifacts
 explicit operator decisions, and keeps the test surface focused. It also matches

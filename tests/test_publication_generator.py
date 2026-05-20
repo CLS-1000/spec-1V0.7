@@ -1,4 +1,4 @@
-"""Tests for spec1_engine.tools.publication_generator."""
+"""Tests for spec1_core.tools.publication_generator."""
 from __future__ import annotations
 
 from pathlib import Path
@@ -74,7 +74,7 @@ def sample_cycle_stats() -> dict:
 
 def test_generate_publication_creates_pdf(tmp_path, sample_records, sample_brief_text, sample_cycle_stats):
     """generate_publication() must produce a PDF file at the returned path."""
-    from spec1_engine.tools.publication_generator import generate_publication
+    from spec1_core.tools.publication_generator import generate_publication
 
     out = generate_publication(
         records=sample_records,
@@ -89,7 +89,7 @@ def test_generate_publication_creates_pdf(tmp_path, sample_records, sample_brief
 
 def test_generate_publication_file_size(tmp_path, sample_records, sample_brief_text, sample_cycle_stats):
     """Generated file must be a structurally valid PDF: magic header and EOF marker present."""
-    from spec1_engine.tools.publication_generator import generate_publication
+    from spec1_core.tools.publication_generator import generate_publication
 
     out = generate_publication(
         records=sample_records,
@@ -105,7 +105,7 @@ def test_generate_publication_file_size(tmp_path, sample_records, sample_brief_t
 
 def test_generate_publication_issue_number_auto_increments(tmp_path, sample_records, sample_brief_text, sample_cycle_stats):
     """Issue number must auto-increment based on existing files in output_dir."""
-    from spec1_engine.tools.publication_generator import generate_publication
+    from spec1_core.tools.publication_generator import generate_publication
 
     out1 = generate_publication(
         records=sample_records,
@@ -136,7 +136,7 @@ def test_generate_publication_raises_when_issue_space_exhausted(
     monkeypatch,
 ):
     """Issue collision search must fail with RuntimeError after bounded attempts."""
-    import spec1_engine.tools.publication_generator as pub_mod
+    import spec1_core.tools.publication_generator as pub_mod
 
     monkeypatch.setattr(pub_mod.Path, "exists", lambda self: True)
 
@@ -152,7 +152,7 @@ def test_generate_publication_raises_when_issue_space_exhausted(
 
 def test_generate_publication_empty_records(tmp_path, sample_brief_text, sample_cycle_stats):
     """generate_publication() must not crash when records list is empty."""
-    from spec1_engine.tools.publication_generator import generate_publication
+    from spec1_core.tools.publication_generator import generate_publication
 
     out = generate_publication(
         records=[],
@@ -167,7 +167,7 @@ def test_generate_publication_empty_records(tmp_path, sample_brief_text, sample_
 
 def test_generate_publication_domain_scores_capped(tmp_path, sample_records, sample_brief_text):
     """_derive_domain_scores() must cap all values to [0.0, 1.0] regardless of inputs."""
-    from spec1_engine.tools.publication_generator import generate_publication, _derive_domain_scores
+    from spec1_core.tools.publication_generator import generate_publication, _derive_domain_scores
 
     cycle_stats = {
         "signals_harvested": 9999,   # would produce > 1.0 without cap
@@ -197,7 +197,7 @@ def test_generate_publication_domain_scores_capped(tmp_path, sample_records, sam
 
 def test_generate_publication_explicit_issue_number(tmp_path, sample_records, sample_brief_text, sample_cycle_stats):
     """Explicit issue_number appears in the filename when no collision exists."""
-    from spec1_engine.tools.publication_generator import generate_publication
+    from spec1_core.tools.publication_generator import generate_publication
 
     out = generate_publication(
         records=sample_records,
@@ -211,7 +211,7 @@ def test_generate_publication_explicit_issue_number(tmp_path, sample_records, sa
 
 def test_generate_publication_output_dir_created(tmp_path, sample_records, sample_brief_text, sample_cycle_stats):
     """generate_publication() must create output_dir if it does not exist."""
-    from spec1_engine.tools.publication_generator import generate_publication
+    from spec1_core.tools.publication_generator import generate_publication
 
     nested = tmp_path / "deep" / "nested" / "dir"
     out = generate_publication(
@@ -226,7 +226,7 @@ def test_generate_publication_output_dir_created(tmp_path, sample_records, sampl
 
 def test_generate_publication_bool_gate_results(tmp_path, sample_brief_text, sample_cycle_stats):
     """Records with bool gate_results (real engine shape) must not raise AttributeError."""
-    from spec1_engine.tools.publication_generator import generate_publication
+    from spec1_core.tools.publication_generator import generate_publication
 
     records_with_bool_gates = [
         {
@@ -277,13 +277,13 @@ def test_publication_latest_returns_404_when_no_pdfs(tmp_path, monkeypatch):
     from fastapi.testclient import TestClient
     from spec1_api.main import create_app
     client = TestClient(create_app())
-    resp = client.get('/publication/latest')
+    resp = client.get('/api/v1/publication/latest')
     assert resp.status_code == 404
 
 
 def test_publication_latest_returns_pdf_when_exists(tmp_path, monkeypatch, sample_records, sample_brief_text, sample_cycle_stats):
     """GET /publication/latest must return 200 with application/pdf when a PDF exists."""
-    from spec1_engine.tools.publication_generator import generate_publication
+    from spec1_core.tools.publication_generator import generate_publication
     import spec1_api.routers.publication as pub_mod
     monkeypatch.setattr(pub_mod, '_BRIEFS_DIR', tmp_path)
 
@@ -298,7 +298,7 @@ def test_publication_latest_returns_pdf_when_exists(tmp_path, monkeypatch, sampl
     from fastapi.testclient import TestClient
     from spec1_api.main import create_app
     client = TestClient(create_app())
-    resp = client.get('/publication/latest')
+    resp = client.get('/api/v1/publication/latest')
     assert resp.status_code == 200
     assert resp.headers['content-type'] == 'application/pdf'
     assert 'spec1_issue_001' in resp.headers.get('content-disposition', '')
@@ -307,7 +307,7 @@ def test_publication_latest_returns_pdf_when_exists(tmp_path, monkeypatch, sampl
 def test_publication_list_returns_stable_shape(tmp_path, monkeypatch, sample_records, sample_brief_text, sample_cycle_stats):
     """GET /publication/list must return {total, items} and order newest first."""
     import os
-    from spec1_engine.tools.publication_generator import generate_publication
+    from spec1_core.tools.publication_generator import generate_publication
     import spec1_api.routers.publication as pub_mod
     monkeypatch.setattr(pub_mod, '_BRIEFS_DIR', tmp_path)
 
@@ -332,7 +332,7 @@ def test_publication_list_returns_stable_shape(tmp_path, monkeypatch, sample_rec
     from fastapi.testclient import TestClient
     from spec1_api.main import create_app
     client = TestClient(create_app())
-    resp = client.get('/publication/list')
+    resp = client.get('/api/v1/publication/list')
     assert resp.status_code == 200
     body = resp.json()
     assert 'total' in body

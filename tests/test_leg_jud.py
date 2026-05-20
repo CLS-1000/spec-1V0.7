@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timezone
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -362,7 +361,7 @@ class TestLegJudFormatter:
 
     def test_section_to_markdown_standalone(self):
         from cls_leg_jud.producer import produce_brief
-        from cls_leg_jud.formatter import section_to_markdown, to_markdown
+        from cls_leg_jud.formatter import section_to_markdown
         records = [
             {
                 "record_id": "r1",
@@ -417,10 +416,10 @@ class TestLegJudAPIRoutes:
             if mod not in sys.modules:
                 sys.modules[mod] = MagicMock()
 
-        # Stub spec1_engine.app.cycle to avoid its heavy import chain
+        # Stub spec1_core.app.cycle to avoid its heavy import chain
         mock_cycle = MagicMock()
         mock_cycle.run_cycle.return_value = {"run_id": "test", "records_stored": 0}
-        monkeypatch.setitem(sys.modules, "spec1_engine.app.cycle", mock_cycle)
+        monkeypatch.setitem(sys.modules, "spec1_core.app.cycle", mock_cycle)
 
         import importlib
         import spec1_api.main as main_mod
@@ -430,18 +429,18 @@ class TestLegJudAPIRoutes:
             yield c
 
     def test_leg_jud_brief_returns_200(self, client):
-        r = client.get("/leg_jud/brief")
+        r = client.get("/api/v1/leg_jud/brief")
         assert r.status_code == 200
 
     def test_leg_jud_judicial_returns_200(self, client):
-        r = client.get("/leg_jud/judicial")
+        r = client.get("/api/v1/leg_jud/judicial")
         assert r.status_code == 200
         data = r.json()
         assert "total" in data
         assert "items" in data
 
     def test_leg_jud_state_leg_returns_200(self, client):
-        r = client.get("/leg_jud/state_leg")
+        r = client.get("/api/v1/leg_jud/state_leg")
         assert r.status_code == 200
         data = r.json()
         assert "total" in data
@@ -455,7 +454,7 @@ class TestLegJudAPIRoutes:
                 sys.modules[mod] = MagicMock()
         mock_cycle = MagicMock()
         mock_cycle.run_cycle.return_value = {"run_id": "test", "records_stored": 0}
-        monkeypatch.setitem(sys.modules, "spec1_engine.app.cycle", mock_cycle)
+        monkeypatch.setitem(sys.modules, "spec1_core.app.cycle", mock_cycle)
 
         osint_path = tmp_path / "osint2.jsonl"
         record = {
@@ -479,7 +478,7 @@ class TestLegJudAPIRoutes:
         importlib.reload(main_mod)
         from fastapi.testclient import TestClient
         with TestClient(main_mod.app) as c:
-            r = c.get("/leg_jud/judicial?judge=test")
+            r = c.get("/api/v1/leg_jud/judicial?judge=test")
         assert r.status_code == 200
         data = r.json()
         assert data["total"] == 1

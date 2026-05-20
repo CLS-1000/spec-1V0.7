@@ -22,7 +22,7 @@ def _run_cycle_job() -> None:
         logger.warning("Kill file present at %s — skipping scheduled cycle.", KILL_FILE)
         return
     try:
-        from spec1_engine.app.cycle import run_cycle
+        from spec1_core.app.cycle import run_cycle
         stats = run_cycle(
             store_path=Path(os.environ.get("SPEC1_STORE_PATH", "spec1_intelligence.jsonl")),
             environment=os.environ.get("SPEC1_ENVIRONMENT", "production"),

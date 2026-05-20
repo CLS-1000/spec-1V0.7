@@ -9,11 +9,11 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from spec1_engine.intelligence.store import JsonlStore
+from spec1_core.intelligence.store import JsonlStore
 from cls_osint.store import OsintStore
-from cls_leads.store import LeadStore
-from cls_psyop.store import PsyopStore
-from cls_world_brief.store import BriefStore
+from spec1_analytics.cls_leads.store import LeadStore
+from spec1_analytics.cls_psyop.store import PsyopStore
+from spec1_analytics.cls_world_brief.store import BriefStore
 from cls_verdicts.store import VerdictStore
 from cls_db.database import Database
 from cls_db.migrate import ensure_schema
@@ -38,20 +38,20 @@ def get_osint_store() -> OsintStore:
 @lru_cache(maxsize=1)
 def get_lead_store() -> LeadStore:
     path = _env_path("SPEC1_LEADS_PATH", "leads.jsonl")
-    return LeadStore(path)
+    return LeadStore(path, db=get_database())
 
 
 @lru_cache(maxsize=1)
 def get_psyop_store() -> PsyopStore:
     path = _env_path("SPEC1_PSYOP_PATH", "psyop_scores.jsonl")
-    return PsyopStore(path)
+    return PsyopStore(path, db=get_database())
 
 
 @lru_cache(maxsize=1)
 def get_brief_store() -> BriefStore:
     jsonl = _env_path("SPEC1_BRIEFS_PATH", "world_briefs.jsonl")
     briefs_dir = _env_path("SPEC1_BRIEFS_DIR", "briefs")
-    return BriefStore(jsonl_path=jsonl, briefs_dir=briefs_dir)
+    return BriefStore(jsonl_path=jsonl, briefs_dir=briefs_dir, db=get_database())
 
 
 @lru_cache(maxsize=1)

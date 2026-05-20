@@ -39,45 +39,39 @@ A repo split is a deliberate decision gate, not an automatic outcome.
 ### Goal: Fix architectural loose ends and prepare for external users
 ### Week 1-2: Foundation Fixes
 #### TASK 1.1: Resolve Quant Module Decision
-- **Status:** ⚠️ BLOCKING (decision required before proceeding)
-- **Decision Options:**
-  - A) **Remove entirely** (recommended): Delete `cls_quant/`, remove numpy from dev deps, remove yfinance
-  - B) **Commit fully**: Make numpy required, document watchlist, integrate into briefs, add dashboard
-- **Recommendation:** **REMOVE** — orthogonal to core triage mission; market demand not validated
-- **Time Estimate:** 1-2 days
+- **Status:** ✅ DONE — Decision: **REMOVE** (option A)
+- **Decision:** Remove entirely — orthogonal to core triage mission; market demand not validated
 - **Deliverables:**
-  - [ ] Decision documented in CHANGELOG
-  - [ ] Code removed or committed fully
-  - [ ] All tests passing
-  - [ ] pyproject.toml updated
-- **Testing:** `pytest tests/ -v --tb=short` (no quant imports)
+  - [x] Decision documented in CHANGELOG
+  - [x] Code removed (cls_quant never shipped; references cleaned from docs, Makefile, .env.example, README)
+  - [x] All tests passing
+  - [x] pyproject.toml has no quant extras
 - **Commits:**
-  - `chore: remove quant module (out of scope for v0.5)`
-  - Or: `feat: commit to quant module; make numpy required`
+  - `chore: remove quant module references (out of scope)`
 ---
 #### TASK 1.2: Consolidate Module Naming (Remove Re-export Shims)
 - **Status:** 🔴 CRITICAL
 - **Current Problem:**
-  - `spec1_engine.cls_leads` is alias to `cls_leads`
-  - `spec1_engine.cls_psyop` is alias to `cls_psyop`
-  - `spec1_engine.cls_world_brief` is alias to `cls_world_brief`
+  - `spec1_analytics.cls_leads` is alias to `cls_leads`
+  - `spec1_analytics.cls_psyop` is alias to `cls_psyop`
+  - `spec1_analytics.cls_world_brief` is alias to `cls_world_brief`
   - These suggest a future refactor that never happened
 - **Solution:** Remove all re-export shims; always import from top-level modules
 - **Time Estimate:** 2-3 days
 - **Deliverables:**
-  - [ ] `spec1_engine/cls_leads.py` → DELETED
-  - [ ] `spec1_engine/cls_psyop.py` → DELETED
-  - [ ] `spec1_engine/cls_world_brief.py` → DELETED
+  - [ ] `spec1_analytics/cls_leads.py` → DELETED
+  - [ ] `spec1_analytics/cls_psyop.py` → DELETED
+  - [ ] `spec1_analytics/cls_world_brief.py` → DELETED
   - [ ] All imports updated throughout codebase
   - [ ] All tests passing
   - [ ] No re-exports remain
 - **Files to Update:**
-  - `src/spec1_engine/__init__.py` (remove re-exports)
+  - `src/spec1_core/__init__.py` (remove re-exports)
   - `src/spec1_api/routers/*.py` (update imports)
   - `src/mcp_server.py` (update imports)
   - `tests/*.py` (update imports)
 - **Testing:** 
-  - `grep -r "from spec1_engine import cls_" src/ tests/` → should return nothing
+  - `grep -r "from spec1_core import cls_" src/ tests/` → should return nothing
   - `pytest tests/ -v --tb=short` → all passing
 - **Commits:**
   - `refactor: remove re-export shims (cls_leads, cls_psyop, cls_world_brief)`
@@ -114,28 +108,28 @@ A repo split is a deliberate decision gate, not an automatic outcome.
 - **Status:** 🟡 MEDIUM (tools exist but entry points are unclear)
 - **Problem:** Makefile targets reference tools that may not be callable as modules
 - **Solution:** Ensure every operator tool is:
-  - Callable as `python -m spec1_engine.tools.<tool>`
+  - Callable as `python -m spec1_core.tools.<tool>`
   - Documented in docs/runbook.md
   - Tested in test suite
   - Listed in pyproject.toml `[project.scripts]`
 - **Time Estimate:** 2-3 days
 - **Operator Tools to Audit:**
-  1. `generate_brief` → `python -m spec1_engine.tools.generate_brief`
-  2. `generate_leads` → `python -m spec1_engine.tools.generate_leads`
-  3. `run_psyop` → `python -m spec1_engine.tools.run_psyop`
-  4. `calibration_propose` → `python -m spec1_engine.tools.calibration_propose`
-  5. `historical_briefs` → `python -m spec1_engine.tools.historical_briefs`
-  6. `pdf_render` → `python -m spec1_engine.tools.pdf_render`
+  1. `generate_brief` → `python -m spec1_core.tools.generate_brief`
+  2. `generate_leads` → `python -m spec1_core.tools.generate_leads`
+  3. `run_psyop` → `python -m spec1_core.tools.run_psyop`
+  4. `calibration_propose` → `python -m spec1_core.tools.calibration_propose`
+  5. `historical_briefs` → `python -m spec1_core.tools.historical_briefs`
+  6. `pdf_render` → `python -m spec1_core.tools.pdf_render`
 - **Deliverables:**
   - [ ] Each tool has a `__main__.py` entry point
   - [ ] `pyproject.toml` lists all tools under `[project.scripts]`
   - [ ] Makefile targets verified working
   - [ ] docs/runbook.md documents each tool (usage, parameters, output)
   - [ ] Each tool has tests in test suite
-  - [ ] `python -m spec1_engine.tools.<tool> --help` works
+  - [ ] `python -m spec1_core.tools.<tool> --help` works
 - **Testing:**
-  - `python -m spec1_engine.tools.generate_brief --help`
-  - `python -m spec1_engine.tools.run_psyop --help`
+  - `python -m spec1_core.tools.generate_brief --help`
+  - `python -m spec1_core.tools.run_psyop --help`
   - `make brief` → works
   - `make psyop` → works
   - `make calibration` → works
@@ -364,7 +358,7 @@ A repo split is a deliberate decision gate, not an automatic outcome.
   ```
   Monorepo is equally valid; split only if licensing or team boundaries demand it.
 - **Deliverables:**
-  - [ ] `src/spec1_engine/` → `src/spec1_core/` (rename + update all imports)
+  - [ ] `src/spec1_core/` (done — renamed from spec1_engine + all imports updated)
   - [ ] `src/cls_world_brief/`, `src/cls_leads/`, `src/cls_psyop/` → `src/spec1_analytics/`
   - [ ] All other top-level packages (`cls_osint`, `cls_verdicts`, etc.) remain at `src/`
   - [ ] All imports updated throughout codebase
@@ -395,7 +389,7 @@ A repo split is a deliberate decision gate, not an automatic outcome.
   ```
   Current:
   src/
-  ├── spec1_engine/
+  ├── spec1_core/
   └── cls_*/
   
   Reorganize to:

@@ -17,17 +17,18 @@ from cls_calibration.schemas import (
     ProposalReport,
     SuggestedAdjustment,
 )
+from spec1_labels import VERIF_CORROBORATED, VERIF_CONFLICTED
 
 
 # Ports of analyzer.py weight tables. Pulled in as constants here so the
 # proposer can compare observed accuracy against the value the system
 # currently asserts for each outcome.
 CLASSIFICATION_WEIGHTS: dict[str, float] = {
-    "CORROBORATED": 1.0,
+    VERIF_CORROBORATED: 1.0,
     "ESCALATE": 0.85,
     "INVESTIGATE": 0.70,
     "MONITOR": 0.55,
-    "CONFLICTED": 0.35,
+    VERIF_CONFLICTED: 0.35,
     "ARCHIVE": 0.15,
 }
 

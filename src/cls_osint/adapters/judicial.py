@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 import xml.etree.ElementTree as ET
-from datetime import date, datetime, timezone
+from datetime import date, datetime
 from typing import Iterator
 
 import requests
@@ -158,8 +158,6 @@ def _fetch_pacer_rss(timeout: int) -> list[JudicialRecord]:
     resp = requests.get(PACER_RSS_URL, headers=_HEADERS, timeout=timeout)
     resp.raise_for_status()
     root = ET.fromstring(resp.content)
-    ns = {"": ""}  # RSS 2.0 uses no namespace by default
-
     records: list[JudicialRecord] = []
     # RSS structure: <rss><channel><item>...</item></channel></rss>
     channel = root.find("channel")

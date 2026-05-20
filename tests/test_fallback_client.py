@@ -3,14 +3,13 @@
 from __future__ import annotations
 
 import json
-import time
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spec1_engine.llm import tier3_rules
-from spec1_engine.llm.fallback_client import FallbackLLMClient
+from spec1_core.llm import tier3_rules
+from spec1_core.llm.fallback_client import FallbackLLMClient
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
@@ -151,7 +150,7 @@ class TestTier1Claude:
         client = make_client(tmp_path)
         with patch.dict("os.environ", {}, clear=True):
             import os; os.environ.pop("ANTHROPIC_API_KEY", None)
-            with patch("spec1_engine.llm.ollama_manager.is_running", return_value=False):
+            with patch("spec1_core.llm.ollama_manager.is_running", return_value=False):
                 result = client.complete(ANOMALY_SIGNAL, system="")
 
         data = json.loads(result)
@@ -170,9 +169,9 @@ class TestTier2OllamaFallback:
         with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
             with patch("anthropic.Anthropic") as MockCls:
                 MockCls.return_value.messages.create.side_effect = Exception("401 Unauthorized")
-                with patch("spec1_engine.llm.ollama_manager.is_running", return_value=True):
-                    with patch("spec1_engine.llm.ollama_manager.ensure_model", return_value=True):
-                        with patch("spec1_engine.llm.ollama_manager.chat", return_value=ollama_response):
+                with patch("spec1_core.llm.ollama_manager.is_running", return_value=True):
+                    with patch("spec1_core.llm.ollama_manager.ensure_model", return_value=True):
+                        with patch("spec1_core.llm.ollama_manager.chat", return_value=ollama_response):
                             result = client.complete(ANOMALY_SIGNAL, system="analyst")
 
         assert result == ollama_response
@@ -185,10 +184,10 @@ class TestTier2OllamaFallback:
         with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
             with patch("anthropic.Anthropic") as MockCls:
                 MockCls.return_value.messages.create.side_effect = Exception("429 rate_limit_error")
-                with patch("spec1_engine.llm.ollama_manager.is_running", return_value=True):
-                    with patch("spec1_engine.llm.ollama_manager.ensure_model", return_value=True):
-                        with patch("spec1_engine.llm.ollama_manager.chat", return_value=ollama_json):
-                            result = client.complete(CLEAR_SIGNAL, system="")
+                with patch("spec1_core.llm.ollama_manager.is_running", return_value=True):
+                    with patch("spec1_core.llm.ollama_manager.ensure_model", return_value=True):
+                        with patch("spec1_core.llm.ollama_manager.chat", return_value=ollama_json):
+                            client.complete(CLEAR_SIGNAL, system="")
 
         assert client.get_active_tier() == "ollama"
 
@@ -199,10 +198,10 @@ class TestTier2OllamaFallback:
         with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key", "OLLAMA_AUTO_SPAWN": "true"}):
             with patch("anthropic.Anthropic") as MockCls:
                 MockCls.return_value.messages.create.side_effect = Exception("API error")
-                with patch("spec1_engine.llm.ollama_manager.is_running", return_value=False):
-                    with patch("spec1_engine.llm.ollama_manager.spawn", return_value=True) as mock_spawn:
-                        with patch("spec1_engine.llm.ollama_manager.ensure_model", return_value=True):
-                            with patch("spec1_engine.llm.ollama_manager.chat", return_value=ollama_json):
+                with patch("spec1_core.llm.ollama_manager.is_running", return_value=False):
+                    with patch("spec1_core.llm.ollama_manager.spawn", return_value=True) as mock_spawn:
+                        with patch("spec1_core.llm.ollama_manager.ensure_model", return_value=True):
+                            with patch("spec1_core.llm.ollama_manager.chat", return_value=ollama_json):
                                 client.complete(ANOMALY_SIGNAL)
 
         mock_spawn.assert_called_once()
@@ -215,9 +214,9 @@ class TestTier2OllamaFallback:
         with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
             with patch("anthropic.Anthropic") as MockCls:
                 MockCls.return_value.messages.create.side_effect = Exception("Unavailable")
-                with patch("spec1_engine.llm.ollama_manager.is_running", return_value=True):
-                    with patch("spec1_engine.llm.ollama_manager.ensure_model", return_value=True):
-                        with patch("spec1_engine.llm.ollama_manager.chat", return_value=ollama_json):
+                with patch("spec1_core.llm.ollama_manager.is_running", return_value=True):
+                    with patch("spec1_core.llm.ollama_manager.ensure_model", return_value=True):
+                        with patch("spec1_core.llm.ollama_manager.chat", return_value=ollama_json):
                             result = client.analyze(ANOMALY_SIGNAL)
 
         assert result["tier_used"] == "ollama"
@@ -235,8 +234,8 @@ class TestTier3MockFallback:
         with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
             with patch("anthropic.Anthropic") as MockCls:
                 MockCls.return_value.messages.create.side_effect = Exception("Claude down")
-                with patch("spec1_engine.llm.ollama_manager.is_running", return_value=False):
-                    with patch("spec1_engine.llm.ollama_manager.spawn", return_value=False):
+                with patch("spec1_core.llm.ollama_manager.is_running", return_value=False):
+                    with patch("spec1_core.llm.ollama_manager.spawn", return_value=False):
                         result = client.complete(THREAT_SIGNAL, system="")
 
         data = json.loads(result)
@@ -249,8 +248,8 @@ class TestTier3MockFallback:
         with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
             with patch("anthropic.Anthropic") as MockCls:
                 MockCls.return_value.messages.create.side_effect = Exception("down")
-                with patch("spec1_engine.llm.ollama_manager.is_running", return_value=False):
-                    with patch("spec1_engine.llm.ollama_manager.spawn", return_value=False):
+                with patch("spec1_core.llm.ollama_manager.is_running", return_value=False):
+                    with patch("spec1_core.llm.ollama_manager.spawn", return_value=False):
                         result = client.analyze(THREAT_SIGNAL)
 
         assert result["verdict"] == "THREAT"
@@ -262,8 +261,8 @@ class TestTier3MockFallback:
 
         with patch.dict("os.environ", {}, clear=True):
             import os; os.environ.pop("ANTHROPIC_API_KEY", None)
-            with patch("spec1_engine.llm.ollama_manager.is_running", return_value=False):
-                with patch("spec1_engine.llm.ollama_manager.spawn", return_value=False):
+            with patch("spec1_core.llm.ollama_manager.is_running", return_value=False):
+                with patch("spec1_core.llm.ollama_manager.spawn", return_value=False):
                     try:
                         client.analyze(CLEAR_SIGNAL)
                     except Exception as exc:
@@ -274,8 +273,8 @@ class TestTier3MockFallback:
 
         with patch.dict("os.environ", {}, clear=True):
             import os; os.environ.pop("ANTHROPIC_API_KEY", None)
-            with patch("spec1_engine.llm.ollama_manager.is_running", return_value=False):
-                with patch("spec1_engine.llm.ollama_manager.spawn", return_value=False):
+            with patch("spec1_core.llm.ollama_manager.is_running", return_value=False):
+                with patch("spec1_core.llm.ollama_manager.spawn", return_value=False):
                     try:
                         client.complete("anything")
                     except Exception as exc:
@@ -304,17 +303,17 @@ class TestOutputSchemaConsistency:
         with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
             with patch("anthropic.Anthropic") as MockCls:
                 MockCls.return_value.messages.create.side_effect = Exception("fail")
-                with patch("spec1_engine.llm.ollama_manager.is_running", return_value=True):
-                    with patch("spec1_engine.llm.ollama_manager.ensure_model", return_value=True):
-                        with patch("spec1_engine.llm.ollama_manager.chat", return_value=payload):
+                with patch("spec1_core.llm.ollama_manager.is_running", return_value=True):
+                    with patch("spec1_core.llm.ollama_manager.ensure_model", return_value=True):
+                        with patch("spec1_core.llm.ollama_manager.chat", return_value=payload):
                             return client.analyze(signal)
 
     def _analyze_via_tier3(self, tmp_path, signal):
         client = make_client(tmp_path)
         with patch.dict("os.environ", {}, clear=True):
             import os; os.environ.pop("ANTHROPIC_API_KEY", None)
-            with patch("spec1_engine.llm.ollama_manager.is_running", return_value=False):
-                with patch("spec1_engine.llm.ollama_manager.spawn", return_value=False):
+            with patch("spec1_core.llm.ollama_manager.is_running", return_value=False):
+                with patch("spec1_core.llm.ollama_manager.spawn", return_value=False):
                     return client.analyze(signal)
 
     @pytest.mark.parametrize("signal", [THREAT_SIGNAL, ANOMALY_SIGNAL, CLEAR_SIGNAL])
@@ -376,8 +375,8 @@ class TestLatencyLogging:
 
         with patch.dict("os.environ", {}, clear=True):
             import os; os.environ.pop("ANTHROPIC_API_KEY", None)
-            with patch("spec1_engine.llm.ollama_manager.is_running", return_value=False):
-                with patch("spec1_engine.llm.ollama_manager.spawn", return_value=False):
+            with patch("spec1_core.llm.ollama_manager.is_running", return_value=False):
+                with patch("spec1_core.llm.ollama_manager.spawn", return_value=False):
                     client.analyze(THREAT_SIGNAL)
 
         log_file = tmp_path / "llm_fallback.jsonl"
@@ -400,8 +399,8 @@ class TestLatencyLogging:
 
         with patch.dict("os.environ", {}, clear=True):
             import os; os.environ.pop("ANTHROPIC_API_KEY", None)
-            with patch("spec1_engine.llm.ollama_manager.is_running", return_value=False):
-                with patch("spec1_engine.llm.ollama_manager.spawn", return_value=False):
+            with patch("spec1_core.llm.ollama_manager.is_running", return_value=False):
+                with patch("spec1_core.llm.ollama_manager.spawn", return_value=False):
                     client.analyze(THREAT_SIGNAL)
                     client.analyze(CLEAR_SIGNAL)
 
@@ -418,8 +417,8 @@ class TestInvestigate:
 
         with patch.dict("os.environ", {}, clear=True):
             import os; os.environ.pop("ANTHROPIC_API_KEY", None)
-            with patch("spec1_engine.llm.ollama_manager.is_running", return_value=False):
-                with patch("spec1_engine.llm.ollama_manager.spawn", return_value=False):
+            with patch("spec1_core.llm.ollama_manager.is_running", return_value=False):
+                with patch("spec1_core.llm.ollama_manager.spawn", return_value=False):
                     result = client.investigate("What is the threat level in eastern Ukraine?")
 
         assert isinstance(result, dict)
@@ -430,8 +429,8 @@ class TestInvestigate:
 
         with patch.dict("os.environ", {}, clear=True):
             import os; os.environ.pop("ANTHROPIC_API_KEY", None)
-            with patch("spec1_engine.llm.ollama_manager.is_running", return_value=False):
-                with patch("spec1_engine.llm.ollama_manager.spawn", return_value=False):
+            with patch("spec1_core.llm.ollama_manager.is_running", return_value=False):
+                with patch("spec1_core.llm.ollama_manager.spawn", return_value=False):
                     try:
                         client.investigate("test query")
                     except Exception as exc:
@@ -476,9 +475,9 @@ class TestDevMode:
                                         "SPEC1_DEV_MODE": "true"}):
             client = make_client(tmp_path)
             with patch("anthropic.Anthropic") as MockCls:
-                with patch("spec1_engine.llm.ollama_manager.is_running", return_value=True):
-                    with patch("spec1_engine.llm.ollama_manager.ensure_model", return_value=True):
-                        with patch("spec1_engine.llm.ollama_manager.chat", return_value=ollama_json):
+                with patch("spec1_core.llm.ollama_manager.is_running", return_value=True):
+                    with patch("spec1_core.llm.ollama_manager.ensure_model", return_value=True):
+                        with patch("spec1_core.llm.ollama_manager.chat", return_value=ollama_json):
                             result = client.analyze(ANOMALY_SIGNAL)
 
         MockCls.assert_not_called()
@@ -492,9 +491,9 @@ class TestDevMode:
                                         "SPEC1_DEV_MODE": "true"}):
             client = make_client(tmp_path)
             with patch("anthropic.Anthropic") as MockCls:
-                with patch("spec1_engine.llm.ollama_manager.is_running", return_value=True):
-                    with patch("spec1_engine.llm.ollama_manager.ensure_model", return_value=True):
-                        with patch("spec1_engine.llm.ollama_manager.chat", return_value=ollama_json):
+                with patch("spec1_core.llm.ollama_manager.is_running", return_value=True):
+                    with patch("spec1_core.llm.ollama_manager.ensure_model", return_value=True):
+                        with patch("spec1_core.llm.ollama_manager.chat", return_value=ollama_json):
                             result = client.complete(CLEAR_SIGNAL)
 
         MockCls.assert_not_called()
@@ -505,8 +504,8 @@ class TestDevMode:
                                         "SPEC1_DEV_MODE": "true"}):
             client = make_client(tmp_path)
             with patch("anthropic.Anthropic") as MockCls:
-                with patch("spec1_engine.llm.ollama_manager.is_running", return_value=False):
-                    with patch("spec1_engine.llm.ollama_manager.spawn", return_value=False):
+                with patch("spec1_core.llm.ollama_manager.is_running", return_value=False):
+                    with patch("spec1_core.llm.ollama_manager.spawn", return_value=False):
                         result = client.analyze(THREAT_SIGNAL)
 
         MockCls.assert_not_called()
@@ -535,9 +534,9 @@ class TestDevMode:
         with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key",
                                         "SPEC1_DEV_MODE": "true"}):
             client = make_client(tmp_path)
-            with patch("spec1_engine.llm.ollama_manager.is_running", return_value=True):
-                with patch("spec1_engine.llm.ollama_manager.ensure_model", return_value=True):
-                    with patch("spec1_engine.llm.ollama_manager.chat", return_value=ollama_json):
+            with patch("spec1_core.llm.ollama_manager.is_running", return_value=True):
+                with patch("spec1_core.llm.ollama_manager.ensure_model", return_value=True):
+                    with patch("spec1_core.llm.ollama_manager.chat", return_value=ollama_json):
                         client.analyze(CLEAR_SIGNAL)
 
         assert client.get_cost_estimate() == 0.0
@@ -551,9 +550,9 @@ class TestDevMode:
         with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key",
                                         "SPEC1_DEV_MODE": "true"}):
             client = make_client(tmp_path)
-            with patch("spec1_engine.llm.ollama_manager.is_running", return_value=True):
-                with patch("spec1_engine.llm.ollama_manager.ensure_model", return_value=True):
-                    with patch("spec1_engine.llm.ollama_manager.chat", return_value=ollama_json):
+            with patch("spec1_core.llm.ollama_manager.is_running", return_value=True):
+                with patch("spec1_core.llm.ollama_manager.ensure_model", return_value=True):
+                    with patch("spec1_core.llm.ollama_manager.chat", return_value=ollama_json):
                         result = client.analyze(THREAT_SIGNAL)
 
         assert required.issubset(result.keys())

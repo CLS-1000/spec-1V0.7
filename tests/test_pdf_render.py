@@ -7,8 +7,8 @@ import sys
 
 import pytest
 
-from spec1_engine.briefing.writer import write_brief_pdf
-from spec1_engine.tools import pdf_render
+from spec1_core.briefing.writer import write_brief_pdf
+from spec1_core.tools import pdf_render
 
 
 def test_argparser_requires_brief_md_and_out():
@@ -54,9 +54,9 @@ def test_render_pdf_end_to_end(tmp_path):
 
 
 def test_cli_module_invocation_help():
-    """`python -m spec1_engine.tools.pdf_render --help` returns 0."""
+    """`python -m spec1_core.tools.pdf_render --help` returns 0."""
     result = subprocess.run(
-        [sys.executable, "-m", "spec1_engine.tools.pdf_render", "--help"],
+        [sys.executable, "-m", "spec1_core.tools.pdf_render", "--help"],
         capture_output=True,
         text=True,
         timeout=10,

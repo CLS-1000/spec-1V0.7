@@ -41,7 +41,7 @@ RSS / FARA / Congress / Narrative
   cls_osint.feed ─────────── cls_osint.adapters (fara, congressional, narrative)
         │
         ▼
-  spec1_engine  (harvest → parse → score → investigate → verify → analyze)
+  spec1_core  (harvest → parse → score → investigate → verify → analyze)
         │
         ▼
   IntelligenceRecord  →  spec1_intelligence.jsonl  (append-only)
@@ -102,7 +102,6 @@ cp .env.example .env  # edit — set ANTHROPIC_API_KEY at minimum
 | `SPEC1_TIMEZONE` | `America/Los_Angeles` | Scheduler timezone |
 | `SPEC1_FEED_TIMEOUT` | `15` | Feed fetch timeout (seconds) |
 | `SPEC1_RUN_ON_START` | `false` | Run one cycle immediately on API startup |
-| `SPEC1_QUANT_ENABLED` | `false` | Enable quantitative market signal pipeline |
 
 ## Key Sources
 

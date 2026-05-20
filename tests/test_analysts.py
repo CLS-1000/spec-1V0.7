@@ -4,16 +4,16 @@ from __future__ import annotations
 
 import pytest
 
-from spec1_engine.analysts.registry import (
+from spec1_core.analysts.registry import (
     load_all,
     find_by_name,
     find_by_domain,
     get_all_names,
     get_credibility,
 )
-from spec1_engine.analysts.credibility import CredibilityAnalyst
-from spec1_engine.analysts.discovery import DiscoveryAnalyst, DiscoveredAnalyst
-from spec1_engine.schemas.models import AnalystRecord, ParsedSignal, Signal
+from spec1_core.analysts.credibility import CredibilityAnalyst
+from spec1_core.analysts.discovery import DiscoveryAnalyst, DiscoveredAnalyst
+from spec1_core.schemas.models import AnalystRecord, ParsedSignal, Signal
 from datetime import datetime, timezone
 
 REQUIRED_ANALYSTS = [

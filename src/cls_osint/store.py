@@ -6,7 +6,7 @@ import json
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Callable, Iterator, Optional
+from typing import Callable, Iterator
 
 
 def _now() -> str:

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 from pydantic import BaseModel, Field
+from spec1_labels import PSYOP_CLEAN
 
 
 class HealthResponse(BaseModel):
@@ -93,7 +94,7 @@ class PsyopResponse(BaseModel):
     patterns_matched: list[str] = Field(default_factory=list)
     pattern_names: list[str] = Field(default_factory=list)
     score: float = 0.0
-    classification: str = "CLEAN"
+    classification: str = PSYOP_CLEAN
     threat_categories: list[str] = Field(default_factory=list)
     scored_at: str
 
