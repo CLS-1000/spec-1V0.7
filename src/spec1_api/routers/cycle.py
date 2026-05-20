@@ -7,6 +7,8 @@ from pathlib import Path
 
 from fastapi import APIRouter, BackgroundTasks
 
+from spec1_api import metrics as _metrics
+from spec1_api import webhooks as _webhooks
 from spec1_api.schemas import CycleRequest, CycleResponse
 from spec1_core.app.cycle import run_cycle as _execute_cycle
 
@@ -45,6 +47,8 @@ def run_cycle(request: CycleRequest, background_tasks: BackgroundTasks) -> Cycle
         cases_updated=stats.get("cases_updated"),
     )
     _last_run.update(result.model_dump())
+    _metrics.record_cycle(stats)
+    _webhooks.fire_cycle_completed(stats)
     return result
 
 
