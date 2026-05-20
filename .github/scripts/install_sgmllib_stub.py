@@ -12,6 +12,7 @@ on feedparser) will skip building sgmllib3k entirely.
 import os
 import site
 import sys
+import sysconfig
 
 STUB = """\
 import re
@@ -68,12 +69,14 @@ Summary: Stub provided by install_sgmllib_stub.py
 
 DIST_INFO_RECORD = "sgmllib.py,,\n"
 
-if hasattr(site, "getsitepackages"):
-    site_dir = site.getsitepackages()[0]
-else:
-    site_dir = site.getusersitepackages()
+# sysconfig.get_paths()['purelib'] is the most reliable way to get the
+# current interpreter's site-packages: works in system Python, venvs, and
+# GitHub Actions toolcache Python where site.getsitepackages() may return
+# a different (system) path than where pip actually installs.
+site_dir = sysconfig.get_paths()["purelib"]
 
 os.makedirs(site_dir, exist_ok=True)
+print(f"[sgmllib stub] site_dir={site_dir}", file=sys.stderr)
 
 # 1. Write sgmllib.py module
 stub_path = os.path.join(site_dir, "sgmllib.py")
