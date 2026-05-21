@@ -104,20 +104,21 @@ class Engine:
             stats.finish()
             return stats
 
-        # 2. Parse
-        parsed_signals: list[ParsedSignal] = []
+        # 2. Parse — track (signal, parsed) pairs so a failed parse never
+        # misaligns a subsequent signal with the wrong ParsedSignal in scoring.
+        parsed_pairs: list[tuple[Signal, ParsedSignal]] = []
         for sig in signals:
             try:
                 ps = parse_signal(sig)
-                parsed_signals.append(ps)
+                parsed_pairs.append((sig, ps))
             except Exception as exc:
                 stats.errors.append(f"parse:{sig.signal_id}:{exc}")
-        stats.signals_parsed = len(parsed_signals)
+        stats.signals_parsed = len(parsed_pairs)
         logger.info("Parsed %d signals", stats.signals_parsed)
 
         # 3. Score — 4 gates
         opportunities: list[tuple[Signal, ParsedSignal, Opportunity]] = []
-        for sig, ps in zip(signals, parsed_signals):
+        for sig, ps in parsed_pairs:
             try:
                 opp = score_signal(sig, ps, run_id=self.config.run_id)
                 if opp is not None:
