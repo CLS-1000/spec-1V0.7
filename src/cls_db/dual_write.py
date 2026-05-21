@@ -10,11 +10,14 @@ import json
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from cls_db.database import Database
 from cls_db.migrate import ensure_schema
 from cls_db.repository import Repository
+
+if TYPE_CHECKING:
+    from cls_db.indexed_queries import IndexedQueryLayer
 
 
 def _now() -> str:
@@ -96,15 +99,36 @@ class DualWriter:
     def count_db(self) -> int:
         return self.repo.count()
 
-    def read_chunked(self, limit: int = 100):
-        """Iterate JSONL in memory-safe chunks."""
-        from cls_db.cursor_reader import JSONLCursorReader
-        reader = JSONLCursorReader(self.jsonl_path, chunk_size=limit)
-        return reader.read_all_chunked(limit=limit)
+    # ------------------------------------------------------------------
+    # Scalable read helpers
+    # ------------------------------------------------------------------
 
-    def indexed_queries(self):
-        """Get indexed query interface."""
+
+    def read_chunked(self, limit: int = 1000):
+        """Iterate over JSONL in forward-only chunks without loading the whole file.
+
+        Yields successive ``list[dict]`` pages. Each page contains at most
+        ``limit`` records. Delegates to :class:`cls_db.cursor_reader.JSONLCursorReader`.
+        """
+        from cls_db.cursor_reader import JSONLCursorReader
+
+        # Pass pk_field so cursor tokens are unique even when written_at is
+        # shared across batch-written records.
+        reader = JSONLCursorReader(
+            self.jsonl_path,
+            chunk_size=limit,
+            id_field=self.repo.pk_field,
+            ts_field=getattr(self.repo, "ts_field", "written_at"),
+        )
+        yield from reader.read_all_chunked(limit=limit)
+            
+    def indexed_queries(self) -> "IndexedQueryLayer":
+        """Return an :class:`cls_db.indexed_queries.IndexedQueryLayer` for this writer's table.
+
+        Provides composable, limit-enforced queries over the SQLite backend.
+        """
         from cls_db.indexed_queries import IndexedQueryLayer
+
         return IndexedQueryLayer(self.repo)
 
 

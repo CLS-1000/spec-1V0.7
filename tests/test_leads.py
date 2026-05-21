@@ -255,3 +255,69 @@ class TestLeadStore:
     def test_empty_store_count_zero(self, tmp_path):
         store = LeadStore(tmp_path / "empty.jsonl")
         assert store.count() == 0
+
+
+class TestLeadStoreDualWrite:
+    def test_dual_write_persists_to_both_backends(self, tmp_path):
+        from cls_db.database import Database
+        from cls_db.migrate import ensure_schema
+        from cls_db.repository import Repository
+
+        db = Database(tmp_path / "spec1.db")
+        ensure_schema(db)
+        store = LeadStore(tmp_path / "leads.jsonl", db=db)
+
+        lead = _make_lead(lead_id="l_dw_001")
+        store.save(lead)
+
+        # JSONL has it
+        jsonl_rows = list(store.read_all())
+        assert len(jsonl_rows) == 1
+        assert jsonl_rows[0]["lead_id"] == "l_dw_001"
+
+        # SQLite has it too
+        repo = Repository(db, "leads", pk_field="lead_id")
+        db_rows = repo.all()
+        assert len(db_rows) == 1
+        assert db_rows[0]["lead_id"] == "l_dw_001"
+
+    def test_dual_write_batch(self, tmp_path):
+        from cls_db.database import Database
+        from cls_db.migrate import ensure_schema
+        from cls_db.repository import Repository
+
+        db = Database(tmp_path / "spec1.db")
+        ensure_schema(db)
+        store = LeadStore(tmp_path / "leads.jsonl", db=db)
+
+        leads = [_make_lead(lead_id=f"l_batch_{i:03d}") for i in range(3)]
+        store.save_batch(leads)
+
+        jsonl_rows = list(store.read_all())
+        assert len(jsonl_rows) == 3
+
+        repo = Repository(db, "leads", pk_field="lead_id")
+        assert repo.count() == 3
+
+    def test_sqlite_failure_does_not_lose_jsonl(self, tmp_path):
+        from cls_db.database import Database
+        from cls_db.migrate import ensure_schema
+        import unittest.mock
+
+        db = Database(tmp_path / "spec1.db")
+        ensure_schema(db)
+        store = LeadStore(tmp_path / "leads.jsonl", db=db)
+
+        # Write a valid record, then break SQLite
+        store.save(_make_lead(lead_id="l_ok"))
+        with unittest.mock.patch.object(store._dual_writer.repo, "insert", side_effect=Exception("DB failure")):
+            store.save(_make_lead(lead_id="l_after_failure"))
+
+        jsonl_rows = list(store.read_all())
+        assert len(jsonl_rows) == 2
+
+    def test_jsonl_only_mode_still_works(self, tmp_path):
+        store = LeadStore(tmp_path / "leads.jsonl")
+        assert store._dual_writer is None
+        store.save(_make_lead())
+        assert store.count() == 1

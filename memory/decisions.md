@@ -47,7 +47,7 @@ consequential.
 ## ADR-003 — Dual-Write Persistence: JSONL Primary, SQLite Secondary
 
 **Date:** 2026-04-11
-**Status:** Active (partially implemented)
+**Status:** Active (expanded in v0.5.1)
 
 **Decision:** JSONL is the system of record — append-only, immutable, auditable.
 SQLite is a queryable index that can be rebuilt from the JSONL log at any time.
@@ -59,16 +59,20 @@ DB queries.
 `cat`, reconstructible from scratch, and immune to database corruption. The SQLite
 layer is a convenience that must never become a dependency.
 
-**Current coverage (as of v0.4):** Only `cls_verdicts/store.py` actually goes through
-`cls_db.dual_write`. `intelligence/store.py`, `cls_psyop/store.py`, `cls_leads/store.py`,
-and `cls_world_brief/store.py` are still JSONL-only. The decision stands; the
-implementation is incremental. Broader coverage is a roadmap goal, not a current
-property.
+**Current coverage (as of v0.5.1):**
+- `cls_verdicts/store.py` — always dual-writes.
+- `cls_leads/store.py` — opt-in dual-write via `db=` kwarg.
+- `cls_psyop/store.py` — opt-in dual-write via `db=` kwarg.
+- `intelligence/store.py`, `cls_world_brief/store.py` — still JSONL-only.
+
+Scalable read helpers added:
+- `cls_db.cursor_reader.JSONLCursorReader` — cursor-based forward pagination.
+- `cls_db.indexed_queries.IndexedQueryLayer` — limit-enforced SQLite queries.
+- `spec1_engine.tools.backfill_jsonl_to_db` — JSONL→SQLite migration CLI.
 
 **Tradeoff accepted:** JSONL and SQLite can diverge if a SQLite write fails. This is
-accepted because SQLite is the index, not the record. The current partial coverage
-also means most stores are inspectable only via `cat`, which is intentional during
-the dual-write rollout.
+accepted because SQLite is the index, not the record. The backfill tool allows
+re-syncing the two at any time.
 
 ---
 
