@@ -7,7 +7,7 @@ accumulated signals and anomalies and decides whether publication should fire.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Optional
 
 from cls_pdx1.models import Anomaly, AnomalyTier, Signal

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 
 from cls_pdx1.neutrality.tone import tone_gate, LOADED_VERBS
 from cls_pdx1.neutrality.attribution import attribution_gate

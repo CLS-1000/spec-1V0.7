@@ -46,7 +46,7 @@ def _parse_row(row: dict, fetched_at: datetime) -> Optional[Affiliation]:
         if not filer_name or not contributor_name:
             return None
 
-        from cls_pdx1.models import Official, Entity, Jurisdiction, _make_id
+        from cls_pdx1.models import Jurisdiction, _make_id
 
         official_id = _make_id("official", filer_name, "candidate", str(int(Jurisdiction.STATE_OREGON)))
         entity_id = _make_id("entity", contributor_name)

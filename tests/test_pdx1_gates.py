@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from datetime import date, datetime, timedelta
 
-import pytest
 
 from cls_pdx1.gates import (
     anomaly_publication_gate,

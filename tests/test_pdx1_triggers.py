@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-import pytest
 
 from cls_pdx1.models import Anomaly, AnomalyTier, Provenance, Signal
 from cls_pdx1.triggers import TriggerPolicy, TriggerState, evaluate_trigger

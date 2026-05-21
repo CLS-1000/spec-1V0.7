@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
-import pytest
 
-from cls_pdx1.models import Affiliation, Bill, BillStatus, ConfidenceTier, EdgeType, Jurisdiction, Provenance, Signal, _make_id
+from cls_pdx1.models import Affiliation, Bill, ConfidenceTier, EdgeType, Jurisdiction, Provenance, Signal, _make_id
 from cls_pdx1.pipeline import CycleResult, Pipeline
 from cls_pdx1.sources.base import AdapterResult, BaseAdapter
-from cls_pdx1.triggers import TriggerPolicy, TriggerState
+from cls_pdx1.triggers import TriggerPolicy
 from cls_pdx1.watch.base import WatchModule, WatchResult
 
 from datetime import date

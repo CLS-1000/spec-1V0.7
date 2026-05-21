@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from datetime import date, datetime
 
-import pytest
 
 from cls_pdx1.models import (
     Affiliation,
@@ -13,11 +12,9 @@ from cls_pdx1.models import (
     Bill,
     BillStatus,
     ConfidenceTier,
-    District,
     EdgeType,
     Entity,
     Issue,
-    IssueSection,
     Jurisdiction,
     Official,
     Provenance,

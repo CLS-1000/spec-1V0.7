@@ -10,7 +10,7 @@ from datetime import date, datetime, timezone
 from enum import IntEnum
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field
 
 
 def _now() -> datetime:

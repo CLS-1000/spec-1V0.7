@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import pytest
 
-from cls_pdx1.models import Signal
 from cls_pdx1.watch.base import WATCH_REGISTRY
 from cls_pdx1.watch.pge import PgeWatchModule
 from cls_pdx1.watch.nw_natural import NwNaturalWatchModule

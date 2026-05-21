@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from pathlib import Path
 
-import pytest
 
-from cls_pdx1.models import Anomaly, AnomalyTier, Issue, IssueSection, Provenance, Signal, _make_id
+from cls_pdx1.models import Anomaly, AnomalyTier, Issue, IssueSection, Provenance, Signal
 from cls_pdx1.publication.builder import IssueBuilder
 from cls_pdx1.publication.newsletter import to_markdown, write_markdown
 from cls_pdx1.publication.diagram import build_graph_data, write_diagram

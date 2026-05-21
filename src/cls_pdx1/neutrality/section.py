@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Optional
 
 from cls_pdx1.neutrality.attribution import attribution_gate
 from cls_pdx1.neutrality.tone import tone_gate

@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 
-import pytest
 
 from cls_pdx1.models import Affiliation, Bill, BillStatus, ConfidenceTier, EdgeType
 from cls_pdx1.sources.orestar import OrestarAdapter

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-import pytest
 
 from cls_pdx1.anomaly import RollingBaseline, _tier_from_sigma
 from cls_pdx1.models import AnomalyTier, Provenance, Signal

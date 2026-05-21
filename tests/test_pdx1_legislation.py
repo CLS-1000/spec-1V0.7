@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-import pytest
 
 from cls_pdx1.models import Bill, BillStatus, Jurisdiction, Provenance, _make_id
 from cls_pdx1.legislation.bills import BillTracker, advance_bill
@@ -104,7 +103,6 @@ class TestBillTracker:
     def test_active_bills_excludes_terminal(self):
         tracker = BillTracker()
         active = _bill(BillStatus.IN_COMMITTEE)
-        signed = _bill(BillStatus.SIGNED)
         signed_bill = Bill(
             bill_id=_make_id("bill", str(int(Jurisdiction.STATE_OREGON)), "HB 2000"),
             external_id="HB 2000",
