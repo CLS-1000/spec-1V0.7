@@ -10,6 +10,7 @@ from typing import Optional
 
 from spec1_core.core import ids, logging_utils
 from spec1_core.schemas.models import CaseFile, Signal
+from spec1_labels import PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_LOW
 
 logger = logging_utils.get_logger(__name__)
 
@@ -141,9 +142,9 @@ def update_case(
 
     # Recalculate confidence (simple: average over findings)
     if case.findings:
-        high_count = sum(1 for f in case.findings if "HIGH" in f.upper())
-        medium_count = sum(1 for f in case.findings if "MEDIUM" in f.upper())
-        low_count = sum(1 for f in case.findings if "LOW" in f.upper())
+        high_count = sum(1 for f in case.findings if PRIORITY_HIGH in f.upper())
+        medium_count = sum(1 for f in case.findings if PRIORITY_MEDIUM in f.upper())
+        low_count = sum(1 for f in case.findings if PRIORITY_LOW in f.upper())
         total = high_count + medium_count + low_count
         if total > 0:
             case.confidence = (high_count * 1.0 + medium_count * 0.5 + low_count * 0.0) / total
