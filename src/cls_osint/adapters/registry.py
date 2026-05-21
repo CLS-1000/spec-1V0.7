@@ -27,7 +27,7 @@ from __future__ import annotations
 
 import abc
 import threading
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import ClassVar, Dict, List, Optional, Type
 
 from cls_osint.schemas import OSINTRecord

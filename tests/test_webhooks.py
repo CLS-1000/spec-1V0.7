@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import json
 import os
 import threading
 import time
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 
 def _make_stats(run_id="run-001", signals=10, records=5, errors=None):

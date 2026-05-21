@@ -11,9 +11,8 @@ Expose via GET /metrics (Prometheus text format) and GET /metrics/json.
 from __future__ import annotations
 
 import threading
-import time
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List
 
 # ── Internal state ─────────────────────────────────────────────────────────────
