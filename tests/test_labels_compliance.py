@@ -16,7 +16,7 @@ import pytest
 SCRIPTS_DIR = Path(__file__).parent.parent / ".github" / "scripts"
 sys.path.insert(0, str(SCRIPTS_DIR))
 
-from check_hardcoded_labels import check_file, scan  # noqa: E402
+from check_hardcoded_labels import check_file  # noqa: E402
 
 
 SRC_DIR = Path(__file__).parent.parent / "src"
@@ -53,7 +53,7 @@ class TestCheckHardcodedLabels:
     def test_spec1_labels_itself_excluded(self):
         """spec1_labels.py must be excluded from the scan (it defines the labels)."""
         path = SRC_DIR / "spec1_labels.py"
-        violations = check_file(path)
+        check_file(path)  # call to exercise the exclude logic; result not asserted here
         # spec1_labels.py is in _EXCLUDES so check_file is called directly here;
         # the scan() function would skip it via _is_excluded() — we confirm here that
         # any violations in spec1_labels.py itself are *ignored by the scanner*

@@ -121,7 +121,7 @@ class DualWriter:
             ts_field=getattr(self.repo, "ts_field", "written_at"),
         )
         yield from reader.read_all_chunked(limit=limit)
-            
+
     def indexed_queries(self) -> "IndexedQueryLayer":
         """Return an :class:`cls_db.indexed_queries.IndexedQueryLayer` for this writer's table.
 
