@@ -23,6 +23,10 @@ class OpenCaseRequest(BaseModel):
     tags: Annotated[list[_Tag], Field(max_length=20)] = []
 
 
+class AddFindingRequest(BaseModel):
+    finding: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=4000)]
+
+
 @router.get("/cases")
 def list_cases(
     status: Optional[str] = Query(None, description="Filter by status: OPEN, CLOSED, WATCHING"),
@@ -60,6 +64,19 @@ def get_case(case_id: str) -> dict:
         return _get(case_id).to_dict()
     except ValueError as exc:
         raise HTTPException(status_code=404, detail=f"Case {case_id} not found") from exc
+
+
+@router.post("/cases/{case_id}/findings")
+def add_finding(case_id: str, req: AddFindingRequest) -> dict:
+    """Manually append a finding to an open investigation case."""
+    try:
+        from spec1_core.workspace.case import update_case as _update
+        case = _update(case_id, new_signals=[], new_finding=req.finding)
+        return case.to_dict()
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=f"Case {case_id} not found") from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @router.post("/cases/{case_id}/close")

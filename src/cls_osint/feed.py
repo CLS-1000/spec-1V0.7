@@ -173,7 +173,7 @@ async def _fetch_feed_bytes_async(
         # Graceful fallback: run synchronous fetch in thread executor
         loop = asyncio.get_event_loop()
         try:
-            records = await loop.run_in_executor(
+            await loop.run_in_executor(
                 None, lambda: list(fetch_feed(source, timeout=timeout, max_retries=max_retries))
             )
             return source, None, None  # sentinel; caller will handle sync fallback

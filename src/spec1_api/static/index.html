@@ -396,7 +396,7 @@
         <span class="nav-glyph">▣</span> Intel Records
       </div>
       <div class="nav-item" data-panel="panel-leads" onclick="showPanel('panel-leads')">
-        <span class="nav-glyph">◈</span> Leads
+        <span class="nav-glyph">→</span> Leads
       </div>
 
       <div class="nav-divider"></div>
@@ -423,7 +423,7 @@
         <span class="nav-glyph">⊞</span> Work Bench
       </div>
       <div class="nav-item" data-panel="panel-policy" onclick="showPanel('panel-policy')">
-        <span class="nav-glyph">⊡</span> Policy Desk
+        <span class="nav-glyph">⊘</span> Policy Desk
       </div>
 
       <div class="nav-divider"></div>
@@ -432,16 +432,16 @@
         <span class="nav-glyph">▷</span> Cycle
       </div>
       <div class="nav-item" data-panel="panel-verdicts" onclick="showPanel('panel-verdicts')">
-        <span class="nav-glyph">◻</span> Verdicts
+        <span class="nav-glyph">◧</span> Verdicts
       </div>
       <div class="nav-item" data-panel="panel-calibration" onclick="showPanel('panel-calibration')">
-        <span class="nav-glyph">⊞</span> Calibration
+        <span class="nav-glyph">⊟</span> Calibration
       </div>
 
       <div class="nav-divider"></div>
       <div class="nav-section">Tools</div>
       <div class="nav-item" data-panel="panel-local" onclick="showPanel('panel-local')">
-        <span class="nav-glyph">▷</span> Local Access
+        <span class="nav-glyph">≡</span> Local Access
       </div>
       <div class="nav-item" data-panel="panel-publications" onclick="showPanel('panel-publications')">
         <span class="nav-glyph">◫</span> Issue Generator
@@ -453,7 +453,7 @@
         <span class="nav-glyph">⊛</span> Portland Web ↗
       </a>
       <a class="nav-item" href="/spec1_political_web.html" target="_blank" rel="noopener noreferrer">
-        <span class="nav-glyph">◈</span> Intel Viewer ↗
+        <span class="nav-glyph">◉</span> Intel Viewer ↗
       </a>
     </nav>
 
@@ -788,7 +788,6 @@
         </div>
       </div>
 
-      <!-- ─────────────────────────── Work Bench ─────────────────────────── -->
       <!-- ──────────────────────────── Issue Generator ────────────────────────── -->
       <div class="panel" id="panel-publications">
         <div class="panel-title">◫ Issue Generator</div>
@@ -801,13 +800,14 @@
         <div id="pub-list-content"><div class="loading">Loading publications…</div></div>
       </div>
 
+      <!-- ────────────────────────────── Work Bench ──────────────────────────── -->
       <div class="panel" id="panel-workbench">
         <div class="panel-title">⊞ Work Bench</div>
         <div class="panel-sub">Active investigation cases — open, track, and close case files</div>
         <div style="display:flex;gap:10px;align-items:center;margin-bottom:18px;">
           <button class="action-btn" onclick="openNewCaseModal()">+ Open New Case</button>
           <div style="display:flex;gap:6px;margin-left:auto;">
-            <button class="action-btn" id="wb-filter-all" onclick="setWbFilter('all')">All</button>
+            <button class="action-btn" id="wb-filter-all" style="border-color:var(--border)" onclick="setWbFilter('all')">All</button>
             <button class="action-btn" id="wb-filter-open" onclick="setWbFilter('OPEN')">Open</button>
             <button class="action-btn" id="wb-filter-closed" onclick="setWbFilter('CLOSED')">Closed</button>
           </div>
@@ -1864,7 +1864,12 @@ async function loadWorkbench(offset) {
         <div class="case-detail">
           ${tags ? `<div class="case-tags" style="margin-bottom:10px">${tags}</div>` : ''}
           ${finds ? `<div class="case-findings">${finds}</div>` : '<p style="font-size:12px;color:var(--text-muted)">No findings yet.</p>'}
-          ${canClose ? `<div style="margin-top:12px"><button class="action-btn danger" data-close="${esc(c.case_id||'')}">Close Case</button></div>` : ''}
+          ${canClose ? `
+          <div style="margin-top:14px;display:flex;gap:8px;align-items:flex-start">
+            <textarea class="form-textarea" data-finding-input="${esc(c.case_id||'')}" rows="2" placeholder="Add a finding note…" style="flex:1;resize:vertical;min-height:56px"></textarea>
+            <button class="action-btn" data-add-finding="${esc(c.case_id||'')}" style="flex-shrink:0;align-self:flex-end">Add Finding</button>
+          </div>
+          <div style="margin-top:10px"><button class="action-btn danger" data-close="${esc(c.case_id||'')}">Close Case</button></div>` : ''}
         </div>
       </div>`;
   }).join('');
@@ -1931,6 +1936,29 @@ async function closeCase(cid) {
     errDiv.style.cssText = 'display:block;margin:8px 0';
     errDiv.textContent = 'Failed to close case: ' + detail;
     el.prepend(errDiv);
+  }
+}
+
+async function addFinding(cid, textarea, btn) {
+  const finding = (textarea.value || '').trim();
+  if (!finding) return;
+  btn.disabled = true;
+  const res = await apiPost(`/workspace/cases/${encodeURIComponent(cid)}/findings`, { finding });
+  btn.disabled = false;
+  if (res.ok) {
+    textarea.value = '';
+    loadWorkbench(_wbOff);
+  } else {
+    const msg = res.data?.detail || res.status || 'Unknown error';
+    let errDiv = textarea.parentNode.querySelector('.form-err');
+    if (!errDiv) {
+      errDiv = document.createElement('div');
+      errDiv.className = 'form-err';
+      errDiv.style.cssText = 'display:block;margin-top:6px;font-size:11px';
+      textarea.parentNode.appendChild(errDiv);
+    }
+    errDiv.textContent = 'Failed: ' + msg;
+    setTimeout(() => { if (errDiv.parentNode) errDiv.remove(); }, 4000);
   }
 }
 
@@ -2201,10 +2229,18 @@ function fallbackCopy(text) {
   const wbContent = document.getElementById('workbench-content');
   if (wbContent) {
     wbContent.addEventListener('click', function(e) {
+      const addBtn = e.target.closest('[data-add-finding]');
+      if (addBtn) {
+        e.stopPropagation();
+        const cid = addBtn.dataset.addFinding;
+        const textarea = wbContent.querySelector(`[data-finding-input="${cid}"]`);
+        if (textarea) addFinding(cid, textarea, addBtn);
+        return;
+      }
       const closeBtn = e.target.closest('[data-close]');
       if (closeBtn) { e.stopPropagation(); closeCase(closeBtn.dataset.close); return; }
       const card = e.target.closest('.case-card');
-      if (card) card.classList.toggle('expanded');
+      if (card && !e.target.closest('.case-detail')) card.classList.toggle('expanded');
     });
   }
 

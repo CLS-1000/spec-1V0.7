@@ -136,21 +136,30 @@ def create_app() -> FastAPI:
         )
         return response
 
-    app.include_router(health.router)
-    app.include_router(signals.router)
-    app.include_router(intel.router)
-    app.include_router(leads.router)
-    app.include_router(brief.router)
-    app.include_router(psyop.router)
-    app.include_router(fara.router)
-    app.include_router(cycle.router)
-    app.include_router(verdicts.router)
-    app.include_router(calibration.router)
-    app.include_router(publication.router)
-    app.include_router(workspace.router)
-    app.include_router(leg_jud.router)
-    app.include_router(metrics.router)
-    app.include_router(adapters.router)
+    _V1 = "/api/v1"
+    app.include_router(health.router)        # GET /health  (no prefix — public)
+    app.include_router(metrics.router)       # GET /metrics (no prefix — public)
+    app.include_router(signals.router, prefix=_V1)
+    app.include_router(intel.router, prefix=_V1)
+    app.include_router(leads.router, prefix=_V1)
+    app.include_router(brief.router, prefix=_V1)
+    app.include_router(psyop.router, prefix=_V1)
+    app.include_router(fara.router, prefix=_V1)
+    app.include_router(cycle.router, prefix=_V1)
+    app.include_router(verdicts.router, prefix=_V1)
+    app.include_router(calibration.router, prefix=_V1)
+    app.include_router(publication.router, prefix=_V1)
+    app.include_router(workspace.router, prefix=_V1)
+    app.include_router(leg_jud.router, prefix=_V1)
+    app.include_router(adapters.router, prefix=_V1)
+
+    @app.get("/verdicts/", include_in_schema=False)
+    async def verdicts_ui() -> FileResponse:
+        """Serve the verdict-filing web UI."""
+        path = _STATIC_DIR / "verdicts.html"
+        if not path.is_file():
+            raise HTTPException(status_code=404, detail="Verdicts UI not found")
+        return FileResponse(path, media_type="text/html")
 
     if _political_web_enabled():
         from spec1_api.routers import ingest, nodes

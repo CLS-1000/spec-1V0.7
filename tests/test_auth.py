@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -62,23 +62,23 @@ class TestPublicPaths:
 
 class TestProtectedPaths:
     def test_intel_without_key_returns_403(self, app_with_key):
-        r = app_with_key.get("/intel")
+        r = app_with_key.get("/api/v1/intel")
         assert r.status_code == 403
 
     def test_intel_with_wrong_key_returns_403(self, app_with_key):
-        r = app_with_key.get("/intel", headers={"X-API-Key": "wrong-key"})
+        r = app_with_key.get("/api/v1/intel", headers={"X-API-Key": "wrong-key"})
         assert r.status_code == 403
 
     def test_intel_with_correct_header_key_passes(self, app_with_key):
-        r = app_with_key.get("/intel", headers={"X-API-Key": "test-secret-key"})
+        r = app_with_key.get("/api/v1/intel", headers={"X-API-Key": "test-secret-key"})
         assert r.status_code == 200
 
     def test_intel_with_correct_query_param_passes(self, app_with_key):
-        r = app_with_key.get("/intel?api_key=test-secret-key")
+        r = app_with_key.get("/api/v1/intel?api_key=test-secret-key")
         assert r.status_code == 200
 
     def test_403_response_has_detail(self, app_with_key):
-        r = app_with_key.get("/intel")
+        r = app_with_key.get("/api/v1/intel")
         assert "detail" in r.json()
 
 
@@ -86,11 +86,11 @@ class TestProtectedPaths:
 
 class TestNoKeyConfigured:
     def test_intel_accessible_without_key(self, app_no_key):
-        r = app_no_key.get("/intel")
+        r = app_no_key.get("/api/v1/intel")
         assert r.status_code == 200
 
     def test_signals_accessible_without_key(self, app_no_key):
-        r = app_no_key.get("/signals")
+        r = app_no_key.get("/api/v1/signals")
         assert r.status_code == 200
 
 
