@@ -25,26 +25,39 @@ from typing import Iterator, Optional, Tuple
 class Cursor:
     """Opaque forward pagination token for JSONL files.
 
-    The cursor stores the ``written_at`` timestamp and ``record_id`` of the
-    last record returned, which together identify a unique position in the
-    append-only log.  Use ``to_string()`` / ``from_string()`` to
+    The cursor stores the ``written_at`` timestamp, ``record_id``, and a byte
+    offset into the file.  The byte offset allows :meth:`JSONLCursorReader.read_chunk`
+    to seek directly to the correct position rather than scanning from the
+    beginning on each page.  Use ``to_string()`` / ``from_string()`` to
     serialise/deserialise across HTTP or MCP calls.
     """
 
     start_ts: str
     start_id: str
+    byte_offset: int = 0
 
     def to_string(self) -> str:
         """Serialise to a compact opaque string."""
-        return f"{self.start_ts}|{self.start_id}"
+        return f"{self.start_ts}|{self.start_id}|{self.byte_offset}"
 
     @classmethod
     def from_string(cls, token: str) -> "Cursor":
-        """Deserialise from ``to_string()`` output."""
+        """Deserialise from ``to_string()`` output.
+
+        Accepts both the legacy two-part format (``ts|id``) for backward
+        compatibility and the current three-part format (``ts|id|offset``).
+        """
         if "|" not in token:
             raise ValueError(f"Invalid cursor token: {token!r}")
-        ts, _, rid = token.partition("|")
-        return cls(start_ts=ts, start_id=rid)
+        parts = token.split("|", 2)
+        if len(parts) == 2:
+            # Legacy token without byte_offset — fall back to start of file.
+            return cls(start_ts=parts[0], start_id=parts[1], byte_offset=0)
+        try:
+            offset = int(parts[2])
+        except ValueError:
+            offset = 0
+        return cls(start_ts=parts[0], start_id=parts[1], byte_offset=offset)
 
     def __lt__(self, other: "Cursor") -> bool:
         return (self.start_ts, self.start_id) < (other.start_ts, other.start_id)
@@ -92,6 +105,11 @@ class JSONLCursorReader:
         Pass the returned ``next_cursor`` back on the next call to advance.
         Returns ``(records, None)`` on the final page.
 
+        When *cursor* carries a ``byte_offset`` (all cursors produced by this
+        method do), reading seeks directly to that file position — no O(n²)
+        scan from the beginning.  Legacy cursor tokens without a byte offset
+        (``byte_offset == 0``) fall back to reading from the start of the file.
+
         Parameters
         ----------
         cursor:
@@ -106,10 +124,18 @@ class JSONLCursorReader:
             return [], None
 
         records: list[dict] = []
-        after_cursor = cursor is None  # start collecting immediately if no cursor
+        last_offset: int = 0  # byte offset after the last collected record
 
         with self.path.open("r", encoding="utf-8") as fh:
-            for raw_line in fh:
+            # Seek directly to the resume position when a valid byte offset is
+            # available, avoiding a full-file scan on each page.
+            if cursor is not None and cursor.byte_offset > 0:
+                fh.seek(cursor.byte_offset)
+
+            while len(records) < effective_limit:
+                raw_line = fh.readline()
+                if not raw_line:  # EOF
+                    break
                 line = raw_line.strip()
                 if not line:
                     continue
@@ -118,16 +144,8 @@ class JSONLCursorReader:
                 except json.JSONDecodeError:
                     continue
 
-                if not after_cursor:
-                    ts = record.get(self.ts_field, "")
-                    rid = record.get(self.id_field, "")
-                    if (ts, rid) == (cursor.start_ts, cursor.start_id):
-                        after_cursor = True
-                    continue  # skip records up to and including the cursor position
-
                 records.append(record)
-                if len(records) >= effective_limit:
-                    break
+                last_offset = fh.tell()
 
         if not records:
             return [], None
@@ -140,6 +158,7 @@ class JSONLCursorReader:
         next_cursor = Cursor(
             start_ts=last.get(self.ts_field, ""),
             start_id=last.get(self.id_field, ""),
+            byte_offset=last_offset,
         )
         return records, next_cursor
 

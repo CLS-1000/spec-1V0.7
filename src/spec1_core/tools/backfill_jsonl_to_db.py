@@ -80,30 +80,40 @@ def backfill(
     errors = 0
     batch: list[dict] = []
 
-    def _flush(b: list[dict]) -> int:
+    def _flush(b: list[dict]) -> tuple[int, int]:
+        """Return (inserted_count, error_count) for the batch."""
         try:
             repo.insert_batch(b)
-            return len(b)
+            return len(b), 0
         except Exception as exc:
             logger.warning("Batch insert failed (%d records): %s", len(b), exc)
             # Fall back to per-record inserts
-            count = 0
+            ok = 0
+            errs = 0
             for rec in b:
                 try:
                     repo.insert(rec)
-                    count += 1
+                    ok += 1
                 except Exception as rec_exc:
-                    logger.warning("Record insert failed [%s=%s]: %s", pk_field, rec.get(pk_field), rec_exc)
-            return count
+                    logger.warning(
+                        "Record insert failed [%s=%s]: %s",
+                        pk_field, rec.get(pk_field), rec_exc,
+                    )
+                    errs += 1
+            return ok, errs
 
     for record in _iter_jsonl(jsonl_path):
         batch.append(record)
         if len(batch) >= batch_size:
-            inserted += _flush(batch)
+            ok, errs = _flush(batch)
+            inserted += ok
+            errors += errs
             batch = []
 
     if batch:
-        inserted += _flush(batch)
+        ok, errs = _flush(batch)
+        inserted += ok
+        errors += errs
 
     db_count = repo.count()
     return {
@@ -123,10 +133,10 @@ def verify_parity(
 ) -> dict:
     """Count records in both backends and report mismatches.
 
-    Does **not** write any data.
+    Does **not** write any data — no schema migrations are run.  If the
+    database or table does not exist, the DB count is reported as 0.
     """
     from cls_db.database import Database
-    from cls_db.migrate import ensure_schema
     from cls_db.repository import Repository
 
     jsonl_count = sum(1 for _ in _iter_jsonl(jsonl_path))
@@ -135,11 +145,11 @@ def verify_parity(
         db_count = 0
     else:
         db = Database(db_path)
-        ensure_schema(db)
         repo = Repository(db, table)
         try:
             db_count = repo.count()
         except Exception:
+            # Table may not exist yet — treat as 0.
             db_count = 0
 
     in_sync = jsonl_count == db_count

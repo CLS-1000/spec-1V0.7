@@ -63,6 +63,30 @@ _EXCLUDES: tuple[str, ...] = (
     "node_modules",
 )
 
+# Reverse mapping: label *value* → canonical constant name in spec1_labels.
+# Used to produce accurate, actionable violation messages.
+_LABEL_TO_CONSTANT: dict[str, str] = {
+    "CRITICAL":    "PRIORITY_CRITICAL",
+    "HIGH_RISK":   "PSYOP_HIGH_RISK",
+    "MEDIUM_RISK": "PSYOP_MEDIUM_RISK",
+    "LOW_RISK":    "PSYOP_LOW_RISK",
+    "CLEAN":       "PSYOP_CLEAN",
+    # Ambiguous single-word values — list the most likely candidates.
+    "HIGH":   "PRIORITY_HIGH or THREAT_HIGH",
+    "MEDIUM": "PRIORITY_MEDIUM or THREAT_MEDIUM",
+    "LOW":    "PRIORITY_LOW or THREAT_LOW",
+}
+
+
+def _violation_message(value: str) -> str:
+    constant = _LABEL_TO_CONSTANT.get(value)
+    if constant:
+        return (
+            f"Import the canonical constant from spec1_labels "
+            f"(e.g. spec1_labels.{constant}) instead of bare string {value!r}"
+        )
+    return f"Import the canonical constant from spec1_labels instead of bare string {value!r}"
+
 
 def _is_excluded(path: Path) -> bool:
     parts = path.parts
@@ -99,10 +123,11 @@ def check_file(path: Path) -> list[tuple[int, str, str]]:
     except (SyntaxError, UnicodeDecodeError):
         return violations
 
+    all_labels = CANONICAL_LABELS | set(_CONTEXT_SENSITIVE.keys())
     for lineno, value in _extract_string_literals(tree):
-        if value in CANONICAL_LABELS and _relevant_context(path, value):
+        if value in all_labels and _relevant_context(path, value):
             violations.append(
-                (lineno, value, f"Use spec1_labels.{value} instead of bare string {value!r}")
+                (lineno, value, _violation_message(value))
             )
     return violations
 

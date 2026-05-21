@@ -23,12 +23,19 @@ Typical usage::
 
 from __future__ import annotations
 
+import re
 from typing import Any, Optional
 
 from cls_db.repository import Repository
 
 
 _DEFAULT_LIMIT = 100
+
+# Strict identifier pattern: letters, digits, and underscores only; must start
+# with a letter or underscore.  Used to prevent SQL injection when column names
+# or sort columns are interpolated into raw SQL.
+_IDENT_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+_VALID_DIRECTIONS = frozenset({"ASC", "DESC"})
 
 
 class IndexedQueryLayer:
@@ -119,11 +126,38 @@ class IndexedQueryLayer:
             Maximum rows to return.
         order_by:
             Column to sort by.  Defaults to ``rowid`` (insertion order).
+            Must match ``^[A-Za-z_][A-Za-z0-9_]*$`` to prevent SQL injection.
         order_dir:
             ``"ASC"`` or ``"DESC"``.
+
+        Raises
+        ------
+        ValueError
+            If any column name in *filters* or *order_by* contains invalid
+            characters, or if *order_dir* is not ``"ASC"`` or ``"DESC"``.
         """
+        # Validate order_dir before any SQL is built.
+        order_dir_upper = order_dir.upper()
+        if order_dir_upper not in _VALID_DIRECTIONS:
+            raise ValueError(
+                f"order_dir must be 'ASC' or 'DESC', got {order_dir!r}"
+            )
+
+        # Validate order_by column identifier.
+        if not _IDENT_RE.match(order_by):
+            raise ValueError(
+                f"order_by contains invalid identifier: {order_by!r}"
+            )
+
         if not filters:
             return self.page(limit=limit)
+
+        # Validate every filter column name.
+        for col in filters:
+            if not _IDENT_RE.match(col):
+                raise ValueError(
+                    f"Filter column contains invalid identifier: {col!r}"
+                )
 
         n = limit if limit is not None else self.default_limit
         where_clauses = [f"{col} = ?" for col in filters]
@@ -131,7 +165,7 @@ class IndexedQueryLayer:
         sql = (
             f"SELECT * FROM {self.repo.table}"
             f" WHERE {' AND '.join(where_clauses)}"
-            f" ORDER BY {order_by} {order_dir}"
+            f" ORDER BY {order_by} {order_dir_upper}"
             f" LIMIT ?"
         )
         params.append(n)
