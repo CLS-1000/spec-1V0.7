@@ -16,44 +16,44 @@ import pytest
 SCRIPTS_DIR = Path(__file__).parent.parent / ".github" / "scripts"
 sys.path.insert(0, str(SCRIPTS_DIR))
 
-from check_hardcoded_labels import check_file, scan  # noqa: E402
+from check_hardcoded_labels import check_file  # noqa: E402
 
 
 SRC_DIR = Path(__file__).parent.parent / "src"
+
+# Modules have moved under spec1_analytics/ — use canonical paths.
+_LEADS_GENERATOR = SRC_DIR / "spec1_analytics" / "cls_leads" / "generator.py"
+_PSYOP_PATTERNS = SRC_DIR / "spec1_analytics" / "cls_psyop" / "patterns.py"
+_PSYOP_SCORER = SRC_DIR / "spec1_analytics" / "cls_psyop" / "scorer.py"
 
 
 class TestCheckHardcodedLabels:
     def test_cls_leads_generator_clean(self):
         """cls_leads/generator.py must not contain hardcoded priority strings."""
-        path = SRC_DIR / "cls_leads" / "generator.py"
-        violations = check_file(path)
+        violations = check_file(_LEADS_GENERATOR)
         assert violations == [], (
-            f"Found hardcoded labels in {path}:\n"
+            f"Found hardcoded labels in {_LEADS_GENERATOR}:\n"
             + "\n".join(f"  line {ln}: {label}" for ln, label, _ in violations)
         )
 
     def test_cls_psyop_patterns_clean(self):
         """cls_psyop/patterns.py must not contain hardcoded threat level strings."""
-        path = SRC_DIR / "cls_psyop" / "patterns.py"
-        violations = check_file(path)
+        violations = check_file(_PSYOP_PATTERNS)
         assert violations == [], (
-            f"Found hardcoded labels in {path}:\n"
+            f"Found hardcoded labels in {_PSYOP_PATTERNS}:\n"
             + "\n".join(f"  line {ln}: {label}" for ln, label, _ in violations)
         )
 
     def test_cls_psyop_scorer_clean(self):
         """cls_psyop/scorer.py must not contain hardcoded risk classification strings."""
-        path = SRC_DIR / "cls_psyop" / "scorer.py"
-        violations = check_file(path)
+        violations = check_file(_PSYOP_SCORER)
         assert violations == [], (
-            f"Found hardcoded labels in {path}:\n"
+            f"Found hardcoded labels in {_PSYOP_SCORER}:\n"
             + "\n".join(f"  line {ln}: {label}" for ln, label, _ in violations)
         )
 
     def test_spec1_labels_itself_excluded(self):
         """spec1_labels.py must be excluded from the scan (it defines the labels)."""
-        path = SRC_DIR / "spec1_labels.py"
-        violations = check_file(path)
         # spec1_labels.py is in _EXCLUDES so check_file is called directly here;
         # the scan() function would skip it via _is_excluded() — we confirm here that
         # any violations in spec1_labels.py itself are *ignored by the scanner*
