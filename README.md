@@ -65,10 +65,14 @@ RSS / FARA / Congress / Narrative
 ## Quick Start
 
 ```bash
+# Note: pip install -e ".[dev]" has a known sgmllib3k build issue (feedparser transitive).
+# Workaround: use `uv pip install --system -e ".[dev]"` or install with uv.
+# See FALLBACK_SETUP.md for details.
+
 bash scripts/setup_dev.sh
 
 # Or manually:
-pip install -e ".[dev]"
+uv pip install --system -e ".[dev]"
 cp .env.example .env  # set ANTHROPIC_API_KEY
 ```
 
@@ -103,15 +107,33 @@ cp .env.example .env  # edit — set ANTHROPIC_API_KEY at minimum
 | `SPEC1_FEED_TIMEOUT` | `15` | Feed fetch timeout (seconds) |
 | `SPEC1_RUN_ON_START` | `false` | Run one cycle immediately on API startup |
 
-## Key Sources
+## Modules at a Glance
 
-**RSS Feeds**
-- War on the Rocks, Cipher Brief, Just Security, RAND, Atlantic Council, Defense One
+**Core Intelligence Pipeline**
+- `spec1_engine` — canonical 7-stage cycle (harvest → parse → score → investigate → verify → analyze → store)
+- `cls_osint` — RSS/FARA/Congressional/Narrative adapters with feed registry
+- `spec1_api` — FastAPI service with scheduler, dual-write persistence, MCP server
 
-**OSINT Adapters**
-- FARA (Foreign Agents Registration Act) filings
-- Congressional records (bills, hearings)
-- Narrative / influence-operation tracking
+**Intelligence Products & Analysis**
+- `cls_world_brief` — Daily structured intelligence brief (Claude Sonnet writer, rule-based fallback)
+- `cls_leads` — Actionable leads extracted from scored records
+- `cls_psyop` — Psychological-operation pattern detection and scoring
+- `cls_leg_jud` — Legislative and judicial desk tracking
+- `cls_pdx1` — PDX-1i Metro Citizens Brief (Portland bi-state metro elected officials, entities, districts)
+- `cls_db` — Append-only JSONL + SQLite dual-write persistence
+
+**Intelligence Operations**
+- `spec1_engine.workspace` — Case management CLI for investigation tracking
+- `spec1_engine.app.publishers.x` — X/Twitter thread publication (with idempotency log)
+- `spec1_engine.llm` — Three-tier fallback client (Claude Sonnet → Ollama → rule-based)
+- `cls_verdicts` — Human ground-truth verdict collection (append-only)
+- `cls_calibration` — Drift detection and threshold proposal (descriptive only, human-decided)
+
+**Data Sources**
+
+- **RSS Feeds:** War on the Rocks, Cipher Brief, Just Security, RAND, Atlantic Council, Defense One
+- **OSINT Adapters:** FARA (Foreign Agents Registration Act) filings, Congressional records (bills, hearings), Narrative/influence-operation tracking, State-level political data (Oregon OLIS, ORESTAR; Washington PDC)
+- **Equities Watchlist:** Defense primes, cybersecurity vendors, energy majors, macro instruments (via yfinance)
 
 ## API Endpoints
 

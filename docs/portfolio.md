@@ -137,17 +137,41 @@ A FastAPI application wraps the pipeline for operational use. The API exposes en
 
 ---
 
+## Recent Expansions
+
+### Legislative & Judicial Desk (`cls_leg_jud`)
+A parallel intelligence product tracking legislative activity and judicial proceedings. Monitors bills, hearings, and court actions; scores by relevance to defense, national security, and technology policy; produces a daily desk brief alongside the world brief.
+
+### PDX-1i Metro Citizens Brief (`cls_pdx1`)
+A regional intelligence module for Portland's bi-state metro area (Multnomah, Washington, Clackamas OR; Clark WA). Tracks elected officials across 8 jurisdictions, their district assignments, and ties to 17 monitored entities (utilities, universities, transit, law enforcement). Seeds verified data, resolves officials via fuzzy matching, detects anomalies (vacancies, rapid transitions), and publishes findings as structured "Issues" in PDF + markdown + D3 diagrams.
+
+Current focus: Metro Council President vacancy (Lynn Peterson resignation, Duncan Hwang acting president, appointment deadline June 11, 2026).
+
+### Three-Tier LLM Fallback (`spec1_engine.llm`)
+An operational resilience pattern: when Claude is unavailable or expensive, fall back to local Ollama, then to rule-based templating. Every major analysis point that calls an LLM is protected by this fallback chain. Prevents service interruptions and enables offline/low-cost operation paths.
+
+### Operations & Publishing
+- **Workspace CLI** (`spec1_engine.workspace`) — case management for investigation tracking, analyst notes, verdict filing
+- **X/Twitter Publisher** (`spec1_engine.app.publishers.x`) — thread publication with idempotency log, rate-limit aware
+- **Publication Export** — PDF (via weasyprint subprocess) and markdown rendering for standalone briefs and analysis docs
+
+---
+
 ## Technical Summary
 
 | Dimension | Detail |
 |---|---|
-| Language | Python 3.11+ |
-| Pipeline stages | 7 (harvest → store) |
-| Signal sources | RSS feeds from 6 authoritative publishers |
-| Scoring framework | 4-gate deterministic filter |
-| AI integration | Claude Haiku (verification), Claude Sonnet (briefing) |
+| Language | Python 3.9–3.12 |
+| Modules | 51 (core engine, 8 intelligence products, 3 persistence/infrastructure) |
+| Pipeline stages | 7 (harvest → analyze → store) |
+| Test suite | 1,009 tests passing across 37 files |
+| Signal sources | RSS (6 publishers), FARA, Congressional records, state political data, narrative/influence ops |
+| Scoring framework | 4-gate deterministic filter (credibility, volume, velocity, novelty) |
+| AI integration | Claude Haiku (verification, low-cost), Claude Sonnet (briefing, LLM fallback), Ollama (offline), rule-based (always-available) |
+| Regional intelligence | PDX-1i metro (57 officials, 40 districts, 17 entities, live OLIS/ORESTAR feeds) |
 | Market signals | 4-sector equity watchlist via yfinance |
-| Persistence | Append-only JSONL (source of truth); SQLite dual-write for verdicts |
+| Persistence | Append-only JSONL (audit log, source of truth); SQLite dual-write for queries; rebuild-safe |
+| Operations | FastAPI HTTP service + APScheduler daily cron + MCP tools for Claude + CLI workspace |
 | API | FastAPI + APScheduler |
 | Feedback loop | `cls_verdicts` (human verdicts) + `cls_calibration` (drift report, descriptive only) |
 | Tests | ~825 collected pytest tests across 30 files |
