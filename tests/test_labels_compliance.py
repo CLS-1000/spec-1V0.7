@@ -31,6 +31,8 @@ class TestCheckHardcodedLabels:
     def test_cls_leads_generator_clean(self):
         """cls_leads/generator.py must not contain hardcoded priority strings."""
         violations = check_file(_LEADS_GENERATOR)
+        path = SRC_DIR / "spec1_analytics" / "cls_leads" / "generator.py"
+        violations = check_file(path)
         assert violations == [], (
             f"Found hardcoded labels in {_LEADS_GENERATOR}:\n"
             + "\n".join(f"  line {ln}: {label}" for ln, label, _ in violations)
@@ -39,6 +41,8 @@ class TestCheckHardcodedLabels:
     def test_cls_psyop_patterns_clean(self):
         """cls_psyop/patterns.py must not contain hardcoded threat level strings."""
         violations = check_file(_PSYOP_PATTERNS)
+        path = SRC_DIR / "spec1_analytics" / "cls_psyop" / "patterns.py"
+        violations = check_file(path)
         assert violations == [], (
             f"Found hardcoded labels in {_PSYOP_PATTERNS}:\n"
             + "\n".join(f"  line {ln}: {label}" for ln, label, _ in violations)
@@ -47,6 +51,8 @@ class TestCheckHardcodedLabels:
     def test_cls_psyop_scorer_clean(self):
         """cls_psyop/scorer.py must not contain hardcoded risk classification strings."""
         violations = check_file(_PSYOP_SCORER)
+        path = SRC_DIR / "spec1_analytics" / "cls_psyop" / "scorer.py"
+        violations = check_file(path)
         assert violations == [], (
             f"Found hardcoded labels in {_PSYOP_SCORER}:\n"
             + "\n".join(f"  line {ln}: {label}" for ln, label, _ in violations)
@@ -54,6 +60,8 @@ class TestCheckHardcodedLabels:
 
     def test_spec1_labels_itself_excluded(self):
         """spec1_labels.py must be excluded from the scan (it defines the labels)."""
+        path = SRC_DIR / "spec1_labels.py"
+        check_file(path)  # call to exercise the exclude logic; result not asserted here
         # spec1_labels.py is in _EXCLUDES so check_file is called directly here;
         # the scan() function would skip it via _is_excluded() — we confirm here that
         # any violations in spec1_labels.py itself are *ignored by the scanner*
