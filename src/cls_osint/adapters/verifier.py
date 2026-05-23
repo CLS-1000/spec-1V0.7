@@ -10,9 +10,13 @@ import hashlib
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Sequence
+from typing import TYPE_CHECKING, Sequence
 
 from cls_osint.schemas import FaraRecord, CongressRecord, NarrativeRecord, OSINTRecord
+from spec1_labels import VERIF_CORROBORATED, VERIF_PARTIAL, VERIF_UNVERIFIED
+
+if TYPE_CHECKING:
+    from cls_osint.schemas import JudicialRecord, StateLegRecord
 
 
 @dataclass
@@ -69,12 +73,12 @@ def _text_overlap(claim_kw: set[str], record_text: str) -> float:
 
 def _classify(score: float, count: int) -> str:
     if score >= 0.7 and count >= 2:
-        return "CORROBORATED"
+        return VERIF_CORROBORATED
     if score >= 0.4 or count >= 2:
-        return "PARTIAL"
+        return VERIF_PARTIAL
     if score > 0 and count >= 1:
-        return "UNVERIFIED"
-    return "UNVERIFIED"
+        return VERIF_UNVERIFIED
+    return VERIF_UNVERIFIED
 
 
 def verify_claim(
@@ -146,4 +150,22 @@ def verify_narrative(
 ) -> VerificationResult:
     """Verify a narrative record against the broader OSINT corpus."""
     claim = record.theme + " " + record.description
+    return verify_claim(claim, osint_records)
+
+
+def verify_judicial_record(
+    record: "JudicialRecord",
+    osint_records: Sequence[OSINTRecord],
+) -> VerificationResult:
+    """Verify a judicial record against the broader OSINT corpus."""
+    claim = f"Judge {record.judge} {record.action_type} in {record.court}: {record.case_ref}"
+    return verify_claim(claim, osint_records)
+
+
+def verify_state_leg_record(
+    record: "StateLegRecord",
+    osint_records: Sequence[OSINTRecord],
+) -> VerificationResult:
+    """Verify a state legislative record against the broader OSINT corpus."""
+    claim = f"{record.bill_id} {record.title} sponsored by {record.sponsor} in {record.state}"
     return verify_claim(claim, osint_records)

@@ -1,17 +1,16 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-
 name: Python package
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "dev" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "dev" ]
+
+permissions:
+  contents: read
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -20,23 +19,53 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip setuptools wheel
-        python -m pip install flake8
-        pip install -e ".[dev,quant]"
-    - name: Lint with flake8
+        python -m pip install --upgrade pip wheel setuptools
+        pip install -e ".[dev]"
+        pip install ruff bandit[toml] coverage pytest-cov
+
+    - name: Check hardcoded labels
+      run: python .github/scripts/check_hardcoded_labels.py
+
+    - name: Lint with ruff
+      run: ruff check src/ tests/
+
+    - name: Security check with bandit
       run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
+        bandit -r src/ --severity-level medium -f json -o bandit-report.json
+        python -c "
+        import json, sys
+        try:
+            d = json.load(open('bandit-report.json'))
+            high_count = d['metrics']['_totals'].get('SEVERITY.HIGH', 0)
+            medium_count = d['metrics']['_totals'].get('SEVERITY.MEDIUM', 0)
+            if high_count > 0:
+                print(f'❌ bandit: {high_count} HIGH severity issue(s) found')
+                sys.exit(1)
+            elif medium_count > 0:
+                print(f'⚠️  bandit: {medium_count} MEDIUM severity issue(s) found (allowed, but review recommended)')
+            else:
+                print('✓ bandit: no HIGH or MEDIUM severity issues')
+        except Exception as e:
+            print(f'Error parsing bandit report: {e}')
+            sys.exit(1)
+        "
+
+    - name: Test with pytest + coverage
       env:
         PYTHONPATH: src
       run: |
-        pytest
+        pytest --cov=src --cov-report=xml --cov-report=term-missing -q
+
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./coverage.xml
+      continue-on-error: true

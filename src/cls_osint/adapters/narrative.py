@@ -7,12 +7,12 @@ amplification patterns, and potential influence operations.
 from __future__ import annotations
 
 import hashlib
-import re
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from typing import Sequence
 
 from cls_osint.schemas import NarrativeRecord, OSINTRecord
+from spec1_labels import SENTIMENT_NEGATIVE, SENTIMENT_NEUTRAL, SENTIMENT_MIXED, SENTIMENT_POSITIVE
 
 
 # Known narrative themes with seed keywords
@@ -95,12 +95,12 @@ def _detect_sentiment(text: str) -> str:
     neg_count = sum(1 for w in negative_words if w in text_lower)
     pos_count = sum(1 for w in positive_words if w in text_lower)
     if neg_count > pos_count + 2:
-        return "NEGATIVE"
+        return SENTIMENT_NEGATIVE
     if pos_count > neg_count + 2:
-        return "POSITIVE"
+        return SENTIMENT_POSITIVE
     if neg_count > 0 and pos_count > 0:
-        return "MIXED"
-    return "NEUTRAL"
+        return SENTIMENT_MIXED
+    return SENTIMENT_NEUTRAL
 
 
 def _detect_amplifiers(records: list[OSINTRecord], theme_keywords: list[str]) -> list[str]:

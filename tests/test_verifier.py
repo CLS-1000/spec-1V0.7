@@ -1,4 +1,4 @@
-"""Tests for the Claude-backed investigation verifier."""
+"""Tests for the three-tier LLM investigation verifier."""
 
 from __future__ import annotations
 
@@ -7,14 +7,18 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spec1_engine.schemas.models import Investigation, Outcome
-from spec1_engine.investigation.verifier import (
+from spec1_core.schemas.models import Investigation, Outcome
+from spec1_core.investigation.verifier import (
     verify_investigation,
     _build_user_prompt,
     _fallback_outcome,
     VALID_CLASSIFICATIONS,
     MODEL,
 )
+
+# Patch target for Ollama health check used in FallbackLLMClient
+_OLLAMA_RUNNING = "spec1_core.llm.ollama_manager.is_running"
+_OLLAMA_SPAWN = "spec1_core.llm.ollama_manager.spawn"
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -275,20 +279,21 @@ def test_invalid_classification_falls_back_to_investigate():
 
 # ─── API failure → fallback, no exception raised ─────────────────────────────
 
-def test_api_failure_returns_fallback():
-    """API raises an exception — should return fallback Outcome, not crash."""
+def test_api_failure_returns_valid_outcome():
+    """API raises an exception — Tier 3 takes over; a valid Outcome is returned."""
     inv = make_investigation()
 
     with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
         with patch("anthropic.Anthropic") as MockClient:
             instance = MockClient.return_value
             instance.messages.create.side_effect = Exception("Connection timeout")
-
-            outcome = verify_investigation(inv)
+            with patch(_OLLAMA_RUNNING, return_value=False):
+                with patch(_OLLAMA_SPAWN, return_value=False):
+                    outcome = verify_investigation(inv)
 
     assert isinstance(outcome, Outcome)
-    assert outcome.classification == "INVESTIGATE"
-    assert outcome.confidence == 0.0
+    assert outcome.classification in VALID_CLASSIFICATIONS
+    assert 0.0 <= outcome.confidence <= 1.0
 
 
 def test_api_failure_does_not_raise():
@@ -299,31 +304,34 @@ def test_api_failure_does_not_raise():
         with patch("anthropic.Anthropic") as MockClient:
             instance = MockClient.return_value
             instance.messages.create.side_effect = RuntimeError("Network error")
+            with patch(_OLLAMA_RUNNING, return_value=False):
+                with patch(_OLLAMA_SPAWN, return_value=False):
+                    try:
+                        verify_investigation(inv)
+                    except Exception as exc:
+                        pytest.fail(f"verify_investigation raised unexpectedly: {exc}")
 
-            try:
-                verify_investigation(inv)
-            except Exception as exc:
-                pytest.fail(f"verify_investigation raised unexpectedly: {exc}")
 
-
-def test_api_rate_limit_returns_fallback():
-    """Rate limit error returns fallback gracefully."""
+def test_api_rate_limit_falls_to_tier3():
+    """Rate limit error falls through to Tier 3 — valid Outcome returned."""
     inv = make_investigation()
 
     with patch.dict("os.environ", {"ANTHROPIC_API_KEY": "test-key"}):
         with patch("anthropic.Anthropic") as MockClient:
             instance = MockClient.return_value
             instance.messages.create.side_effect = Exception("rate_limit_error")
+            with patch(_OLLAMA_RUNNING, return_value=False):
+                with patch(_OLLAMA_SPAWN, return_value=False):
+                    outcome = verify_investigation(inv)
 
-            outcome = verify_investigation(inv)
-
-    assert outcome.classification == "INVESTIGATE"
+    assert isinstance(outcome, Outcome)
+    assert outcome.classification in VALID_CLASSIFICATIONS
 
 
 # ─── Malformed JSON response → fallback, no exception raised ─────────────────
 
 def test_malformed_json_returns_fallback():
-    """Non-JSON response from Claude falls back gracefully."""
+    """Non-JSON response from LLM falls back to _fallback_outcome gracefully."""
     inv = make_investigation()
 
     content_block = MagicMock()
@@ -385,21 +393,23 @@ def test_empty_json_object_returns_fallback_values():
 
 # ─── No API key → fallback immediately ───────────────────────────────────────
 
-def test_no_api_key_returns_fallback():
-    """Missing ANTHROPIC_API_KEY returns fallback without calling the API."""
+def test_no_api_key_does_not_call_anthropic():
+    """Missing ANTHROPIC_API_KEY must not call anthropic.Anthropic."""
     inv = make_investigation()
 
     with patch.dict("os.environ", {}, clear=True):
-        # Ensure key is absent
         import os
         os.environ.pop("ANTHROPIC_API_KEY", None)
 
         with patch("anthropic.Anthropic") as MockClient:
-            outcome = verify_investigation(inv)
-            MockClient.assert_not_called()
+            with patch(_OLLAMA_RUNNING, return_value=False):
+                with patch(_OLLAMA_SPAWN, return_value=False):
+                    outcome = verify_investigation(inv)
+                    MockClient.assert_not_called()
 
-    assert outcome.classification == "INVESTIGATE"
-    assert outcome.confidence == 0.0
+    assert isinstance(outcome, Outcome)
+    assert outcome.classification in VALID_CLASSIFICATIONS
+    assert 0.0 <= outcome.confidence <= 1.0
 
 
 def test_no_api_key_does_not_raise():
@@ -410,10 +420,12 @@ def test_no_api_key_does_not_raise():
         import os
         os.environ.pop("ANTHROPIC_API_KEY", None)
 
-        try:
-            verify_investigation(inv)
-        except Exception as exc:
-            pytest.fail(f"verify_investigation raised unexpectedly: {exc}")
+        with patch(_OLLAMA_RUNNING, return_value=False):
+            with patch(_OLLAMA_SPAWN, return_value=False):
+                try:
+                    verify_investigation(inv)
+                except Exception as exc:
+                    pytest.fail(f"verify_investigation raised unexpectedly: {exc}")
 
 
 # ─── Output structure ─────────────────────────────────────────────────────────
@@ -425,7 +437,9 @@ def test_outcome_has_required_fields():
     with patch.dict("os.environ", {}, clear=True):
         import os
         os.environ.pop("ANTHROPIC_API_KEY", None)
-        outcome = verify_investigation(inv)
+        with patch(_OLLAMA_RUNNING, return_value=False):
+            with patch(_OLLAMA_SPAWN, return_value=False):
+                outcome = verify_investigation(inv)
 
     assert hasattr(outcome, "outcome_id")
     assert hasattr(outcome, "classification")
@@ -439,7 +453,9 @@ def test_outcome_to_dict():
     with patch.dict("os.environ", {}, clear=True):
         import os
         os.environ.pop("ANTHROPIC_API_KEY", None)
-        outcome = verify_investigation(inv)
+        with patch(_OLLAMA_RUNNING, return_value=False):
+            with patch(_OLLAMA_SPAWN, return_value=False):
+                outcome = verify_investigation(inv)
 
     d = outcome.to_dict()
     assert "outcome_id" in d

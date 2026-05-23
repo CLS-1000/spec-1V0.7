@@ -4,12 +4,11 @@ from __future__ import annotations
 
 import json
 import threading
-import time
 from pathlib import Path
 
 import pytest
 
-from spec1_engine.intelligence.store import JsonlStore
+from spec1_core.intelligence.store import JsonlStore
 
 
 # ─── Fixtures ────────────────────────────────────────────────────────────────
@@ -262,7 +261,7 @@ def test_written_at_is_iso_format(tmp_store, sample_record):
 # ─── Module-level convenience functions ──────────────────────────────────────
 
 def test_module_append_returns_dict(tmp_path):
-    from spec1_engine.intelligence import store as store_mod
+    from spec1_core.intelligence import store as store_mod
     path = tmp_path / "module_store.jsonl"
     result = store_mod.append({"key": "value"}, path=path)
     assert isinstance(result, dict)
@@ -271,7 +270,7 @@ def test_module_append_returns_dict(tmp_path):
 
 
 def test_module_append_batch_returns_list(tmp_path):
-    from spec1_engine.intelligence import store as store_mod
+    from spec1_core.intelligence import store as store_mod
     path = tmp_path / "module_batch.jsonl"
     records = [{"id": i} for i in range(3)]
     results = store_mod.append_batch(records, path=path)
@@ -279,7 +278,7 @@ def test_module_append_batch_returns_list(tmp_path):
 
 
 def test_module_read_all_yields_records(tmp_path):
-    from spec1_engine.intelligence import store as store_mod
+    from spec1_core.intelligence import store as store_mod
     path = tmp_path / "module_read.jsonl"
     store_mod.append({"data": "test"}, path=path)
     records = list(store_mod.read_all(path=path))
@@ -288,7 +287,7 @@ def test_module_read_all_yields_records(tmp_path):
 
 
 def test_module_count_returns_correct_number(tmp_path):
-    from spec1_engine.intelligence import store as store_mod
+    from spec1_core.intelligence import store as store_mod
     path = tmp_path / "module_count.jsonl"
     for i in range(4):
         store_mod.append({"i": i}, path=path)
@@ -296,7 +295,7 @@ def test_module_count_returns_correct_number(tmp_path):
 
 
 def test_module_filter_by_returns_matches(tmp_path):
-    from spec1_engine.intelligence import store as store_mod
+    from spec1_core.intelligence import store as store_mod
     path = tmp_path / "module_filter.jsonl"
     store_mod.append({"cls": "A"}, path=path)
     store_mod.append({"cls": "B"}, path=path)
@@ -306,13 +305,13 @@ def test_module_filter_by_returns_matches(tmp_path):
 
 
 def test_module_exists_false_before_write(tmp_path):
-    from spec1_engine.intelligence import store as store_mod
+    from spec1_core.intelligence import store as store_mod
     path = tmp_path / "module_exists.jsonl"
     assert store_mod.exists(path=path) is False
 
 
 def test_module_exists_true_after_write(tmp_path):
-    from spec1_engine.intelligence import store as store_mod
+    from spec1_core.intelligence import store as store_mod
     path = tmp_path / "module_exists2.jsonl"
     store_mod.append({"x": 1}, path=path)
     assert store_mod.exists(path=path) is True
@@ -320,7 +319,7 @@ def test_module_exists_true_after_write(tmp_path):
 
 def test_module_default_store_reinit_for_different_path(tmp_path):
     """_get_default_store creates a new store when path changes."""
-    from spec1_engine.intelligence import store as store_mod
+    from spec1_core.intelligence import store as store_mod
     path_a = tmp_path / "store_a.jsonl"
     path_b = tmp_path / "store_b.jsonl"
     store_mod.append({"tag": "a"}, path=path_a)
@@ -338,12 +337,11 @@ def test_module_default_store_reinit_for_different_path(tmp_path):
 def test_read_all_skips_empty_lines(tmp_path):
     """read_all skips empty lines in the file."""
     store_path = tmp_path / "empty_lines.jsonl"
-    import json
     with store_path.open("w") as fh:
         fh.write('{"a": 1}\n')
         fh.write("\n")  # empty line — should be skipped (line 63)
         fh.write('{"b": 2}\n')
-    from spec1_engine.intelligence.store import JsonlStore
+    from spec1_core.intelligence.store import JsonlStore
     store = JsonlStore(store_path)
     records = list(store.read_all())
     assert len(records) == 2
@@ -356,9 +354,52 @@ def test_read_all_skips_invalid_json_lines(tmp_path):
         fh.write('{"good": true}\n')
         fh.write('THIS IS NOT JSON\n')  # invalid JSON — lines 66-67
         fh.write('{"also_good": 42}\n')
-    from spec1_engine.intelligence.store import JsonlStore
+    from spec1_core.intelligence.store import JsonlStore
     store = JsonlStore(store_path)
     records = list(store.read_all())
     assert len(records) == 2
     assert records[0]["good"] is True
     assert records[1]["also_good"] == 42
+
+
+def test_read_chunk_first_page(tmp_path):
+    """read_chunk returns a limited subset starting from offset 0."""
+    store = JsonlStore(tmp_path / "test.jsonl")
+    for i in range(10):
+        store.append({"record_id": f"r{i}", "val": i})
+
+    page = store.read_chunk(offset=0, limit=5)
+    assert len(page) == 5
+    assert page[0]["record_id"] == "r0"
+    assert page[4]["record_id"] == "r4"
+
+
+def test_read_chunk_with_offset(tmp_path):
+    """read_chunk respects offset correctly."""
+    store = JsonlStore(tmp_path / "test.jsonl")
+    for i in range(10):
+        store.append({"record_id": f"r{i}", "val": i})
+
+    page = store.read_chunk(offset=5, limit=5)
+    assert len(page) == 5
+    assert page[0]["record_id"] == "r5"
+
+
+def test_read_chunk_beyond_end(tmp_path):
+    """read_chunk returns empty list when offset exceeds record count."""
+    store = JsonlStore(tmp_path / "test.jsonl")
+    for i in range(3):
+        store.append({"record_id": f"r{i}", "val": i})
+
+    page = store.read_chunk(offset=10, limit=5)
+    assert page == []
+
+
+def test_read_chunk_partial_page(tmp_path):
+    """read_chunk returns fewer records than limit when near EOF."""
+    store = JsonlStore(tmp_path / "test.jsonl")
+    for i in range(7):
+        store.append({"record_id": f"r{i}", "val": i})
+
+    page = store.read_chunk(offset=5, limit=10)
+    assert len(page) == 2

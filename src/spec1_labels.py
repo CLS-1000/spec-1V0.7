@@ -76,3 +76,51 @@ CATEGORY_GEOPOLITICAL = "GEOPOLITICAL"
 CATEGORY_FARA         = "FARA"
 CATEGORY_PSYOP        = "PSYOP"
 CATEGORY_QUANT        = "QUANT"
+
+# ── Legislative & Judicial Desk — source types ────────────────────────────────
+SOURCE_JUDICIAL  = "JUDICIAL"
+SOURCE_STATE_LEG = "STATE_LEG"
+
+# ── Legislative & Judicial Desk — domain prefixes ─────────────────────────────
+DOMAIN_CONGRESS_VOTE       = "congress.vote"
+DOMAIN_CONGRESS_HEARING    = "congress.hearing"
+DOMAIN_CONGRESS_SPONSOR    = "congress.sponsor"
+DOMAIN_FARA_FILING         = "fara.filing"
+DOMAIN_LDA_FILING          = "lda.filing"
+DOMAIN_JUDICIAL_RULING     = "judicial.ruling"
+DOMAIN_JUDICIAL_RECUSAL    = "judicial.recusal"
+DOMAIN_JUDICIAL_DISCLOSURE = "judicial.disclosure"
+DOMAIN_JUDICIAL_GIFT       = "judicial.gift"
+DOMAIN_JUDICIAL_ENGAGEMENT = "judicial.speaking_engagement"
+DOMAIN_STATE_LEG_BILL      = "state_leg.bill"
+DOMAIN_STATE_LEG_VOTE      = "state_leg.vote"
+
+# ── Disclosure regime ─────────────────────────────────────────────────────────
+DISCLOSURE_FULL       = "FULL"
+DISCLOSURE_PARTIAL    = "PARTIAL"
+DISCLOSURE_NONE       = "NONE"
+DISCLOSURE_GAP_MARKER = "DISCLOSURE GAP"
+
+# ── Type aliases ──────────────────────────────────────────────────────────────
+from typing import Literal  # noqa: E402
+
+PriorityT      = Literal["CRITICAL", "HIGH", "MEDIUM", "LOW"]
+ThreatLevelT   = Literal["HIGH", "MEDIUM", "LOW"]
+PsyopRiskT     = Literal["HIGH_RISK", "MEDIUM_RISK", "LOW_RISK", "CLEAN"]
+VerificationT  = Literal["CORROBORATED", "PARTIAL", "UNVERIFIED", "CONFLICTED"]
+
+
+def is_valid_priority(value: str) -> bool:
+    return value in {PRIORITY_CRITICAL, PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_LOW}
+
+
+def is_valid_threat_level(value: str) -> bool:
+    return value in {THREAT_HIGH, THREAT_MEDIUM, THREAT_LOW}
+
+
+def is_valid_psyop_risk(value: str) -> bool:
+    return value in {PSYOP_HIGH_RISK, PSYOP_MEDIUM_RISK, PSYOP_LOW_RISK, PSYOP_CLEAN}
+
+
+def is_valid_verification(value: str) -> bool:
+    return value in {VERIF_CORROBORATED, VERIF_PARTIAL, VERIF_UNVERIFIED, VERIF_CONFLICTED}

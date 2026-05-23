@@ -7,15 +7,8 @@ from pathlib import Path
 
 import pytest
 
-from spec1_engine.cls_psyop.scorer import (
-    NARRATIVE_CLUSTER,
-    FARA_ACTIVE,
-    MODEL_LEGISLATION,
-    CONSENSUS_SPIKE,
-    NO_ORGANIC_ORIGIN,
+from spec1_core.psyop.scorer import (
     REQUIRED_FIELDS,
-    THRESHOLD_CANDIDATE,
-    THRESHOLD_CONFIRMED,
     score_psyop,
 )
 

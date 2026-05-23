@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from unittest.mock import patch
 
 import pytest
@@ -33,26 +32,23 @@ def kill_file_in_tmp(tmp_path, monkeypatch):
 
 def test_run_cycle_job_skips_when_kill_file_present(kill_file_in_tmp, caplog):
     kill_file_in_tmp.write_text("")
-    with patch("spec1_engine.core.engine.Engine") as mock_engine:
+    with patch("spec1_core.app.cycle.run_cycle") as mock_run:
         sched._run_cycle_job()
-        mock_engine.assert_not_called()
+        mock_run.assert_not_called()
     assert "Kill file present" in caplog.text
 
 
 def test_run_cycle_job_runs_engine_when_no_kill_file(kill_file_in_tmp):
     assert not kill_file_in_tmp.exists()
-    with patch("spec1_engine.core.engine.Engine") as mock_engine:
-        instance = mock_engine.return_value
-        instance.run.return_value.records_stored = 3
-        instance.run.return_value.errors = []
+    with patch("spec1_core.app.cycle.run_cycle") as mock_run:
+        mock_run.return_value = {"records_stored": 3, "errors": []}
         sched._run_cycle_job()
-        mock_engine.assert_called_once()
-        instance.run.assert_called_once()
+        mock_run.assert_called_once()
 
 
 def test_run_cycle_job_swallows_engine_errors(kill_file_in_tmp, caplog):
-    with patch("spec1_engine.core.engine.Engine") as mock_engine:
-        mock_engine.side_effect = RuntimeError("boom")
+    with patch("spec1_core.app.cycle.run_cycle") as mock_run:
+        mock_run.side_effect = RuntimeError("boom")
         sched._run_cycle_job()  # must not raise
     assert "Scheduled cycle failed" in caplog.text
 

@@ -45,6 +45,7 @@
   nav { width: 210px; flex-shrink: 0; background: rgba(10,10,10,.96); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; padding: 12px 0; }
   .nav-section { padding: 8px 16px 4px; font-size: 10px; font-weight: 600; letter-spacing: .14em; color: var(--text-muted); text-transform: uppercase; }
   .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px 16px; cursor: pointer; font-size: 12px; color: var(--text-muted); border-left: 2px solid transparent; transition: all .12s; user-select: none; letter-spacing: .04em; }
+  a.nav-item { text-decoration: none; }
   .nav-item:hover { color: var(--text-secondary); }
   .nav-item.active { color: var(--text-primary); border-left-color: var(--border); }
   .nav-glyph { font-size: 11px; width: 18px; text-align: center; }
@@ -253,6 +254,84 @@
     nav.open { transform: translateX(0); }
     main { padding: 16px 14px; }
   }
+
+  /* ── Action button ─────────────────────────────────────────── */
+  .action-btn {
+    padding: 6px 16px; background: transparent;
+    border: 1px solid rgba(255,255,255,.5); color: var(--text-secondary);
+    cursor: pointer; font-size: 12px; font-family: var(--mono);
+    transition: all .12s; letter-spacing: .06em;
+  }
+  .action-btn:hover { border-color: var(--border); color: var(--text-primary); }
+  .action-btn.danger { border-color: rgba(255,255,255,.3); }
+  .action-btn.danger:hover { border-color: var(--border); }
+
+  /* ── Case cards ────────────────────────────────────────────── */
+  .case-card {
+    background: rgba(10,10,10,.92); border: 1px solid rgba(255,255,255,.18);
+    padding: 16px 20px; margin-bottom: 8px; cursor: pointer;
+    transition: border-color .12s, background .12s;
+  }
+  .case-card:hover { border-color: rgba(255,255,255,.45); background: rgba(255,255,255,.02); }
+  .case-card.expanded { border-color: var(--border); }
+  .case-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .case-title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; letter-spacing: .04em; }
+  .case-question { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+  .case-meta { display: flex; gap: 12px; align-items: center; margin-top: 10px; font-size: 11px; color: var(--text-muted); flex-wrap: wrap; }
+  .case-detail { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.1); display: none; }
+  .case-card.expanded .case-detail { display: block; }
+  .case-findings { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+  .case-finding { background: var(--background); border: 1px solid rgba(255,255,255,.12); padding: 10px 14px; font-size: 12px; color: var(--text-secondary); line-height: 1.6; }
+  .case-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .case-tag { font-size: 10px; padding: 2px 8px; border: 1px solid rgba(255,255,255,.2); color: var(--text-muted); letter-spacing: .06em; }
+
+  .status-badge { font-size: 10px; font-weight: 700; padding: 2px 8px; letter-spacing: .1em; border: 1px solid; }
+  .status-OPEN    { border-color: rgba(255,255,255,.6); color: var(--text-primary); }
+  .status-CLOSED  { border-color: rgba(255,255,255,.2); color: var(--text-muted); }
+  .status-WATCHING { border-color: rgba(255,255,255,.4); color: var(--text-secondary); }
+
+  /* ── Modal overlay ─────────────────────────────────────────── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.88);
+    z-index: 200; align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box { background: #0A0A0A; border: 1px solid var(--border); padding: 28px; max-width: 520px; width: 90%; }
+  .modal-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; letter-spacing: .06em; }
+  .form-row { margin-bottom: 14px; }
+  .form-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); margin-bottom: 5px; }
+  .form-input {
+    width: 100%; background: var(--background); border: 1px solid rgba(255,255,255,.3);
+    color: var(--text-primary); font-family: var(--mono); font-size: 12px; padding: 7px 10px;
+    outline: none; letter-spacing: .02em;
+  }
+  .form-input:focus { border-color: var(--border); }
+  .form-actions { display: flex; gap: 10px; margin-top: 18px; }
+  .form-err { font-size: 11px; color: rgba(255,180,180,.8); margin-top: 8px; display: none; }
+
+  /* ── Policy Desk ───────────────────────────────────────────── */
+  .policy-summary { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .policy-stat { background: rgba(10,10,10,.92); border: 1px solid rgba(255,255,255,.18); padding: 14px 18px; min-width: 130px; }
+  .policy-stat-num { font-size: 24px; font-weight: 700; }
+  .policy-stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); margin-top: 3px; }
+
+  .tab-bar { display: flex; gap: 2px; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,.15); }
+  .tab-btn {
+    padding: 7px 16px; background: transparent; border: none; border-bottom: 2px solid transparent;
+    color: var(--text-muted); cursor: pointer; font-size: 12px; font-family: var(--mono);
+    letter-spacing: .06em; transition: all .12s; margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--text-secondary); }
+  .tab-btn.active { color: var(--text-primary); border-bottom-color: var(--border); }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  .policy-record {
+    background: rgba(10,10,10,.92); border: 1px solid rgba(255,255,255,.15);
+    padding: 14px 18px; margin-bottom: 6px;
+  }
+  .policy-record-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
+  .policy-record-meta { font-size: 11px; color: var(--text-muted); display: flex; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -285,7 +364,7 @@
         <span class="logo-badge">S1</span>
         SPEC-1 Intelligence Engine
       </div>
-      <div class="logo-tagline">Real-time OSINT · harvest → score → investigate → analyze</div>
+      <div class="logo-tagline">Real-time OSINT · AI-powered by Claude · harvest → score → investigate → analyze</div>
     </div>
     <div id="api-status">
       <span class="status-geo offline" id="status-dot"></span>
@@ -317,7 +396,7 @@
         <span class="nav-glyph">▣</span> Intel Records
       </div>
       <div class="nav-item" data-panel="panel-leads" onclick="showPanel('panel-leads')">
-        <span class="nav-glyph">◈</span> Leads
+        <span class="nav-glyph">→</span> Leads
       </div>
 
       <div class="nav-divider"></div>
@@ -328,6 +407,24 @@
       <div class="nav-item" data-panel="panel-fara" onclick="showPanel('panel-fara')">
         <span class="nav-glyph">⊡</span> FARA
       </div>
+      <div class="nav-item" data-panel="panel-congress" onclick="showPanel('panel-congress')">
+        <span class="nav-glyph">⊠</span> Congress &amp; Policy
+      </div>
+      <div class="nav-item" data-panel="panel-leg-jud" onclick="showPanel('panel-leg-jud')">
+        <span class="nav-glyph">⚖</span> Leg &amp; Judicial
+      </div>
+      <div class="nav-item" data-panel="panel-anomaly" onclick="showPanel('panel-anomaly')">
+        <span class="nav-glyph">△</span> Anomaly Detection
+      </div>
+
+      <div class="nav-divider"></div>
+      <div class="nav-section">Workspace</div>
+      <div class="nav-item" data-panel="panel-workbench" onclick="showPanel('panel-workbench')">
+        <span class="nav-glyph">⊞</span> Work Bench
+      </div>
+      <div class="nav-item" data-panel="panel-policy" onclick="showPanel('panel-policy')">
+        <span class="nav-glyph">⊘</span> Policy Desk
+      </div>
 
       <div class="nav-divider"></div>
       <div class="nav-section">Operations</div>
@@ -335,17 +432,29 @@
         <span class="nav-glyph">▷</span> Cycle
       </div>
       <div class="nav-item" data-panel="panel-verdicts" onclick="showPanel('panel-verdicts')">
-        <span class="nav-glyph">◻</span> Verdicts
+        <span class="nav-glyph">◧</span> Verdicts
       </div>
       <div class="nav-item" data-panel="panel-calibration" onclick="showPanel('panel-calibration')">
-        <span class="nav-glyph">⊞</span> Calibration
+        <span class="nav-glyph">⊟</span> Calibration
       </div>
 
       <div class="nav-divider"></div>
       <div class="nav-section">Tools</div>
       <div class="nav-item" data-panel="panel-local" onclick="showPanel('panel-local')">
-        <span class="nav-glyph">▷</span> Local Access
+        <span class="nav-glyph">≡</span> Local Access
       </div>
+      <div class="nav-item" data-panel="panel-publications" onclick="showPanel('panel-publications')">
+        <span class="nav-glyph">◫</span> Issue Generator
+      </div>
+
+      <div class="nav-divider"></div>
+      <div class="nav-section">Political</div>
+      <a class="nav-item" id="nav-portland-web" href="/portland-web" target="_blank" rel="noopener noreferrer">
+        <span class="nav-glyph">⊛</span> Portland Web ↗
+      </a>
+      <a class="nav-item" href="/spec1_political_web.html" target="_blank" rel="noopener noreferrer">
+        <span class="nav-glyph">◉</span> Intel Viewer ↗
+      </a>
     </nav>
 
     <!-- ── Main content ── -->
@@ -421,7 +530,8 @@
             <option value="geopolitical">GEOPOLITICAL</option>
             <option value="fara">FARA</option>
             <option value="psyop">PSYOP</option>
-            <option value="quant">QUANT</option>
+            <option value="congressional">CONGRESSIONAL</option>
+            <option value="policy">POLICY</option>
           </select>
           <button class="filter-btn" onclick="loadLeads(0)">Filter</button>
           <button class="filter-btn" onclick="document.getElementById('leads-pri').value='';document.getElementById('leads-cat').value='';loadLeads(0)">Clear</button>
@@ -461,6 +571,8 @@
           </select>
           <button class="filter-btn" onclick="loadPsyop(0)">Filter</button>
           <button class="filter-btn" onclick="document.getElementById('psyop-cls').value='';loadPsyop(0)">Clear</button>
+          <button class="action-btn" id="psyop-run-btn" onclick="runPsyopDetection()" style="margin-left:auto">Run Detection</button>
+          <span id="psyop-run-msg" style="font-size:12px;color:var(--text-muted)"></span>
         </div>
         <div id="psyop-content"><div class="loading">Loading psyop scores…</div></div>
       </div>
@@ -478,6 +590,57 @@
           <button class="filter-btn" onclick="document.getElementById('fara-country').value='';document.getElementById('fara-reg').value='';loadFara(0)">Clear</button>
         </div>
         <div id="fara-content"><div class="loading">Loading FARA records…</div></div>
+      </div>
+
+      <!-- ─────────────────────────── Congress & Policy Desk ──────────────── -->
+      <div class="panel" id="panel-congress">
+        <div class="panel-title">⊠ Congress &amp; Policy Desk</div>
+        <div class="panel-sub">Congressional trading disclosures, conflict-of-interest scoring, and policy-driven intelligence — analyzed by Claude</div>
+
+        <div class="section-heading">Trading Disclosures</div>
+        <div class="filter-bar">
+          <label>Politician</label>
+          <input id="cong-politician" class="filter-input" placeholder="Name fragment" style="width:160px">
+          <label>Ticker</label>
+          <input id="cong-ticker" class="filter-input" placeholder="e.g. LMT" style="width:90px">
+          <label>Trade</label>
+          <select id="cong-trade" class="filter-select" style="width:120px">
+            <option value="">All</option>
+            <option value="Purchase">Purchase</option>
+            <option value="Sale">Sale</option>
+          </select>
+          <button class="filter-btn" onclick="loadCongress(0)">Filter</button>
+          <button class="filter-btn" onclick="document.getElementById('cong-politician').value='';document.getElementById('cong-ticker').value='';document.getElementById('cong-trade').value='';loadCongress(0)">Clear</button>
+        </div>
+        <div id="congress-signals-content"><div class="loading">Loading congressional signals…</div></div>
+
+        <div class="section-sep"></div>
+        <div class="section-heading">COI Intelligence Records</div>
+        <div id="congress-intel-content"><div class="loading">Loading COI records…</div></div>
+      </div>
+
+      <!-- ─────────────────────────── Anomaly Detection ───────────────────── -->
+      <div class="panel" id="panel-anomaly">
+        <div class="panel-title">△ Anomaly Detection</div>
+        <div class="panel-sub">Quant and behavioral anomaly patterns — breakouts, volume spikes, momentum shifts, and structural deviations detected by Claude Sonnet</div>
+
+        <div class="filter-bar">
+          <label>Pattern type</label>
+          <select id="anomaly-type" class="filter-select" style="width:180px">
+            <option value="">All Anomalies</option>
+            <option value="HIGH_VOL_BREAKOUT">Breakout (High Vol)</option>
+            <option value="HIGH_VOL_BREAKDOWN">Breakdown (High Vol)</option>
+            <option value="VOLUME_SPIKE">Volume Spike</option>
+            <option value="MOMENTUM_UP">Momentum Up</option>
+            <option value="MOMENTUM_DOWN">Momentum Down</option>
+            <option value="ELEVATED_VOLUME">Elevated Volume</option>
+          </select>
+          <label>Min confidence</label>
+          <input id="anomaly-conf" class="filter-input" type="number" min="0" max="1" step="0.05" value="0" style="width:80px">
+          <button class="filter-btn" onclick="loadAnomalies(0)">Filter</button>
+          <button class="filter-btn" onclick="document.getElementById('anomaly-type').value='';document.getElementById('anomaly-conf').value='0';loadAnomalies(0)">Clear</button>
+        </div>
+        <div id="anomaly-content"><div class="loading">Loading anomaly records…</div></div>
       </div>
 
       <!-- ─────────────────────────── Cycle ───────────────────────────────── -->
@@ -560,6 +723,113 @@
         <div id="calibration-content"><div class="loading">Loading calibration report…</div></div>
       </div>
 
+      <!-- ──────────────────── Legislative & Judicial Desk ──────────────────── -->
+      <div class="panel" id="panel-leg-jud">
+        <div class="panel-title">⚖ Legislative &amp; Judicial Desk</div>
+        <div class="panel-sub">Daily brief, judicial disclosures, and state legislative records</div>
+
+        <div class="tab-bar" role="tablist">
+          <button class="tab-btn active" onclick="switchTab('lj-tab-brief', this)">Brief</button>
+          <button class="tab-btn" onclick="switchTab('lj-tab-judicial', this)">Judicial Records</button>
+          <button class="tab-btn" onclick="switchTab('lj-tab-state', this)">State Legislation</button>
+        </div>
+
+        <!-- Brief tab -->
+        <div class="tab-pane active" id="lj-tab-brief">
+          <div style="display:flex;gap:10px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
+            <button class="action-btn" onclick="loadLegJudBrief()">Refresh Brief</button>
+            <span id="lj-brief-meta" style="font-size:12px;color:var(--text-muted)"></span>
+          </div>
+          <div id="lj-brief-content"><div class="loading">Loading Legislative &amp; Judicial brief…</div></div>
+        </div>
+
+        <!-- Judicial records tab -->
+        <div class="tab-pane" id="lj-tab-judicial">
+          <div class="filter-bar">
+            <label>Judge</label>
+            <input id="lj-judge-filter" class="filter-input" placeholder="Name…" style="width:140px">
+            <label>Action</label>
+            <select id="lj-action-filter" class="filter-select" style="width:140px">
+              <option value="">All</option>
+              <option value="ruling">Ruling</option>
+              <option value="recusal">Recusal</option>
+              <option value="disclosure">Disclosure</option>
+              <option value="gift">Gift</option>
+              <option value="speaking_engagement">Speaking Engagement</option>
+            </select>
+            <label>Court</label>
+            <input id="lj-court-filter" class="filter-input" placeholder="Court…" style="width:120px">
+            <button class="filter-btn" onclick="loadJudicial(0)">Filter</button>
+            <button class="filter-btn" onclick="clearJudicialFilters()">Clear</button>
+          </div>
+          <div id="lj-judicial-content"><div class="loading">Loading judicial records…</div></div>
+        </div>
+
+        <!-- State legislation tab -->
+        <div class="tab-pane" id="lj-tab-state">
+          <div class="filter-bar">
+            <label>State</label>
+            <input id="lj-state-filter" class="filter-input" placeholder="CA, TX…" style="width:80px">
+            <label>Chamber</label>
+            <select id="lj-chamber-filter" class="filter-select" style="width:120px">
+              <option value="">All</option>
+              <option value="SENATE">Senate</option>
+              <option value="HOUSE">House</option>
+              <option value="JOINT">Joint</option>
+            </select>
+            <label>
+              <input type="checkbox" id="lj-gap-filter" onchange="loadStateLeg(0)">
+              Disclosure gaps only
+            </label>
+            <button class="filter-btn" onclick="loadStateLeg(0)">Filter</button>
+            <button class="filter-btn" onclick="clearStateLegFilters()">Clear</button>
+          </div>
+          <div id="lj-state-content"><div class="loading">Loading state legislation…</div></div>
+        </div>
+      </div>
+
+      <!-- ──────────────────────────── Issue Generator ────────────────────────── -->
+      <div class="panel" id="panel-publications">
+        <div class="panel-title">◫ Issue Generator</div>
+        <div class="panel-sub">Convert current intelligence output into a publication PDF</div>
+        <div style="display:flex;gap:10px;margin-bottom:18px;align-items:center;flex-wrap:wrap">
+          <button class="action-btn" id="pub-generate-btn" onclick="triggerGenerate()">Generate New Issue</button>
+          <a class="action-btn" href="/publication/latest" target="_blank" rel="noopener noreferrer" id="pub-download-btn" style="display:none">Download Latest ↗</a>
+        </div>
+        <div id="pub-status" style="margin-bottom:14px"></div>
+        <div id="pub-list-content"><div class="loading">Loading publications…</div></div>
+      </div>
+
+      <!-- ────────────────────────────── Work Bench ──────────────────────────── -->
+      <div class="panel" id="panel-workbench">
+        <div class="panel-title">⊞ Work Bench</div>
+        <div class="panel-sub">Active investigation cases — open, track, and close case files</div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:18px;">
+          <button class="action-btn" onclick="openNewCaseModal()">+ Open New Case</button>
+          <div style="display:flex;gap:6px;margin-left:auto;">
+            <button class="action-btn" id="wb-filter-all" style="border-color:var(--border)" onclick="setWbFilter('all')">All</button>
+            <button class="action-btn" id="wb-filter-open" onclick="setWbFilter('OPEN')">Open</button>
+            <button class="action-btn" id="wb-filter-closed" onclick="setWbFilter('CLOSED')">Closed</button>
+          </div>
+        </div>
+        <div id="workbench-content"><div class="loading">Loading cases…</div></div>
+      </div>
+
+      <!-- ─────────────────────────── Policy Desk ──────────────────────────── -->
+      <div class="panel" id="panel-policy">
+        <div class="panel-title">⊡ Policy Desk</div>
+        <div class="panel-sub">Foreign agents, legislative signals, and policy intelligence</div>
+        <div id="policy-summary" class="policy-summary"></div>
+        <div class="tab-bar">
+          <button class="tab-btn active" data-tab="tab-fara"  onclick="switchTab('tab-fara',this)">FARA</button>
+          <button class="tab-btn"        data-tab="tab-leads" onclick="switchTab('tab-leads',this)">Policy Leads</button>
+          <button class="tab-btn"        data-tab="tab-intel" onclick="switchTab('tab-intel',this)">Policy Intel</button>
+        </div>
+        <div id="tab-fara"  class="tab-pane active"><div class="loading">Loading FARA records…</div></div>
+        <div id="tab-leads" class="tab-pane"><div class="loading">Loading leads…</div></div>
+        <div id="tab-intel" class="tab-pane"><div class="loading">Loading policy intel…</div></div>
+      </div>
+
       <!-- ─────────────────────────── Local Access ─────────────────────────── -->
       <div class="panel" id="panel-local">
         <div class="panel-title">▷ Local Access</div>
@@ -569,16 +839,16 @@
           <div class="cmd-block">
             <div class="cmd-label">Read latest brief</div>
             <div class="cmd-body">
-              <pre>cat ~/spec-1/briefs/spec1_brief_latest.md</pre>
-              <button class="copy-btn" onclick="copyText(this, 'cat ~/spec-1/briefs/spec1_brief_latest.md')">Copy</button>
+              <pre>cat ~/spec-1/generated/briefs/spec1_brief_latest.md</pre>
+              <button class="copy-btn" onclick="copyText(this, 'cat ~/spec-1/generated/briefs/spec1_brief_latest.md')">Copy</button>
             </div>
           </div>
 
           <div class="cmd-block">
             <div class="cmd-label">List all briefs</div>
             <div class="cmd-body">
-              <pre>ls ~/spec-1/briefs/spec1_brief_*.md</pre>
-              <button class="copy-btn" onclick="copyText(this, 'ls ~/spec-1/briefs/spec1_brief_*.md')">Copy</button>
+              <pre>ls ~/spec-1/generated/briefs/spec1_brief_*.md</pre>
+              <button class="copy-btn" onclick="copyText(this, 'ls ~/spec-1/generated/briefs/spec1_brief_*.md')">Copy</button>
             </div>
           </div>
 
@@ -595,8 +865,8 @@
             <div class="cmd-body">
 <pre>cd ~/spec-1 &amp;&amp; PYTHONPATH=src \
 ANTHROPIC_API_KEY=$(grep ANTHROPIC_API_KEY .env | cut -d= -f2 | tr -d '\r') \
-python -m spec1_engine.app.cycle</pre>
-              <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && PYTHONPATH=src ANTHROPIC_API_KEY=$(grep ANTHROPIC_API_KEY .env | cut -d= -f2 | tr -d \'\\r\') python -m spec1_engine.app.cycle')">Copy</button>
+python -m spec1_core.app.cycle</pre>
+              <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && PYTHONPATH=src ANTHROPIC_API_KEY=$(grep ANTHROPIC_API_KEY .env | cut -d= -f2 | tr -d \'\\r\') python -m spec1_core.app.cycle')">Copy</button>
             </div>
           </div>
 
@@ -609,13 +879,29 @@ python -m spec1_engine.app.cycle</pre>
           </div>
 
           <div class="cmd-block">
+            <div class="cmd-label">Open Portland Political Web</div>
+            <div class="cmd-body">
+              <pre>http://localhost:8000/portland-web</pre>
+              <button class="copy-btn" onclick="copyText(this, 'http://localhost:8000/portland-web')">Copy</button>
+            </div>
+          </div>
+
+          <div class="cmd-block">
+            <div class="cmd-label">Open Political Intel Viewer</div>
+            <div class="cmd-body">
+              <pre>http://localhost:8000/spec1_political_web.html</pre>
+              <button class="copy-btn" onclick="copyText(this, 'http://localhost:8000/spec1_political_web.html')">Copy</button>
+            </div>
+          </div>
+
+          <div class="cmd-block">
             <div class="cmd-label">Build calibration proposal report</div>
             <div class="cmd-body">
-<pre>cd ~/spec-1 &amp;&amp; PYTHONPATH=src python -m spec1_engine.tools.calibration_propose \
+<pre>cd ~/spec-1 &amp;&amp; PYTHONPATH=src python -m spec1_core.tools.calibration_propose \
   --intel spec1_intelligence.jsonl \
   --verdicts verdicts.jsonl \
   --out-dir generated/</pre>
-              <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && PYTHONPATH=src python -m spec1_engine.tools.calibration_propose --intel spec1_intelligence.jsonl --verdicts verdicts.jsonl --out-dir generated/')">Copy</button>
+              <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && PYTHONPATH=src python -m spec1_core.tools.calibration_propose --intel spec1_intelligence.jsonl --verdicts verdicts.jsonl --out-dir generated/')">Copy</button>
             </div>
           </div>
 
@@ -637,6 +923,30 @@ python -m spec1_engine.app.cycle</pre>
     <div style="display:flex; gap:10px;">
       <button class="copy-btn" onclick="copyText(this, 'cd ~/spec-1 && PYTHONPATH=src python -m spec1_api.main')">Copy command</button>
       <button class="copy-btn" onclick="closeOverlay()" style="margin-left:auto;">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── New Case modal ── -->
+<div class="modal-overlay" id="case-modal">
+  <div class="modal-box">
+    <div class="modal-title">Open New Case</div>
+    <div class="form-row">
+      <div class="form-label">Title</div>
+      <input class="form-input" id="case-title" placeholder="Investigation title…">
+    </div>
+    <div class="form-row">
+      <div class="form-label">Question</div>
+      <input class="form-input" id="case-question" placeholder="Core investigation question…">
+    </div>
+    <div class="form-row">
+      <div class="form-label">Tags (comma-separated)</div>
+      <input class="form-input" id="case-tags" placeholder="fara, senate, legislation…">
+    </div>
+    <div class="form-err" id="case-form-err"></div>
+    <div class="form-actions">
+      <button class="action-btn" onclick="submitNewCase()">Open Case</button>
+      <button class="action-btn" onclick="closeNewCaseModal()" style="margin-left:auto">Cancel</button>
     </div>
   </div>
 </div>
@@ -809,9 +1119,15 @@ const _panelLoaders = {
   'panel-leads':       () => loadLeads(0),
   'panel-psyop':       () => loadPsyop(0),
   'panel-fara':        () => loadFara(0),
+  'panel-congress':    () => loadCongress(0),
+  'panel-leg-jud':     () => loadLegJudBrief(),
+  'panel-anomaly':     () => loadAnomalies(0),
   'panel-cycle':       () => loadCycleStatus(),
   'panel-verdicts':    () => loadVerdicts(0),
   'panel-calibration': () => loadCalibration(),
+  'panel-publications': () => loadPublications(),
+  'panel-workbench':   () => loadWorkbench(0),
+  'panel-policy':      () => loadPolicyDesk(),
   'panel-local':       () => {},
 };
 
@@ -1133,6 +1449,142 @@ async function loadFara(offset) {
   </div>` + pager(data.total||items.length, offset, PAGE, 'loadFara');
 }
 
+// ── Congress & Policy panel ───────────────────────────────────────────────────
+
+let _congOff = 0;
+async function loadCongress(offset) {
+  if (offset < 0) offset = 0;
+  _congOff = offset;
+
+  const sigEl   = document.getElementById('congress-signals-content');
+  const intelEl = document.getElementById('congress-intel-content');
+  sigEl.innerHTML   = '<div class="loading">Loading congressional signals…</div>';
+  intelEl.innerHTML = '<div class="loading">Loading COI records…</div>';
+
+  const politician = document.getElementById('cong-politician').value.trim();
+  const ticker     = document.getElementById('cong-ticker').value.trim().toUpperCase();
+  const trade      = document.getElementById('cong-trade').value;
+
+  // Fetch congressional OSINT signals
+  const sigData = await apiFetch(`/signals?limit=500&offset=0&source_type=CONGRESSIONAL`);
+  let sigItems = sigData ? (sigData.items || []) : [];
+  if (politician) sigItems = sigItems.filter(r => (r.metadata?.politician || r.source || '').toLowerCase().includes(politician.toLowerCase()));
+  if (ticker)     sigItems = sigItems.filter(r => (r.metadata?.ticker || '').toUpperCase().includes(ticker));
+  if (trade)      sigItems = sigItems.filter(r => (r.metadata?.trade_type || '').toLowerCase().includes(trade.toLowerCase()));
+
+  const total = sigItems.length;
+  const page  = sigItems.slice(offset, offset + PAGE);
+
+  if (!page.length) {
+    sigEl.innerHTML = emptyState('No congressional trading disclosures found. Run an intelligence cycle to harvest data.');
+  } else {
+    const rows = page.map(r => {
+      const m = r.metadata || {};
+      const amount = m.amount ? `$${Number(m.amount).toLocaleString()}` : '—';
+      return `<tr>
+        <td><span class="cell-trunc" title="${esc(m.politician||r.source||'')}">${esc(trunc(m.politician||r.source||'—',36))}</span></td>
+        <td><strong>${esc(m.ticker||'—')}</strong></td>
+        <td>${badge(m.trade_type||'')}</td>
+        <td>${esc(amount)}</td>
+        <td><span class="cell-trunc">${esc(trunc(m.committee||'—',30))}</span></td>
+        <td>${ts(m.trade_date||r.published_at||'')}</td>
+      </tr>`;
+    }).join('');
+    sigEl.innerHTML = `<div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Politician</th><th>Ticker</th><th>Trade</th><th>Amount</th><th>Committee</th><th>Date</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>` + pager(total, offset, PAGE, 'loadCongress');
+  }
+
+  // Fetch COI intel records
+  const intelData = await apiFetch(`/intel?limit=500&offset=0`);
+  const coiRecords = (intelData?.items || []).filter(r =>
+    (r.pattern || '').includes('[COI]') ||
+    (r.pattern || '').toLowerCase().includes('congress') ||
+    (r.pattern || '').toLowerCase().includes('senator') ||
+    (r.pattern || '').toLowerCase().includes('representative')
+  );
+
+  if (!coiRecords.length) {
+    intelEl.innerHTML = emptyState('No COI intelligence records found. Congressional trade COI scoring runs as part of the intelligence cycle.');
+  } else {
+    const coiRows = coiRecords.map(r => `<tr>
+      <td><span class="mono-id">${esc(trunc(r.record_id||'',22))}</span></td>
+      <td><span class="cell-trunc" title="${esc(r.pattern||'')}">${esc(trunc(r.pattern||'—',100))}</span></td>
+      <td>${badge(r.classification||'')}</td>
+      <td>${confBar(r.confidence)}</td>
+      <td>${confBar(r.source_weight)}</td>
+    </tr>`).join('');
+    intelEl.innerHTML = `<div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>ID</th><th>COI Pattern</th><th>Class</th><th>Confidence</th><th>Src Wt</th></tr></thead>
+        <tbody>${coiRows}</tbody>
+      </table>
+    </div>`;
+  }
+}
+
+// ── Anomaly Detection panel ───────────────────────────────────────────────────
+
+const _ANOMALY_KEYWORDS = ['HIGH_VOL_BREAKOUT','HIGH_VOL_BREAKDOWN','VOLUME_SPIKE','MOMENTUM_UP','MOMENTUM_DOWN','ELEVATED_VOLUME','ANOMALY'];
+let _anomalyOff = 0;
+
+async function loadAnomalies(offset) {
+  if (offset < 0) offset = 0;
+  _anomalyOff = offset;
+  const el = document.getElementById('anomaly-content');
+  el.innerHTML = '<div class="loading">Loading anomaly records…</div>';
+
+  const typeFilter = document.getElementById('anomaly-type').value;
+  const minConf    = parseFloat(document.getElementById('anomaly-conf').value) || 0;
+
+  const intelData = await apiFetch('/intel?limit=500&offset=0');
+  if (!intelData) { el.innerHTML = emptyState('API offline — cannot load anomaly records.'); return; }
+
+  let records = (intelData.items || []).filter(r => {
+    const pat = (r.pattern || '').toUpperCase();
+    return _ANOMALY_KEYWORDS.some(k => pat.includes(k));
+  });
+
+  if (typeFilter) {
+    records = records.filter(r => (r.pattern || '').toUpperCase().includes(typeFilter));
+  }
+  if (minConf > 0) {
+    records = records.filter(r => parseFloat(r.confidence || 0) >= minConf);
+  }
+
+  const total = records.length;
+  const page  = records.slice(offset, offset + PAGE);
+
+  if (!page.length) {
+    el.innerHTML = emptyState('No anomaly patterns detected.');
+    return;
+  }
+
+  const rows = page.map(r => {
+    const pat = (r.pattern || '');
+    // Extract the anomaly type label from the pattern string
+    const typeLabel = _ANOMALY_KEYWORDS.find(k => pat.toUpperCase().includes(k)) || 'ANOMALY';
+    return `<tr>
+      <td><span class="mono-id">${esc(trunc(r.record_id||'',22))}</span></td>
+      <td>${badge(typeLabel)}</td>
+      <td><span class="cell-trunc" title="${esc(pat)}">${esc(trunc(pat,100))}</span></td>
+      <td>${badge(r.classification||'')}</td>
+      <td>${confBar(r.confidence)}</td>
+      <td>${confBar(r.analyst_weight)}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `<div class="table-wrap">
+    <table class="data-table">
+      <thead><tr><th>ID</th><th>Type</th><th>Pattern</th><th>Class</th><th>Confidence</th><th>Ana Wt</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>` + pager(total, offset, PAGE, 'loadAnomalies');
+}
+
 // ── Cycle panel ───────────────────────────────────────────────────────────────
 
 async function loadCycleStatus() {
@@ -1325,6 +1777,422 @@ async function loadCalibration() {
     </p>`;
 }
 
+// ── Issue Generator ───────────────────────────────────────────────────────────
+
+async function loadPublications() {
+  const el = document.getElementById('pub-list-content');
+  const data = await apiFetch('/publication/list');
+  if (!data || !data.items?.length) {
+    el.innerHTML = emptyState('No publications yet. Click "Generate New Issue" to create one.');
+    return;
+  }
+  document.getElementById('pub-download-btn').style.display = '';
+  el.innerHTML = data.items.map(p => `
+    <div class="intel-card" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+      <div style="min-width:0">
+        <div class="intel-title">${esc(p.filename)}</div>
+        <div class="intel-meta">${(p.size_bytes / 1024).toFixed(1)} KB</div>
+      </div>
+      <a class="action-btn" href="/publication/${esc(p.filename)}" target="_blank" rel="noopener noreferrer" style="white-space:nowrap">Download ↗</a>
+    </div>`).join('');
+}
+
+async function triggerGenerate() {
+  const btn    = document.getElementById('pub-generate-btn');
+  const status = document.getElementById('pub-status');
+  btn.disabled    = true;
+  btn.textContent = 'Generating…';
+  status.innerHTML = '';
+  const res = await apiPost('/publication/generate', {});
+  btn.disabled    = false;
+  btn.textContent = 'Generate New Issue';
+  if (res.ok) {
+    status.innerHTML = `<span style="color:var(--text)">✓ ${esc(res.data?.filename || 'Issue generated')}</span>`;
+    document.getElementById('pub-download-btn').style.display = '';
+    loadPublications();
+  } else {
+    const detail = res.data?.detail || String(res.status);
+    status.innerHTML = `<span class="form-err" style="display:inline">Failed: ${esc(detail)}</span>`;
+  }
+}
+
+// ── Work Bench ────────────────────────────────────────────────────────────────
+
+let _wbOff = 0;
+let _wbFilter = 'all';
+
+async function loadWorkbench(offset) {
+  if (offset < 0) offset = 0;
+  _wbOff = offset;
+  const el = document.getElementById('workbench-content');
+  el.innerHTML = '<div class="loading">Loading cases…</div>';
+
+  const status = _wbFilter !== 'all' ? `&status=${_wbFilter}` : '';
+  const data = await apiFetch(`/workspace/cases?limit=${PAGE}&offset=${offset}${status}`);
+  if (!data) { el.innerHTML = emptyState('API offline — cannot load cases.'); return; }
+
+  const items = data.items || [];
+  if (!items.length) {
+    el.innerHTML = emptyState(_wbFilter !== 'all'
+      ? `No ${_wbFilter.toLowerCase()} cases.`
+      : 'No cases yet. Open one to start tracking an investigation.');
+    return;
+  }
+
+  const cards = items.map(c => {
+    const conf  = typeof c.confidence === 'number' ? Math.round(c.confidence * 100) : 0;
+    const tags  = (c.tags || []).map(t => `<span class="case-tag">${esc(t)}</span>`).join('');
+    const finds = (c.findings || []).map(f =>
+      `<div class="case-finding">${esc(trunc(f, 320))}</div>`).join('');
+    const canClose = c.status === 'OPEN';
+    return `
+      <div class="case-card" data-cid="${esc(c.case_id||'')}">
+        <div class="case-header">
+          <div style="flex:1;min-width:0">
+            <div class="case-title">${esc(c.title||'Untitled')}</div>
+            <div class="case-question">${esc(trunc(c.question||'', 200))}</div>
+          </div>
+          <span class="status-badge status-${esc(c.status||'OPEN')}">${esc(c.status||'OPEN')}</span>
+        </div>
+        <div class="case-meta">
+          ${confBar(c.confidence)}
+          <span>${(c.findings||[]).length} finding${(c.findings||[]).length !== 1 ? 's' : ''}</span>
+          <span>${(c.signal_ids||[]).length} signal${(c.signal_ids||[]).length !== 1 ? 's' : ''}</span>
+          <span>Updated ${ts(c.updated_at||'')}</span>
+          <span style="opacity:.4;font-size:10px">${esc((c.case_id||'').slice(0,18))}</span>
+        </div>
+        <div class="case-detail">
+          ${tags ? `<div class="case-tags" style="margin-bottom:10px">${tags}</div>` : ''}
+          ${finds ? `<div class="case-findings">${finds}</div>` : '<p style="font-size:12px;color:var(--text-muted)">No findings yet.</p>'}
+          ${canClose ? `
+          <div style="margin-top:14px;display:flex;gap:8px;align-items:flex-start">
+            <textarea class="form-textarea" data-finding-input="${esc(c.case_id||'')}" rows="2" placeholder="Add a finding note…" style="flex:1;resize:vertical;min-height:56px"></textarea>
+            <button class="action-btn" data-add-finding="${esc(c.case_id||'')}" style="flex-shrink:0;align-self:flex-end">Add Finding</button>
+          </div>
+          <div style="margin-top:10px"><button class="action-btn danger" data-close="${esc(c.case_id||'')}">Close Case</button></div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  el.innerHTML = `<div id="wb-cards">${cards}</div>${pager(data.total||items.length, offset, PAGE, 'loadWorkbench')}`;
+}
+
+function setWbFilter(status) {
+  _wbFilter = status;
+  ['all', 'OPEN', 'CLOSED'].forEach(s => {
+    const id = 'wb-filter-' + s.toLowerCase();
+    const btn = document.getElementById(id);
+    if (btn) btn.style.borderColor = (s === status) ? 'var(--border)' : '';
+  });
+  loadWorkbench(0);
+}
+
+function openNewCaseModal() {
+  ['case-title','case-question','case-tags'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const err = document.getElementById('case-form-err');
+  if (err) { err.textContent = ''; err.style.display = 'none'; }
+  document.getElementById('case-modal').classList.add('open');
+}
+
+function closeNewCaseModal() {
+  document.getElementById('case-modal').classList.remove('open');
+}
+
+async function submitNewCase() {
+  const title    = (document.getElementById('case-title').value || '').trim();
+  const question = (document.getElementById('case-question').value || '').trim();
+  const tagsRaw  = (document.getElementById('case-tags').value || '').trim();
+  const tags     = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(Boolean) : [];
+  const errEl    = document.getElementById('case-form-err');
+
+  if (!title || !question) {
+    errEl.textContent = 'Title and question are required.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const res = await apiPost('/workspace/cases', { title, question, tags });
+  if (!res.ok) {
+    errEl.textContent = 'Failed to open case: ' + (res.data?.detail || res.status);
+    errEl.style.display = 'block';
+    return;
+  }
+  closeNewCaseModal();
+  loadWorkbench(0);
+}
+
+async function closeCase(cid) {
+  const res = await apiPost(`/workspace/cases/${encodeURIComponent(cid)}/close`, {});
+  if (res.ok) {
+    loadWorkbench(_wbOff);
+  } else {
+    const detail = res.data?.detail || res.status || 'Unknown error';
+    const el = document.getElementById('workbench-content');
+    const errDiv = document.createElement('div');
+    errDiv.className = 'form-err';
+    errDiv.style.cssText = 'display:block;margin:8px 0';
+    errDiv.textContent = 'Failed to close case: ' + detail;
+    el.prepend(errDiv);
+  }
+}
+
+async function addFinding(cid, textarea, btn) {
+  const finding = (textarea.value || '').trim();
+  if (!finding) return;
+  btn.disabled = true;
+  const res = await apiPost(`/workspace/cases/${encodeURIComponent(cid)}/findings`, { finding });
+  btn.disabled = false;
+  if (res.ok) {
+    textarea.value = '';
+    loadWorkbench(_wbOff);
+  } else {
+    const msg = res.data?.detail || res.status || 'Unknown error';
+    let errDiv = textarea.parentNode.querySelector('.form-err');
+    if (!errDiv) {
+      errDiv = document.createElement('div');
+      errDiv.className = 'form-err';
+      errDiv.style.cssText = 'display:block;margin-top:6px;font-size:11px';
+      textarea.parentNode.appendChild(errDiv);
+    }
+    errDiv.textContent = 'Failed: ' + msg;
+    setTimeout(() => { if (errDiv.parentNode) errDiv.remove(); }, 4000);
+  }
+}
+
+// ── Policy Desk ───────────────────────────────────────────────────────────────
+
+const POLICY_KEYWORDS = ['congress','senate','house','fara','bill','amendment','lobbying','legislat','foreign agent','appropriat','committee'];
+
+function _isPolicyRecord(r) {
+  const hay = [r.hypothesis||'', r.pattern||'', r.signal_source||'', r.signal_url||''].join(' ').toLowerCase();
+  return POLICY_KEYWORDS.some(k => hay.includes(k));
+}
+
+async function loadPolicyDesk() {
+  const summaryEl = document.getElementById('policy-summary');
+  summaryEl.innerHTML = '<div class="loading" style="border:none">Loading…</div>';
+
+  const [faraData, leadsData, intelData] = await Promise.all([
+    apiFetch('/fara?limit=20'),
+    apiFetch('/leads?limit=50'),
+    apiFetch('/intel?limit=200'),
+  ]);
+
+  const faraItems  = faraData?.items  || [];
+  const leadsItems = leadsData?.items || [];
+  const intelAll   = intelData?.items || [];
+  const policyIntel = intelAll.filter(_isPolicyRecord);
+
+  summaryEl.innerHTML = `
+    <div class="policy-stat"><div class="policy-stat-num">${faraData?.total ?? faraItems.length}</div><div class="policy-stat-label">FARA Records</div></div>
+    <div class="policy-stat"><div class="policy-stat-num">${leadsData?.total ?? leadsItems.length}</div><div class="policy-stat-label">Leads</div></div>
+    <div class="policy-stat"><div class="policy-stat-num">${policyIntel.length}</div><div class="policy-stat-label">Policy Intel (last 200)</div></div>`;
+
+  // FARA tab
+  const faraEl = document.getElementById('tab-fara');
+  if (!faraData) {
+    faraEl.innerHTML = emptyState('API offline — cannot load FARA records.');
+  } else if (!faraItems.length) {
+    faraEl.innerHTML = emptyState('No FARA records found. Run a cycle to harvest filings.');
+  } else {
+    faraEl.innerHTML = faraItems.map(r => {
+      const meta = r.metadata || {};
+      return `<div class="policy-record">
+        <div class="policy-record-title">${esc(meta.registrant || r.title || r.record_id || '—')}</div>
+        <div style="font-size:12px;color:var(--text-secondary);line-height:1.5">${esc(trunc(r.summary||r.content||'', 220))}</div>
+        <div class="policy-record-meta">
+          ${meta.country ? `<span>Country: ${esc(meta.country)}</span>` : ''}
+          ${meta.principal ? `<span>Principal: ${esc(meta.principal)}</span>` : ''}
+          <span>${ts(r.published_at || r.collected_at || '')}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Leads tab
+  const leadsEl = document.getElementById('tab-leads');
+  if (!leadsData) {
+    leadsEl.innerHTML = emptyState('API offline — cannot load leads.');
+  } else if (!leadsItems.length) {
+    leadsEl.innerHTML = emptyState('No leads yet. Generate via POST /leads/generate.');
+  } else {
+    leadsEl.innerHTML = leadsItems.map(r => `
+      <div class="policy-record">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+          <div class="policy-record-title">${esc(r.title||'—')}</div>
+          ${badge(r.priority||'')}
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-top:4px">${esc(trunc(r.summary||'', 240))}</div>
+        <div class="policy-record-meta"><span>${ts(r.generated_at||'')}</span></div>
+      </div>`).join('');
+  }
+
+  // Policy intel tab
+  const intelEl = document.getElementById('tab-intel');
+  if (!intelData) {
+    intelEl.innerHTML = emptyState('API offline — cannot load intel records.');
+  } else if (!policyIntel.length) {
+    intelEl.innerHTML = emptyState('No policy-relevant intel records found in the current page.');
+  } else {
+    intelEl.innerHTML = policyIntel.map(r => `
+      <div class="policy-record">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+          <div class="policy-record-title">${esc(trunc(r.pattern||r.hypothesis||'—', 120))}</div>
+          ${badge(r.classification||'')}
+        </div>
+        <div style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-top:4px">${esc(trunc(r.hypothesis||'', 220))}</div>
+        <div class="policy-record-meta">
+          ${confBar(r.confidence)}
+          <span>${esc((r.signal_source||'').replace(/_/g,' '))}</span>
+          <span>${ts(r.written_at||'')}</span>
+        </div>
+      </div>`).join('');
+  }
+}
+
+function switchTab(tabId, button) {
+  const panel = button.closest('.panel') || document.getElementById('panel-policy');
+  panel.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  panel.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  button.classList.add('active');
+  // Lazy-load tab content on first activation
+  if (tabId === 'lj-tab-judicial') loadJudicial(0);
+  if (tabId === 'lj-tab-state') loadStateLeg(0);
+}
+
+// ── Psyop batch run ───────────────────────────────────────────────────────────
+
+async function runPsyopDetection() {
+  const btn = document.getElementById('psyop-run-btn');
+  const msg = document.getElementById('psyop-run-msg');
+  btn.disabled = true;
+  btn.textContent = 'Running…';
+  msg.textContent = '';
+  const res = await apiPost('/psyop/run', {});
+  btn.disabled = false;
+  btn.textContent = 'Run Detection';
+  if (res.ok) {
+    const s = res.data || {};
+    msg.textContent = `✓ ${s.records_analysed ?? '?'} records analysed, ${s.risky_detected ?? '?'} risky detected`;
+    loadPsyop(0);
+  } else {
+    msg.textContent = `Failed: ${res.data?.detail || res.status}`;
+  }
+}
+
+// ── Legislative & Judicial Desk ───────────────────────────────────────────────
+
+const LJ_PAGE = 20;
+
+async function loadLegJudBrief() {
+  const el = document.getElementById('lj-brief-content');
+  const meta = document.getElementById('lj-brief-meta');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">Loading brief…</div>';
+  const data = await apiFetch('/leg_jud/brief');
+  if (!data || !data.brief) {
+    el.innerHTML = emptyState('No Legislative & Judicial brief generated yet. Run a cycle to produce one.');
+    return;
+  }
+  const b = data.brief;
+  meta.textContent = `run_id: ${(b.run_id||'').slice(0,8)} · ${b.eligible_records ?? 0} eligible records · ${b.date || ''}`;
+  const sections = (b.sections || []).map(s => `
+    <div class="state-box" style="margin-bottom:16px">
+      <div style="font-weight:600;margin-bottom:6px;color:var(--accent)">${esc(s.title || s.kind)}</div>
+      <div style="white-space:pre-wrap;font-size:13px">${esc(s.body || 'NO SIGNAL THIS CYCLE')}</div>
+    </div>`).join('');
+  el.innerHTML = sections || emptyState('No sections in this brief.');
+}
+
+async function loadJudicial(offset) {
+  const el = document.getElementById('lj-judicial-content');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">Loading…</div>';
+  const judge = (document.getElementById('lj-judge-filter')?.value || '').trim();
+  const action = document.getElementById('lj-action-filter')?.value || '';
+  const court = (document.getElementById('lj-court-filter')?.value || '').trim();
+  let qs = `/leg_jud/judicial?limit=${LJ_PAGE}&offset=${offset}`;
+  if (judge) qs += `&judge=${encodeURIComponent(judge)}`;
+  if (action) qs += `&action=${encodeURIComponent(action)}`;
+  if (court) qs += `&court=${encodeURIComponent(court)}`;
+  const data = await apiFetch(qs);
+  if (!data) { el.innerHTML = emptyState('No judicial records found.'); return; }
+  const items = data.items || [];
+  if (!items.length) { el.innerHTML = emptyState('No judicial records match the current filters.'); return; }
+  const rows = items.map(r => {
+    const m = r.metadata || {};
+    const ties = (m.disclosed_ties || []).join('; ') || '—';
+    return `<tr>
+      <td>${esc(m.judge || '—')}</td>
+      <td>${esc(m.court || '—')}</td>
+      <td><span class="badge badge-blue">${esc(m.action_type || '—')}</span></td>
+      <td>${esc(m.case_ref || '—')}</td>
+      <td style="max-width:280px">${esc(trunc(m.ruling_summary || '—', 120))}</td>
+      <td style="max-width:200px;font-size:11px">${esc(ties)}</td>
+      <td>${esc(m.filed_at || '—')}</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = `<table class="data-table"><thead><tr>
+    <th>Judge</th><th>Court</th><th>Action</th><th>Case Ref</th><th>Summary</th><th>Disclosed Ties</th><th>Filed</th>
+  </tr></thead><tbody>${rows}</tbody></table>
+  ${pager(data.total || items.length, offset, LJ_PAGE, 'loadJudicial')}`;
+}
+
+async function loadStateLeg(offset) {
+  const el = document.getElementById('lj-state-content');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">Loading…</div>';
+  const state = (document.getElementById('lj-state-filter')?.value || '').trim();
+  const chamber = document.getElementById('lj-chamber-filter')?.value || '';
+  const gapOnly = document.getElementById('lj-gap-filter')?.checked;
+  let qs = `/leg_jud/state_leg?limit=${LJ_PAGE}&offset=${offset}`;
+  if (state) qs += `&state=${encodeURIComponent(state)}`;
+  if (chamber) qs += `&chamber=${encodeURIComponent(chamber)}`;
+  if (gapOnly) qs += `&disclosure_gap=true`;
+  const data = await apiFetch(qs);
+  if (!data) { el.innerHTML = emptyState('No state legislative records found.'); return; }
+  const items = data.items || [];
+  if (!items.length) { el.innerHTML = emptyState('No state legislative records match the current filters.'); return; }
+  const rows = items.map(r => {
+    const m = r.metadata || {};
+    const gapBadge = m.disclosure_gap
+      ? `<span class="badge badge-orange" title="Disclosure data structurally unavailable">DISCLOSURE GAP</span>`
+      : `<span class="badge badge-green">${esc(m.disclosure_regime || 'FULL')}</span>`;
+    return `<tr>
+      <td>${esc(m.state || '—')}</td>
+      <td>${esc(m.bill_id || '—')}</td>
+      <td style="max-width:220px">${esc(trunc(m.title || '—', 80))}</td>
+      <td>${esc(m.sponsor || '—')}</td>
+      <td>${esc(m.chamber || '—')}</td>
+      <td><span class="badge badge-blue">${esc(m.status || '—')}</span></td>
+      <td>${gapBadge}</td>
+      <td>${esc(m.filed_at || '—')}</td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = `<table class="data-table"><thead><tr>
+    <th>State</th><th>Bill</th><th>Title</th><th>Sponsor</th><th>Chamber</th><th>Status</th><th>Disclosure</th><th>Filed</th>
+  </tr></thead><tbody>${rows}</tbody></table>
+  ${pager(data.total || items.length, offset, LJ_PAGE, 'loadStateLeg')}`;
+}
+
+function clearJudicialFilters() {
+  document.getElementById('lj-judge-filter').value = '';
+  document.getElementById('lj-action-filter').value = '';
+  document.getElementById('lj-court-filter').value = '';
+  loadJudicial(0);
+}
+
+function clearStateLegFilters() {
+  document.getElementById('lj-state-filter').value = '';
+  document.getElementById('lj-chamber-filter').value = '';
+  document.getElementById('lj-gap-filter').checked = false;
+  loadStateLeg(0);
+}
+
 // ── Copy helper ───────────────────────────────────────────────────────────────
 
 function copyText(btn, text) {
@@ -1350,6 +2218,39 @@ function fallbackCopy(text) {
   await checkStatus();
   loadLatestBrief();
   setInterval(checkStatus, 30000);
+
+  const caseModal = document.getElementById('case-modal');
+  if (caseModal) {
+    caseModal.addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeNewCaseModal();
+    });
+  }
+
+  const wbContent = document.getElementById('workbench-content');
+  if (wbContent) {
+    wbContent.addEventListener('click', function(e) {
+      const addBtn = e.target.closest('[data-add-finding]');
+      if (addBtn) {
+        e.stopPropagation();
+        const cid = addBtn.dataset.addFinding;
+        const textarea = wbContent.querySelector(`[data-finding-input="${cid}"]`);
+        if (textarea) addFinding(cid, textarea, addBtn);
+        return;
+      }
+      const closeBtn = e.target.closest('[data-close]');
+      if (closeBtn) { e.stopPropagation(); closeCase(closeBtn.dataset.close); return; }
+      const card = e.target.closest('.case-card');
+      if (card && !e.target.closest('.case-detail')) card.classList.toggle('expanded');
+    });
+  }
+
+  // Hide Portland Web nav link if the feature is not enabled on this server
+  fetch('/portland-web', { method: 'HEAD' }).then(r => {
+    if (r.status === 404) {
+      const link = document.getElementById('nav-portland-web');
+      if (link) link.style.display = 'none';
+    }
+  }).catch(() => {});
 })();
 </script>
 </body>

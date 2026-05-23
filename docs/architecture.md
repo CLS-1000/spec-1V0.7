@@ -10,7 +10,7 @@
 ```
 spec-1/
 ├── src/
-│   ├── spec1_engine/        # Core OSINT pipeline (harvest → score → investigate → analyze)
+│   ├── spec1_core/          # Core OSINT pipeline (harvest → score → investigate → analyze)
 │   │   ├── core/            # Frozen — schemas, IDs, logging, prompts
 │   │   ├── signal/          # harvester, parser, scorer, complexity
 │   │   ├── investigation/   # generator, verifier (Claude Haiku)
@@ -18,21 +18,18 @@ spec-1/
 │   │   ├── analysts/        # registry, credibility, discovery
 │   │   ├── briefing/        # generator (Claude Sonnet) + writer + templates
 │   │   ├── congressional/   # collector, parser, scorer, analyzer, cycle
-│   │   ├── quant/           # collector, parser, scorer, analyzer, cycle
 │   │   ├── workspace/       # persistent case files (case, tracker, researcher, CLI)
 │   │   ├── tools/           # historical_briefs, calibration_propose, pdf_render
-│   │   ├── cls_leads/       # re-export shim
-│   │   ├── cls_psyop/       # re-export shim
-│   │   ├── cls_world_brief/ # re-export shim
 │   │   ├── api/             # legacy in-engine FastAPI mount
 │   │   ├── app/cycle.py     # one-shot cycle entry point
 │   │   └── main.py          # alternate entry point
 │   │
+│   ├── spec1_analytics/     # Analytics and output generation
+│   │   ├── cls_world_brief/ # Daily world intelligence brief
+│   │   ├── cls_leads/       # Actionable intelligence leads
+│   │   └── cls_psyop/       # Psychological-operation detection
+│   │
 │   ├── cls_osint/           # Extended OSINT adapters (feed, fara, congressional, narrative)
-│   ├── cls_world_brief/     # Daily world intelligence brief
-│   ├── cls_leads/           # Actionable intelligence leads
-│   ├── cls_psyop/           # Psychological-operation detection
-│   ├── cls_quant/           # Quantitative / market intelligence
 │   ├── cls_verdicts/        # Phase 1 feedback: human ground truth
 │   ├── cls_calibration/     # Phase 2 feedback: drift surfacing (descriptive only)
 │   ├── cls_db/              # Dual-write persistence (JSONL + SQLite)
@@ -66,18 +63,18 @@ RSS / FARA / Congress / Narrative
    cls_osint.feed ───────────────────────────────────┐
          │                                            │
          ▼                                            ▼
-  spec1_engine.signal                          cls_osint.adapters
+  spec1_core.signal                            cls_osint.adapters
   ├── harvester  → Signal[]                    ├── fara          → FaraRecord[]
   ├── parser     → ParsedSignal[]              ├── congressional → CongressRecord[]
   └── scorer     → Opportunity[]               └── narrative     → NarrativeRecord[]
          │
          ▼
-  spec1_engine.investigation
+  spec1_core.investigation
   ├── generator  → Investigation[]   (Claude Haiku)
   └── verifier   → Outcome[]
          │
          ▼
-  spec1_engine.intelligence
+  spec1_core.intelligence
   ├── analyzer   → IntelligenceRecord[]
   └── store      → spec1_intelligence.jsonl   (append-only)
 
@@ -85,12 +82,12 @@ RSS / FARA / Congress / Narrative
 ═════ Operator tools (manual, on-demand) ══════════════════════════════════════
   Each reads from spec1_intelligence.jsonl independently. None run inside the cycle.
 
-  spec1_api /psyop/run                   → psyop_scores.jsonl
-  spec1_api /brief/generate              → generated/briefs/spec1_brief_<date>.md
-                                            (Claude Sonnet → cls_world_brief fallback)
-  spec1_api /leads/generate              → leads.jsonl
-  spec1_engine.tools.calibration_propose → calibration_report.{md,jsonl}
-  spec1_engine.tools.historical_briefs   → backfill briefs for historical run_ids
+  spec1_api /psyop/run                  → psyop_scores.jsonl
+  spec1_api /brief/generate             → generated/briefs/spec1_brief_<date>.md
+                                           (Claude Sonnet → cls_world_brief fallback)
+  spec1_api /leads/generate             → leads.jsonl
+  spec1_core.tools.calibration_propose → calibration_report.{md,jsonl}
+  spec1_core.tools.historical_briefs   → backfill briefs for historical run_ids
 
 
 ═════ Feedback ════════════════════════════════════════════════════════════════
@@ -101,9 +98,26 @@ RSS / FARA / Congress / Narrative
 
 ═════ Persistence reality ═════════════════════════════════════════════════════
   JSONL is the source of truth across every store (append-only, immutable).
-  cls_db.dual_write currently writes both JSONL and SQLite **only for verdicts**.
-  Every other store is JSONL-only today; broader dual-write coverage is a roadmap
-  goal, not a current property.
+  cls_db.dual_write writes both JSONL and SQLite for:
+    - cls_verdicts (verdicts.jsonl ↔ verdicts table)
+    - cls_leads (leads.jsonl ↔ leads table)      [opt-in via db= kwarg]
+    - cls_psyop (psyop_scores.jsonl ↔ psyop_scores table) [opt-in via db= kwarg]
+  JSONL-only stores: intelligence/store.py, cls_world_brief, cls_osint adapters.
+
+  Scalable read helpers (cls_db):
+    - cls_db.cursor_reader.JSONLCursorReader — cursor-based forward pagination
+      over large JSONL files without loading them entirely into memory.
+    - cls_db.indexed_queries.IndexedQueryLayer — composable, limit-enforced
+      queries over SQLite (wraps Repository).
+    - DualWriter.read_chunked(limit) — iterate JSONL in chunks via cursor reader.
+    - DualWriter.indexed_queries() — get an IndexedQueryLayer for the SQLite backend.
+    - JsonlStore.read_chunk(offset, limit) — simple offset/limit slice for
+      spec1_engine/intelligence/store.py.
+
+  Migration / backfill:
+    - spec1_engine.tools.backfill_jsonl_to_db — CLI to backfill any JSONL file
+      into its SQLite table (idempotent; INSERT OR REPLACE semantics).
+      Includes --verify mode for parity checks without writing.
 
 
 ═════ Surfaces ════════════════════════════════════════════════════════════════
@@ -116,7 +130,7 @@ RSS / FARA / Congress / Narrative
 ## 4-Gate Scoring System
 
 Every signal must pass ALL four gates to become an `Opportunity`.
-Exact constants are in `src/spec1_engine/signal/scorer.py`.
+Exact constants are in `src/spec1_core/signal/scorer.py`.
 
 | Gate | Criterion | Constant |
 |------|-----------|----------|
@@ -133,21 +147,20 @@ Calibration drift across gates is surfaced by `cls_calibration` — **never auto
 
 | Model | Module | Description |
 |-------|--------|-------------|
-| `Signal` | `spec1_engine` | Raw RSS/OSINT item |
-| `ParsedSignal` | `spec1_engine` | Cleaned, keywords/entities extracted |
-| `Opportunity` | `spec1_engine` | Passed all 4 gates |
-| `Investigation` | `spec1_engine` | Hypothesis + queries + analyst leads |
-| `Outcome` | `spec1_engine` | Verified classification + confidence |
-| `IntelligenceRecord` | `spec1_engine` | Final record with blended confidence |
-| `AnalystRecord` | `spec1_engine` | Name, domains, credibility score |
+| `Signal` | `spec1_core` | Raw RSS/OSINT item |
+| `ParsedSignal` | `spec1_core` | Cleaned, keywords/entities extracted |
+| `Opportunity` | `spec1_core` | Passed all 4 gates |
+| `Investigation` | `spec1_core` | Hypothesis + queries + analyst leads |
+| `Outcome` | `spec1_core` | Verified classification + confidence |
+| `IntelligenceRecord` | `spec1_core` | Final record with blended confidence |
+| `AnalystRecord` | `spec1_core` | Name, domains, credibility score |
 | `OSINTRecord` | `cls_osint` | Generic extended OSINT item |
 | `FaraRecord` | `cls_osint` | FARA filing |
 | `CongressRecord` | `cls_osint` | Congressional record |
 | `NarrativeRecord` | `cls_osint` | Influence-operation narrative |
-| `WorldBrief` | `cls_world_brief` | Daily brief (headline, sections, sources) |
-| `Lead` | `cls_leads` | Actionable intelligence lead |
-| `PsyopScore` | `cls_psyop` | Psychological-operation detection score |
-| `MarketBar` / `QuantSignal` | `cls_quant` | Market intelligence |
+| `WorldBrief` | `spec1_analytics.cls_world_brief` | Daily brief (headline, sections, sources) |
+| `Lead` | `spec1_analytics.cls_leads` | Actionable intelligence lead |
+| `PsyopScore` | `spec1_analytics.cls_psyop` | Psychological-operation detection score |
 | `Verdict` | `cls_verdicts` | Human ground-truth (`correct\|incorrect\|partial\|unclear`) |
 | `CalibrationReport` | `cls_calibration` | Descriptive drift report |
 
@@ -168,7 +181,7 @@ Calibration drift across gates is surfaced by `cls_calibration` — **never auto
 
 ## Frozen Core — Governance
 
-`src/spec1_engine/core/` is off-limits to ad-hoc edits.
+`src/spec1_core/core/` is off-limits to ad-hoc edits.
 
 - Agents may **import** from `core/` but may **not modify** it
 - Changes require explicit human approval + semantic version bump

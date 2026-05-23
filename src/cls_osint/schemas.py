@@ -185,3 +185,123 @@ class NarrativeRecord:
             collected_at=self.detected_at,
             metadata=self.to_dict(),
         )
+
+
+@dataclass
+class JudicialRecord:
+    """A federal judicial record (ruling, recusal, financial disclosure, gift, speaking engagement)."""
+
+    record_id: str
+    judge: str
+    court: str
+    district: str
+    action_type: str          # "ruling" | "recusal" | "disclosure" | "gift" | "speaking_engagement"
+    case_ref: str
+    ruling_summary: str
+    disclosed_ties: list[str]
+    recusal_basis: str
+    gift_amount: float
+    engagement_sponsor: str
+    filed_at: str             # ISO date string
+    source_url: str
+    metadata: dict = field(default_factory=dict)
+
+    @classmethod
+    def make_id(cls, judge: str, action_type: str, filed_at: str) -> str:
+        return _make_id("judicial", judge, action_type, filed_at)
+
+    def to_dict(self) -> dict:
+        return {
+            "record_id": self.record_id,
+            "judge": self.judge,
+            "court": self.court,
+            "district": self.district,
+            "action_type": self.action_type,
+            "case_ref": self.case_ref,
+            "ruling_summary": self.ruling_summary,
+            "disclosed_ties": self.disclosed_ties,
+            "recusal_basis": self.recusal_basis,
+            "gift_amount": self.gift_amount,
+            "engagement_sponsor": self.engagement_sponsor,
+            "filed_at": self.filed_at,
+            "source_url": self.source_url,
+            "metadata": self.metadata,
+        }
+
+    def to_osint_record(self) -> OSINTRecord:
+        ties_str = "; ".join(self.disclosed_ties) if self.disclosed_ties else "none"
+        content = (
+            f"Judge {self.judge} ({self.court}, {self.district}): {self.action_type} — "
+            f"{self.case_ref}. {self.ruling_summary} "
+            f"Disclosed ties: {ties_str}."
+        )
+        return OSINTRecord(
+            record_id=self.record_id,
+            source_type="JUDICIAL",
+            source_name="federal_courts",
+            content=content,
+            url=self.source_url,
+            collected_at=_now(),
+            metadata=self.to_dict(),
+        )
+
+
+@dataclass
+class StateLegRecord:
+    """A state legislative record with disclosure-regime tracking."""
+
+    record_id: str
+    state: str
+    bill_id: str
+    title: str
+    sponsor: str
+    chamber: str              # "HOUSE" | "SENATE" | "JOINT"
+    status: str               # "INTRODUCED" | "PASSED_HOUSE" | "PASSED_SENATE" | "ENACTED" | "FAILED"
+    summary: str
+    disclosure_regime: str    # "FULL" | "PARTIAL" | "NONE"
+    disclosure_gap: bool
+    filed_at: str             # ISO date string
+    source_url: str
+    tags: list[str] = field(default_factory=list)
+    metadata: dict = field(default_factory=dict)
+
+    @classmethod
+    def make_id(cls, state: str, bill_id: str, filed_at: str) -> str:
+        return _make_id("state_leg", state, bill_id, filed_at)
+
+    def to_dict(self) -> dict:
+        return {
+            "record_id": self.record_id,
+            "state": self.state,
+            "bill_id": self.bill_id,
+            "title": self.title,
+            "sponsor": self.sponsor,
+            "chamber": self.chamber,
+            "status": self.status,
+            "summary": self.summary,
+            "disclosure_regime": self.disclosure_regime,
+            "disclosure_gap": self.disclosure_gap,
+            "filed_at": self.filed_at,
+            "source_url": self.source_url,
+            "tags": self.tags,
+            "metadata": self.metadata,
+        }
+
+    def to_osint_record(self) -> OSINTRecord:
+        tag_str = ", ".join(self.tags) if self.tags else ""
+        gap_note = f" DISCLOSURE GAP: {self.state}." if self.disclosure_gap else ""
+        content = (
+            f"{self.bill_id} ({self.state}): {self.title}. Sponsor: {self.sponsor}. "
+            f"Chamber: {self.chamber}. Status: {self.status}. {self.summary}"
+            f"{gap_note} Disclosure regime: {self.disclosure_regime}. "
+            f"Tags: {tag_str}."
+        )
+        return OSINTRecord(
+            record_id=self.record_id,
+            source_type="STATE_LEG",
+            source_name="state_legislature",
+            content=content,
+            url=self.source_url,
+            collected_at=_now(),
+            metadata=self.to_dict(),
+        )

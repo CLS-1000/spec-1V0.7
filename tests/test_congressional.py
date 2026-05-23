@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from cls_osint.adapters.congressional import (
     _extract_bill_id,
@@ -16,7 +15,6 @@ from cls_osint.adapters.congressional import (
     _classify_record_type,
     _make_record_id,
     fetch_congress_rss,
-    fetch_govtrack_rss,
     collect,
 )
 from cls_osint.schemas import CongressRecord

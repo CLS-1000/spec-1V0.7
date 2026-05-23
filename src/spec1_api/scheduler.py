@@ -14,7 +14,7 @@ KILL_FILE = Path(".cls_kill")
 
 
 def _run_cycle_job() -> None:
-    """Background job — runs one intelligence cycle.
+    """Background job — runs one full intelligence cycle (all steps).
 
     Skipped if the kill-file is present.
     """
@@ -22,17 +22,16 @@ def _run_cycle_job() -> None:
         logger.warning("Kill file present at %s — skipping scheduled cycle.", KILL_FILE)
         return
     try:
-        from spec1_engine.core.engine import Engine, EngineConfig
-        config = EngineConfig(
-            environment=os.environ.get("SPEC1_ENVIRONMENT", "production"),
+        from spec1_core.app.cycle import run_cycle
+        stats = run_cycle(
             store_path=Path(os.environ.get("SPEC1_STORE_PATH", "spec1_intelligence.jsonl")),
+            environment=os.environ.get("SPEC1_ENVIRONMENT", "production"),
+            verbose=False,
         )
-        engine = Engine(config)
-        stats = engine.run()
         logger.info(
             "Scheduled cycle complete: %d records stored, %d errors",
-            stats.records_stored,
-            len(stats.errors),
+            stats["records_stored"],
+            len(stats.get("errors", [])),
         )
     except Exception as exc:
         logger.error("Scheduled cycle failed: %s", exc)

@@ -2,20 +2,19 @@
 
 import pytest
 import json
-from pathlib import Path
 from unittest.mock import patch, MagicMock
 from datetime import datetime
 
-from spec1_engine.schemas.models import Signal, CaseFile
-from spec1_engine.workspace.case import (
+from spec1_core.schemas.models import Signal, CaseFile
+from spec1_core.workspace.case import (
     open_case,
     update_case,
     close_case,
     list_cases,
     get_case,
 )
-from spec1_engine.workspace.tracker import match_signals_to_cases
-from spec1_engine.workspace.researcher import run_research
+from spec1_core.workspace.tracker import match_signals_to_cases
+from spec1_core.workspace.researcher import run_research
 
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
@@ -27,7 +26,7 @@ def temp_workspace(tmp_path, monkeypatch):
     workspace_dir.mkdir()
 
     # Monkey patch the workspace paths
-    import spec1_engine.workspace.case as case_module
+    import spec1_core.workspace.case as case_module
     case_module.WORKSPACE_DIR = workspace_dir
     case_module.CASES_DIR = workspace_dir / "cases"
     case_module.REPORTS_DIR = workspace_dir / "reports"
@@ -197,12 +196,60 @@ def test_get_case_retrieves_case_by_id(temp_workspace):
 
 
 def test_get_case_raises_on_missing_case(temp_workspace):
-    """Test: get_case raises ValueError for missing case."""
+    """Test: get_case raises ValueError for a well-formed but absent case ID."""
     with pytest.raises(ValueError):
-        get_case("case-nonexistent")
+        get_case("case-000000000000")
 
 
-# ── Signal matching tests ─────────────────────────────────────────────────────
+# ── Path-traversal rejection tests ───────────────────────────────────────────
+
+@pytest.mark.parametrize("bad_id", [
+    "../../../etc/passwd",
+    "case-../../../etc/shadow",
+    "../../etc/hostname",
+    "case_../../secret",
+    "",
+    "CASE-aabbccddeeff",
+    "case-AABBCCDDEEFF",
+    "case-toolongid12345",
+    "case-short",
+    "case-aabbccddee;rm -rf /",
+])
+def test_get_case_rejects_invalid_case_id(temp_workspace, bad_id):
+    """Test: get_case raises ValueError for any invalid / traversal case_id."""
+    with pytest.raises(ValueError, match="Invalid case_id"):
+        get_case(bad_id)
+
+
+def test_get_case_raises_on_valid_format_but_absent(temp_workspace):
+    """Test: get_case raises ValueError for a well-formed ID that doesn't exist on disk."""
+    with pytest.raises(ValueError, match="not found"):
+        get_case("case-999999999999")
+
+
+@pytest.mark.parametrize("bad_id", [
+    "../../../etc/passwd",
+    "case-../../../etc/shadow",
+    "../../etc/hostname",
+])
+def test_close_case_rejects_path_traversal(temp_workspace, bad_id):
+    """Test: close_case raises ValueError for path-traversal case_id."""
+    with pytest.raises(ValueError, match="Invalid case_id"):
+        close_case(bad_id)
+
+
+@pytest.mark.parametrize("bad_id", [
+    "../../../etc/passwd",
+    "case-../../../etc/shadow",
+    "../../etc/hostname",
+])
+def test_update_case_rejects_path_traversal(temp_workspace, bad_id, sample_signal):
+    """Test: update_case raises ValueError for path-traversal case_id."""
+    with pytest.raises(ValueError, match="Invalid case_id"):
+        update_case(bad_id, [sample_signal], "finding")
+
+
+
 
 def test_tracker_matches_signal_to_case_by_tag(temp_workspace, apt29_signal):
     """Test: tracker matches signal to case by tag."""
@@ -324,7 +371,7 @@ def test_researcher_returns_empty_for_no_signals():
     assert result == ""
 
 
-@patch("spec1_engine.workspace.researcher._anthropic")
+@patch("spec1_core.workspace.researcher._anthropic")
 def test_researcher_calls_claude_sonnet_4(mock_anthropic):
     """Test: researcher calls Claude Sonnet 4 model."""
     mock_client = MagicMock()
@@ -369,7 +416,7 @@ def test_researcher_calls_claude_sonnet_4(mock_anthropic):
     assert call_kwargs["max_tokens"] == 2000
 
 
-@patch("spec1_engine.workspace.researcher._anthropic")
+@patch("spec1_core.workspace.researcher._anthropic")
 def test_researcher_returns_fallback_on_api_error(mock_anthropic):
     """Test: researcher returns fallback on API failure."""
     mock_client = MagicMock()

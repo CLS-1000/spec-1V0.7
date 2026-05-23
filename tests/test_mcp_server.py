@@ -5,11 +5,9 @@ from __future__ import annotations
 import json
 import sys
 import os
-from datetime import datetime, timezone
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-import pytest
 
 # Add repo root to path for mcp_server import
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -21,7 +19,6 @@ from mcp_server import (
     handle_initialize,
     handle_tools_list,
     handle_tools_call,
-    handle_request,
     tool_get_signals,
     tool_get_intel,
     tool_get_leads,
@@ -33,7 +30,6 @@ from mcp_server import (
     tool_file_verdict,
     tool_get_verdicts,
     tool_get_calibration,
-    TOOLS,
 )
 
 
@@ -263,7 +259,6 @@ class TestGetStats:
             "SPEC1_OSINT_PATH": str(tmp_path / "osint.jsonl"),
             "SPEC1_LEADS_PATH": str(tmp_path / "leads.jsonl"),
             "SPEC1_PSYOP_PATH": str(tmp_path / "psyop.jsonl"),
-            "SPEC1_QUANT_PATH": str(tmp_path / "quant.jsonl"),
             "SPEC1_BRIEFS_PATH": str(tmp_path / "briefs.jsonl"),
             "SPEC1_VERDICTS_PATH": str(tmp_path / "verdicts.jsonl"),
         }

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 from pydantic import BaseModel, Field
+from spec1_labels import PSYOP_CLEAN
 
 
 class HealthResponse(BaseModel):
@@ -31,6 +32,14 @@ class CycleResponse(BaseModel):
     outcomes_verified: int = 0
     records_stored: int = 0
     errors: list[str] = Field(default_factory=list)
+    # Post-cycle steps surfaced by the full run_cycle bridge
+    psyop_classification: Optional[str] = None
+    psyop_score: Optional[float] = None
+    psyop_patterns_fired: Optional[int] = None
+    brief_word_count: Optional[int] = None
+    brief_path: Optional[str] = None
+    publication_path: Optional[str] = None
+    cases_updated: Optional[int] = None
 
 
 class SignalResponse(BaseModel):
@@ -85,7 +94,7 @@ class PsyopResponse(BaseModel):
     patterns_matched: list[str] = Field(default_factory=list)
     pattern_names: list[str] = Field(default_factory=list)
     score: float = 0.0
-    classification: str = "CLEAN"
+    classification: str = PSYOP_CLEAN
     threat_categories: list[str] = Field(default_factory=list)
     scored_at: str
 

@@ -194,7 +194,7 @@ def client(tmp_path: Path):
 
 def test_post_verdict_writes_to_store(client):
     c, store = client
-    r = c.post("/verdicts", json={
+    r = c.post("/api/v1/verdicts", json={
         "record_id": "rec1",
         "verdict": "correct",
         "reviewer": "alice",
@@ -210,50 +210,50 @@ def test_post_verdict_writes_to_store(client):
 
 def test_post_verdict_rejects_invalid_kind(client):
     c, _ = client
-    r = c.post("/verdicts", json={"record_id": "rec1", "verdict": "maybe"})
+    r = c.post("/api/v1/verdicts", json={"record_id": "rec1", "verdict": "maybe"})
     assert r.status_code == 422
 
 
 def test_get_verdicts_filters_by_record_and_reviewer(client):
     c, _ = client
-    c.post("/verdicts", json={"record_id": "rec1", "verdict": "correct", "reviewer": "alice"})
-    c.post("/verdicts", json={"record_id": "rec1", "verdict": "incorrect", "reviewer": "bob"})
-    c.post("/verdicts", json={"record_id": "rec2", "verdict": "partial", "reviewer": "alice"})
+    c.post("/api/v1/verdicts", json={"record_id": "rec1", "verdict": "correct", "reviewer": "alice"})
+    c.post("/api/v1/verdicts", json={"record_id": "rec1", "verdict": "incorrect", "reviewer": "bob"})
+    c.post("/api/v1/verdicts", json={"record_id": "rec2", "verdict": "partial", "reviewer": "alice"})
 
-    all_resp = c.get("/verdicts").json()
+    all_resp = c.get("/api/v1/verdicts").json()
     assert all_resp["total"] == 3
 
-    rec1 = c.get("/verdicts", params={"record_id": "rec1"}).json()
+    rec1 = c.get("/api/v1/verdicts", params={"record_id": "rec1"}).json()
     assert rec1["total"] == 2
     assert all(v["record_id"] == "rec1" for v in rec1["items"])
 
-    alice = c.get("/verdicts", params={"reviewer": "alice"}).json()
+    alice = c.get("/api/v1/verdicts", params={"reviewer": "alice"}).json()
     assert alice["total"] == 2
     assert all(v["reviewer"] == "alice" for v in alice["items"])
 
-    correct = c.get("/verdicts", params={"verdict": "correct"}).json()
+    correct = c.get("/api/v1/verdicts", params={"verdict": "correct"}).json()
     assert correct["total"] == 1
     assert correct["items"][0]["reviewer"] == "alice"
 
 
 def test_get_verdicts_for_record_endpoint(client):
     c, _ = client
-    c.post("/verdicts", json={"record_id": "rec1", "verdict": "correct", "reviewer": "alice"})
-    c.post("/verdicts", json={"record_id": "rec1", "verdict": "partial", "reviewer": "bob"})
+    c.post("/api/v1/verdicts", json={"record_id": "rec1", "verdict": "correct", "reviewer": "alice"})
+    c.post("/api/v1/verdicts", json={"record_id": "rec1", "verdict": "partial", "reviewer": "bob"})
 
-    r = c.get("/verdicts/rec1").json()
+    r = c.get("/api/v1/verdicts/rec1").json()
     assert r["record_id"] == "rec1"
     assert r["total"] == 2
 
-    empty = c.get("/verdicts/missing").json()
+    empty = c.get("/api/v1/verdicts/missing").json()
     assert empty["total"] == 0
 
 
 def test_pagination(client):
     c, _ = client
     for i in range(5):
-        c.post("/verdicts", json={"record_id": f"r{i}", "verdict": "correct"})
-    page = c.get("/verdicts", params={"limit": 2, "offset": 1}).json()
+        c.post("/api/v1/verdicts", json={"record_id": f"r{i}", "verdict": "correct"})
+    page = c.get("/api/v1/verdicts", params={"limit": 2, "offset": 1}).json()
     assert page["total"] == 5
     assert len(page["items"]) == 2
     assert page["offset"] == 1

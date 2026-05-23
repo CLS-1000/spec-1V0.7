@@ -29,7 +29,7 @@ reading the `cls_calibration` drift report. This is intentional — see ADR-005.
 **Date:** 2026-04-11
 **Status:** Active
 
-**Decision:** `src/spec1_engine/core/` is off-limits to ad-hoc edits. Agents and
+**Decision:** `src/spec1_core/core/` is off-limits to ad-hoc edits. Agents and
 contributors may import from it but may not modify it without a semantic version bump
 and explicit human approval. All prompts live in `core/prompts/*.md` — no inline
 prompt strings anywhere else in the codebase.
@@ -47,7 +47,7 @@ consequential.
 ## ADR-003 — Dual-Write Persistence: JSONL Primary, SQLite Secondary
 
 **Date:** 2026-04-11
-**Status:** Active (partially implemented)
+**Status:** Active (expanded in v0.5.1)
 
 **Decision:** JSONL is the system of record — append-only, immutable, auditable.
 SQLite is a queryable index that can be rebuilt from the JSONL log at any time.
@@ -59,16 +59,20 @@ DB queries.
 `cat`, reconstructible from scratch, and immune to database corruption. The SQLite
 layer is a convenience that must never become a dependency.
 
-**Current coverage (as of v0.4):** Only `cls_verdicts/store.py` actually goes through
-`cls_db.dual_write`. `intelligence/store.py`, `cls_psyop/store.py`, `cls_leads/store.py`,
-and `cls_world_brief/store.py` are still JSONL-only. The decision stands; the
-implementation is incremental. Broader coverage is a roadmap goal, not a current
-property.
+**Current coverage (as of v0.5.1):**
+- `cls_verdicts/store.py` — always dual-writes.
+- `cls_leads/store.py` — opt-in dual-write via `db=` kwarg.
+- `cls_psyop/store.py` — opt-in dual-write via `db=` kwarg.
+- `intelligence/store.py`, `cls_world_brief/store.py` — still JSONL-only.
+
+Scalable read helpers added:
+- `cls_db.cursor_reader.JSONLCursorReader` — cursor-based forward pagination.
+- `cls_db.indexed_queries.IndexedQueryLayer` — limit-enforced SQLite queries.
+- `spec1_engine.tools.backfill_jsonl_to_db` — JSONL→SQLite migration CLI.
 
 **Tradeoff accepted:** JSONL and SQLite can diverge if a SQLite write fails. This is
-accepted because SQLite is the index, not the record. The current partial coverage
-also means most stores are inspectable only via `cat`, which is intentional during
-the dual-write rollout.
+accepted because SQLite is the index, not the record. The backfill tool allows
+re-syncing the two at any time.
 
 ---
 
@@ -118,7 +122,7 @@ itself. This is the intended design.
 **Status:** Active
 
 **Decision:** PDF generation uses `weasyprint` via a subprocess
-(`spec1_engine.tools.pdf_render`) rather than importing it directly in the API or
+(`spec1_core.tools.pdf_render`) rather than importing it directly in the API or
 engine process.
 
 **Rationale:** `weasyprint` carries heavy native dependencies (Cairo, Pango, etc.)
@@ -158,12 +162,12 @@ SQLite) is the coordination layer.
 investigate → verify → analyze → write `IntelligenceRecord` to JSONL. Brief
 generation, lead derivation, psyop scoring, calibration proposals, and workspace
 case processing are operator-invoked through the richer app/API entrypoints
-(`spec1_engine.app.cycle`, `POST /brief/generate`, `POST /leads/generate`,
+(`spec1_core.app.cycle`, `POST /brief/generate`, `POST /leads/generate`,
 `POST /psyop/run`), each reading from the intelligence JSONL on demand.
 
 **Rationale:** An audit found the docs claimed the canonical cycle automatically
 produced briefs, leads, and psyop scores, but the actual `Engine.run()` produced
-only intelligence records. The richer behaviour lived in `spec1_engine.app.cycle`
+only intelligence records. The richer behaviour lived in `spec1_core.app.cycle`
 and related API routes rather than in the canonical scheduler path. The
 split-then-rejoin pattern preserves the trustworthy core, makes downstream artifacts
 explicit operator decisions, and keeps the test surface focused. It also matches

@@ -8,7 +8,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-from spec1_engine.signal.gates import GATE_THRESHOLD
+from spec1_core.signal.gates import GATE_THRESHOLD
 
 
 class GateScores(BaseModel):
