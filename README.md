@@ -65,14 +65,10 @@ RSS / FARA / Congress / Narrative
 ## Quick Start
 
 ```bash
-# Note: pip install -e ".[dev]" has a known sgmllib3k build issue (feedparser transitive).
-# Workaround: use `uv pip install --system -e ".[dev]"` or install with uv.
-# See FALLBACK_SETUP.md for details.
-
 bash scripts/setup_dev.sh
 
 # Or manually:
-uv pip install --system -e ".[dev]"
+pip install -e ".[dev]"
 cp .env.example .env  # set ANTHROPIC_API_KEY
 ```
 
