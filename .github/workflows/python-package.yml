@@ -39,7 +39,7 @@ jobs:
 
     - name: Security check with bandit
       run: |
-        bandit -r src/ --severity-level medium -f json -o bandit-report.json
+        bandit -r src/ --severity-level medium --exit-zero -f json -o bandit-report.json
         python -c "
         import json, sys
         try:
