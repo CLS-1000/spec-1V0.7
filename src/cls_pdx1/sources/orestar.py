@@ -1,12 +1,12 @@
-"""ORESTAR adapter — Oregon SOS campaign finance.
+"""ORESTAR adapter — Oregon SOS campaign finance records.
 
-Production path: Oregon Secretary of State ORESTAR bulk CSV export.
-Export URL: https://sos.oregon.gov/elections/Pages/orestar.aspx
-CSV columns (as of 2025): filer_id, filer_name, transaction_type, amount,
+Source: Oregon Secretary of State bulk CSV export.
+Export: https://sos.oregon.gov/elections/Pages/orestar.aspx
+Columns (2025): filer_id, filer_name, transaction_type, amount,
     contributor_name, contributor_address, transaction_date, election_year
 
-HTTP scrape is stubbed — raises NotImplementedError so pipeline.run_cycle
-catches it and logs the gap rather than crashing.
+Live HTTP fetch is not implemented — pipeline catches the missing-csv error
+and logs it. Use fetch_from_csv_text() for offline/test ingestion.
 """
 
 from __future__ import annotations

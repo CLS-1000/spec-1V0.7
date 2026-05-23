@@ -1,188 +1,202 @@
-# SPEC-1 Intelligence Engine — Portfolio Summary
+# [ SPEC-1 INTELLIGENCE ENGINE ] — Portfolio
 
-## What This Is
-
-SPEC-1 is an automated open-source intelligence (OSINT) system built for real-time national security signal monitoring. The canonical cycle harvests, filters, investigates, and analyzes signals from authoritative sources — producing structured intelligence records on a fixed schedule. Downstream artifacts (daily briefs, actionable leads, psyop scores, calibration reports) are explicit operator tools that read from those records, never silent steps inside the cycle.
-
-The system does one thing well: separate signal from noise in a high-volume information environment, and surface what actually matters to a human analyst.
+`// v0.6.0 · Portland OR · EVASTARARCANA`
 
 ---
 
-## The Problem It Solves
+## What it is
 
-Anyone working in national security, geopolitical risk, or threat intelligence faces the same daily reality: there is far more credible reporting than any human can process. Think tanks, investigative journalists, and defense research organizations produce dozens of new pieces every day. Most are not actionable. A small fraction are.
-
-The challenge is not access to information — it is triage.
-
-SPEC-1 automates that triage. It monitors a curated set of high-credibility sources continuously, evaluates each new signal through a structured scoring framework, and surfaces only those that clear every threshold. Signals that pass are handed to an investigation and verification workflow powered by Claude. The result is a compressed, high-confidence set of intelligence records — ready for human review, without the noise. From those records, an operator chooses what to produce next: a daily brief, prioritized leads, psyop pattern scores, or a calibration report against filed verdicts.
+Automated OSINT for national security signal monitoring. SPEC-1 runs a fixed canonical cycle — harvest, filter, investigate, analyze — and produces structured `IntelligenceRecord` objects on a daily schedule. Downstream products (briefs, leads, psyop scores, calibration reports) are explicit operator tools that read from those records. None runs silently inside the cycle.
 
 ---
 
-## System Architecture
+## The problem it solves
 
-Seven stages. Each transforms the data and gates what moves forward.
+The bottleneck is attention, not access.
+
+Authoritative national-security reporting is abundant. Think tanks, investigative journalists, and defense-research organizations produce dozens of pieces daily. Most are not actionable. The challenge is triage — separating the signal from the noise before it reaches an analyst.
+
+SPEC-1 automates that triage: monitors a curated set of high-credibility sources, evaluates each incoming signal through a structured scoring framework, and surfaces only those that clear every threshold. Signals that pass are handed to an investigation and verification workflow powered by Claude. The result is a compressed, high-confidence set of records ready for human review — without the noise.
+
+**The system handles the volume. The analyst handles the judgment.**
+
+---
+
+## Architecture
+
+Seven stages — engineered for graceful degradation.
 
 ```
-Harvest → Parse → Score → Investigate → Verify → Analyze → Store
+[01 HARVEST] > [02 PARSE] > [03 SCORE] > [04 INVESTIGATE] > [05 VERIFY] > [06 ANALYZE] > [07 STORE]
 ```
 
-A FastAPI service wraps the pipeline for scheduled and on-demand operation. Briefing, leads, psyop scoring, and calibration are operator tools — each reads from the intelligence store on demand, none runs automatically inside the cycle.
+```
+>> SYSTEM METADATA LOG
+* Analyst Impact:  You never see garbled text or raw HTML — only clean,
+                   normalized prose. Stage 1 errors are contained.
+* Programmer Impact: A dead RSS feed will not halt the 06:00 AM cron job.
+                   Seven sequential stages, each independently fault-tolerant.
+```
 
-### 1. Harvest
+### `[01 HARVEST]`
 
-The harvester fetches RSS/Atom feeds from a curated list of national security publishers: authoritative think tanks, investigative outlets, and defense policy organizations with consistent editorial standards and domain expertise.
+Fetches RSS/Atom feeds from a curated list of national-security publishers. Handles SSL edge cases, malformed XML, and timeouts without stopping the cycle. Failed feeds are logged and skipped.
+Output: `Signal[]` — source ID, URL, raw text, author, timestamp.
 
-The harvester handles SSL edge cases, malformed XML, and timeout conditions without stopping the cycle. A failed feed is logged and skipped. Output: `Signal` objects carrying source ID, URL, raw text, author, publication timestamp, and engagement metadata.
+### `[02 PARSE]`
 
-### 2. Parse
+Strips HTML, extracts clean prose, identifies keywords and named entities, measures content volume. BeautifulSoup + NLP heuristics — no external model dependencies.
+Output: `ParsedSignal[]` — normalized text, keyword set, entity set, word count.
 
-Each signal passes through a parser that strips HTML, extracts clean prose, identifies keywords and named entities, and measures content volume. BeautifulSoup and lightweight NLP heuristics — no external model dependencies.
+### `[03 SCORE]` — The 4-Gate Framework
 
-Output: `ParsedSignal` — normalized text, keyword set, entity set, word count, detected language.
+Any single failure drops the signal.
 
-### 3. Score — The Four-Gate Framework
+| Gate | Criterion | Default |
+|------|-----------|---------|
+| `[CREDIBILITY]` | Source rating ≥ 0.60 | 0.60 |
+| `[VOLUME]` | Word count ≥ 50 | 50 words |
+| `[VELOCITY]` | Recency score ≥ 0.0 (≤ 48h) | 48h |
+| `[NOVELTY]` | Keyword domain match ≥ 1 | hash dedup |
 
-The core filtering layer. Every parsed signal must clear four independent gates to advance. A single failure removes it from further processing.
+Thresholds encode accumulated operational judgment. Gate weights remain unpublished.
 
-- **Credibility** — Is this source trustworthy? Each source carries an internal credibility rating reflecting editorial standards, domain expertise, and track record. Low-rated sources do not advance regardless of content.
+```
+>> SYSTEM METADATA LOG
+* Analyst Impact:  Only signals that matter reach you. The filter is explicit,
+                   not probabilistic — every threshold decision is legible.
+* Programmer Impact: Thresholds are constants. Calibration is a deliberate
+                   human decision backed by the verdict log, never a silent update.
+```
 
-- **Volume** — Does this signal contain sufficient substance? Thin posts and summaries are filtered out. Only signals with meaningful content depth continue.
+Signals clearing all four gates become `Opportunity` objects, each carrying a composite score and priority tier.
 
-- **Velocity** — Is this signal fresh? Intelligence value degrades rapidly. The scoring rewards recency across a sliding time window.
+### `[04 INVESTIGATE]`
 
-- **Novelty** — Does this signal touch relevant intelligence domains? A keyword evaluation checks for subject matter relevance across a curated domain taxonomy.
+Each opportunity is handed to an investigation generator that produces a stated hypothesis, research queries targeting authoritative external sources, and analyst leads drawn from an internal domain-expert registry. Lead selection is domain-aware: Russian military signals surface different analysts than cybersecurity or energy-infrastructure signals.
+Output: `Investigation[]`
 
-Signals clearing all four gates become `Opportunity` objects, each carrying a composite score that blends the four gate dimensions. Opportunities are classified by priority tier based on that score. Threshold constants are documented in the [architecture reference](architecture.md).
+### `[05 VERIFY]`
 
-### 4. Investigate
+Each investigation is submitted to Claude for hypothesis evaluation. Claude classifies outcome against an evidence decision tree:
 
-Each opportunity is handed to an investigation generator that builds a structured `Investigation` object: a stated hypothesis about what the signal may indicate, research queries targeting authoritative external sources, and analyst leads — domain-relevant subject matter experts drawn from the internal analyst registry.
+| Outcome | Meaning |
+|---------|---------|
+| `[CORROBORATED]` | Evidence supports the hypothesis — escalate |
+| `[INVESTIGATE]` | Hypothesis plausible, more research needed |
+| `[MONITOR]` | Signal real, not yet actionable |
+| `[CONFLICTED]` | Evidence contradictory |
+| `[ARCHIVE]` | No further attention warranted |
 
-Analyst selection is domain-aware: signals about Russian military operations surface different leads than signals about cyber operations or energy infrastructure.
+API failures fall through gracefully. No verification failure crashes the pipeline.
 
-### 5. Verify
+```
+>> SYSTEM METADATA LOG
+* Programmer Impact: The cycle never crashes on a verification error.
+                   Graceful rule-based fallbacks exist for all API timeouts.
+```
 
-Each investigation is submitted to Claude (Haiku) for hypothesis evaluation. Claude returns a structured classification with a confidence score:
+### `[06 ANALYZE]`
 
-| Classification | Meaning |
-|---------------|---------|
-| Corroborated | Evidence supports the hypothesis |
-| Escalate | High-confidence, high-urgency finding |
-| Investigate | Hypothesis plausible, more research needed |
-| Monitor | Signal real but not yet actionable |
-| Conflicted | Evidence is contradictory |
-| Archive | Does not warrant further attention |
+Synthesizes signal, investigation, and verification outcome into a final `IntelligenceRecord`. Blends confidence signals from source credibility, analyst credibility, and outcome classification into a single composite confidence value.
+Output: `IntelligenceRecord[]`
 
-API failures fall through gracefully — the cycle logs the error and continues. No verification failure crashes the pipeline.
+### `[07 STORE]`
 
-### 6. Analyze
+Dual-write: append-only JSONL (source of truth) + SQLite (queryable index, rebuildable from JSONL). Records are never overwritten.
 
-The analyzer synthesizes signal, investigation, and verification outcome into a final `IntelligenceRecord`. It blends confidence signals from multiple sources — verification confidence, source credibility, analyst credibility, outcome classification — into a single composite confidence value.
-
-The weighting reflects the relative epistemic weight each source carries. A highly credible source with a corroborated hypothesis from a domain-specialist analyst carries more weight than a mid-tier source with a speculative outcome. The weights are calibrated, not arbitrary.
-
-### 7. Store
-
-Completed `IntelligenceRecord` objects are written to a JSONL file via a thread-safe, append-only store. Records are never overwritten — the store is an immutable log.
+```
+[STORE: JSONL / SQLite]
+```
 
 ---
 
-## Quantitative Signal Domain
+## Intelligence adapters
 
-Alongside the text-based OSINT pipeline, SPEC-1 monitors a curated watchlist of publicly traded equities across four sectors: defense primes, cybersecurity vendors, energy majors, and macro instruments.
+The core pipeline adapts to specialized intelligence domains.
 
-Market signals are processed through their own four-gate framework evaluating watchlist membership, relative volume, daily return magnitude, and deduplication. Signals clearing all four gates enter the same investigation, verification, and analysis pipeline as text signals.
-
-The rationale: defense and cybersecurity equities often move on information that has not yet surfaced publicly in text. Anomalous volume and price action in these names can be an early signal worth investigating.
+```
+┌──────────────────┬────────────────────┬──────────────────────┐
+│     [FARA]       │  [CONGRESSIONAL]   │    [NARRATIVE]       │
+├──────────────────┼────────────────────┼──────────────────────┤
+│ DOJ bulk         │ Trade intelligence.│ PsyOps detection.    │
+│ filings.         │ Fallback chain:    │ TF-IDF cosine        │
+│                  │ QuiverQuant →      │ similarity           │
+│ Cross-references │ Capitol Trades →   │ clustering.          │
+│ foreign agent    │ House eFD.         │                      │
+│ registrations    │                    │ Detects narrative    │
+│ against          │ Flags defense/     │ seeding and          │
+│ congressional    │ cyber/energy       │ astroturfing.        │
+│ activity.        │ conflicts.         │                      │
+│                  │                    │ Outputs Anomaly/     │
+│                  │                    │ Campaign records.    │
+└──────────────────┴────────────────────┴──────────────────────┘
+                            │
+                            ▼
+               [STORE: JSONL / SQLite]
+```
 
 ---
 
-## Daily Intelligence Brief
+## Quantitative signal domain
 
-A briefing operator tool (`make brief`) collects scored intelligence records for a given run and calls Claude Sonnet to produce a structured written brief. It is invoked deliberately after a cycle — never a silent cycle step.
+Market volume often precedes textual intelligence.
 
-The brief covers executive findings, elevated signals, domain briefings across cyber and geopolitical developments, story leads, and watch list items. Claude writes as a professional intelligence editor: precise, sourced, and without speculation beyond what the evidence supports. Every claim traces back to a scored signal. If the API call fails, a structured rule-based fallback brief is generated from the raw record data — the briefing never returns empty-handed.
+SPEC-1 monitors a curated equity watchlist across four sectors: defense primes, cybersecurity vendors, energy majors, and macro instruments. Market signals clear a parallel 4-gate framework (watchlist membership, relative volume, daily return, deduplication) before merging into the core Claude verification pipeline.
+
+The rationale: defense and cybersecurity equities often move on information that has not yet surfaced in text. Anomalous volume and price action in these names can be an early signal worth investigating.
 
 ---
 
-## Feedback Loop and Calibration
+## `[ WORLD STATE BRIEF ]`
 
-The four-gate framework and composite scoring weights are not fixed arbitrarily. They were developed through iterative exposure to the signal environment — observing what the system surfaced, evaluating whether those signals were actionable, and adjusting thresholds based on that judgment.
+`// Publication delivers neutral news intel. // Powered by SPEC-1`
 
-### Verdict Collection
+A briefing operator tool (`make brief`) collects scored records for a given cycle run and calls Claude Sonnet to produce a structured written brief. It is invoked deliberately — never a silent cycle step.
 
-`cls_verdicts` captures human ground-truth verdicts on stored intelligence records. Each verdict carries a `kind` — `correct`, `partial`, `incorrect`, or `unclear` — along with reviewer attribution and optional notes. Multiple verdicts per record are allowed; the store is append-only and never overwrites.
+Claude writes as a professional intelligence editor: precise, sourced, without speculation beyond what the evidence supports. Every claim traces back to a scored `IntelligenceRecord`. If the API call fails, a structured rule-based fallback brief is generated — the briefing never returns empty-handed.
 
-### Calibration as Drift Surfacing
+---
 
-`cls_calibration.aggregator` computes a reliability report from filed verdicts: overall accuracy, per-classification accuracy, and reliability buckets across confidence, source weight, and analyst weight dimensions.
+## Feedback loop
 
-`cls_calibration.proposer` surfaces suggested threshold adjustments based on observed drift. These are descriptive proposals — they document what the data suggests. Calibration is a deliberate human decision; the system surfaces what to consider changing and stops there.
+The four-gate framework is not fixed arbitrarily — it improves through legible calibration decisions.
+
+**`[ cls_verdicts ]`** — Human ground-truth verdict collection. Each verdict carries a `kind` (`correct | partial | incorrect | unclear`), reviewer attribution, and optional notes. Append-only; multiple verdicts per record allowed.
+
+**`[ cls_calibration ]`** — Computes reliability reports from filed verdicts: overall accuracy, per-classification accuracy, and reliability buckets across confidence, source weight, and analyst weight. Surfaces suggested threshold adjustments as descriptive proposals. Calibration is a deliberate human decision — the system surfaces what to consider, and stops there.
 
 This is an explicit design choice. A deterministic scoring system should improve through legible calibration decisions, not silent weight updates. When a threshold is wrong, the failure is diagnosable and the adjustment is a decision someone can argue with, document, and test against the test suite.
 
-### Source Credibility and Analyst Registry
+---
 
-Source credibility ratings and analyst domain weights are not static. As publishers change in quality or focus, their ratings can be updated. As new subject matter experts establish track records, they can be added. This is structured knowledge maintenance — the same process a human analyst undergoes when updating their mental model of which sources and researchers to trust.
+## `[ cls_pdx1 ]` — PDX-1i Metro Citizens Brief
 
-### Test Suite as Calibration Anchor
+A regional intelligence module for Portland's bi-state metro area (Multnomah, Washington, Clackamas OR; Clark WA). Tracks elected and appointed officials across 8 jurisdictions, their district assignments, and ties to 17 monitored entities — utilities (PGE, NW Natural, Portland Water Bureau), public agencies (TriMet, PPB, OHSU), and private-sector networks (Schnitzer).
 
-The repo has approximately 825 collected pytest tests across 30 files, covering the engine, OSINT adapters, psyop detection, briefing, persistence, API, MCP server, and operator tools. When a threshold changes during calibration, the tests verify that the change does not silently break intended behavior elsewhere. The test suite is, in a real sense, a changelog of accumulated calibration judgment.
+- `EntityResolver` — deterministic name→ID resolution (exact, token-sort, substring; no external NLP)
+- `RollingBaseline` — 90-day rolling sigma detector (TIER_1 = 3σ, publish-eligible)
+- `TriggerState` — signal-gated publication (weight threshold + TIER_1 auto-trigger + floor cadence)
+- `OrestarAdapter`, `OlisAdapter`, `SeiAdapter`, `WaPdcAdapter` — state campaign finance + legislative feeds
+- `IssueBuilder` — neutrality-gated assembly; tone gate + attribution gate at every section
+- PDF + markdown + D3 force-directed diagram exporter
+
+Current focus: Metro Council President vacancy (Lynn Peterson, appointment deadline June 11, 2026).
 
 ---
 
-## API and Scheduling
-
-A FastAPI application wraps the pipeline for operational use. The API exposes endpoints for triggering a cycle, querying status and statistics, and retrieving signals, records, briefs, leads, verdicts, and calibration reports. The scheduler runs the pipeline on a configurable daily cron cadence. A kill-file mechanism allows operators to pause scheduled execution without modifying configuration.
-
----
-
-## Recent Expansions
-
-### Legislative & Judicial Desk (`cls_leg_jud`)
-A parallel intelligence product tracking legislative activity and judicial proceedings. Monitors bills, hearings, and court actions; scores by relevance to defense, national security, and technology policy; produces a daily desk brief alongside the world brief.
-
-### PDX-1i Metro Citizens Brief (`cls_pdx1`)
-A regional intelligence module for Portland's bi-state metro area (Multnomah, Washington, Clackamas OR; Clark WA). Tracks elected officials across 8 jurisdictions, their district assignments, and ties to 17 monitored entities (utilities, universities, transit, law enforcement). Seeds verified data, resolves officials via fuzzy matching, detects anomalies (vacancies, rapid transitions), and publishes findings as structured "Issues" in PDF + markdown + D3 diagrams.
-
-Current focus: Metro Council President vacancy (Lynn Peterson resignation, Duncan Hwang acting president, appointment deadline June 11, 2026).
-
-### Three-Tier LLM Fallback (`spec1_engine.llm`)
-An operational resilience pattern: when Claude is unavailable or expensive, fall back to local Ollama, then to rule-based templating. Every major analysis point that calls an LLM is protected by this fallback chain. Prevents service interruptions and enables offline/low-cost operation paths.
-
-### Operations & Publishing
-- **Workspace CLI** (`spec1_engine.workspace`) — case management for investigation tracking, analyst notes, verdict filing
-- **X/Twitter Publisher** (`spec1_engine.app.publishers.x`) — thread publication with idempotency log, rate-limit aware
-- **Publication Export** — PDF (via weasyprint subprocess) and markdown rendering for standalone briefs and analysis docs
-
----
-
-## Technical Summary
+## Technical summary
 
 | Dimension | Detail |
-|---|---|
+|-----------|--------|
 | Language | Python 3.9–3.12 |
-| Modules | 51 (core engine, 8 intelligence products, 3 persistence/infrastructure) |
-| Pipeline stages | 7 (harvest → analyze → store) |
-| Test suite | 1,009 tests passing across 37 files |
-| Signal sources | RSS (6 publishers), FARA, Congressional records, state political data, narrative/influence ops |
-| Scoring framework | 4-gate deterministic filter (credibility, volume, velocity, novelty) |
-| AI integration | Claude Haiku (verification, low-cost), Claude Sonnet (briefing, LLM fallback), Ollama (offline), rule-based (always-available) |
-| Regional intelligence | PDX-1i metro (57 officials, 40 districts, 17 entities, live OLIS/ORESTAR feeds) |
+| Pipeline stages | 7 — `[01]` Harvest → `[07]` Store |
+| Test suite | 1,359 tests passing across 37+ files |
+| Scoring | 4-gate deterministic filter — credibility, volume, velocity, novelty |
+| AI integration | Claude Haiku (verification) · Claude Sonnet (briefing) · Ollama (offline fallback) · rule-based (always-available) |
+| Regional intelligence | PDX-1i metro — officials, districts, entities, live OLIS/ORESTAR feeds |
 | Market signals | 4-sector equity watchlist via yfinance |
-| Persistence | Append-only JSONL (audit log, source of truth); SQLite dual-write for queries; rebuild-safe |
-| Operations | FastAPI HTTP service + APScheduler daily cron + MCP tools for Claude + CLI workspace |
-| API | FastAPI + APScheduler |
-| Feedback loop | `cls_verdicts` (human verdicts) + `cls_calibration` (drift report, descriptive only) |
-| Tests | ~825 collected pytest tests across 30 files |
-| Architecture version | v0.4.0 |
-
----
-
-## Why This Matters
-
-The bottleneck in intelligence work is not information — it is attention. SPEC-1 is designed to protect analyst attention by automating the triage that does not require human judgment: fetching, cleaning, filtering, and structuring. What reaches the analyst is already scored, investigated, verified, and written up.
-
-The human role is what it should be: evaluating findings, directing follow-on research, and making decisions. The system handles the volume. The analyst handles the judgment.
-
-That division of labor is the point.
+| Persistence | Append-only JSONL (source of truth) · SQLite dual-write (queryable index) |
+| Operations | FastAPI + APScheduler · MCP tools for Claude · CLI workspace |
+| Feedback | `cls_verdicts` (human verdicts) · `cls_calibration` (drift report, descriptive only) |
+| Architecture version | v0.6.0 |
