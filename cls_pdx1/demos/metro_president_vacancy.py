@@ -1,0 +1,1 @@
+full content from metro_president_vacancy.py
