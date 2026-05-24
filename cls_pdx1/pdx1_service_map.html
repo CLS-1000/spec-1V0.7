@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PDX-1i Service Map • Political Network</title>
+<style>
+  body { margin:0; background:#0a0a0a; color:#f5f5f5; font-family: 'IBM Plex Mono', monospace; }
+  #map { width:100%; height:100vh; background:#111; position:relative; }
+  .node {
+    position:absolute;
+    width:80px; height:80px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:11px;
+    text-align:center;
+    border:2px solid #d4af37;
+    background:#1a1a1a;
+    cursor:pointer;
+    transition: all 0.2s;
+    box-shadow: 0 0 20px rgba(212,175,55,0.2);
+  }
+  .node:hover { transform:scale(1.1); box-shadow:0 0 30px #d4af37; }
+  .node.real { border-color:#22c55e; }
+  .node.demo { border-color:#eab308; }
+  .label { font-size:9px; line-height:1.2; padding:4px; }
+  .connection {
+    stroke:#444;
+    stroke-width:1.5;
+    stroke-dasharray:4 2;
+  }
+  .legend {
+    position:absolute;
+    bottom:20px;
+    left:20px;
+    background:#111;
+    padding:12px 16px;
+    border:1px solid #333;
+    font-size:11px;
+  }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div class="legend">
+  <div><span style="color:#22c55e">●</span> Real Data</div>
+  <div><span style="color:#eab308">●</span> Demo / Placeholder</div>
+  <div style="margin-top:8px; color:#666; font-size:10px;">Click nodes for details • Lines = known or suspected connections</div>
+</div>
+
+<script>
+const nodes = [
+  { id: "wheeler", name: "Ted Wheeler", type: "official", x: 200, y: 180, status: "real" },
+  { id: "rubio", name: "Carmen Rubio", type: "official", x: 380, y: 140, status: "real" },
+  { id: "wyden", name: "Ron Wyden", type: "official", x: 620, y: 220, status: "real" },
+  { id: "nike", name: "Nike", type: "entity", x: 300, y: 320, status: "real" },
+  { id: "intel", name: "Intel", type: "entity", x: 480, y: 380, status: "real" },
+  { id: "schnitzer", name: "Schnitzer Steel", type: "entity", x: 180, y: 420, status: "real" },
+  { id: "ohsu", name: "OHSU", type: "entity", x: 550, y: 300, status: "real" },
+  { id: "pge", name: "PGE", type: "entity", x: 420, y: 480, status: "real" },
+  { id: "trimet", name: "TriMet", type: "entity", x: 280, y: 500, status: "real" }
+];
+
+const connections = [
+  ["wheeler", "nike"],
+  ["wheeler", "pge"],
+  ["rubio", "ohsu"],
+  ["wyden", "intel"],
+  ["nike", "intel"],
+  ["schnitzer", "pge"],
+  ["trimet", "pge"]
+];
+
+const container = document.getElementById('map');
+
+// Draw connections
+connections.forEach(([from, to]) => {
+  const fromNode = nodes.find(n => n.id === from);
+  const toNode = nodes.find(n => n.id === to);
+  if (!fromNode || !toNode) return;
+
+  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  line.setAttribute("x1", fromNode.x + 40);
+  line.setAttribute("y1", fromNode.y + 40);
+  line.setAttribute("x2", toNode.x + 40);
+  line.setAttribute("y2", toNode.y + 40);
+  line.setAttribute("class", "connection");
+  container.appendChild(line);
+});
+
+// Draw nodes
+nodes.forEach(node => {
+  const el = document.createElement('div');
+  el.className = `node ${node.status}`;
+  el.style.left = `${node.x}px`;
+  el.style.top = `${node.y}px`;
+  el.innerHTML = `<div class="label">${node.name}</div>`;
+
+  el.onclick = () => {
+    alert(`${node.name}\nType: ${node.type}\nStatus: ${node.status.toUpperCase()}\n\nTies: NOT VERIFIED - Research required`);
+  };
+
+  container.appendChild(el);
+});
+
+console.log('%c[PDX-1i] Service Map loaded', 'color:#d4af37');
+</script>
+
+</body>
+</html>
