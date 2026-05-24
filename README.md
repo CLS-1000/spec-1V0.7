@@ -12,7 +12,7 @@ LOADING 1,359 TESTS... [OK]
 PIPELINE STATUS: READY
 ```
 
-**_ Automated OSINT for national security signal monitoring.**
+**_ Automated OSINT for geo conflict signal monitoring.**
 `// v0.6.0 · Portland OR · EVASTARARCANA`
 
 **Landing:** [mjlak1000.github.io/spec-1](https://mjlak1000.github.io/spec-1/) · **Dashboard:** [/ui](https://mjlak1000.github.io/spec-1/ui/)
