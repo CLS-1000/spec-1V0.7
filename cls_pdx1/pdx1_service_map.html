@@ -2,111 +2,102 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>PDX-1i Service Map • Political Network</title>
+<title>PDX-1i • Service Map (Grafana Style)</title>
 <style>
-  body { margin:0; background:#0a0a0a; color:#f5f5f5; font-family: 'IBM Plex Mono', monospace; }
-  #map { width:100%; height:100vh; background:#111; position:relative; }
-  .node {
-    position:absolute;
-    width:80px; height:80px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:11px;
-    text-align:center;
-    border:2px solid #d4af37;
-    background:#1a1a1a;
-    cursor:pointer;
-    transition: all 0.2s;
-    box-shadow: 0 0 20px rgba(212,175,55,0.2);
-  }
-  .node:hover { transform:scale(1.1); box-shadow:0 0 30px #d4af37; }
-  .node.real { border-color:#22c55e; }
-  .node.demo { border-color:#eab308; }
-  .label { font-size:9px; line-height:1.2; padding:4px; }
-  .connection {
-    stroke:#444;
-    stroke-width:1.5;
-    stroke-dasharray:4 2;
-  }
-  .legend {
-    position:absolute;
-    bottom:20px;
-    left:20px;
-    background:#111;
-    padding:12px 16px;
-    border:1px solid #333;
-    font-size:11px;
-  }
+  body { margin:0; background:#0f1115; color:#e0e0e0; font-family: 'IBM Plex Mono', monospace; }
+  #container { width:100%; height:100vh; position:relative; background:#0f1115; }
+  svg { width:100%; height:100%; }
+  .node { cursor:pointer; }
+  .node circle { stroke:#d4af37; stroke-width:2.5; }
+  .node.real circle { stroke:#22c55e; }
+  .node.demo circle { stroke:#eab308; }
+  .node text { fill:#e0e0e0; font-size:11px; text-anchor:middle; dominant-baseline:middle; }
+  .link { stroke:#3a3f4a; stroke-width:1.5; }
+  .legend { position:absolute; bottom:20px; left:20px; background:#1a1d24; padding:14px 18px; border:1px solid #333; font-size:12px; }
 </style>
 </head>
 <body>
 
-<div id="map"></div>
+<div id="container">
+  <svg id="graph"></svg>
+</div>
 
 <div class="legend">
   <div><span style="color:#22c55e">●</span> Real Data</div>
   <div><span style="color:#eab308">●</span> Demo / Placeholder</div>
-  <div style="margin-top:8px; color:#666; font-size:10px;">Click nodes for details • Lines = known or suspected connections</div>
+  <div style="margin-top:6px; color:#666; font-size:10px;">Click nodes for details</div>
 </div>
 
 <script>
+const width = window.innerWidth;
+const height = window.innerHeight;
+
 const nodes = [
-  { id: "wheeler", name: "Ted Wheeler", type: "official", x: 200, y: 180, status: "real" },
-  { id: "rubio", name: "Carmen Rubio", type: "official", x: 380, y: 140, status: "real" },
-  { id: "wyden", name: "Ron Wyden", type: "official", x: 620, y: 220, status: "real" },
-  { id: "nike", name: "Nike", type: "entity", x: 300, y: 320, status: "real" },
-  { id: "intel", name: "Intel", type: "entity", x: 480, y: 380, status: "real" },
-  { id: "schnitzer", name: "Schnitzer Steel", type: "entity", x: 180, y: 420, status: "real" },
-  { id: "ohsu", name: "OHSU", type: "entity", x: 550, y: 300, status: "real" },
-  { id: "pge", name: "PGE", type: "entity", x: 420, y: 480, status: "real" },
-  { id: "trimet", name: "TriMet", type: "entity", x: 280, y: 500, status: "real" }
+  { id: "wheeler", name: "Ted Wheeler", x: 280, y: 220, status: "real" },
+  { id: "rubio", name: "Carmen Rubio", x: 420, y: 180, status: "real" },
+  { id: "wyden", name: "Ron Wyden", x: 680, y: 260, status: "real" },
+  { id: "nike", name: "Nike", x: 350, y: 380, status: "real" },
+  { id: "intel", name: "Intel", x: 520, y: 420, status: "real" },
+  { id: "schnitzer", name: "Schnitzer Steel", x: 220, y: 460, status: "real" },
+  { id: "ohsu", name: "OHSU", x: 600, y: 340, status: "real" },
+  { id: "pge", name: "PGE", x: 460, y: 520, status: "real" },
+  { id: "trimet", name: "TriMet", x: 320, y: 540, status: "real" }
 ];
 
-const connections = [
-  ["wheeler", "nike"],
-  ["wheeler", "pge"],
-  ["rubio", "ohsu"],
-  ["wyden", "intel"],
-  ["nike", "intel"],
-  ["schnitzer", "pge"],
-  ["trimet", "pge"]
+const links = [
+  { source: "wheeler", target: "nike" },
+  { source: "wheeler", target: "pge" },
+  { source: "rubio", target: "ohsu" },
+  { source: "wyden", target: "intel" },
+  { source: "nike", target: "intel" },
+  { source: "schnitzer", target: "pge" },
+  { source: "trimet", target: "pge" }
 ];
 
-const container = document.getElementById('map');
+const svg = document.getElementById('graph');
 
-// Draw connections
-connections.forEach(([from, to]) => {
-  const fromNode = nodes.find(n => n.id === from);
-  const toNode = nodes.find(n => n.id === to);
-  if (!fromNode || !toNode) return;
+// Draw links
+links.forEach(link => {
+  const from = nodes.find(n => n.id === link.source);
+  const to = nodes.find(n => n.id === link.target);
+  if (!from || !to) return;
 
-  const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-  line.setAttribute("x1", fromNode.x + 40);
-  line.setAttribute("y1", fromNode.y + 40);
-  line.setAttribute("x2", toNode.x + 40);
-  line.setAttribute("y2", toNode.y + 40);
-  line.setAttribute("class", "connection");
-  container.appendChild(line);
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('x1', from.x);
+  line.setAttribute('y1', from.y);
+  line.setAttribute('x2', to.x);
+  line.setAttribute('y2', to.y);
+  line.setAttribute('class', 'link');
+  svg.appendChild(line);
 });
 
 // Draw nodes
 nodes.forEach(node => {
-  const el = document.createElement('div');
-  el.className = `node ${node.status}`;
-  el.style.left = `${node.x}px`;
-  el.style.top = `${node.y}px`;
-  el.innerHTML = `<div class="label">${node.name}</div>`;
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  g.setAttribute('class', `node ${node.status}`);
 
-  el.onclick = () => {
-    alert(`${node.name}\nType: ${node.type}\nStatus: ${node.status.toUpperCase()}\n\nTies: NOT VERIFIED - Research required`);
+  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle.setAttribute('cx', node.x);
+  circle.setAttribute('cy', node.y);
+  circle.setAttribute('r', 32);
+  circle.setAttribute('fill', '#1a1d24');
+
+  const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  text.setAttribute('x', node.x);
+  text.setAttribute('y', node.y);
+  text.textContent = node.name;
+
+  g.appendChild(circle);
+  g.appendChild(text);
+
+  g.onclick = () => {
+    alert(`${node.name}\nStatus: ${node.status.toUpperCase()}\n\nTies & Connections: NOT VERIFIED — Research required`);
   };
 
-  container.appendChild(el);
+  svg.appendChild(g);
 });
 
-console.log('%c[PDX-1i] Service Map loaded', 'color:#d4af37');
+console.log('%c[PDX-1i] Grafana-style Service Map loaded', 'color:#d4af37');
 </script>
 
 </body>
