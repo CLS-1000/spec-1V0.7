@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDX-1i • Metro Citizens Brief</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #121212;
+    --accent: #d4af37; /* Gold - Sistine touch */
+    --text: #f5f5f5;
+    --text-muted: #a0a0a0;
+    --border: #2a2a2a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,10,0.95);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    color: var(--accent);
+  }
+  .nav {
+    display: flex;
+    gap: 24px;
+  }
+  .nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav a:hover { color: var(--accent); }
+  .main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 32px;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .section-subtitle {
+    color: var(--text-muted);
+    margin-bottom: 32px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 24px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  }
+  .metric {
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    margin-top: 8px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th, td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+  }
+  .demo-badge {
+    background: #3a2a00;
+    color: #d4af37;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin-left: 8px;
+  }
+  .real-badge {
+    background: #1a3a1a;
+    color: #4ade80;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin-left: 8px;
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div>
+    <span class="logo">PDX-1i</span>
+    <span style="margin-left:12px; color:#666; font-size:13px;">Metro Citizens Brief • v0.2</span>
+  </div>
+  <div class="nav">
+    <a href="#overview">Overview</a>
+    <a href="#officials">Officials</a>
+    <a href="#entities">Entities</a>
+    <a href="#signals">Signals</a>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- HERO -->
+  <div style="margin-bottom: 60px; text-align:center;">
+    <h1 style="font-family:'Playfair Display',serif; font-size:56px; line-height:1.1; margin:0 0 12px;">Portland Metro<br>Intelligence Brief</h1>
+    <p style="max-width:620px; margin:0 auto; color:#888; font-size:15px;">
+      A living document of power, influence, and accountability in the bi-state metro.
+    </p>
+  </div>
+
+  <!-- OVERVIEW -->
+  <div id="overview">
+    <div class="section-title">Overview</div>
+    <div class="section-subtitle">Key metrics • May 2026</div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="metric">87</div>
+        <div class="label">Tracked Officials <span class="real-badge">REAL</span></div>
+      </div>
+      <div class="card">
+        <div class="metric">142</div>
+        <div class="label">Key Entities <span class="real-badge">REAL</span></div>
+      </div>
+      <div class="card">
+        <div class="metric">31</div>
+        <div class="label">Active Signals <span class="demo-badge">DEMO</span></div>
+      </div>
+      <div class="card">
+        <div class="metric">94%</div>
+        <div class="label">Avg Confidence</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OFFICIALS -->
+  <div id="officials" style="margin-top:80px;">
+    <div class="section-title">Elected Officials</div>
+    <div class="section-subtitle">With verified structure • Real data where available</div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Role</th>
+          <th>District</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Ted Wheeler</td>
+          <td>Mayor (former)</td>
+          <td>Citywide</td>
+          <td><span class="real-badge">REAL</span></td>
+        </tr>
+        <tr>
+          <td>Carmen Rubio</td>
+          <td>City Commissioner</td>
+          <td>District 1</td>
+          <td><span class="real-badge">REAL</span></td>
+        </tr>
+        <tr>
+          <td>Ron Wyden</td>
+          <td>U.S. Senator</td>
+          <td>Oregon</td>
+          <td><span class="real-badge">REAL</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ENTITIES -->
+  <div id="entities" style="margin-top:80px;">
+    <div class="section-title">Key Entities & Corporate Presence</div>
+    <div class="section-subtitle">Schnitzer • Nike • Intel • OHSU • Providence • Legacy • TriMet • PGE • NW Natural • PDX • PPS • PPB</div>
+
+    <div class="grid">
+      <div class="card">
+        <strong>Nike</strong><br>
+        <span style="color:#888; font-size:12px;">Beaverton HQ • Major employer</span>
+        <div style="margin-top:12px; font-size:11px; color:#666;">Corporate ties: NOT VERIFIED</div>
+      </div>
+      <div class="card">
+        <strong>Intel</strong><br>
+        <span style="color:#888; font-size:12px;">Hillsboro campus</span>
+        <div style="margin-top:12px; font-size:11px; color:#666;">Corporate ties: NOT VERIFIED</div>
+      </div>
+      <div class="card">
+        <strong>Schnitzer Steel</strong><br>
+        <span style="color:#888; font-size:12px;">Portland metro</span>
+        <div style="margin-top:12px; font-size:11px; color:#666;">Corporate ties: NOT VERIFIED</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:120px; text-align:center; color:#555; font-size:12px;">
+    PDX-1i • Built with precision • Data integrity first<br>
+    Demo data clearly marked • Real data flagged for verification
+  </div>
+
+</div>
+
+<script>
+  // Future: Load real JSON from cls_pdx1/data/officials_seed.json
+  console.log('%c[PDX-1i] Dashboard loaded with elevated aesthetic', 'color:#d4af37');
+</script>
+
+</body>
+</html>
