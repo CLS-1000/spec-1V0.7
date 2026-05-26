@@ -232,6 +232,43 @@
   .run-msg.running { color: var(--text-secondary); }
   .run-msg.done    { color: var(--text-primary); }
   .run-msg.err     { color: rgba(255,100,100,.9); }
+
+  /* ── Workbench panel ── */
+  .wb-bar { display: flex; flex-wrap: wrap; gap: 18px; padding: 14px 16px; border: 1px solid rgba(255,255,255,.25); margin-bottom: 18px; font-size: 11px; color: var(--text-muted); letter-spacing: .04em; }
+  .wb-bar b { color: var(--text-primary); font-weight: 600; }
+  .wb-bar .wb-pill { padding: 2px 8px; border: 1px solid rgba(255,255,255,.3); color: var(--text-secondary); }
+  .wb-section { margin-bottom: 28px; }
+  .wb-section-title { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text-primary); border-bottom: 1px solid rgba(255,255,255,.3); padding-bottom: 6px; margin-bottom: 14px; }
+  .wb-sub { font-size: 11px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.6; }
+  .wb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .wb-card { background: rgba(10,10,10,.92); border: 1px solid rgba(255,255,255,.25); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+  .wb-card .wb-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .wb-card .wb-name { font-size: 12px; font-weight: 600; color: var(--text-primary); letter-spacing: .04em; }
+  .wb-card .wb-meta { font-size: 10px; color: var(--text-muted); letter-spacing: .04em; }
+  .wb-card .wb-desc { font-size: 11px; color: var(--text-secondary); line-height: 1.55; }
+  .wb-card .wb-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  .wb-btn { padding: 3px 10px; font-size: 11px; font-family: var(--mono); border: 1px solid rgba(255,255,255,.3); background: transparent; color: var(--text-muted); cursor: pointer; letter-spacing: .04em; transition: all .12s; }
+  .wb-btn:hover:not(:disabled) { color: var(--text-primary); border-color: var(--border); }
+  .wb-btn:disabled { opacity: .35; cursor: not-allowed; }
+  .wb-btn.run { color: var(--text-primary); }
+  .wb-btn.copied { color: var(--text-primary); border-color: var(--border); }
+  .wb-msg { font-size: 10px; color: var(--text-muted); min-height: 14px; }
+  .wb-msg.running { color: var(--text-secondary); }
+  .wb-msg.done    { color: var(--text-primary); }
+  .wb-msg.err     { color: rgba(255,100,100,.9); }
+  .wb-cmd { font-family: 'Courier Prime', monospace; font-size: 11px; color: var(--text-primary); background: var(--background); border: 1px solid rgba(255,255,255,.2); padding: 4px 8px; overflow-x: auto; white-space: nowrap; }
+  .wb-tag { display: inline-block; font-size: 9px; padding: 1px 6px; border: 1px solid rgba(255,255,255,.3); color: var(--text-secondary); letter-spacing: .06em; margin-right: 4px; }
+  .wb-tag.method-GET  { color: #9ae6b4; border-color: rgba(154,230,180,.45); }
+  .wb-tag.method-POST { color: #fbd38d; border-color: rgba(251,211,141,.45); }
+  .wb-tag.model       { color: var(--text-secondary); border-color: rgba(255,255,255,.4); }
+  .wb-env-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .wb-env-table th, .wb-env-table td { padding: 6px 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,.12); }
+  .wb-env-table th { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .1em; font-weight: 600; }
+  .wb-env-table td { color: var(--text-secondary); vertical-align: top; }
+  .wb-env-table td.k { color: var(--text-primary); font-weight: 600; white-space: nowrap; }
+  details.wb-fold { margin-top: 6px; }
+  details.wb-fold > summary { cursor: pointer; font-size: 11px; color: var(--text-muted); padding: 6px 0; letter-spacing: .04em; }
+  details.wb-fold[open] > summary { color: var(--text-primary); }
 </style>
 </head>
 <body>
@@ -316,6 +353,9 @@
 
       <div class="nav-divider"></div>
       <div class="nav-section">Tools</div>
+      <div class="nav-item" data-panel="panel-workbench" onclick="showPanel('panel-workbench')">
+        <span class="nav-glyph">⌬</span> Workbench
+      </div>
       <div class="nav-item" data-panel="panel-local" onclick="showPanel('panel-local')">
         <span class="nav-glyph">▷</span> Local Access
       </div>
@@ -531,6 +571,292 @@
         <div class="panel-title">⊞ Calibration</div>
         <div class="panel-sub">Accuracy drift surfacing across confidence, source weight, and classification — descriptive only, never auto-applied</div>
         <div id="calibration-content"><div class="loading">Loading calibration report…</div></div>
+      </div>
+
+      <!-- ─────────────────────────── Workbench ────────────────────────────── -->
+      <div class="panel" id="panel-workbench">
+        <div class="panel-title">⌬ Workbench</div>
+        <div class="panel-sub">Every executable action in SPEC-1 — Make targets, API endpoints, MCP tools, models, env vars. Run via the API when reachable; copy commands when terminal-only. See <a href="docs/ACCESS_AUDIT.md" style="color:var(--text-secondary);">ACCESS_AUDIT.md</a> and <a href="docs/SHOP_MANUAL.md" style="color:var(--text-secondary);">SHOP_MANUAL.md</a>.</div>
+
+        <div class="wb-bar" id="wb-status-bar">
+          <span><b>API:</b> <span class="wb-pill" id="wb-api-state">checking…</span></span>
+          <span><b>Endpoints:</b> <span class="wb-pill">41</span></span>
+          <span><b>MCP tools:</b> <span class="wb-pill">15</span></span>
+          <span><b>Make targets:</b> <span class="wb-pill">15</span></span>
+          <span><b>Models:</b> <span class="wb-pill">3 Anthropic IDs</span></span>
+          <span><b>Env keys:</b> <span class="wb-pill">33</span></span>
+        </div>
+
+        <!-- Pipeline -->
+        <div class="wb-section">
+          <div class="wb-section-title">Pipeline</div>
+          <div class="wb-sub">The canonical cycle. Runs automatically on cron; trigger manually here.</div>
+          <div class="wb-grid">
+            <div class="wb-card">
+              <div class="wb-head"><span class="wb-name">Run intelligence cycle</span><span class="wb-meta">POST /cycle/run</span></div>
+              <div class="wb-desc">harvest → parse → 4-gate score → investigate → verify → store. 30–90s.</div>
+              <div class="wb-btns">
+                <button class="wb-btn run" onclick="wbApi(this, 'POST', '/cycle/run', {})">Run</button>
+                <button class="wb-btn" onclick="copyText(this, 'curl -s -X POST http://127.0.0.1:8000/cycle/run -H \\'Content-Type: application/json\\' -d \\'{}\\'')">Copy curl</button>
+                <button class="wb-btn" onclick="copyText(this, 'cd ~/spec-1 && make cycle')">Copy make</button>
+              </div>
+              <div class="wb-msg" data-msg></div>
+            </div>
+            <div class="wb-card">
+              <div class="wb-head"><span class="wb-name">Cycle status</span><span class="wb-meta">GET /cycle/status</span></div>
+              <div class="wb-desc">Last run metadata: run_id, started_at, finished_at, counts.</div>
+              <div class="wb-btns">
+                <button class="wb-btn run" onclick="wbApi(this, 'GET', '/cycle/status')">Fetch</button>
+                <button class="wb-btn" onclick="copyText(this, 'curl -s http://127.0.0.1:8000/cycle/status | jq')">Copy curl</button>
+              </div>
+              <div class="wb-msg" data-msg></div>
+            </div>
+            <div class="wb-card">
+              <div class="wb-head"><span class="wb-name">Ingest a signal</span><span class="wb-meta">POST /signal</span></div>
+              <div class="wb-desc">Manually submit a Signal payload for ingestion outside the cron path.</div>
+              <div class="wb-btns">
+                <button class="wb-btn" onclick="copyText(this, 'curl -s -X POST http://127.0.0.1:8000/signal -H \\'Content-Type: application/json\\' -d \\'{...}\\'')">Copy curl</button>
+              </div>
+            </div>
+            <div class="wb-card">
+              <div class="wb-head"><span class="wb-name">Bulk-ingest signals</span><span class="wb-meta">POST /signals/ingest</span></div>
+              <div class="wb-desc">Async bulk ingest. Returns 202.</div>
+              <div class="wb-btns">
+                <button class="wb-btn" onclick="copyText(this, 'curl -s -X POST http://127.0.0.1:8000/signals/ingest -H \\'Content-Type: application/json\\' -d \\'{...}\\'')">Copy curl</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Operator Tools -->
+        <div class="wb-section">
+          <div class="wb-section-title">Operator Tools</div>
+          <div class="wb-sub">Manual, on-demand. Never run as cycle side-effects.</div>
+          <div class="wb-grid">
+            <div class="wb-card">
+              <div class="wb-head"><span class="wb-name">Generate daily brief</span><span class="wb-meta">POST /brief/generate <span class="wb-tag model">claude-sonnet-4-6</span></span></div>
+              <div class="wb-desc">Daily world intelligence brief. Claude Sonnet primary; rule-based fallback if Anthropic fails.</div>
+              <div class="wb-btns">
+                <button class="wb-btn run" onclick="wbApi(this, 'POST', '/brief/generate', {})">Run</button>
+                <button class="wb-btn" onclick="copyText(this, 'cd ~/spec-1 && make brief')">Copy make</button>
+              </div>
+              <div class="wb-msg" data-msg></div>
+            </div>
+            <div class="wb-card">
+              <div class="wb-head"><span class="wb-name">Generate leads</span><span class="wb-meta">POST /leads/generate</span></div>
+              <div class="wb-desc">Derive Lead objects from intelligence records.</div>
+              <div class="wb-btns">
+                <button class="wb-btn run" onclick="wbApi(this, 'POST', '/leads/generate', {})">Run</button>
+                <button class="wb-btn" onclick="copyText(this, 'cd ~/spec-1 && make leads')">Copy make</button>
+              </div>
+              <div class="wb-msg" data-msg></div>
+            </div>
+            <div class="wb-card">
+              <div class="wb-head"><span class="wb-name">Score psyop across all records</span><span class="wb-meta">POST /psyop/run</span></div>
+              <div class="wb-desc">Re-score every intel record for psyop patterns; appends to psyop store.</div>
+              <div class="wb-btns">
+                <button class="wb-btn run" onclick="wbApi(this, 'POST', '/psyop/run', {})">Run</button>
+                <button class="wb-btn" onclick="copyText(this, 'cd ~/spec-1 && make psyop')">Copy make</button>
+              </div>
+              <div class="wb-msg" data-msg></div>
+            </div>
+            <div class="wb-card">
+              <div class="wb-head"><span class="wb-name">Calibration drift report</span><span class="wb-meta">GET /calibration/report</span></div>
+              <div class="wb-desc">Descriptive only — never auto-tunes scoring weights.</div>
+              <div class="wb-btns">
+                <button class="wb-btn run" onclick="wbApi(this, 'GET', '/calibration/report')">Fetch</button>
+                <button class="wb-btn" onclick="copyText(this, 'cd ~/spec-1 && make calibration')">Copy make</button>
+              </div>
+              <div class="wb-msg" data-msg></div>
+            </div>
+            <div class="wb-card">
+              <div class="wb-head"><span class="wb-name">Calibration proposals</span><span class="wb-meta">GET /calibration/proposals</span></div>
+              <div class="wb-desc">Suggested adjustments. Human-applied, never automatic.</div>
+              <div class="wb-btns">
+                <button class="wb-btn run" onclick="wbApi(this, 'GET', '/calibration/proposals')">Fetch</button>
+              </div>
+              <div class="wb-msg" data-msg></div>
+            </div>
+            <div class="wb-card">
+              <div class="wb-head"><span class="wb-name">Backfill historical briefs</span><span class="wb-meta">terminal</span></div>
+              <div class="wb-desc">Walks intel store, writes briefs for missing run_ids.</div>
+              <div class="wb-btns">
+                <button class="wb-btn" onclick="copyText(this, 'cd ~/spec-1 && make backfill')">Copy make</button>
+              </div>
+            </div>
+            <div class="wb-card">
+              <div class="wb-head"><span class="wb-name">Generate publication</span><span class="wb-meta">POST /publication/generate</span></div>
+              <div class="wb-desc">Generate a publication artifact from latest analysis.</div>
+              <div class="wb-btns">
+                <button class="wb-btn run" onclick="wbApi(this, 'POST', '/publication/generate', {})">Run</button>
+              </div>
+              <div class="wb-msg" data-msg></div>
+            </div>
+            <div class="wb-card">
+              <div class="wb-head"><span class="wb-name">Workspace CLI</span><span class="wb-meta">terminal</span></div>
+              <div class="wb-desc">Interactive case-file CLI. Uses <span class="wb-tag model">claude-sonnet-4-20250514</span></div>
+              <div class="wb-btns">
+                <button class="wb-btn" onclick="copyText(this, 'cd ~/spec-1 && make workspace')">Copy make</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- HTTP API -->
+        <div class="wb-section">
+          <div class="wb-section-title">HTTP API — 17 routers, 41 routes</div>
+          <div class="wb-sub">Browse all routes. <code>GET</code> verbs are safe; <code>POST</code> verbs mutate state.</div>
+          <details class="wb-fold" open>
+            <summary>Read endpoints (GET)</summary>
+            <div class="wb-grid" style="margin-top:10px;">
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/health</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/health')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/metrics</span></div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'curl -s http://127.0.0.1:8000/metrics')">Copy curl</button></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/metrics/json</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/metrics/json')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/signals</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/signals')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/intel</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/intel')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/leads</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/leads')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/fara</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/fara')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/psyop</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/psyop')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/verdicts</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/verdicts')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/brief/latest</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/brief/latest')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/brief/index</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/brief/index')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/brief/history</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/brief/history')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/adapters</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/adapters')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/workspace/cases</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/workspace/cases')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/leg_jud/brief</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/leg_jud/brief')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/leg_jud/judicial</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/leg_jud/judicial')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/leg_jud/state_leg</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/leg_jud/state_leg')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/publication/latest</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/publication/latest')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/publication/list</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/publication/list')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/calibration/report</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/calibration/report')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-GET">GET</span>/calibration/proposals</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'GET','/calibration/proposals')">Fetch</button></div><div class="wb-msg" data-msg></div></div>
+            </div>
+          </details>
+          <details class="wb-fold">
+            <summary>Write endpoints (POST)</summary>
+            <div class="wb-grid" style="margin-top:10px;">
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-POST">POST</span>/cycle/run</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'POST','/cycle/run',{})">Run</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-POST">POST</span>/signal</span></div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'curl -s -X POST http://127.0.0.1:8000/signal -H \\'Content-Type: application/json\\' -d \\'{}\\'')">Copy curl</button></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-POST">POST</span>/signals/ingest</span></div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'curl -s -X POST http://127.0.0.1:8000/signals/ingest -H \\'Content-Type: application/json\\' -d \\'{}\\'')">Copy curl</button></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-POST">POST</span>/brief/generate</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'POST','/brief/generate',{})">Run</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-POST">POST</span>/leads/generate</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'POST','/leads/generate',{})">Run</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-POST">POST</span>/psyop/analyse</span></div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'curl -s -X POST http://127.0.0.1:8000/psyop/analyse -H \\'Content-Type: application/json\\' -d \\'{\"text\":\"…\"}\\'')">Copy curl</button></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-POST">POST</span>/psyop/run</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'POST','/psyop/run',{})">Run</button></div><div class="wb-msg" data-msg></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-POST">POST</span>/verdicts</span></div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'curl -s -X POST http://127.0.0.1:8000/verdicts -H \\'Content-Type: application/json\\' -d \\'{\"record_id\":\"rec_…\",\"verdict\":\"correct\"}\\'')">Copy curl</button></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-POST">POST</span>/workspace/cases</span></div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'curl -s -X POST http://127.0.0.1:8000/workspace/cases -H \\'Content-Type: application/json\\' -d \\'{}\\'')">Copy curl</button></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-POST">POST</span>/workspace/cases/{id}/findings</span></div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'curl -s -X POST http://127.0.0.1:8000/workspace/cases/CASE_ID/findings -H \\'Content-Type: application/json\\' -d \\'{}\\'')">Copy curl</button></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-POST">POST</span>/workspace/cases/{id}/close</span></div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'curl -s -X POST http://127.0.0.1:8000/workspace/cases/CASE_ID/close -H \\'Content-Type: application/json\\' -d \\'{}\\'')">Copy curl</button></div></div>
+              <div class="wb-card"><div class="wb-head"><span class="wb-name"><span class="wb-tag method-POST">POST</span>/publication/generate</span></div><div class="wb-btns"><button class="wb-btn run" onclick="wbApi(this,'POST','/publication/generate',{})">Run</button></div><div class="wb-msg" data-msg></div></div>
+            </div>
+          </details>
+        </div>
+
+        <!-- MCP Tools -->
+        <div class="wb-section">
+          <div class="wb-section-title">MCP Tools — 15</div>
+          <div class="wb-sub">JSON-RPC over stdio. Boot with <span class="wb-cmd" style="white-space:normal;">make mcp</span>. UI cannot reach stdio directly — copy the JSON-RPC payload and pipe it into the server.</div>
+          <div class="wb-grid">
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">run_cycle</span></div><div class="wb-desc">Run a full intelligence cycle.</div><div class="wb-btns"><button class="wb-btn" onclick="wbCopyMcp(this,'run_cycle',{})">Copy JSON-RPC</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">get_signals</span></div><div class="wb-desc">Return recent OSINT signals.</div><div class="wb-btns"><button class="wb-btn" onclick="wbCopyMcp(this,'get_signals',{limit:20})">Copy JSON-RPC</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">get_intel</span></div><div class="wb-desc">Intel records with optional min_confidence filter.</div><div class="wb-btns"><button class="wb-btn" onclick="wbCopyMcp(this,'get_intel',{limit:20})">Copy JSON-RPC</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">get_leads</span></div><div class="wb-desc">Leads optionally filtered by priority.</div><div class="wb-btns"><button class="wb-btn" onclick="wbCopyMcp(this,'get_leads',{limit:20})">Copy JSON-RPC</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">get_brief</span></div><div class="wb-desc">Latest world brief.</div><div class="wb-btns"><button class="wb-btn" onclick="wbCopyMcp(this,'get_brief',{})">Copy JSON-RPC</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">get_psyop</span></div><div class="wb-desc">Stored psyop scores by classification.</div><div class="wb-btns"><button class="wb-btn" onclick="wbCopyMcp(this,'get_psyop',{limit:20})">Copy JSON-RPC</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">get_fara</span></div><div class="wb-desc">FARA filings; filter by country.</div><div class="wb-btns"><button class="wb-btn" onclick="wbCopyMcp(this,'get_fara',{limit:20})">Copy JSON-RPC</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">analyse_psyop</span></div><div class="wb-desc">Score one text snippet for psyop patterns.</div><div class="wb-btns"><button class="wb-btn" onclick="wbCopyMcp(this,'analyse_psyop',{text:'…'})">Copy JSON-RPC</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">get_stats</span></div><div class="wb-desc">Counts across every store.</div><div class="wb-btns"><button class="wb-btn" onclick="wbCopyMcp(this,'get_stats',{})">Copy JSON-RPC</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">file_verdict</span></div><div class="wb-desc">Append a human verdict to a record.</div><div class="wb-btns"><button class="wb-btn" onclick="wbCopyMcp(this,'file_verdict',{record_id:'rec_…',verdict:'correct'})">Copy JSON-RPC</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">get_verdicts</span></div><div class="wb-desc">All verdicts or by record_id.</div><div class="wb-btns"><button class="wb-btn" onclick="wbCopyMcp(this,'get_verdicts',{limit:20})">Copy JSON-RPC</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">run_psyop</span></div><div class="wb-desc">Re-score every intel record for psyop.</div><div class="wb-btns"><button class="wb-btn" onclick="wbCopyMcp(this,'run_psyop',{})">Copy JSON-RPC</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">generate_brief <span class="wb-tag model">claude-sonnet-4-6</span></span></div><div class="wb-desc">Daily brief; falls back to rule-based on failure.</div><div class="wb-btns"><button class="wb-btn" onclick="wbCopyMcp(this,'generate_brief',{})">Copy JSON-RPC</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">generate_leads</span></div><div class="wb-desc">Derive Lead objects from intel.</div><div class="wb-btns"><button class="wb-btn" onclick="wbCopyMcp(this,'generate_leads',{})">Copy JSON-RPC</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">get_calibration</span></div><div class="wb-desc">Drift report. Descriptive only — never auto-applies tuning.</div><div class="wb-btns"><button class="wb-btn" onclick="wbCopyMcp(this,'get_calibration',{})">Copy JSON-RPC</button></div></div>
+          </div>
+        </div>
+
+        <!-- Make targets -->
+        <div class="wb-section">
+          <div class="wb-section-title">Make Targets — 15</div>
+          <div class="wb-sub">Run from the repo root. Each maps to a single <code>python -m</code> entry point (see SHOP_MANUAL §4.2).</div>
+          <div class="wb-grid">
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">make install</span></div><div class="wb-desc">pip install -e ".[dev]"</div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'cd ~/spec-1 && make install')">Copy</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">make test</span></div><div class="wb-desc">Full pytest suite.</div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'cd ~/spec-1 && make test')">Copy</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">make test-fast</span></div><div class="wb-desc">Stop at first failure.</div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'cd ~/spec-1 && make test-fast')">Copy</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">make test-cov</span></div><div class="wb-desc">Coverage report.</div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'cd ~/spec-1 && make test-cov')">Copy</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">make lint</span></div><div class="wb-desc">flake8.</div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'cd ~/spec-1 && make lint')">Copy</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">make run</span></div><div class="wb-desc">Start FastAPI on :8000.</div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'cd ~/spec-1 && make run')">Copy</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">make mcp</span></div><div class="wb-desc">MCP server on stdio.</div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'cd ~/spec-1 && make mcp')">Copy</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">make cycle</span></div><div class="wb-desc">One-shot intelligence cycle.</div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'cd ~/spec-1 && make cycle')">Copy</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">make backfill</span></div><div class="wb-desc">Backfill historical briefs.</div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'cd ~/spec-1 && make backfill')">Copy</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">make brief</span></div><div class="wb-desc">Daily brief for latest run_id.</div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'cd ~/spec-1 && make brief')">Copy</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">make leads</span></div><div class="wb-desc">Derive Leads from intel.</div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'cd ~/spec-1 && make leads')">Copy</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">make psyop</span></div><div class="wb-desc">Score psyop on every record.</div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'cd ~/spec-1 && make psyop')">Copy</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">make calibration</span></div><div class="wb-desc">Drift proposal report → generated/.</div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'cd ~/spec-1 && make calibration')">Copy</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">make workspace</span></div><div class="wb-desc">Workspace CLI.</div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'cd ~/spec-1 && make workspace')">Copy</button></div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">make clean</span></div><div class="wb-desc">Remove pycache + pytest cache.</div><div class="wb-btns"><button class="wb-btn" onclick="copyText(this,'cd ~/spec-1 && make clean')">Copy</button></div></div>
+          </div>
+        </div>
+
+        <!-- Models -->
+        <div class="wb-section">
+          <div class="wb-section-title">Models — 3 distinct Anthropic IDs</div>
+          <div class="wb-sub">Override knob: <code>SPEC1_LLM_CLAUDE_MODEL</code> (honored by <code>llm/fallback_client.py</code> only). See ACCESS_AUDIT findings F-1 and F-2.</div>
+          <div class="wb-grid">
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">claude-sonnet-4-6</span><span class="wb-meta">Briefing</span></div><div class="wb-desc">src/spec1_core/briefing/generator.py — daily brief.</div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">claude-sonnet-4-6</span><span class="wb-meta">PDX1 narrative</span></div><div class="wb-desc">src/cls_pdx1/explain/summarize.py — regional narrative summary.</div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">claude-haiku-4-5-20251001</span><span class="wb-meta">Investigation</span></div><div class="wb-desc">src/spec1_core/investigation/verifier.py — verifier loop.</div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">claude-haiku-4-5-20251001</span><span class="wb-meta">LLM fallback default</span></div><div class="wb-desc">src/spec1_core/llm/fallback_client.py — tier 1. Honors SPEC1_LLM_CLAUDE_MODEL.</div></div>
+            <div class="wb-card"><div class="wb-head"><span class="wb-name">claude-sonnet-4-20250514</span><span class="wb-meta">Workspace</span></div><div class="wb-desc">src/spec1_core/workspace/researcher.py — case-file researcher. <b>F-1 drift candidate.</b></div></div>
+          </div>
+        </div>
+
+        <!-- Env vars -->
+        <div class="wb-section">
+          <div class="wb-section-title">Environment Variables — 33</div>
+          <div class="wb-sub">Full definitions in SHOP_MANUAL §8. There is no <code>.env.example</code> in the repo today (F-6).</div>
+          <details class="wb-fold">
+            <summary>Show all 33 keys</summary>
+            <table class="wb-env-table" style="margin-top:10px;">
+              <thead><tr><th>Key</th><th>Default</th><th>Consumer</th></tr></thead>
+              <tbody>
+                <tr><td class="k">ANTHROPIC_API_KEY</td><td>(required)</td><td>briefing, verifier, fallback_client, workspace, pdx1</td></tr>
+                <tr><td class="k">QUIVER_API_KEY</td><td>(optional)</td><td>congressional collector</td></tr>
+                <tr><td class="k">LEGISCAN_API_KEY</td><td>(optional)</td><td>leg_jud router</td></tr>
+                <tr><td class="k">OPENSTATES_API_KEY</td><td>(optional)</td><td>leg_jud router</td></tr>
+                <tr><td class="k">OLLAMA_AUTO_SPAWN</td><td>true</td><td>llm/fallback_client</td></tr>
+                <tr><td class="k">SPEC1_API_HOST</td><td>127.0.0.1</td><td>spec1_api.main</td></tr>
+                <tr><td class="k">SPEC1_API_PORT</td><td>8000</td><td>spec1_api.main</td></tr>
+                <tr><td class="k">SPEC1_API_KEY</td><td>(unset = open)</td><td>spec1_api.auth</td></tr>
+                <tr><td class="k">SPEC1_ENVIRONMENT</td><td>production</td><td>many</td></tr>
+                <tr><td class="k">SPEC1_CORS_ORIGINS</td><td>(none)</td><td>spec1_api.main</td></tr>
+                <tr><td class="k">SPEC1_STORE_PATH</td><td>spec1_intelligence.jsonl</td><td>many</td></tr>
+                <tr><td class="k">SPEC1_DB_PATH</td><td>(cls_db default)</td><td>cls_db.database</td></tr>
+                <tr><td class="k">SPEC1_VERDICTS_PATH</td><td>verdicts.jsonl</td><td>verdicts router</td></tr>
+                <tr><td class="k">SPEC1_PSYOP_PATH</td><td>generated/psyop_scores.jsonl</td><td>psyop router, run_psyop</td></tr>
+                <tr><td class="k">SPEC1_LEADS_PATH</td><td>leads.jsonl</td><td>leads router</td></tr>
+                <tr><td class="k">SPEC1_OSINT_PATH</td><td>(cls_osint default)</td><td>OSINT routers</td></tr>
+                <tr><td class="k">SPEC1_BRIEFS_DIR</td><td>briefs</td><td>publication router</td></tr>
+                <tr><td class="k">SPEC1_BRIEFS_PATH</td><td>(varies)</td><td>other brief lookups (F-5)</td></tr>
+                <tr><td class="k">SPEC1_LEG_JUD_PATH</td><td>leg_jud_briefs.jsonl</td><td>leg_jud router</td></tr>
+                <tr><td class="k">SPEC1_PUBLISH_LOG</td><td>publish_log.jsonl</td><td>cls_db.publish_log</td></tr>
+                <tr><td class="k">SPEC1_LLM_CLAUDE_MODEL</td><td>claude-haiku-4-5-20251001</td><td>llm/fallback_client (partial — F-2)</td></tr>
+                <tr><td class="k">SPEC1_LLM_LOG_PATH</td><td>(per llm)</td><td>llm package</td></tr>
+                <tr><td class="k">SPEC1_OLLAMA_URL</td><td>(ollama default)</td><td>llm/fallback_client</td></tr>
+                <tr><td class="k">SPEC1_TIMEZONE</td><td>America/Los_Angeles</td><td>scheduler</td></tr>
+                <tr><td class="k">SPEC1_CRON_HOUR</td><td>6</td><td>scheduler</td></tr>
+                <tr><td class="k">SPEC1_CRON_MINUTE</td><td>0</td><td>scheduler</td></tr>
+                <tr><td class="k">SPEC1_RUN_ON_START</td><td>(false)</td><td>scheduler</td></tr>
+                <tr><td class="k">SPEC1_DEV_MODE</td><td>(false)</td><td>various</td></tr>
+                <tr><td class="k">SPEC1_HEADERS</td><td>(none)</td><td>various</td></tr>
+                <tr><td class="k">SPEC1_POLITICAL_WEB_ENABLED</td><td>(false)</td><td>spec1_api.main</td></tr>
+                <tr><td class="k">SPEC1_WEBHOOK_URLS</td><td>(none)</td><td>webhooks</td></tr>
+                <tr><td class="k">SPEC1_WEBHOOK_SECRET</td><td>(none)</td><td>webhooks</td></tr>
+                <tr><td class="k">SPEC1_WEBHOOK_TIMEOUT</td><td>(default)</td><td>webhooks</td></tr>
+              </tbody>
+            </table>
+          </details>
+        </div>
+
       </div>
 
       <!-- ─────────────────────────── Local Access ─────────────────────────── -->
@@ -785,6 +1111,7 @@ const _panelLoaders = {
   'panel-cycle':       () => loadCycleStatus(),
   'panel-verdicts':    () => loadVerdicts(0),
   'panel-calibration': () => loadCalibration(),
+  'panel-workbench':   () => initWorkbench(),
   'panel-local':       () => {},
 };
 
@@ -1305,6 +1632,52 @@ function copyText(btn, text) {
 function fallbackCopy(text) {
   const ta = Object.assign(document.createElement('textarea'), { value: text, style: 'position:fixed;opacity:0' });
   document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+}
+
+// ── Workbench ─────────────────────────────────────────────────────────────────
+
+async function initWorkbench() {
+  const pill = document.getElementById('wb-api-state');
+  if (!pill) return;
+  try {
+    const r = await fetch(API + '/health', { signal: AbortSignal.timeout(3000) });
+    pill.textContent = r.ok ? 'online' : 'unreachable';
+    pill.style.color = r.ok ? '#9ae6b4' : 'rgba(255,100,100,.9)';
+  } catch (_) {
+    pill.textContent = 'offline';
+    pill.style.color = 'rgba(255,100,100,.9)';
+  }
+}
+
+async function wbApi(btn, method, path, body) {
+  const card = btn.closest('.wb-card');
+  const msg = card ? card.querySelector('[data-msg]') : null;
+  const setMsg = (cls, text) => { if (!msg) return; msg.className = 'wb-msg ' + cls; msg.textContent = text; };
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '…'; setMsg('running', method + ' ' + path + ' …');
+  try {
+    const opts = { method, headers: { 'Content-Type': 'application/json' }, signal: AbortSignal.timeout(60000) };
+    if (body !== undefined) opts.body = JSON.stringify(body);
+    const r = await fetch(API + path, opts);
+    const ct = r.headers.get('content-type') || '';
+    const data = ct.includes('application/json') ? await r.json() : await r.text();
+    if (!r.ok) {
+      setMsg('err', r.status + ' — ' + (typeof data === 'string' ? data.slice(0, 120) : (data.detail || JSON.stringify(data)).slice(0, 120)));
+    } else {
+      const preview = typeof data === 'string' ? data.slice(0, 200) : JSON.stringify(data).slice(0, 200);
+      setMsg('done', '✓ ' + r.status + ' — ' + preview + (preview.length >= 200 ? '…' : ''));
+    }
+  } catch (e) {
+    setMsg('err', 'error: ' + (e.message || e));
+  } finally {
+    btn.disabled = false; btn.textContent = orig;
+  }
+}
+
+function wbCopyMcp(btn, tool, args) {
+  const payload = { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: tool, arguments: args } };
+  const cmd = "echo '" + JSON.stringify(payload).replace(/'/g, "'\\''") + "' | python mcp_server.py";
+  copyText(btn, cmd);
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
