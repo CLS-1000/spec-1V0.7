@@ -1,4 +1,4 @@
-yewyes		.PHONY: install test test-fast test-cov lint run mcp cycle backfill calibration workspace clean help brief leads psyop
+	.PHONY: install test test-fast test-cov lint run mcp cycle backfill calibration workspace clean help brief leads psyop
 
 PYTHONPATH := src
 PYTHON     := PYTHONPATH=$(PYTHONPATH) python
