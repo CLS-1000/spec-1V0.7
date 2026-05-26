@@ -1,4 +1,4 @@
-.PHONY: install test test-fast test-cov lint run mcp cycle backfill calibration workspace clean help brief leads psyop
+	.PHONY: install test test-fast test-cov lint run mcp cycle backfill calibration workspace clean help brief leads psyop
 
 PYTHONPATH := src
 PYTHON     := PYTHONPATH=$(PYTHONPATH) python
@@ -47,27 +47,29 @@ cycle:
 
 backfill:
 	$(PYTHON) -m spec1_engine.tools.historical_briefs
+calibration: $(PYTHON) -m spec1_engine.tools.calibration_propose \
+	--intel data/spec1_intelligence.jsonl \
+	--verdicts data/verdicts.jsonl \
+	--out-dir generated/
 
-calibration:
-	$(PYTHON) -m spec1_engine.tools.calibration_propose \
-		--intel spec1_intelligence.jsonl \
-		--verdicts verdicts.jsonl \
-		--out-dir generated/
-
-brief:
-	$(PYTHON) -m spec1_engine.tools.generate_brief
-
-leads:
-	$(PYTHON) -m spec1_engine.tools.generate_leads
-
-psyop:
-	$(PYTHON) -m spec1_engine.tools.run_psyop
-
-workspace:
-	$(PYTHON) -m spec1_engine.workspace
+brief: $(PYTHON) -m spec1_engine.tools.generate_brief
+leads: $(PYTHON) -m spec1_engine.tools.generate_leads
+psyop: $(PYTHON) -m spec1_engine.tools.run_psyop
+workspace: $(PYTHON) -m spec1_engine.workspace
 
 clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; \
 	find . -type d -name .pytest_cache -exec rm -rf {} + 2>/dev/null; \
 	find . -name "*.pyc" -delete 2>/dev/null; \
 	echo "Cleaned."
+
+organize:
+	@echo "Starting repository organization..."
+	@mkdir -p docs/investor_outreach docs/launch_prep data
+	@-[ -f INVESTOR_PITCH.md ] && git mv INVESTOR_PITCH.md docs/investor_outreach/
+	@-[ -f OUTREACH_TEMPLATES.md ] && git mv OUTREACH_TEMPLATES.md docs/investor_outreach/
+	@-[ -f LAUNCH_PLAN.md ] && git mv LAUNCH_PLAN.md docs/launch_prep/
+	@-[ -f LAUNCH_READINESS.md ] && git mv LAUNCH_READINESS.md docs/launch_prep/
+	@-[ -f spec1_intelligence.jsonl ] && git mv spec1_intelligence.jsonl data/
+	@-[ -f verdicts.jsonl ] && git mv verdicts.jsonl data/
+	@echo "Organization complete! Run 'git status' to review changes."

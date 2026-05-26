@@ -25,7 +25,7 @@ def _tier_from_sigma(sigma: float) -> AnomalyTier:
 
 
 class RollingBaseline:
-    """Maintains a rolling N-day window of signal weights per entity."""
+    """Rolling N-day signal-weight baseline per entity — feeds the sigma detector."""
 
     def __init__(self, window_days: int = 90) -> None:
         self.window_days = window_days
@@ -49,7 +49,7 @@ class RollingBaseline:
         ]
 
     def stats(self, entity_id: str) -> tuple[float, float]:
-        """Return (mean, std) of daily summed weights over the window."""
+        """(mean, std) of daily-summed signal weights over the rolling window."""
         obs = self._window(entity_id)
         if not obs:
             return 0.0, 0.0
@@ -76,7 +76,7 @@ class RollingBaseline:
         provenance: Provenance,
         description: Optional[str] = None,
     ) -> Optional[Anomaly]:
-        """Compare current_value against baseline. Return Anomaly if >= 1 sigma."""
+        """Compare current_value against baseline — emit Anomaly if deviation >= 1σ."""
         mean, std = self.stats(entity_id)
 
         if std == 0.0:

@@ -1,10 +1,10 @@
 """OLIS adapter — Oregon Legislative Information System.
 
-Tracks bills, votes, committee membership, and hearing witnesses.
-OLIS OData API: https://api.oregonlegislature.gov/odata/odataservice.svc/
+Tracks bills, votes, committee assignments, and hearing witnesses.
+OData API: https://api.oregonlegislature.gov/odata/odataservice.svc/
 
-HTTP fetch is fully stubbed to avoid network dependency in tests.
-Provide bill_data list directly via OlisAdapter(bill_data=[...]) for testing.
+Live HTTP fetch is not implemented — inject bill_data=[...] for offline
+and test use. Pipeline catches the missing-data error and logs the gap.
 """
 
 from __future__ import annotations

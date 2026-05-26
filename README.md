@@ -1,66 +1,154 @@
-# SPEC-1 Intelligence Engine
+# [ SPEC-1 INTELLIGENCE ENGINE ]
 
 [![CI](https://github.com/mjlak1000/spec-1/actions/workflows/python-package.yml/badge.svg)](https://github.com/mjlak1000/spec-1/actions/workflows/python-package.yml)
 [![Pages](https://github.com/mjlak1000/spec-1/actions/workflows/pages.yml/badge.svg)](https://mjlak1000.github.io/spec-1/)
 [![Python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](pyproject.toml)
 [![License](https://img.shields.io/badge/license-Proprietary-red)](LICENSE)
 
+```
+INIT PID 1...
+PYTHON 3.11+ DETECTED
+LOADING 1,359 TESTS... [OK]
+PIPELINE STATUS: READY
+```
+
+**_ Automated OSINT for geo conflict signal monitoring.**
+`// v0.6.0 · Portland OR · EVASTARARCANA`
+
 **Landing:** [mjlak1000.github.io/spec-1](https://mjlak1000.github.io/spec-1/) · **Dashboard:** [/ui](https://mjlak1000.github.io/spec-1/ui/)
 
-## Portfolio entry points
+---
 
-- **Landing page:** [mjlak1000.github.io/spec-1](https://mjlak1000.github.io/spec-1/)
-- **Interactive dashboard:** [mjlak1000.github.io/spec-1/ui](https://mjlak1000.github.io/spec-1/ui/)
-- **Portfolio summary:** [docs/portfolio.md](docs/portfolio.md)
-- **Case study (engineering decisions):** [docs/case_study.md](docs/case_study.md)
+The bottleneck is attention, not access.
 
-The bottleneck in intelligence work is attention, not information. SPEC-1 handles the triage: it monitors a curated set of authoritative national security sources continuously, scores every new signal through a four-gate deterministic filter, and hands only the survivors to Claude for investigation and verification. What reaches the analyst is already classified, scored, and structured — ready for a decision, not a digest.
+Authoritative reporting is abundant. The constraint is analyst hours — the time it takes to triage thousands of items down to the dozen that matter today. SPEC-1 handles that triage automatically: it monitors a curated set of national-security and regional-accountability sources continuously, scores every incoming signal through a four-gate deterministic filter, and hands only the survivors to Claude for investigation and verification. What reaches the analyst is already classified, scored, and structured — ready for a decision, not a digest.
 
-**Canonical cycle** — runs automatically on cron or on-demand via `POST /cycle/run`. Produces one artifact: append-only `IntelligenceRecord` objects in `spec1_intelligence.jsonl`.
+**The system handles the volume. The analyst handles the judgment.**
 
-**Operator tools** — invoked deliberately. Briefs, leads, psyop scores, and calibration reports each read from the intelligence store independently. None runs silently inside the cycle. The separation is the architecture: the cycle ships a trustworthy, auditable core; downstream artifacts are explicit operator decisions, never side effects.
+```
+>> SYSTEM METADATA LOG
+* Analyst Impact:  You start your day with filtered signal. Hours of manual
+                   reading replaced by a verified, structured brief.
+* Programmer Impact: A unified fault-tolerant ingestion architecture.
+                   A dead RSS feed will not halt the 06:00 AM cron job.
+```
 
-| Document | Description |
-|----------|-------------|
-| [docs/architecture.md](docs/architecture.md) | System architecture, data flow, models |
-| [docs/api.md](docs/api.md) | HTTP API reference |
-| [docs/runbook.md](docs/runbook.md) | Operational procedures |
-| [docs/portfolio.md](docs/portfolio.md) | Project overview for stakeholders |
-| [docs/case_study.md](docs/case_study.md) | Design decisions and engineering rationale |
-| [CHANGELOG.md](CHANGELOG.md) | Version history |
-| [memory/decisions.md](memory/decisions.md) | Architecture Decision Records |
-| [CLAUDE.md](CLAUDE.md) | Developer and agent governance |
+---
 
 ## Architecture
 
+A four-step deterministic lifecycle separates signal from noise.
+
 ```
-═══ Canonical cycle (automatic) ═══════════════════════════════════════
-RSS / FARA / Congress / Narrative
+[RAW SIGNAL] ──→ [OPPORTUNITY] ──→ [INVESTIGATION] ──→ [INTELLIGENCE]
+   High volume       Filtered by        Augmented with      Structured
+  RSS/Atom feeds    4-Gate System       Claude API          output & briefs
         │
         ▼
-  cls_osint.feed ─────────── cls_osint.adapters (fara, congressional, narrative)
-        │
-        ▼
-  spec1_core  (harvest → parse → score → investigate → verify → analyze)
-        │
-        ▼
-  IntelligenceRecord  →  spec1_intelligence.jsonl  (append-only)
-
-═══ Operator tools (manual, on-demand) ════════════════════════════════
-  make psyop         → generated/psyop_scores.jsonl
-  make brief         → generated/briefs/*.md
-  make leads         → generated/leads.jsonl
-  make calibration   → generated/calibration_report.*
-  make backfill      → briefs for historical run_ids
-
-═══ Surfaces ══════════════════════════════════════════════════════════
-  spec1_api   (FastAPI HTTP + APScheduler daily cron)
-  mcp_server  (MCP tools for Claude — cycle + operator tools)
-
-═══ Persistence ═══════════════════════════════════════════════════════
-  JSONL   : source of truth, append-only (every store)
-  SQLite  : queryable index, rebuildable from JSONL
+   /dev/null
+   NOISE DISCARDED
 ```
+
+Seven sequential stages — engineered for graceful degradation.
+
+```
+[01 HARVEST] > [02 PARSE] > [03 SCORE] > [04 INVESTIGATE] > [05 VERIFY] > [06 ANALYZE] > [07 STORE]
+```
+
+| Stage | What happens | Output |
+|-------|-------------|--------|
+| `[01 HARVEST]` | SSL edge cases, malformed XML, timeouts — failed feeds logged and skipped | `Signal[]` |
+| `[02 PARSE]` | BeautifulSoup + NLP heuristics. No external model dependencies | `ParsedSignal[]` |
+| `[03 SCORE]` | Four-gate filter — any single failure drops the signal | `Opportunity[]` |
+| `[04 INVESTIGATE]` | Claude generates hypothesis + analyst leads | `Investigation[]` |
+| `[05 VERIFY]` | Claude classifies outcome against evidence tree | `Outcome[]` |
+| `[06 ANALYZE]` | Confidence synthesis — sources, analysts, corroboration | `IntelligenceRecord[]` |
+| `[07 STORE]` | Dual-write: append-only JSONL + SQLite. JSONL is source of truth | persisted |
+
+---
+
+## The 4-Gate Scoring System
+
+Any single failure drops the signal to `/dev/null`.
+
+| Gate | Criterion | Default |
+|------|-----------|---------|
+| `[CREDIBILITY]` | Known source / analyst weight ≥ 0.60 | 0.60 |
+| `[VOLUME]` | Word count ≥ 50 | 50 words |
+| `[VELOCITY]` | Signal recency ≤ 48 hours | 48h |
+| `[NOVELTY]` | Not a duplicate — keyword domain match ≥ 1 | hash dedup |
+
+Thresholds encode accumulated operational judgment. Gate weights remain unpublished.
+
+---
+
+## Intelligence Adapters
+
+The core pipeline adapts to specialized intelligence domains.
+
+```
+┌────────────────┬─────────────────────┬─────────────────────┐
+│    [FARA]      │   [CONGRESSIONAL]   │    [NARRATIVE]      │
+├────────────────┼─────────────────────┼─────────────────────┤
+│ DOJ bulk       │ Trade intelligence. │ PsyOps detection.   │
+│ filings.       │ Fallback chain:     │ TF-IDF cosine       │
+│                │ QuiverQuant →       │ similarity          │
+│ Cross-refs     │ Capitol Trades →    │ clustering.         │
+│ foreign agent  │ House eFD.          │                     │
+│ registrations  │                     │ Detects narrative   │
+│ against        │ Flags defense/      │ seeding and         │
+│ congressional  │ cyber/energy        │ astroturfing.       │
+│ activity.      │ conflicts.          │                     │
+│                │                     │ Outputs Anomaly/    │
+│                │                     │ Campaign records.   │
+└────────────────┴─────────────────────┴─────────────────────┘
+                           │
+                           ▼
+              [STORE: JSONL / SQLite]
+```
+
+---
+
+## Modules at a Glance
+
+**Core Pipeline**
+
+| Module | Role |
+|--------|------|
+| `[ spec1_core ]` | Canonical 7-stage cycle — frozen; change requires human approval + version bump |
+| `[ cls_osint ]` | RSS/FARA/Congressional/Narrative adapters with feed registry |
+| `[ spec1_api ]` | FastAPI service — APScheduler daily cron, dual-write persistence, MCP surface |
+
+**Intelligence Products**
+
+| Module | Role |
+|--------|------|
+| `[ cls_world_brief ]` | Daily structured brief — Claude Sonnet writer, rule-based fallback |
+| `[ cls_leads ]` | Actionable leads extracted from scored records |
+| `[ cls_psyop ]` | Psychological-operation pattern detection and scoring |
+| `[ cls_pdx1 ]` | PDX-1i Metro Citizens Brief — Portland bi-state metro officials, entities, districts |
+| `[ cls_quant ]` | Quantitative market-signal monitoring — defense, cyber, energy, macro |
+| `[ cls_db ]` | Append-only JSONL + SQLite dual-write persistence layer |
+
+**Feedback Loop**
+
+| Module | Role |
+|--------|------|
+| `[ cls_verdicts ]` | Human ground-truth verdict collection — append-only |
+| `[ cls_calibration ]` | Drift detection + threshold proposals — descriptive only, human-decided |
+
+---
+
+## Data Sources
+
+- **RSS/Atom:** War on the Rocks, Cipher Brief, Just Security, RAND, Atlantic Council, Defense One
+- **`[FARA]`:** DOJ Foreign Agents Registration Act bulk filings
+- **`[CONGRESSIONAL]`:** Bills, hearings, equity disclosures — QuiverQuant → Capitol Trades → House eFD fallback chain
+- **`[NARRATIVE]`:** Influence-operation and narrative-seeding detection
+- **State/Regional:** Oregon OLIS, ORESTAR, OGEC/SEI; Washington PDC (for `[ cls_pdx1 ]`)
+- **Equities Watchlist:** Defense primes, cybersecurity vendors, energy majors, macro instruments (yfinance)
+
+---
 
 ## Quick Start
 
@@ -73,7 +161,7 @@ cp .env.example .env  # set ANTHROPIC_API_KEY
 ```
 
 ```bash
-make cycle        # one-shot intelligence cycle (records + brief + workspace)
+make cycle        # one-shot intelligence cycle
 make run          # API server → http://localhost:8000
 make mcp          # MCP server (Claude integration)
 make brief        # generate brief from latest run_id
@@ -84,6 +172,8 @@ make workspace    # workspace CLI (case management)
 make test         # full test suite
 make help         # all commands
 ```
+
+---
 
 ## Environment
 
@@ -103,70 +193,48 @@ cp .env.example .env  # edit — set ANTHROPIC_API_KEY at minimum
 | `SPEC1_FEED_TIMEOUT` | `15` | Feed fetch timeout (seconds) |
 | `SPEC1_RUN_ON_START` | `false` | Run one cycle immediately on API startup |
 
-## Modules at a Glance
-
-**Core Intelligence Pipeline**
-- `spec1_engine` — canonical 7-stage cycle (harvest → parse → score → investigate → verify → analyze → store)
-- `cls_osint` — RSS/FARA/Congressional/Narrative adapters with feed registry
-- `spec1_api` — FastAPI service with scheduler, dual-write persistence, MCP server
-
-**Intelligence Products & Analysis**
-- `cls_world_brief` — Daily structured intelligence brief (Claude Sonnet writer, rule-based fallback)
-- `cls_leads` — Actionable leads extracted from scored records
-- `cls_psyop` — Psychological-operation pattern detection and scoring
-- `cls_leg_jud` — Legislative and judicial desk tracking
-- `cls_pdx1` — PDX-1i Metro Citizens Brief (Portland bi-state metro elected officials, entities, districts)
-- `cls_db` — Append-only JSONL + SQLite dual-write persistence
-
-**Intelligence Operations**
-- `spec1_engine.workspace` — Case management CLI for investigation tracking
-- `spec1_engine.app.publishers.x` — X/Twitter thread publication (with idempotency log)
-- `spec1_engine.llm` — Three-tier fallback client (Claude Sonnet → Ollama → rule-based)
-- `cls_verdicts` — Human ground-truth verdict collection (append-only)
-- `cls_calibration` — Drift detection and threshold proposal (descriptive only, human-decided)
-
-**Data Sources**
-
-- **RSS Feeds:** War on the Rocks, Cipher Brief, Just Security, RAND, Atlantic Council, Defense One
-- **OSINT Adapters:** FARA (Foreign Agents Registration Act) filings, Congressional records (bills, hearings), Narrative/influence-operation tracking, State-level political data (Oregon OLIS, ORESTAR; Washington PDC)
-- **Equities Watchlist:** Defense primes, cybersecurity vendors, energy majors, macro instruments (via yfinance)
+---
 
 ## API Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | /health | Health check |
-| GET | /signals | Latest harvested signals |
-| POST | /signals/ingest | Ingest a signal manually |
-| GET | /intel | Intelligence records |
-| GET | /leads | Actionable leads |
-| POST | /leads/generate | Generate leads from current records |
-| GET | /brief | Latest world brief |
-| GET | /brief/latest | Latest brief (alias) |
-| GET | /brief/history | All briefs, newest first |
-| GET | /brief/index | Brief index (run_ids + dates) |
-| GET | /brief/{date} | Brief by date or run_id |
-| POST | /brief/generate | Generate brief for a run_id |
-| GET | /psyop | PsyOp detections |
-| POST | /psyop/analyse | Score text for psyop patterns |
-| POST | /psyop/run | Score all records for psyop patterns |
-| GET | /fara | FARA filings |
-| GET | /verdicts | Filed verdicts |
-| GET | /verdicts/{record_id} | Verdicts for a specific record |
-| POST | /verdicts | File a verdict |
-| GET | /calibration/report | Calibration drift report (descriptive) |
-| GET | /calibration/proposals | Suggested threshold adjustments |
-| GET | /cycle/status | Last cycle status |
-| POST | /cycle/run | Trigger one canonical cycle |
-| GET | /publication/latest | Download latest publication |
-| GET | /publication/list | List all publications |
-| POST | /publication/generate | Generate a new publication |
-| GET | /publication/{filename} | Download publication by filename |
-| GET | /workspace/cases | List investigation cases |
-| POST | /workspace/cases | Open a new case |
-| GET | /workspace/cases/{case_id} | Get case detail |
-| POST | /workspace/cases/{case_id}/close | Close a case |
+| GET | `/health` | Health check |
+| GET | `/signals` | Latest harvested signals |
+| POST | `/signals/ingest` | Ingest a signal manually |
+| GET | `/intel` | Intelligence records |
+| GET | `/leads` | Actionable leads |
+| POST | `/leads/generate` | Generate leads from current records |
+| GET | `/brief` | Latest world brief |
+| GET | `/brief/latest` | Latest brief (alias) |
+| GET | `/brief/history` | All briefs, newest first |
+| GET | `/brief/{date}` | Brief by date or run_id |
+| POST | `/brief/generate` | Generate brief for a run_id |
+| GET | `/psyop` | PsyOp detections |
+| POST | `/psyop/analyse` | Score text for psyop patterns |
+| POST | `/psyop/run` | Score all records for psyop patterns |
+| GET | `/fara` | FARA filings |
+| GET | `/verdicts` | Filed verdicts |
+| POST | `/verdicts` | File a verdict |
+| GET | `/calibration/report` | Calibration drift report (descriptive) |
+| GET | `/calibration/proposals` | Suggested threshold adjustments |
+| POST | `/cycle/run` | Trigger one canonical cycle |
+| GET | `/cycle/status` | Last cycle status |
 
-> Routes `GET /nodes/{node_id}/signal` and `POST /ingest/signal` are conditionally mounted when `SPEC1_POLITICAL_WEB_ENABLED=true`.
+> Routes conditionally mounted when `SPEC1_POLITICAL_WEB_ENABLED=true`:
+> `GET /nodes/{node_id}/signal`, `POST /ingest/signal`
 
-The canonical cycle produces intelligence records only. Briefs, leads, and psyop scores require their operator tools — see Quick Start.
+---
+
+## Reference
+
+| Document | Description |
+|----------|-------------|
+| [docs/architecture.md](docs/architecture.md) | System architecture, data flow, models |
+| [docs/api.md](docs/api.md) | HTTP API reference |
+| [docs/runbook.md](docs/runbook.md) | Operational procedures |
+| [docs/portfolio.md](docs/portfolio.md) | Project overview for stakeholders |
+| [docs/case_study.md](docs/case_study.md) | Design decisions and engineering rationale |
+| [CHANGELOG.md](CHANGELOG.md) | Version history |
+| [memory/decisions.md](memory/decisions.md) | Architecture Decision Records |
+| [CLAUDE.md](CLAUDE.md) | Developer and agent governance |

@@ -27,7 +27,11 @@ def _now() -> datetime:
 
 @dataclass
 class CycleResult:
-    """Output of one pipeline cycle."""
+    """Aggregate output of one PDX-1i ingest cycle.
+
+    ok() returns True only when all adapters and watch modules completed
+    without errors — partial failures are logged but do not block the cycle.
+    """
 
     ran_at: datetime = field(default_factory=_now)
     affiliations: list[Affiliation] = field(default_factory=list)
@@ -35,15 +39,15 @@ class CycleResult:
     signals: list[Signal] = field(default_factory=list)
     anomalies: list[Anomaly] = field(default_factory=list)
     trigger: Optional[TriggerDecision] = None
-    adapter_errors: dict[str, list[str]] = field(default_factory=dict)
-    watch_errors: dict[str, list[str]] = field(default_factory=dict)
+    adapter_errors: dict[str, list[str]] = field(default_factory=dict)    # source_name → errors
+    watch_errors: dict[str, list[str]] = field(default_factory=dict)      # entity_name → errors
 
     def ok(self) -> bool:
         return not self.adapter_errors and not self.watch_errors
 
 
 class Pipeline:
-    """Orchestrates one full PDX-1i ingest cycle."""
+    """PDX-1i ingest cycle orchestrator — adapters → watch → anomaly → trigger."""
 
     def __init__(
         self,
