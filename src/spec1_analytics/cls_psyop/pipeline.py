@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -12,6 +13,8 @@ from spec1_analytics.cls_psyop.scorer import filter_risky, score_records, score_
 from spec1_analytics.cls_psyop.schemas import PsyopScore
 from spec1_analytics.cls_psyop.store import PsyopStore
 from spec1_labels import PSYOP_HIGH_RISK, PSYOP_MEDIUM_RISK, PSYOP_LOW_RISK
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -79,8 +82,9 @@ class PsyopPipeline:
             if risky:
                 written = self.store.save_batch(risky)
                 stats.stored = len(written)
-        except Exception as exc:
-            stats.errors.append(str(exc))
+        except Exception:
+            logger.exception("Psyop pipeline run failed")
+            stats.errors.append("An internal processing error occurred.")
 
         stats.finish()
         return stats
