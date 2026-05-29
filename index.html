@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPEC-1 :: TERMINAL OSINT ENGINE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #000000;
+            color: #ffffff;
+            font-family: 'Courier New', 'IBM Plex Mono', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 2rem 1rem;
+        }
+        @media(min-width: 640px) {
+            body { padding: 2rem; }
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        /* Strict black and white boundaries */
+        .term-box {
+            border: 1px solid #ffffff;
+            background: #000000;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .term-header {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #ffffff;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        h1, h2, h3 {
+            font-weight: bold;
+        }
+        h1 {
+            font-size: 2.25rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+        }
+        @media(min-width: 768px) {
+            h1 { font-size: 3rem; }
+        }
+        h2 {
+            font-size: 1.15rem;
+            border-left: 3px solid #ffffff;
+            padding-left: 0.75rem;
+            margin: 2.5rem 0 1rem 0;
+            text-transform: uppercase;
+        }
+        h3 {
+            font-size: 1rem;
+            margin: 1rem 0 0.5rem 0;
+        }
+        pre {
+            background: #000000;
+            border: 1px solid #ffffff;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-size: 0.8rem;
+            color: #ffffff;
+        }
+        a {
+            color: #ffffff;
+            text-decoration: none;
+            border-bottom: 1px dotted #ffffff;
+        }
+        a:hover {
+            background: #ffffff;
+            color: #000000;
+            text-decoration: none;
+        }
+        hr {
+            border: none;
+            border-top: 1px solid #ffffff;
+            margin: 1.5rem 0;
+        }
+        /* Rigid Structural Matrices */
+        .pipeline-grid, .contrib-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        @media(min-width: 768px) {
+            .pipeline-grid, .contrib-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .pipeline-card, .contrib-card {
+            border: 1px solid #ffffff;
+            padding: 1.25rem;
+            background: #000000;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .contrib-rank {
+            font-size: 0.7rem;
+            border-bottom: 1px solid #ffffff;
+            padding-bottom: 0.25rem;
+            margin-bottom: 0.75rem;
+        }
+        .contrib-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .contrib-stats {
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+        .button {
+            background: transparent;
+            border: 1px solid #ffffff;
+            color: #ffffff;
+            padding: 0.6rem 1.2rem;
+            font-family: inherit;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: inline-block;
+            text-decoration: none;
+            border-bottom: 1px solid #ffffff;
+        }
+        .button:hover {
+            background: #ffffff;
+            color: #000000;
+        }
+        footer {
+            margin-top: 4rem;
+            text-align: center;
+            font-size: 0.7rem;
+            border-top: 1px solid #ffffff;
+            padding-top: 1.5rem;
+            line-height: 1.8;
+            letter-spacing: 0.5px;
+        }
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background-color: #ffffff;
+            vertical-align: middle;
+            animation: blink 1s step-end infinite;
+            margin-left: 4px;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        /* Tactical Signals */
+        .signal-pass { color: #00ff00; }
+        .signal-caution { color: #ff0000; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="term-box">
+        <div class="term-header">
+            <span>SPEC-1 :: OSINT SIGNAL ENGINE</span>
+            <span>v1.4.2 <span class="signal-pass">[STABLE]</span></span>
+        </div>
+        <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; font-size: 0.8rem;">
+            <div>● PIPELINE ACTIVE<br>● LAST HARVEST: 2026-05-28 04:23:17 UTC</div>
+            <div><span class="signal-pass">PASS</span> :: CREDIBILITY GATE<br><span class="signal-caution">CAUTION</span> :: VELOCITY SPIKE DETECTED</div>
+        </div>
+        <div style="margin-top: 1rem; font-size: 0.8rem;">
+            $ ./spec1 --mode harvest --source all <span class="cursor"></span>
+        </div>
+    </div>
+
+    <h1 class="uppercase">SPEC-1 // MODULAR OSINT PIPELINE</h1>
+    <p style="margin-bottom: 2rem; max-w: 800px;">Asynchronous signal harvesting, narrative clustering, and intelligence synthesis. Built by pragmatic terminal analysts.</p>
+
+    <h2>$ pipeline::architecture</h2>
+    <div class="pipeline-grid">
+        <div class="pipeline-card">
+            <div>
+                <div style="font-weight: bold;">[SOP-01] DISCOVERY</div>
+                <div style="font-size: 0.75rem; margin-top: 0.5rem; color: #ffffff;">Rate-limited API polling, stream scraping, and proxy rotation anomalies.</div>
+            </div>
+        </div>
+        <div class="pipeline-card">
+            <div>
+                <div style="font-weight: bold;">[SOP-02] INGESTION</div>
+                <div style="font-size: 0.75rem; margin-top: 0.5rem; color: #ffffff;">TF‑IDF matrix similarity, core entity resolution, and pipeline anomaly detection.</div>
+            </div>
+        </div>
+        <div class="pipeline-card">
+            <div>
+                <div style="font-weight: bold;">[SOP-03] SYNTHESIS</div>
+                <div style="font-size: 0.75rem; margin-top: 0.5rem; color: #ffffff;">Automated Markdown/PDF briefs, campaign maps, and payload confidence scoring.</div>
+            </div>
+        </div>
+    </div>
+
+    <h2>$ github::top_contributors</h2>
+    <div class="contrib-grid">
+        <div class="contrib-card">
+            <div>
+                <div class="contrib-rank">#1 · PIPELINE OWNER</div>
+                <div class="contrib-name">core_maintainer_01</div>
+                <div class="contrib-stats">248 commits · 12k+ lines</div>
+                <div class="contrib-stats">📦 Scheduler · Redis · Docker</div>
+            </div>
+            <div class="signal-pass" style="font-size: 0.75rem; margin-top: 0.75rem;">✓ CORE SIGNATURE</div>
+        </div>
+        <div class="contrib-card">
+            <div>
+                <div class="contrib-rank">#2 · SIGNAL ARCHITECT</div>
+                <div class="contrib-name">signal_architect_delta</div>
+                <div class="contrib-stats">112 commits · similarity engine</div>
+                <div class="contrib-stats">📦 TF‑IDF · embedding scoring</div>
+            </div>
+        </div>
+        <div class="contrib-card">
+            <div>
+                <div class="contrib-rank">#3 · PIPELINE DEV</div>
+                <div class="contrib-name">pipeline_dev_omega</div>
+                <div class="contrib-stats">89 commits · error handling</div>
+                <div class="contrib-stats">📦 stream validation · logs</div>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top: 1rem; font-size: 0.75rem; letter-spacing: 0.5px;">
+        ↳ RISING: frontend_nexus (34) · harvest_lab (27) · doc_engineer (19)
+    </div>
+
+    <h2>$ intelligence::brief</h2>
+    <div class="term-box">
+        <div class="term-header">
+            <span>ANALYST: SYSTEMS_ARCHITECT</span>
+            <span>CONFIDENCE: <span class="signal-pass">HIGH</span></span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <p><span class="signal-pass">[OBSERVATION]</span> Legislative‑commercial timeline compression has accelerated by 40% over 18 months. Information asymmetry opportunities increase with pre‑public draft access.</p>
+            <p><span class="signal-caution">[CAUTION]</span> Baseline expectation 14‑21 days between committee markup and public announcement. Current average: 8export‑12 days. Possible deliberate opacity detected.</p>
+            <p><span class="signal-pass">[RECOMMENDATION]</span> Monitor disclosure timing deltas for committee members with dual jurisdiction over finance and tech policy. Flag patterns &lt; 7 days.</p>
+        </div>
+    </div>
+
+    <h2>$ deploy::local</h2>
+    <pre>
+$ git clone https://github.com/spec-1/signal-engine.git
+$ cd signal-engine
+$ docker compose up --build
+<span class="signal-pass">[OK] Container spec1-engine started stable.</span>
+    </pre>
+
+    <div style="border: 1px solid #ffffff; padding: 2rem; text-align: center; margin: 3rem 0 1rem 0;">
+        <div style="font-size: 0.75rem; letter-spacing: 2px; font-weight: bold;">OPEN SOURCE · PEER REVIEWED</div>
+        <div style="margin: 0.75rem 0 1.25rem 0; font-size: 0.9rem;">Help build the future of uncompromised OSINT analysis.</div>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="#" class="button">Contribution Guide</a>
+            <a href="#" class="button">Join Discord</a>
+        </div>
+    </div>
+
+    <footer>
+        SPEC-1 // OPEN SOURCE OSINT ENGINE — EVASTARARCANA LLC<br>
+        CLASSIFICATION: UNCLASSIFIED · DATA_STREAM_SECURE
+    </footer>
+</div>
+</body>
+</html>
