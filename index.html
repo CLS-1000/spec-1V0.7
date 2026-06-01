@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -70,40 +69,55 @@
         a:hover {
             text-decoration: underline;
         }
-        .contrib-grid {
+        .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
             margin-top: 1rem;
         }
-        .contrib-card {
+        .feature-card {
             border: 1px solid #ffffff;
             padding: 1rem;
             background: #000000;
         }
-        .contrib-rank {
+        .feature-card-title {
             font-size: 0.7rem;
-            border-bottom: 1px solid #ffffff;
-            padding-bottom: 0.25rem;
-            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+            padding-bottom: 0.4rem;
+            margin-bottom: 0.6rem;
         }
-        .contrib-name {
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-        .contrib-stats {
-            font-size: 0.75rem;
-            margin-top: 0.5rem;
+        .feature-card-body {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.75);
+            line-height: 1.6;
         }
         .pipeline-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1rem;
         }
         .pipeline-card {
             border: 1px solid #ffffff;
             padding: 1rem;
             background: #000000;
+        }
+        .pipeline-step {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 0.3rem;
+        }
+        .pipeline-name {
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .pipeline-desc {
+            font-size: 0.75rem;
+            margin-top: 0.4rem;
+            color: rgba(255,255,255,0.7);
         }
         .button {
             background: transparent;
@@ -127,6 +141,7 @@
             font-size: 0.7rem;
             border-top: 1px solid #ffffff;
             padding-top: 1.5rem;
+            color: rgba(255,255,255,0.5);
         }
         .cursor {
             display: inline-block;
@@ -145,7 +160,17 @@
             color: #00ff00;
         }
         .signal-caution {
-            color: #ff0000;
+            color: #ff4444;
+        }
+        .stat-row {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+        }
+        .stat-item span:first-child {
+            color: rgba(255,255,255,0.5);
         }
     </style>
 </head>
@@ -155,87 +180,107 @@
     <div class="term-box">
         <div class="term-header">
             <span>SPEC-1 :: OSINT SIGNAL ENGINE</span>
-            <span>v1.4.2 <span class="signal-pass">[STABLE]</span></span>
+            <span>v0.6.0 <span class="signal-pass">[STABLE]</span></span>
         </div>
         <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
-            <div>● PIPELINE ACTIVE<br>● LAST HARVEST: 2026-05-28 04:23:17 UTC</div>
-            <div class="mono"><span class="signal-pass">PASS</span> :: CREDIBILITY GATE<br><span class="signal-caution">CAUTION</span> :: VELOCITY SPIKE DETECTED</div>
+            <div>
+                ● PIPELINE ACTIVE<br>
+                ● SOURCES: RSS · FARA · CONGRESSIONAL · NARRATIVE
+            </div>
+            <div>
+                <span class="signal-pass">PASS</span> :: CREDIBILITY GATE<br>
+                <span class="signal-pass">PASS</span> :: 4-GATE SIGNAL FILTER
+            </div>
         </div>
         <div style="margin-top: 0.75rem; font-size: 0.75rem;">
-            $ ./spec1 --mode harvest --source all <span class="cursor"></span>
+            $ python -m spec1_api.main <span class="cursor"></span>
         </div>
     </div>
 
     <h1>SPEC-1 // MODULAR OSINT PIPELINE</h1>
-    <p style="margin-bottom: 1rem;">Asynchronous signal harvesting, narrative clustering, and intelligence synthesis. Built by pragmatic terminal analysts.</p>
+    <p style="margin-bottom: 0.5rem;">Real-time open-source intelligence: harvest → score → investigate → analyze. AI-powered by Claude Sonnet.</p>
+    <div class="stat-row" style="margin-bottom: 1.5rem;">
+        <div class="stat-item"><span>Tests: </span><span class="signal-pass">~780 passing</span></div>
+        <div class="stat-item"><span>Persistence: </span><span>JSONL + SQLite dual-write</span></div>
+        <div class="stat-item"><span>API: </span><span>FastAPI + MCP server</span></div>
+        <div class="stat-item"><span>License: </span><span>Open Source</span></div>
+    </div>
 
     <h2>$ pipeline::stages</h2>
     <div class="pipeline-grid">
         <div class="pipeline-card">
-            <div>[STAGE 1] DISCOVERY</div>
-            <div style="font-size: 0.75rem; margin-top: 0.5rem;">Rate-limited API polling, stream scraping, proxy rotation.</div>
+            <div class="pipeline-step">Stage 1</div>
+            <div class="pipeline-name">HARVEST</div>
+            <div class="pipeline-desc">RSS feeds, FARA filings, congressional records, and narrative sources ingested via cls_osint adapters.</div>
         </div>
         <div class="pipeline-card">
-            <div>[STAGE 2] INGESTION</div>
-            <div style="font-size: 0.75rem; margin-top: 0.5rem;">TF‑IDF similarity, entity resolution, anomaly detection.</div>
+            <div class="pipeline-step">Stage 2</div>
+            <div class="pipeline-name">SCORE</div>
+            <div class="pipeline-desc">4-gate filter: credibility · volume · velocity · novelty. Only signals passing all gates become Opportunities.</div>
         </div>
         <div class="pipeline-card">
-            <div>[STAGE 3] SYNTHESIS</div>
-            <div style="font-size: 0.75rem; margin-top: 0.5rem;">Markdown/PDF briefs, campaign maps, confidence scoring.</div>
+            <div class="pipeline-step">Stage 3</div>
+            <div class="pipeline-name">INVESTIGATE</div>
+            <div class="pipeline-desc">Claude Sonnet generates hypotheses and verifies outcomes: Corroborated · Escalate · Investigate · Monitor · Archive.</div>
+        </div>
+        <div class="pipeline-card">
+            <div class="pipeline-step">Stage 4</div>
+            <div class="pipeline-name">ANALYZE</div>
+            <div class="pipeline-desc">IntelligenceRecords with confidence scoring. Psyop detection, FARA tracking, and daily world briefs generated.</div>
         </div>
     </div>
 
-    <h2>$ github::top_contributors</h2>
-    <div class="contrib-grid">
-        <div class="contrib-card">
-            <div class="contrib-rank">#1 · CORE MAINTAINER</div>
-            <div class="contrib-name">core_maintainer_01</div>
-            <div class="contrib-stats">248 commits · 12k+ lines</div>
-            <div class="contrib-stats">📦 Scheduler · Redis · Docker</div>
-            <div class="signal-pass">✓ CORE SIGNATURE</div>
+    <h2>$ modules::overview</h2>
+    <div class="feature-grid">
+        <div class="feature-card">
+            <div class="feature-card-title">cls_world_brief</div>
+            <div class="feature-card-body">Daily AI-generated world intelligence brief with sections, sources, and confidence scores.</div>
         </div>
-        <div class="contrib-card">
-            <div class="contrib-rank">#2 · SIGNAL ENGINEER</div>
-            <div class="contrib-name">signal_engineer_delta</div>
-            <div class="contrib-stats">112 commits · similarity engine</div>
-            <div class="contrib-stats">📦 TF‑IDF · embedding scoring</div>
+        <div class="feature-card">
+            <div class="feature-card-title">cls_leads</div>
+            <div class="feature-card-body">Actionable intelligence leads prioritized from verified records: CRITICAL → HIGH → MEDIUM → LOW.</div>
         </div>
-        <div class="contrib-card">
-            <div class="contrib-rank">#3 · PIPELINE DEV</div>
-            <div class="contrib-name">pipeline_dev_omega</div>
-            <div class="contrib-stats">89 commits · error handling</div>
-            <div class="contrib-stats">📦 stream validation · logs</div>
+        <div class="feature-card">
+            <div class="feature-card-title">cls_psyop</div>
+            <div class="feature-card-body">Psychological-operation pattern detection with evidence chains and risk classification.</div>
         </div>
-    </div>
-    <div style="margin-top: 0.75rem; font-size: 0.7rem;">
-        ↳ RISING: frontend_nexus (34) · harvest_lab (27) · doc_engineer (19)
-    </div>
-
-    <h2>$ intelligence::brief</h2>
-    <div class="term-box">
-        <div class="term-header">
-            <span>ANALYST: SYSTEMS_ENGINEER</span>
-            <span>CONFIDENCE: <span class="signal-pass">HIGH</span></span>
+        <div class="feature-card">
+            <div class="feature-card-title">cls_verdicts + cls_calibration</div>
+            <div class="feature-card-body">Human feedback loop: file verdicts on records and surface accuracy drift descriptively — never auto-tuned.</div>
         </div>
-        <p><span class="signal-pass">OBSERVATION</span> :: Legislative‑commercial timeline compression has accelerated by 40% over 18 months. Information asymmetry opportunities increase with pre‑public draft access.</p>
-        <p><span class="signal-caution">CAUTION</span> :: Baseline expectation 14‑21 days between committee markup and public announcement. Current average: 8‑12 days. Possible deliberate opacity.</p>
-        <p><span class="signal-pass">RECOMMENDATION</span> :: Monitor disclosure timing deltas for committee members with dual jurisdiction over finance and technology policy. Flag patterns < 7 days.</p>
+        <div class="feature-card">
+            <div class="feature-card-title">spec1_api</div>
+            <div class="feature-card-body">FastAPI application with routers for signals, intel, leads, briefs, psyop, FARA, verdicts, calibration, and cycle.</div>
+        </div>
+        <div class="feature-card">
+            <div class="feature-card-title">MCP Server</div>
+            <div class="feature-card-body">Full Claude integration via MCP: run_cycle, get_intel, file_verdict, get_calibration, and more.</div>
+        </div>
     </div>
 
     <h2>$ deploy::local</h2>
     <pre>
-$ git clone https://github.com/spec-1/signal-engine.git
-$ cd signal-engine
-$ docker compose up --build
-<span class="signal-pass">[OK] Container spec1-engine started</span>
-    </pre>
+$ git clone https://github.com/mjlak1000/spec-1.git
+$ cd spec-1
+$ pip install -e ".[dev]"
+$ cp .env.example .env            # add ANTHROPIC_API_KEY
+$ PYTHONPATH=src python -m spec1_api.main
+<span class="signal-pass">[OK] SPEC-1 API running on http://0.0.0.0:8000</span></pre>
+
+    <h2>$ run::cycle</h2>
+    <pre>
+$ PYTHONPATH=src python -m spec1_engine.app.cycle
+<span class="signal-pass">[OK] Harvest complete</span>
+<span class="signal-pass">[OK] 4-gate scoring: N signals → M opportunities</span>
+<span class="signal-pass">[OK] Investigations generated and verified</span>
+<span class="signal-pass">[OK] Daily brief written to generated/briefs/</span></pre>
 
     <div style="border: 1px solid #ffffff; padding: 1.5rem; text-align: center; margin: 2rem 0;">
-        <div style="font-size: 0.7rem; letter-spacing: 2px;">OPEN SOURCE · PEER REVIEWED</div>
-        <div style="margin: 0.75rem 0;">Help build the future of OSINT analysis.</div>
-        <div style="display: flex; gap: 1rem; justify-content: center;">
-            <a href="#" class="button">Contribution Guide</a>
-            <a href="#" class="button">Join Chat</a>
+        <div style="font-size: 0.7rem; letter-spacing: 2px; margin-bottom: 0.75rem;">OPEN SOURCE · AI-POWERED · TERMINAL-NATIVE</div>
+        <div style="margin-bottom: 1rem; font-size: 0.85rem;">Real-time OSINT. Human-in-the-loop calibration. Built for analysts.</div>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="https://github.com/mjlak1000/spec-1" class="button" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+            <a href="https://github.com/mjlak1000/spec-1/blob/main/README.md" class="button" target="_blank" rel="noopener noreferrer">Documentation</a>
         </div>
     </div>
 
@@ -246,4 +291,3 @@ $ docker compose up --build
 </div>
 </body>
 </html>
-```
