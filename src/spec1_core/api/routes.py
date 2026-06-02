@@ -156,10 +156,16 @@ def brief_prompts_latest() -> dict:
 @router.get("/brief/{date}")
 def brief_by_date(date: str) -> dict:
     """Return the brief for a specific date (YYYY-MM-DD)."""
-    brief_path = _brief_writer.BRIEFS_DIR / f"spec1_brief_{date}.md"
+    try:
+        parsed_date = datetime.strptime(date, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+
+    safe_date = parsed_date.strftime("%Y-%m-%d")
+    brief_path = _brief_writer.BRIEFS_DIR / f"spec1_brief_{safe_date}.md"
     if not brief_path.exists():
-        raise HTTPException(status_code=404, detail=f"No brief found for {date}.")
-    return {"brief": brief_path.read_text(encoding="utf-8"), "date": date}
+        raise HTTPException(status_code=404, detail=f"No brief found for {safe_date}.")
+    return {"brief": brief_path.read_text(encoding="utf-8"), "date": safe_date}
 
 
 # ── Workspace: Investigation Cases ───────────────────────────────────────────
