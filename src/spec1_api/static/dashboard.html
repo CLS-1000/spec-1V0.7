@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPEC-1 Intelligence Engine — Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1a1f3a 100%);
+            color: #e2e8f0;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            margin-bottom: 40px;
+            border-bottom: 1px solid rgba(203, 213, 225, 0.1);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #86efac;
+        }
+
+        .status-badge::before {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .header-meta {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 1024px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Brief Card */
+        .brief-card {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(203, 213, 225, 0.1);
+            border-radius: 8px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .brief-card:hover {
+            border-color: rgba(148, 163, 184, 0.3);
+            background: rgba(30, 41, 59, 0.6);
+        }
+
+        .brief-header {
+            margin-bottom: 16px;
+        }
+
+        .brief-date {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .brief-headline {
+            font-size: 18px;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .brief-stats {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 4px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-label {
+            color: #64748b;
+        }
+
+        .stat-value {
+            color: #cbd5e1;
+            font-weight: 600;
+        }
+
+        .brief-summary {
+            font-size: 13px;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(203, 213, 225, 0.05);
+        }
+
+        .sections {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .section {
+            background: rgba(15, 23, 42, 0.5);
+            border-left: 3px solid rgba(59, 130, 246, 0.3);
+            padding: 12px;
+            border-radius: 4px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #60a5fa;
+            margin-bottom: 8px;
+        }
+
+        .section-body {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #cbd5e1;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .card {
+            background: rgba(30, 41, 59, 0.4);
+            border: 1px solid rgba(203, 213, 225, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .card-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #60a5fa;
+            margin-bottom: 12px;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(203, 213, 225, 0.05);
+        }
+
+        .metric:last-child {
+            border-bottom: none;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .metric-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #f1f5f9;
+        }
+
+        /* Confidence Bar */
+        .confidence-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        /* History */
+        .brief-history {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-item {
+            padding: 10px;
+            background: rgba(15, 23, 42, 0.5);
+            border-left: 2px solid rgba(203, 213, 225, 0.1);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 12px;
+        }
+
+        .history-item:hover {
+            border-left-color: rgba(59, 130, 246, 0.5);
+            background: rgba(15, 23, 42, 0.7);
+        }
+
+        .history-item.active {
+            border-left-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .history-date {
+            color: #94a3b8;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .history-title {
+            color: #cbd5e1;
+            font-size: 11px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid rgba(203, 213, 225, 0.1);
+            padding-top: 20px;
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        footer a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Animations */
+        .brief-card {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Badge */
+        .confidence-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 3px;
+            font-size: 11px;
+            color: #60a5fa;
+            margin-top: 8px;
+        }
+
+        .synthetic-note {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(203, 213, 225, 0.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                [ SPEC-1 ]
+                <span class="status-badge">Pipeline Ready</span>
+            </h1>
+            <div class="header-meta">
+                Automated OSINT signal triage and geopolitical intelligence synthesis.
+                View live briefs from the intelligence cycle.
+            </div>
+        </header>
+
+        <div class="grid">
+            <!-- Main Content -->
+            <main>
+                <div id="brief-container"></div>
+            </main>
+
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <!-- Cycle Stats -->
+                <div class="card">
+                    <div class="card-title">Latest Cycle</div>
+                    <div class="metric">
+                        <span class="metric-label">Status</span>
+                        <span class="metric-value" style="color: #22c55e;">Complete</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Duration</span>
+                        <span class="metric-value">47s</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Next Cycle</span>
+                        <span class="metric-value">06:00 AM</span>
+                    </div>
+                </div>
+
+                <!-- Signal Summary -->
+                <div class="card">
+                    <div class="card-title">Signals Processed</div>
+                    <div class="metric">
+                        <span class="metric-label">Harvested</span>
+                        <span class="metric-value">847</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Scored</span>
+                        <span class="metric-value">412</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Elevated</span>
+                        <span class="metric-value">3</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Leads</span>
+                        <span class="metric-value">12</span>
+                    </div>
+                </div>
+
+                <!-- Gate Performance -->
+                <div class="card">
+                    <div class="card-title">4-Gate Scores</div>
+                    <div class="metric">
+                        <span class="metric-label">Credibility</span>
+                        <span class="metric-value">91%</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Volume</span>
+                        <span class="metric-value">88%</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Velocity</span>
+                        <span class="metric-value">94%</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Novelty</span>
+                        <span class="metric-value">79%</span>
+                    </div>
+                </div>
+
+                <!-- Brief History -->
+                <div class="card">
+                    <div class="card-title">History</div>
+                    <div class="brief-history" id="history"></div>
+                </div>
+
+                <!-- Calibration -->
+                <div class="card">
+                    <div class="card-title">Calibration</div>
+                    <div class="metric">
+                        <span class="metric-label">Drift</span>
+                        <span class="metric-value" style="color: #f97316;">+1.2%</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Verdicts Filed</span>
+                        <span class="metric-value">87</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Accuracy</span>
+                        <span class="metric-value">0.81</span>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <footer>
+            <p>
+                Dashboard demonstrates <strong>synthetic intelligence briefs</strong> for testing and showcase.
+                View docs at <a href="/docs/architecture.md" target="_blank">Architecture</a> ·
+                API at <a href="/api/v1/health" target="_blank">/api/v1</a> ·
+                Live signals at <a href="/api/v1/intel" target="_blank">/intel</a>
+            </p>
+        </footer>
+    </div>
+
+    <script>
+        // Mock synthetic brief data (in production, fetch from /api/v1/brief/latest)
+        const syntheticBriefs = [
+            {
+                date: new Date().toISOString().split('T')[0],
+                headline: "Taiwan semiconductor exports show pressure. US defense spending signals diverging.",
+                summary: "SPEC-1 cycle processed 847 signals. No elevated geopolitical signals crossed confidence threshold today. Baseline activity across defense contracting, energy markets, and congressional trade intelligence.",
+                confidence: 0.65,
+                elevated_signals: 0,
+                sections: [
+                    {
+                        title: "Defense & Military",
+                        body: "No elevated signals. Standard RSS traffic from War on the Rocks and Atlantic Council. Articles focus on Ukraine aid pipelines and NATO standing forces."
+                    },
+                    {
+                        title: "Intelligence & Cyber",
+                        body: "Cipher Brief and Just Security report routine cyber policy updates. No attributions to nation-state actors. Industry-led working groups on critical infrastructure remain on schedule."
+                    },
+                    {
+                        title: "Semiconductor & Economic Statecraft",
+                        body: "Taiwan trade watch active. TSMC export guidance stable. Congressional scrutiny on advanced chip licensing remains moderate."
+                    }
+                ]
+            },
+            {
+                date: new Date(Date.now() - 86400000).toISOString().split('T')[0],
+                headline: "Russian military logistics under strain. Congressional cyber committee advances funding bill.",
+                summary: "SPEC-1 cycle processed 923 signals. Two signals exceeded elevated confidence threshold. Ukraine logistics support and U.S. cyber appropriations bill show momentum.",
+                confidence: 0.71,
+                elevated_signals: 2,
+                sections: [
+                    {
+                        title: "Military & Defense",
+                        body: "War on the Rocks + Atlantic Council: Russian force readiness articles highlight logistics gaps. 18 Month ROI signal sourced from Cipher Brief and defense industry reports."
+                    },
+                    {
+                        title: "Cyber & Infrastructure",
+                        body: "House Armed Services Cyber Subcommittee advances FY2027 appropriations (+$15M cyber personnel). Signal sourced from Capitol Trades equity filings."
+                    }
+                ]
+            },
+            {
+                date: new Date(Date.now() - 172800000).toISOString().split('T')[0],
+                headline: "Energy markets spike on supply disruption rumors. Defense contractors announce major restructuring.",
+                summary: "SPEC-1 cycle processed 1,089 signals. Four elevated signals: energy supply anomaly, defense sector M&A, congressional hearing testimony, and narrative clusters.",
+                confidence: 0.73,
+                elevated_signals: 4,
+                sections: [
+                    {
+                        title: "Energy & Economic Statecraft",
+                        body: "Energy supply disruption signals from multiple RSS feeds. Confidence: 0.76. Three defense contractors simultaneously announce cost-reduction restructuring."
+                    },
+                    {
+                        title: "Defense Contracting",
+                        body: "Northrop Grumman, Raytheon, and Lockheed announce 2-4K layoffs targeting overhead. FARA filings show parallel increase in lobbying engagement."
+                    }
+                ]
+            }
+        ];
+
+        function renderBrief(brief) {
+            const confPercent = Math.round(brief.confidence * 100);
+            const html = `
+                <div class="brief-card">
+                    <div class="brief-header">
+                        <div class="brief-date">${brief.date}</div>
+                        <div class="brief-headline">${brief.headline}</div>
+                    </div>
+                    <div class="brief-stats">
+                        <div class="stat">
+                            <span class="stat-label">Confidence:</span>
+                            <span class="stat-value">${confPercent}%</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Elevated:</span>
+                            <span class="stat-value">${brief.elevated_signals}</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Type:</span>
+                            <span class="stat-value">Synthetic</span>
+                        </div>
+                    </div>
+                    <div class="brief-summary">${brief.summary}</div>
+                    <div class="sections">
+                        ${brief.sections.map(s => `
+                            <div class="section">
+                                <div class="section-title">${s.title}</div>
+                                <div class="section-body">${s.body}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="confidence-badge">Confidence: ${confPercent}%</div>
+                    <div class="synthetic-note">This is a synthetic brief for demonstration purposes.</div>
+                </div>
+            `;
+            return html;
+        }
+
+        function renderHistory() {
+            const history = document.getElementById('history');
+            syntheticBriefs.forEach((brief, i) => {
+                const el = document.createElement('div');
+                el.className = `history-item ${i === 0 ? 'active' : ''}`;
+                el.innerHTML = `
+                    <span class="history-date">${brief.date}</span>
+                    <span class="history-title">${brief.headline.substring(0, 30)}...</span>
+                `;
+                el.onclick = () => {
+                    document.querySelectorAll('.history-item').forEach(x => x.classList.remove('active'));
+                    el.classList.add('active');
+                    document.getElementById('brief-container').innerHTML = renderBrief(brief);
+                };
+                history.appendChild(el);
+            });
+        }
+
+        // Initialize
+        document.getElementById('brief-container').innerHTML = renderBrief(syntheticBriefs[0]);
+        renderHistory();
+    </script>
+</body>
+</html>
