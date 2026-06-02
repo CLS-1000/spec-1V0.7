@@ -28,7 +28,6 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip wheel setuptools
-        pip install .github/sgmllib3k-1.0.0-py3-none-any.whl
         pip install -e ".[dev]"
         pip install ruff bandit[toml] coverage pytest-cov
 
@@ -40,15 +39,23 @@ jobs:
 
     - name: Security check with bandit
       run: |
-        bandit -r src/ --severity-level medium -f json -o bandit-report.json || true
+        bandit -r src/ --severity-level medium --exit-zero -f json -o bandit-report.json
         python -c "
         import json, sys
-        d = json.load(open('bandit-report.json'))
-        n = d['metrics']['_totals'].get('SEVERITY.HIGH', 0)
-        if n > 0:
-            print(f'bandit: {n} HIGH severity issues found')
+        try:
+            d = json.load(open('bandit-report.json'))
+            high_count = d['metrics']['_totals'].get('SEVERITY.HIGH', 0)
+            medium_count = d['metrics']['_totals'].get('SEVERITY.MEDIUM', 0)
+            if high_count > 0:
+                print(f'❌ bandit: {high_count} HIGH severity issue(s) found')
+                sys.exit(1)
+            elif medium_count > 0:
+                print(f'⚠️  bandit: {medium_count} MEDIUM severity issue(s) found (allowed, but review recommended)')
+            else:
+                print('✓ bandit: no HIGH or MEDIUM severity issues')
+        except Exception as e:
+            print(f'Error parsing bandit report: {e}')
             sys.exit(1)
-        print('bandit: no HIGH severity issues')
         "
 
     - name: Test with pytest + coverage
