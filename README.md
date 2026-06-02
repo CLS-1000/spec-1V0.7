@@ -12,141 +12,136 @@ LOADING 1,359 TESTS... [OK]
 PIPELINE STATUS: READY
 ```
 
-**_ Automated OSINT for geo conflict signal monitoring.**
+Automated OSINT signal triage and geopolitical intelligence synthesis via deterministic 7-stage pipeline.
 `// v0.6.0 · Portland OR · EVASTARARCANA`
 
 **Landing:** [mjlak1000.github.io/spec-1](https://mjlak1000.github.io/spec-1/) · **Dashboard:** [/ui](https://mjlak1000.github.io/spec-1/ui/)
 
 ---
 
-The bottleneck is attention, not access.
+## Core Problem
 
-Authoritative reporting is abundant. The constraint is analyst hours — the time it takes to triage thousands of items down to the dozen that matter today. SPEC-1 handles that triage automatically: it monitors a curated set of national-security and regional-accountability sources continuously, scores every incoming signal through a four-gate deterministic filter, and hands only the survivors to Claude for investigation and verification. What reaches the analyst is already classified, scored, and structured — ready for a decision, not a digest.
-
-**The system handles the volume. The analyst handles the judgment.**
+Manual triage of 1000+ daily signals across RSS, FARA, Congressional, and narrative sources requires analyst hours. The bottleneck isn't access—it's attention. SPEC-1 replaces manual reading with automated scoring, deduplication, and structured briefs. The system handles volume. You handle judgment.
 
 ```
->> SYSTEM METADATA LOG
-* Analyst Impact:  You start your day with filtered signal. Hours of manual
-                   reading replaced by a verified, structured brief.
-* Programmer Impact: A unified fault-tolerant ingestion architecture.
-                   A dead RSS feed will not halt the 06:00 AM cron job.
+>> SYSTEM DESIGN PRINCIPLE
+* Analyst Impact:  Shift from reading to decision-making. Filtered signal replaces
+                   raw feed noise. Verdicts feed calibration drift detection.
+* Programmer Impact: Graceful degradation. A failed RSS feed does not halt the
+                    06:00 AM cron. Dual-write JSONL + SQLite. Source of truth is append-only.
 ```
 
 ---
 
 ## Architecture
 
-A four-step deterministic lifecycle separates signal from noise.
+Seven stages process signals into intelligence records. Each stage fails independently.
 
 ```
-[RAW SIGNAL] ──→ [OPPORTUNITY] ──→ [INVESTIGATION] ──→ [INTELLIGENCE]
-   High volume       Filtered by        Augmented with      Structured
-  RSS/Atom feeds    4-Gate System       Claude API          output & briefs
-        │
-        ▼
-   /dev/null
-   NOISE DISCARDED
+[01 HARVEST] ──→ [02 PARSE] ──→ [03 SCORE] ──→ [04 INVESTIGATE]
+                                     │
+                                     ▼
+                              Filtered by 4-Gate
+                                   System
+                                     │
+                                     ▼
+                        ┌─────────────────────────┐
+                        │ Drops to /dev/null      │
+                        │ (noise discarded)       │
+                        └────────────────────────���┘
+
+[05 VERIFY] ──→ [06 ANALYZE] ──→ [07 STORE]
+     │
+     └──→ SQLite / append-only JSONL
 ```
 
-Seven sequential stages — engineered for graceful degradation.
-
-```
-[01 HARVEST] > [02 PARSE] > [03 SCORE] > [04 INVESTIGATE] > [05 VERIFY] > [06 ANALYZE] > [07 STORE]
-```
-
-| Stage | What happens | Output |
-|-------|-------------|--------|
-| `[01 HARVEST]` | SSL edge cases, malformed XML, timeouts — failed feeds logged and skipped | `Signal[]` |
-| `[02 PARSE]` | BeautifulSoup + NLP heuristics. No external model dependencies | `ParsedSignal[]` |
-| `[03 SCORE]` | Four-gate filter — any single failure drops the signal | `Opportunity[]` |
-| `[04 INVESTIGATE]` | Claude generates hypothesis + analyst leads | `Investigation[]` |
-| `[05 VERIFY]` | Claude classifies outcome against evidence tree | `Outcome[]` |
-| `[06 ANALYZE]` | Confidence synthesis — sources, analysts, corroboration | `IntelligenceRecord[]` |
-| `[07 STORE]` | Dual-write: append-only JSONL + SQLite. JSONL is source of truth | persisted |
+| Stage | Operation | Output |
+|-------|-----------|--------|
+| `[01 HARVEST]` | Fetch RSS/Atom with SSL fallback, malformed XML recovery, timeout handling | `Signal[]` |
+| `[02 PARSE]` | BeautifulSoup extraction + NLP heuristics. Zero external model dependencies | `ParsedSignal[]` |
+| `[03 SCORE]` | Apply 4-gate filter. Single gate failure drops signal | `Opportunity[]` |
+| `[04 INVESTIGATE]` | Claude API: hypothesis generation + lead extraction | `Investigation[]` |
+| `[05 VERIFY]` | Evidence tree classification | `Outcome[]` |
+| `[06 ANALYZE]` | Confidence synthesis from sources and corroboration | `IntelligenceRecord[]` |
+| `[07 STORE]` | Dual-write: append-only JSONL (source of truth) + SQLite index | persisted |
 
 ---
 
 ## The 4-Gate Scoring System
 
-Any single failure drops the signal to `/dev/null`.
+Any gate failure discards the signal. Thresholds are operational; weights unpublished.
 
 | Gate | Criterion | Default |
 |------|-----------|---------|
-| `[CREDIBILITY]` | Known source / analyst weight ≥ 0.60 | 0.60 |
-| `[VOLUME]` | Word count ≥ 50 | 50 words |
-| `[VELOCITY]` | Signal recency ≤ 48 hours | 48h |
-| `[NOVELTY]` | Not a duplicate — keyword domain match ≥ 1 | hash dedup |
-
-Thresholds encode accumulated operational judgment. Gate weights remain unpublished.
+| `[CREDIBILITY]` | Known source or analyst weight ≥ 0.60 | 0.60 |
+| `[VOLUME]` | Minimum word count | 50 words |
+| `[VELOCITY]` | Recency threshold | ≤ 48h |
+| `[NOVELTY]` | Deduplication hash + keyword domain match | ≥ 1 |
 
 ---
 
 ## Intelligence Adapters
 
-The core pipeline adapts to specialized intelligence domains.
+Specialized pipelines for distinct data types. All feed the canonical 7-stage cycle.
 
-```
-┌────────────────┬─────────────────────┬─────────────────────┐
-│    [FARA]      │   [CONGRESSIONAL]   │    [NARRATIVE]      │
-├────────────────┼─────────────────────┼─────────────────────┤
-│ DOJ bulk       │ Trade intelligence. │ PsyOps detection.   │
-│ filings.       │ Fallback chain:     │ TF-IDF cosine       │
-│                │ QuiverQuant →       │ similarity          │
-│ Cross-refs     │ Capitol Trades →    │ clustering.         │
-│ foreign agent  │ House eFD.          │                     │
-│ registrations  │                     │ Detects narrative   │
-│ against        │ Flags defense/      │ seeding and         │
-│ congressional  │ cyber/energy        │ astroturfing.       │
-│ activity.      │ conflicts.          │                     │
-│                │                     │ Outputs Anomaly/    │
-│                │                     │ Campaign records.   │
-└────────────────┴─────────────────────┴─────────────────────┘
-                           │
-                           ▼
-              [STORE: JSONL / SQLite]
-```
+| Adapter | Data Source | Signal → Intelligence |
+|---------|-------------|----------------------|
+| **[FARA]** | DOJ Foreign Agents Registration Act filings | Cross-reference agent registrations against Congressional activity patterns |
+| **[CONGRESSIONAL]** | Bills, hearings, disclosures | Trade intelligence via QuiverQuant → Capitol Trades → House eFD fallback chain. Flags defense/cyber/energy sector conflicts |
+| **[NARRATIVE]** | Discourse analysis + text clustering | Detect influence operations and astroturfing via TF-IDF cosine similarity. Output: Anomaly + Campaign records |
+
+All adapters write to shared `[ cls_db ]` append-only store.
 
 ---
 
-## Modules at a Glance
+## Deployment Modes
 
-**Core Pipeline**
+| Mode | Startup | Use Case |
+|------|---------|----------|
+| **CLI** | `make cycle` | Single-shot analysis, CI/CD integration, ad-hoc signal ingestion |
+| **API** | `make run` → `http://localhost:8000` | Scheduled cron (06:00 AM default), webhook-driven manual cycle triggers, dashboard queries |
+| **MCP** | `make mcp` | Claude Desktop/IDE agent-driven investigation with full context |
+| **Workspace** | `make workspace` | Case management: persistent verdict filing, analyst-driven lead triage |
 
-| Module | Role |
-|--------|------|
-| `[ spec1_core ]` | Canonical 7-stage cycle — frozen; change requires human approval + version bump |
-| `[ cls_osint ]` | RSS/FARA/Congressional/Narrative adapters with feed registry |
-| `[ spec1_api ]` | FastAPI service — APScheduler daily cron, dual-write persistence, MCP surface |
+---
+
+## Modules
+
+**Pipeline**
+- `[ spec1_core ]` — 7-stage cycle. Frozen state; changes require version bump + approval
+- `[ cls_osint ]` — RSS/FARA/Congressional/Narrative adapters + feed registry
+- `[ spec1_api ]` — FastAPI service, APScheduler cron, dual-write persistence, MCP surface
 
 **Intelligence Products**
-
-| Module | Role |
-|--------|------|
-| `[ cls_world_brief ]` | Daily structured brief — Claude Sonnet writer, rule-based fallback |
-| `[ cls_leads ]` | Actionable leads extracted from scored records |
-| `[ cls_psyop ]` | Psychological-operation pattern detection and scoring |
-| `[ cls_pdx1 ]` | PDX-1i Metro Citizens Brief — Portland bi-state metro officials, entities, districts |
-| `[ cls_quant ]` | Quantitative market-signal monitoring — defense, cyber, energy, macro |
-| `[ cls_db ]` | Append-only JSONL + SQLite dual-write persistence layer |
+- `[ cls_world_brief ]` — Daily brief via Claude Sonnet or rule-based fallback
+- `[ cls_leads ]` — Extracted leads with confidence scores and analyst assignments
+- `[ cls_psyop ]` — Narrative anomaly detection and campaign scoring
+- `[ cls_pdx1 ]` — Portland metro-specific briefing (officials, entities, districts)
+- `[ cls_quant ]` — Defense/cyber/energy/macro equity watchlist monitoring via yfinance
+- `[ cls_db ]` — Dual-write JSONL + SQLite persistence layer
 
 **Feedback Loop**
-
-| Module | Role |
-|--------|------|
-| `[ cls_verdicts ]` | Human ground-truth verdict collection — append-only |
-| `[ cls_calibration ]` | Drift detection + threshold proposals — descriptive only, human-decided |
+- `[ cls_verdicts ]` — Append-only human ground-truth verdict collection
+- `[ cls_calibration ]` — Drift detection + threshold adjustment proposals (human-decided)
 
 ---
 
 ## Data Sources
 
-- **RSS/Atom:** War on the Rocks, Cipher Brief, Just Security, RAND, Atlantic Council, Defense One
-- **`[FARA]`:** DOJ Foreign Agents Registration Act bulk filings
-- **`[CONGRESSIONAL]`:** Bills, hearings, equity disclosures — QuiverQuant → Capitol Trades → House eFD fallback chain
-- **`[NARRATIVE]`:** Influence-operation and narrative-seeding detection
-- **State/Regional:** Oregon OLIS, ORESTAR, OGEC/SEI; Washington PDC (for `[ cls_pdx1 ]`)
-- **Equities Watchlist:** Defense primes, cybersecurity vendors, energy majors, macro instruments (yfinance)
+**RSS/Atom Feeds**
+- War on the Rocks, Cipher Brief, Just Security, RAND, Atlantic Council, Defense One
+
+**FARA**
+- DOJ bulk filings, cross-referenced against Congressional activity
+
+**Congressional**
+- Bills, hearings, equity disclosures via QuiverQuant → Capitol Trades → House eFD
+
+**Narrative & Regional**
+- Influence-operation detection; Oregon OLIS/ORESTAR; Washington PDC
+
+**Equities**
+- Defense primes, cybersecurity vendors, energy majors, macro instruments (yfinance)
 
 ---
 
@@ -154,87 +149,146 @@ The core pipeline adapts to specialized intelligence domains.
 
 ```bash
 bash scripts/setup_dev.sh
-
 # Or manually:
 pip install -e ".[dev]"
 cp .env.example .env  # set ANTHROPIC_API_KEY
 ```
 
 ```bash
-make cycle        # one-shot intelligence cycle
-make run          # API server → http://localhost:8000
+make cycle        # one-shot: harvest → store
+make run          # API server on 0.0.0.0:8000
 make mcp          # MCP server (Claude integration)
 make brief        # generate brief from latest run_id
-make leads        # derive Lead objects from intelligence records
-make psyop        # score every record for psyop patterns
-make calibration  # calibration drift report from intel + verdicts
-make workspace    # workspace CLI (case management)
+make leads        # extract leads from current records
+make psyop        # score all records for narrative anomalies
+make calibration  # drift report + threshold proposals
+make workspace    # case management CLI
 make test         # full test suite
-make help         # all commands
 ```
 
 ---
 
-## Environment
+## Configuration
 
 ```bash
-cp .env.example .env  # edit — set ANTHROPIC_API_KEY at minimum
+cp .env.example .env
 ```
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `ANTHROPIC_API_KEY` | — | Required for investigation and briefing |
-| `SPEC1_STORE_PATH` | `spec1_intelligence.jsonl` | Intelligence record store |
-| `SPEC1_DB_PATH` | `spec1.db` | SQLite database path |
-| `SPEC1_API_HOST` | `0.0.0.0` | API bind address |
-| `SPEC1_API_PORT` | `8000` | API port |
-| `SPEC1_CRON_HOUR` | `6` | Scheduled cycle hour (24h) |
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `ANTHROPIC_API_KEY` | — | Claude API key (required for investigation + briefing) |
+| `SPEC1_STORE_PATH` | `spec1_intelligence.jsonl` | Append-only intelligence record store |
+| `SPEC1_DB_PATH` | `spec1.db` | SQLite query index |
+| `SPEC1_API_HOST` | `0.0.0.0` | Bind address |
+| `SPEC1_API_PORT` | `8000` | Port |
+| `SPEC1_CRON_HOUR` | `6` | Daily cycle hour (24h) |
 | `SPEC1_TIMEZONE` | `America/Los_Angeles` | Scheduler timezone |
 | `SPEC1_FEED_TIMEOUT` | `15` | Feed fetch timeout (seconds) |
-| `SPEC1_RUN_ON_START` | `false` | Run one cycle immediately on API startup |
+| `SPEC1_RUN_ON_START` | `false` | Execute cycle on API startup |
 
 ---
 
-## API Endpoints
+## API Routes
 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/health` | Health check |
-| GET | `/signals` | Latest harvested signals |
-| POST | `/signals/ingest` | Ingest a signal manually |
-| GET | `/intel` | Intelligence records |
-| GET | `/leads` | Actionable leads |
-| POST | `/leads/generate` | Generate leads from current records |
-| GET | `/brief` | Latest world brief |
-| GET | `/brief/latest` | Latest brief (alias) |
-| GET | `/brief/history` | All briefs, newest first |
+| POST | `/cycle/run` | Trigger one cycle immediately |
+| GET | `/cycle/status` | Last cycle execution metadata |
+| GET | `/signals` | Raw harvested signals |
+| POST | `/signals/ingest` | Ingest signal manually |
+| GET | `/intel` | Intelligence records (JSONL query) |
+| GET | `/leads` | Extracted leads with scores |
+| POST | `/leads/generate` | Derive leads from current records |
+| GET | `/brief/latest` | Latest world brief |
 | GET | `/brief/{date}` | Brief by date or run_id |
-| POST | `/brief/generate` | Generate brief for a run_id |
-| GET | `/psyop` | PsyOp detections |
-| POST | `/psyop/analyse` | Score text for psyop patterns |
-| POST | `/psyop/run` | Score all records for psyop patterns |
-| GET | `/fara` | FARA filings |
-| GET | `/verdicts` | Filed verdicts |
-| POST | `/verdicts` | File a verdict |
-| GET | `/calibration/report` | Calibration drift report (descriptive) |
-| GET | `/calibration/proposals` | Suggested threshold adjustments |
-| POST | `/cycle/run` | Trigger one canonical cycle |
-| GET | `/cycle/status` | Last cycle status |
+| POST | `/brief/generate` | Generate brief for run_id |
+| GET | `/brief/history` | All briefs, newest first |
+| GET | `/psyop` | Narrative anomalies |
+| POST | `/psyop/run` | Score all records for anomalies |
+| POST | `/psyop/analyse` | Score arbitrary text |
+| GET | `/fara` | FARA filing records |
+| GET | `/verdicts` | Analyst verdicts |
+| POST | `/verdicts` | File verdict on signal |
+| GET | `/calibration/report` | Drift detection report |
+| GET | `/calibration/proposals` | Threshold adjustment suggestions |
 
-> Routes conditionally mounted when `SPEC1_POLITICAL_WEB_ENABLED=true`:
-> `GET /nodes/{node_id}/signal`, `POST /ingest/signal`
+Conditional routes (when `SPEC1_POLITICAL_WEB_ENABLED=true`):
+- `GET /nodes/{node_id}/signal` — Political network node context
+- `POST /ingest/signal` — Webhook signal ingestion
+
+---
+
+## Typical Output
+
+**Brief** (`GET /brief/latest`):
+```json
+{
+  "date": "2026-04-12",
+  "run_id": "run-20260412-060000",
+  "elevated_signals": 3,
+  "key_topics": ["Ukraine defense spending", "Taiwan semiconductor vulnerabilities"],
+  "lead_count": 12,
+  "verdicts_filed": 8,
+  "summary": "Low activity. All signals scored below confidence threshold..."
+}
+```
+
+**Lead** (`GET /leads`):
+```json
+{
+  "id": "lead-001",
+  "signal_id": "sig-12345",
+  "title": "Defense contractor consolidation signals emerging",
+  "source": "Defense One RSS",
+  "confidence": 0.78,
+  "action": "Monitor Q2 earnings calls for headcount announcements",
+  "assigned_analyst": null
+}
+```
+
+---
+
+## Troubleshooting
+
+| Symptom | Root Cause | Fix |
+|---------|-----------|-----|
+| `make cycle` hangs | Network timeout or unreachable RSS endpoint | Increase `SPEC1_FEED_TIMEOUT` or verify endpoint connectivity |
+| Brief generation fails | Invalid `ANTHROPIC_API_KEY` or API quota exhausted | Verify key; check Claude API rate limits and balance |
+| SQLite locked | Concurrent writes or stale process | Restart API; check for orphaned processes |
+| No signals scored through gates | Thresholds miscalibrated (too strict) | Review `GET /calibration/proposals`; adjust gate weights |
+| Duplicate signals persist | Novelty gate not catching hash collisions | File verdicts to recalibrate; inspect NOVELTY threshold |
+
+---
+
+## Contributing
+
+**Bug Reports**
+- File GitHub issue with reproducible steps, logs, and stack trace
+
+**New Data Sources**
+- Add feed to `cls_osint/sources.py`; register in feed registry
+- Implement adapter if specialized logic required
+
+**Gate Tuning**
+- File verdicts on signals; system detects drift via `[ cls_calibration ]`
+- Propose threshold changes with supporting evidence
+
+**Development**
+- See [CLAUDE.md](CLAUDE.md) for architecture decisions and governance
+- Run `make test` before PR submission
 
 ---
 
 ## Reference
 
-| Document | Description |
-|----------|-------------|
-| [docs/architecture.md](docs/architecture.md) | System architecture, data flow, models |
-| [docs/api.md](docs/api.md) | HTTP API reference |
-| [docs/runbook.md](docs/runbook.md) | Operational procedures |
-| [docs/portfolio.md](docs/portfolio.md) | Project overview for stakeholders |
-| [docs/case_study.md](docs/case_study.md) | Design decisions and engineering rationale |
-| [CHANGELOG.md](CHANGELOG.md) | Version history |
-| [memory/decisions.md](memory/decisions.md) | Architecture Decision Records |
-| [CLAUDE.md](CLAUDE.md) | Developer and agent governance |
+| Document | Purpose |
+|----------|---------|
+| [docs/architecture.md](docs/architecture.md) | System design, data models, failure modes |
+| [docs/api.md](docs/api.md) | HTTP API reference and request/response schemas |
+| [docs/runbook.md](docs/runbook.md) | Operational procedures and incident response |
+| [docs/portfolio.md](docs/portfolio.md) | Stakeholder overview and use cases |
+| [docs/case_study.md](docs/case_study.md) | Design decisions and tradeoffs |
+| [CHANGELOG.md](CHANGELOG.md) | Version history and breaking changes |
+| [memory/decisions.md](memory/decisions.md) | Architecture Decision Records (ADRs) |
+| [CLAUDE.md](CLAUDE.md) | Developer governance and agent rules |
