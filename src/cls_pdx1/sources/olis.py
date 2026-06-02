@@ -2,12 +2,19 @@
 
 Tracks bills, votes, committee assignments, and hearing witnesses.
 OData API: https://api.oregonlegislature.gov/odata/odataservice.svc/
+
+Fetch priority:
+  1. Pre-loaded bill_data (tests / manual injection)
+  2. Live OData HTTP fetch → writes cache on success
+  3. Cached last-good fetch (if live fails)
 """
 
 from __future__ import annotations
 
+import json
 import logging
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Optional
 
 import requests
@@ -90,14 +97,18 @@ def _parse_bill(raw: dict[str, Any], fetched_at: datetime) -> Optional[Bill]:
 
 
 def _current_session_key() -> str:
-    """Return the current Oregon legislative session key, e.g. '2025R1'."""
     year = datetime.now(timezone.utc).year
     return f"{year}R1"
 
 
 class OlisAdapter(BaseAdapter):
-    """Returns Bill records from OLIS. Fetches live from OData API or accepts
-    pre-loaded data for testing."""
+    """Returns Bill records from OLIS.
+
+    Fetch priority:
+      1. pre-loaded bill_data (tests / manual injection)
+      2. Live OData HTTP → writes cache on success
+      3. Cached last-good fetch → if live fails
+    """
 
     source_name = "OLIS"
 
@@ -105,16 +116,38 @@ class OlisAdapter(BaseAdapter):
         self,
         bill_data: Optional[list[dict]] = None,
         session_key: Optional[str] = None,
+        cache_dir: Optional[Path] = None,
     ) -> None:
         self._bill_data = bill_data
         self._session_key = session_key or _current_session_key()
+        self._cache_dir = cache_dir or Path("cache/pdx1")
+
+    def _cache_path(self) -> Path:
+        return self._cache_dir / f"olis_{self._session_key}.json"
+
+    def _write_cache(self, data: list[dict]) -> None:
+        try:
+            self._cache_dir.mkdir(parents=True, exist_ok=True)
+            self._cache_path().write_text(json.dumps(data), encoding="utf-8")
+        except OSError as exc:
+            logger.warning("OLIS: cache write failed: %s", exc)
+
+    def _read_cache(self) -> Optional[list[dict]]:
+        path = self._cache_path()
+        if not path.exists():
+            return None
+        try:
+            return json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            logger.warning("OLIS: cache read failed: %s", exc)
+            return None
 
     def fetch(self) -> AdapterResult:
         if self._bill_data is not None:
             return self._parse_data(self._bill_data)
-        return self._fetch_live()
+        return self._fetch_with_fallback()
 
-    def _fetch_live(self) -> AdapterResult:
+    def _fetch_with_fallback(self) -> AdapterResult:
         all_data: list[dict] = []
         url: Optional[str] = _MEASURES_URL
         params: Optional[dict] = {
@@ -122,6 +155,7 @@ class OlisAdapter(BaseAdapter):
             "$filter": f"SessionKey eq '{self._session_key}'",
             "$top": _PAGE_SIZE,
         }
+        fetch_error: Optional[str] = None
         try:
             while url:
                 resp = requests.get(url, params=params, headers=_HEADERS, timeout=_TIMEOUT)
@@ -129,15 +163,25 @@ class OlisAdapter(BaseAdapter):
                 payload = resp.json()
                 all_data.extend(payload.get("value", []))
                 url = payload.get("@odata.nextLink")
-                params = None  # subsequent pages use the full nextLink URL
+                params = None
+            logger.info("OLIS: fetched %d measures for session %s", len(all_data), self._session_key)
+            self._write_cache(all_data)
+            return self._parse_data(all_data)
         except requests.RequestException as exc:
-            logger.warning("OLIS HTTP fetch failed: %s", exc)
-            return AdapterResult(
-                source_name=self.source_name,
-                errors=[f"OLIS HTTP error: {exc}"],
-            )
-        logger.info("OLIS: fetched %d raw measures for session %s", len(all_data), self._session_key)
-        return self._parse_data(all_data)
+            fetch_error = str(exc)
+            logger.warning("OLIS HTTP fetch failed: %s — trying cache", fetch_error)
+
+        cached = self._read_cache()
+        if cached is not None:
+            logger.info("OLIS: using cached data (%d records)", len(cached))
+            result = self._parse_data(cached)
+            result.errors.insert(0, f"OLIS live fetch failed ({fetch_error}); serving cached data")
+            return result
+
+        return AdapterResult(
+            source_name=self.source_name,
+            errors=[f"OLIS HTTP error: {fetch_error}; no cache available"],
+        )
 
     def _parse_data(self, data: list[dict]) -> AdapterResult:
         fetched_at = _now()

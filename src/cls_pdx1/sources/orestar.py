@@ -4,6 +4,11 @@ Source: Oregon Secretary of State bulk CSV export.
 Export: https://sos.oregon.gov/elections/Pages/orestar.aspx
 Columns (2025): filer_id, filer_name, transaction_type, amount,
     contributor_name, contributor_address, transaction_date, election_year
+
+Fetch priority:
+  1. Local CSV path (fastest, for pre-downloaded files)
+  2. Live HTTP bulk ZIP download → writes cache on success
+  3. Cached last-good CSV (if live fails)
 """
 
 from __future__ import annotations
@@ -85,9 +90,10 @@ def _current_year() -> int:
 class OrestarAdapter(BaseAdapter):
     """Parses ORESTAR campaign finance records.
 
-    Priority order:
-    1. Local CSV path (fastest, for scheduled ingestion of pre-downloaded files)
-    2. Live HTTP download of the annual bulk ZIP from Oregon SOS
+    Fetch priority:
+      1. Local CSV path (fastest, for pre-downloaded files)
+      2. Live HTTP bulk ZIP → writes cache on success
+      3. Cached last-good CSV → if live fails
     """
 
     source_name = "ORESTAR"
@@ -96,14 +102,36 @@ class OrestarAdapter(BaseAdapter):
         self,
         csv_path: Optional[Union[str, Path]] = None,
         year: Optional[int] = None,
+        cache_dir: Optional[Path] = None,
     ) -> None:
         self._csv_path = Path(csv_path) if csv_path else None
         self._year = year or _current_year()
+        self._cache_dir = cache_dir or Path("cache/pdx1")
+
+    def _cache_path(self) -> Path:
+        return self._cache_dir / f"orestar_{self._year}.csv"
+
+    def _write_cache(self, csv_text: str) -> None:
+        try:
+            self._cache_dir.mkdir(parents=True, exist_ok=True)
+            self._cache_path().write_text(csv_text, encoding="utf-8")
+        except OSError as exc:
+            logger.warning("ORESTAR: cache write failed: %s", exc)
+
+    def _read_cache(self) -> Optional[str]:
+        path = self._cache_path()
+        if not path.exists():
+            return None
+        try:
+            return path.read_text(encoding="utf-8")
+        except OSError as exc:
+            logger.warning("ORESTAR: cache read failed: %s", exc)
+            return None
 
     def fetch(self) -> AdapterResult:
         if self._csv_path is not None:
             return self._parse_local()
-        return self._fetch_live()
+        return self._fetch_with_fallback()
 
     def _parse_local(self) -> AdapterResult:
         if not self._csv_path or not self._csv_path.exists():
@@ -126,36 +154,47 @@ class OrestarAdapter(BaseAdapter):
         logger.info("ORESTAR: parsed %d affiliations, %d errors", len(records), len(errors))
         return AdapterResult(records=records, errors=errors, source_name=self.source_name)
 
-    def _fetch_live(self) -> AdapterResult:
+    def _fetch_with_fallback(self) -> AdapterResult:
         url = _BULK_URL_TEMPLATE.format(year=self._year)
         logger.info("ORESTAR: downloading bulk export from %s", url)
+        fetch_error: Optional[str] = None
         try:
             resp = requests.get(url, headers=_HEADERS, timeout=_TIMEOUT, stream=True)
             resp.raise_for_status()
             raw_bytes = resp.content
-        except requests.RequestException as exc:
-            logger.warning("ORESTAR HTTP fetch failed: %s", exc)
-            return AdapterResult(
-                source_name=self.source_name,
-                errors=[f"ORESTAR HTTP error: {exc}"],
-            )
 
-        # Unzip if ZIP, otherwise treat as raw CSV
-        try:
-            with zipfile.ZipFile(io.BytesIO(raw_bytes)) as zf:
-                csv_name = next(
-                    (n for n in zf.namelist() if n.lower().endswith(".csv")), None
-                )
-                if not csv_name:
-                    return AdapterResult(
-                        source_name=self.source_name,
-                        errors=["ORESTAR ZIP contained no CSV file"],
+            try:
+                with zipfile.ZipFile(io.BytesIO(raw_bytes)) as zf:
+                    csv_name = next(
+                        (n for n in zf.namelist() if n.lower().endswith(".csv")), None
                     )
-                csv_text = zf.read(csv_name).decode("utf-8-sig")
-        except zipfile.BadZipFile:
-            csv_text = raw_bytes.decode("utf-8-sig")
+                    if not csv_name:
+                        return AdapterResult(
+                            source_name=self.source_name,
+                            errors=["ORESTAR ZIP contained no CSV file"],
+                        )
+                    csv_text = zf.read(csv_name).decode("utf-8-sig")
+            except zipfile.BadZipFile:
+                csv_text = raw_bytes.decode("utf-8-sig")
 
-        return self.fetch_from_csv_text(csv_text)
+            self._write_cache(csv_text)
+            return self.fetch_from_csv_text(csv_text)
+
+        except requests.RequestException as exc:
+            fetch_error = str(exc)
+            logger.warning("ORESTAR HTTP fetch failed: %s — trying cache", fetch_error)
+
+        cached = self._read_cache()
+        if cached is not None:
+            logger.info("ORESTAR: using cached data")
+            result = self.fetch_from_csv_text(cached)
+            result.errors.insert(0, f"ORESTAR live fetch failed ({fetch_error}); serving cached data")
+            return result
+
+        return AdapterResult(
+            source_name=self.source_name,
+            errors=[f"ORESTAR HTTP error: {fetch_error}; no cache available"],
+        )
 
     def fetch_from_csv_text(self, csv_text: str) -> AdapterResult:
         """Parse from in-memory CSV text (for testing)."""

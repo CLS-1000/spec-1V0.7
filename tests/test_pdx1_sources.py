@@ -76,14 +76,46 @@ class TestOrestarAdapter:
         assert len(result.records) == 2
         assert result.errors == []
 
-    def test_live_fetch_http_error(self):
-        """HTTP failure returns an error, does not raise."""
+    def test_live_fetch_http_error(self, tmp_path):
+        """HTTP failure with no cache returns an error."""
         import requests as req
         with patch("cls_pdx1.sources.orestar.requests.get", side_effect=req.RequestException("timeout")):
-            adapter = OrestarAdapter(year=2024)
+            adapter = OrestarAdapter(year=2024, cache_dir=tmp_path / "empty_cache")
             result = adapter.fetch()
         assert len(result.errors) > 0
         assert "HTTP error" in result.errors[0]
+
+    def test_cache_fallback_on_http_error(self, tmp_path):
+        """HTTP failure falls back to cached CSV."""
+        import requests as req
+        cache_dir = tmp_path / "cache"
+        cache_dir.mkdir()
+        (cache_dir / "orestar_2024.csv").write_text(_ORESTAR_CSV, encoding="utf-8")
+
+        with patch("cls_pdx1.sources.orestar.requests.get", side_effect=req.RequestException("down")):
+            adapter = OrestarAdapter(year=2024, cache_dir=cache_dir)
+            result = adapter.fetch()
+
+        assert len(result.records) == 2
+        assert any("cached" in e for e in result.errors)
+
+    def test_successful_fetch_writes_cache(self, tmp_path):
+        """Successful HTTP fetch writes cache to disk."""
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as zf:
+            zf.writestr("transactions.csv", _ORESTAR_CSV)
+        zip_bytes = buf.getvalue()
+
+        mock_resp = MagicMock()
+        mock_resp.content = zip_bytes
+        mock_resp.raise_for_status = MagicMock()
+
+        cache_dir = tmp_path / "cache"
+        with patch("cls_pdx1.sources.orestar.requests.get", return_value=mock_resp):
+            adapter = OrestarAdapter(year=2024, cache_dir=cache_dir)
+            adapter.fetch()
+
+        assert (cache_dir / "orestar_2024.csv").exists()
 
 
 # ---------------------------------------------------------------------------
@@ -156,14 +188,45 @@ class TestOlisAdapter:
         assert len(result.records) == 2
         assert result.errors == []
 
-    def test_live_fetch_http_error(self):
-        """HTTP failure returns an error, does not raise."""
+    def test_live_fetch_http_error(self, tmp_path):
+        """HTTP failure with no cache returns an error."""
         import requests as req
         with patch("cls_pdx1.sources.olis.requests.get", side_effect=req.RequestException("timeout")):
-            adapter = OlisAdapter()
+            adapter = OlisAdapter(session_key="2025R1", cache_dir=tmp_path / "empty_cache")
             result = adapter.fetch()
         assert len(result.errors) > 0
         assert "HTTP error" in result.errors[0]
+
+    def test_cache_fallback_on_http_error(self, tmp_path):
+        """HTTP failure falls back to cached JSON."""
+        import requests as req
+        import json
+        cache_dir = tmp_path / "cache"
+        cache_dir.mkdir()
+        (cache_dir / "olis_2025R1.json").write_text(
+            json.dumps(_OLIS_BILLS[:2]), encoding="utf-8"
+        )
+
+        with patch("cls_pdx1.sources.olis.requests.get", side_effect=req.RequestException("down")):
+            adapter = OlisAdapter(session_key="2025R1", cache_dir=cache_dir)
+            result = adapter.fetch()
+
+        assert len(result.records) == 2
+        assert any("cached" in e for e in result.errors)
+
+    def test_successful_fetch_writes_cache(self, tmp_path):
+        """Successful HTTP fetch writes cache to disk."""
+        page = {"value": _OLIS_BILLS[:2]}
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = page
+        mock_resp.raise_for_status = MagicMock()
+
+        cache_dir = tmp_path / "cache"
+        with patch("cls_pdx1.sources.olis.requests.get", return_value=mock_resp):
+            adapter = OlisAdapter(session_key="2025R1", cache_dir=cache_dir)
+            adapter.fetch()
+
+        assert (cache_dir / "olis_2025R1.json").exists()
 
     def test_sponsor_captured(self):
         adapter = OlisAdapter(bill_data=_OLIS_BILLS[:1])
