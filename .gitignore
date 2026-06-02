@@ -62,6 +62,7 @@ workspace/
 # Runtime output and data dirs
 /output/
 /data/
+/cache/
 /src/spec1_api/static/data/
 
 # Duplicate env stub (use .env.example instead)
