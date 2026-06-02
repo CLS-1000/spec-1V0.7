@@ -4,9 +4,6 @@ Source: Oregon Secretary of State bulk CSV export.
 Export: https://sos.oregon.gov/elections/Pages/orestar.aspx
 Columns (2025): filer_id, filer_name, transaction_type, amount,
     contributor_name, contributor_address, transaction_date, election_year
-
-Live HTTP fetch is not implemented — pipeline catches the missing-csv error
-and logs it. Use fetch_from_csv_text() for offline/test ingestion.
 """
 
 from __future__ import annotations
@@ -14,9 +11,12 @@ from __future__ import annotations
 import csv
 import io
 import logging
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Optional, Union
+
+import requests
 
 from cls_pdx1.models import Affiliation, ConfidenceTier, EdgeType, Provenance
 from cls_pdx1.sources.base import AdapterResult, BaseAdapter
@@ -24,6 +24,13 @@ from cls_pdx1.sources.base import AdapterResult, BaseAdapter
 logger = logging.getLogger(__name__)
 
 _SOURCE_URI_BASE = "https://sos.oregon.gov/elections/Pages/orestar.aspx"
+_BULK_URL_TEMPLATE = (
+    "https://sos.oregon.gov/elections/Documents/orestar/{year}_report_transactions.zip"
+)
+_HEADERS = {
+    "User-Agent": "spec1-pdx1i/0.1 (civic intelligence; contact: research@spec1.io)",
+}
+_TIMEOUT = 60  # bulk file can be large
 
 
 def _now() -> datetime:
@@ -71,31 +78,42 @@ def _parse_row(row: dict, fetched_at: datetime) -> Optional[Affiliation]:
         return None
 
 
+def _current_year() -> int:
+    return datetime.now(timezone.utc).year
+
+
 class OrestarAdapter(BaseAdapter):
-    """Parses ORESTAR campaign finance records from a local CSV export."""
+    """Parses ORESTAR campaign finance records.
+
+    Priority order:
+    1. Local CSV path (fastest, for scheduled ingestion of pre-downloaded files)
+    2. Live HTTP download of the annual bulk ZIP from Oregon SOS
+    """
 
     source_name = "ORESTAR"
 
-    def __init__(self, csv_path: Optional[Union[str, Path]] = None) -> None:
+    def __init__(
+        self,
+        csv_path: Optional[Union[str, Path]] = None,
+        year: Optional[int] = None,
+    ) -> None:
         self._csv_path = Path(csv_path) if csv_path else None
+        self._year = year or _current_year()
 
     def fetch(self) -> AdapterResult:
-        if self._csv_path is None:
-            return AdapterResult(
-                source_name=self.source_name,
-                errors=["ORESTAR HTTP scrape not implemented — provide csv_path"],
-            )
+        if self._csv_path is not None:
+            return self._parse_local()
+        return self._fetch_live()
 
-        if not self._csv_path.exists():
+    def _parse_local(self) -> AdapterResult:
+        if not self._csv_path or not self._csv_path.exists():
             return AdapterResult(
                 source_name=self.source_name,
                 errors=[f"CSV not found: {self._csv_path}"],
             )
-
         fetched_at = _now()
         records: list[Affiliation] = []
         errors: list[str] = []
-
         try:
             with self._csv_path.open(newline="", encoding="utf-8-sig") as fh:
                 reader = csv.DictReader(fh)
@@ -105,9 +123,39 @@ class OrestarAdapter(BaseAdapter):
                         records.append(aff)
         except Exception as exc:
             errors.append(f"ORESTAR CSV read error: {exc}")
-
         logger.info("ORESTAR: parsed %d affiliations, %d errors", len(records), len(errors))
         return AdapterResult(records=records, errors=errors, source_name=self.source_name)
+
+    def _fetch_live(self) -> AdapterResult:
+        url = _BULK_URL_TEMPLATE.format(year=self._year)
+        logger.info("ORESTAR: downloading bulk export from %s", url)
+        try:
+            resp = requests.get(url, headers=_HEADERS, timeout=_TIMEOUT, stream=True)
+            resp.raise_for_status()
+            raw_bytes = resp.content
+        except requests.RequestException as exc:
+            logger.warning("ORESTAR HTTP fetch failed: %s", exc)
+            return AdapterResult(
+                source_name=self.source_name,
+                errors=[f"ORESTAR HTTP error: {exc}"],
+            )
+
+        # Unzip if ZIP, otherwise treat as raw CSV
+        try:
+            with zipfile.ZipFile(io.BytesIO(raw_bytes)) as zf:
+                csv_name = next(
+                    (n for n in zf.namelist() if n.lower().endswith(".csv")), None
+                )
+                if not csv_name:
+                    return AdapterResult(
+                        source_name=self.source_name,
+                        errors=["ORESTAR ZIP contained no CSV file"],
+                    )
+                csv_text = zf.read(csv_name).decode("utf-8-sig")
+        except zipfile.BadZipFile:
+            csv_text = raw_bytes.decode("utf-8-sig")
+
+        return self.fetch_from_csv_text(csv_text)
 
     def fetch_from_csv_text(self, csv_text: str) -> AdapterResult:
         """Parse from in-memory CSV text (for testing)."""

@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import io
 import json
-
+import zipfile
+from unittest.mock import MagicMock, patch
 
 from cls_pdx1.models import Affiliation, Bill, BillStatus, ConfidenceTier, EdgeType
 from cls_pdx1.sources.orestar import OrestarAdapter
@@ -56,10 +58,32 @@ class TestOrestarAdapter:
         result = adapter.fetch()
         assert len(result.errors) > 0
 
-    def test_no_path_returns_error(self):
-        adapter = OrestarAdapter()
-        result = adapter.fetch()
+    def test_live_fetch_zip(self):
+        """Adapter downloads ZIP, extracts CSV, parses records."""
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as zf:
+            zf.writestr("transactions.csv", _ORESTAR_CSV)
+        zip_bytes = buf.getvalue()
+
+        mock_resp = MagicMock()
+        mock_resp.content = zip_bytes
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("cls_pdx1.sources.orestar.requests.get", return_value=mock_resp):
+            adapter = OrestarAdapter(year=2024)
+            result = adapter.fetch()
+
+        assert len(result.records) == 2
+        assert result.errors == []
+
+    def test_live_fetch_http_error(self):
+        """HTTP failure returns an error, does not raise."""
+        import requests as req
+        with patch("cls_pdx1.sources.orestar.requests.get", side_effect=req.RequestException("timeout")):
+            adapter = OrestarAdapter(year=2024)
+            result = adapter.fetch()
         assert len(result.errors) > 0
+        assert "HTTP error" in result.errors[0]
 
 
 # ---------------------------------------------------------------------------
@@ -114,10 +138,32 @@ class TestOlisAdapter:
         result = adapter.fetch()
         assert result.records[0].status == BillStatus.PASSED_BOTH_CHAMBERS
 
-    def test_no_data_returns_error(self):
-        adapter = OlisAdapter()
-        result = adapter.fetch()
+    def test_live_fetch_odata(self):
+        """Adapter fetches OData JSON, paginates, parses bills."""
+        page1 = {"value": _OLIS_BILLS[:1], "@odata.nextLink": "https://api.oregonlegislature.gov/page2"}
+        page2 = {"value": _OLIS_BILLS[1:2]}  # only valid bill, not the empty-id stub
+
+        responses = [MagicMock(), MagicMock()]
+        responses[0].json.return_value = page1
+        responses[0].raise_for_status = MagicMock()
+        responses[1].json.return_value = page2
+        responses[1].raise_for_status = MagicMock()
+
+        with patch("cls_pdx1.sources.olis.requests.get", side_effect=responses):
+            adapter = OlisAdapter()
+            result = adapter.fetch()
+
+        assert len(result.records) == 2
+        assert result.errors == []
+
+    def test_live_fetch_http_error(self):
+        """HTTP failure returns an error, does not raise."""
+        import requests as req
+        with patch("cls_pdx1.sources.olis.requests.get", side_effect=req.RequestException("timeout")):
+            adapter = OlisAdapter()
+            result = adapter.fetch()
         assert len(result.errors) > 0
+        assert "HTTP error" in result.errors[0]
 
     def test_sponsor_captured(self):
         adapter = OlisAdapter(bill_data=_OLIS_BILLS[:1])

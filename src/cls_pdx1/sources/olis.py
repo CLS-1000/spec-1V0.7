@@ -2,9 +2,6 @@
 
 Tracks bills, votes, committee assignments, and hearing witnesses.
 OData API: https://api.oregonlegislature.gov/odata/odataservice.svc/
-
-Live HTTP fetch is not implemented — inject bill_data=[...] for offline
-and test use. Pipeline catches the missing-data error and logs the gap.
 """
 
 from __future__ import annotations
@@ -13,13 +10,22 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Optional
 
+import requests
+
 from cls_pdx1.models import Bill, BillStatus, Jurisdiction, Provenance, _make_id
 from cls_pdx1.sources.base import AdapterResult, BaseAdapter
 
 logger = logging.getLogger(__name__)
 
 _OLIS_BASE = "https://api.oregonlegislature.gov/odata/odataservice.svc/"
+_MEASURES_URL = f"{_OLIS_BASE}Measures"
 _SOURCE_URI = "https://www.oregonlegislature.gov/"
+_HEADERS = {
+    "User-Agent": "spec1-pdx1i/0.1 (civic intelligence; contact: research@spec1.io)",
+    "Accept": "application/json",
+}
+_TIMEOUT = 20
+_PAGE_SIZE = 500
 
 
 def _now() -> datetime:
@@ -83,23 +89,55 @@ def _parse_bill(raw: dict[str, Any], fetched_at: datetime) -> Optional[Bill]:
         return None
 
 
+def _current_session_key() -> str:
+    """Return the current Oregon legislative session key, e.g. '2025R1'."""
+    year = datetime.now(timezone.utc).year
+    return f"{year}R1"
+
+
 class OlisAdapter(BaseAdapter):
-    """Returns Bill records from OLIS. Accepts pre-loaded data for testing."""
+    """Returns Bill records from OLIS. Fetches live from OData API or accepts
+    pre-loaded data for testing."""
 
     source_name = "OLIS"
 
-    def __init__(self, bill_data: Optional[list[dict]] = None) -> None:
+    def __init__(
+        self,
+        bill_data: Optional[list[dict]] = None,
+        session_key: Optional[str] = None,
+    ) -> None:
         self._bill_data = bill_data
+        self._session_key = session_key or _current_session_key()
 
     def fetch(self) -> AdapterResult:
         if self._bill_data is not None:
             return self._parse_data(self._bill_data)
+        return self._fetch_live()
 
-        # HTTP fetch not implemented — pipeline catches and logs
-        return AdapterResult(
-            source_name=self.source_name,
-            errors=["OLIS HTTP fetch not implemented — provide bill_data list"],
-        )
+    def _fetch_live(self) -> AdapterResult:
+        all_data: list[dict] = []
+        url: Optional[str] = _MEASURES_URL
+        params: Optional[dict] = {
+            "$format": "json",
+            "$filter": f"SessionKey eq '{self._session_key}'",
+            "$top": _PAGE_SIZE,
+        }
+        try:
+            while url:
+                resp = requests.get(url, params=params, headers=_HEADERS, timeout=_TIMEOUT)
+                resp.raise_for_status()
+                payload = resp.json()
+                all_data.extend(payload.get("value", []))
+                url = payload.get("@odata.nextLink")
+                params = None  # subsequent pages use the full nextLink URL
+        except requests.RequestException as exc:
+            logger.warning("OLIS HTTP fetch failed: %s", exc)
+            return AdapterResult(
+                source_name=self.source_name,
+                errors=[f"OLIS HTTP error: {exc}"],
+            )
+        logger.info("OLIS: fetched %d raw measures for session %s", len(all_data), self._session_key)
+        return self._parse_data(all_data)
 
     def _parse_data(self, data: list[dict]) -> AdapterResult:
         fetched_at = _now()
