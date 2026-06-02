@@ -71,4 +71,4 @@ workspace/
 /docs/*.html
 
 # Literal ${HOME} directory — artifact of bad shell expansion in a git command
-'${HOME}/'
+${HOME}/
