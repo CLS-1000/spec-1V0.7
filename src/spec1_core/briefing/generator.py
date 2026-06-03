@@ -203,11 +203,10 @@ def generate_brief(records: list[dict], cycle_stats: dict, mode: str = "standard
     else:
         sys_prompt = SYSTEM_PROMPT
 
-    prompts_text = ""
 
     try:
         user_prompt = _build_prompt(records, cycle_stats, mode=mode)
-        prompts_text = f"## SYSTEM PROMPT\n\n{sys_prompt.strip()}\n\n---\n\n## USER PROMPT\n\n{user_prompt.strip()}\n"
+        f"## SYSTEM PROMPT\n\n{sys_prompt.strip()}\n\n---\n\n## USER PROMPT\n\n{user_prompt.strip()}\n"
         client = anthropic.Anthropic(api_key=api_key)
         message = client.messages.create(
             model=MODEL,

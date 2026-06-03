@@ -1,5 +1,4 @@
 """SPEC-1 Workspace Sanitation and Redundancy Elimination Engine."""
-import os
 import shutil
 from pathlib import Path
 
