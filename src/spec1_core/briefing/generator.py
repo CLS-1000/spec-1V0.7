@@ -194,7 +194,7 @@ def generate_brief(records: list[dict], cycle_stats: dict, mode: str = "standard
     if not api_key:
         print("[briefing] ANTHROPIC_API_KEY not set in environment — returning fallback brief")
         logger.warning("ANTHROPIC_API_KEY not set — returning fallback brief")
-        return _fallback_brief(cycle_stats), ""
+        return _fallback_brief(cycle_stats)
 
     if mode == "geopolitics":
         sys_prompt = GEO_SYSTEM_PROMPT
@@ -217,8 +217,8 @@ def generate_brief(records: list[dict], cycle_stats: dict, mode: str = "standard
         )
         brief = message.content[0].text.strip()
         logger.info("Brief generated (mode=%s) — %d words", mode, len(brief.split()))
-        return brief, prompts_text
+        return brief
     except Exception as exc:
         print(f"[briefing] API call failed: {type(exc).__name__}: {exc}")
         logger.error("Brief generation failed: %s", exc)
-        return _fallback_brief(cycle_stats), prompts_text
+        return _fallback_brief(cycle_stats)
