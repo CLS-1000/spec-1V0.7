@@ -218,6 +218,19 @@ class _NarrativeAdapter(AdapterBase):
         return list(fetch_narrative_records())
 
 
+class _Pdx911Adapter(AdapterBase):
+    name = "pdx911"
+    source_type = "PDX911"
+    description = "Portland 911 live incident feed adapter (PortlandMaps KML)"
+    version = "1.0.0"
+    author = "SPEC-1 core"
+    tags = ["portland", "911", "incidents", "law_enforcement", "geospatial"]
+
+    def fetch(self) -> list[OSINTRecord]:  # pragma: no cover — integration; covered by tests/test_pdx911.py
+        from cls_osint.adapters.pdx911 import iter_records
+        return list(iter_records())
+
+
 # Register built-in adapters on module import
-for _cls in (_RSSAdapter, _FARAAdapter, _CongressionalAdapter, _NarrativeAdapter):
+for _cls in (_RSSAdapter, _FARAAdapter, _CongressionalAdapter, _NarrativeAdapter, _Pdx911Adapter):
     register_adapter(_cls)

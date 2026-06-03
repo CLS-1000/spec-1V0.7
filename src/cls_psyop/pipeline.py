@@ -3,17 +3,15 @@
 from __future__ import annotations
 
 import logging
-import sys
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from threading import Lock
-from typing import Callable, Iterator, Optional, Protocol, Sequence, Union
-from uuid import uuid4
+from typing import Iterator, Optional, Protocol, Sequence, Union
 
 from cls_psyop.patterns import PATTERNS
-from cls_psyop.scorer import filter_risky, score_records, score_text
+from cls_psyop.scorer import filter_risky, score_text
 from cls_psyop.schemas import PsyopScore
 from cls_psyop.store import PsyopStore
 from spec1_labels import PSYOP_HIGH_RISK, PSYOP_MEDIUM_RISK, PSYOP_LOW_RISK
@@ -123,7 +121,7 @@ class PipelineConfig:
 
 class PsyopPipeline:
     """End-to-end psyop detection pipeline with enhanced features."""
-    
+
     # Class-level cache for expensive operations
     _score_cache: dict[str, PsyopScore] = {}
     _cache_lock = Lock()
@@ -137,7 +135,7 @@ class PsyopPipeline:
     ) -> None:
         """
         Initialize the psyop detection pipeline.
-        
+
         Args:
             store_path: Path to store results. Defaults to config if not provided.
             run_id: Unique identifier for this run. Auto-generated if empty.
@@ -145,7 +143,7 @@ class PsyopPipeline:
             config: Full pipeline configuration. If provided, overrides other params.
         """
         self.config = config or PipelineConfig()
-        
+
         # Override config with explicit parameters
         if store_path is not None:
             self.config.store_path = store_path
@@ -153,20 +151,20 @@ class PsyopPipeline:
             self.config.run_id = run_id
         if min_classification != PSYOP_LOW_RISK:
             self.config.min_classification = min_classification
-        
+
         # Generate run_id if not provided
         if not self.config.run_id:
             self.config.run_id = datetime.now(timezone.utc).strftime("run_%Y%m%d_%H%M%S")
-        
+
         # Append run_id to store path for uniqueness if not specified
         if store_path is None and not config:
             self.config.store_path = Path(f"psyop_scores_{self.config.run_id}.jsonl")
-        
+
         self.store = PsyopStore(self.config.store_path)
         self._lock = Lock()
         self._validators: list[RecordValidator] = []
         self._progress_callback: Optional[ProgressCallback] = None
-        
+
         # Register default validators
         if self.config.validate_records:
             self._register_default_validators()
@@ -225,29 +223,29 @@ class PsyopPipeline:
             yield records[i:i + self.config.chunk_size]
 
     def _process_chunk(
-        self, 
-        chunk: list[dict], 
+        self,
+        chunk: list[dict],
         start_idx: int,
         stats: PsyopPipelineStats
     ) -> tuple[list[PsyopScore], int]:
         """Process a single chunk of records."""
         chunk_scores = []
         chunk_errors = 0
-        
+
         for i, record in enumerate(chunk):
             global_idx = start_idx + i
-            
+
             # Validate record
             is_valid, error_msg = self._validate_record(record, global_idx)
             if not is_valid:
                 stats.add_error(ValidationError(error_msg), {"record_index": global_idx})
                 chunk_errors += 1
                 continue
-            
+
             try:
                 # Score the record
                 score = score_text(record.get('text', ''), PATTERNS)
-                
+
                 # Add metadata
                 score.metadata = {
                     **getattr(score, 'metadata', {}),
@@ -255,9 +253,9 @@ class PsyopPipeline:
                     'run_id': self.config.run_id,
                     'original_record': {k: v for k, v in record.items() if k != 'text'},  # Don't duplicate text
                 }
-                
+
                 chunk_scores.append(score)
-                
+
                 # Update stats
                 if score.classification == PSYOP_HIGH_RISK:
                     stats.high_risk += 1
@@ -265,34 +263,34 @@ class PsyopPipeline:
                     stats.medium_risk += 1
                 elif score.classification == PSYOP_LOW_RISK:
                     stats.low_risk += 1
-                    
+
             except Exception as e:
                 stats.add_error(e, {"record_index": global_idx, "record": str(record)[:200]})
                 chunk_errors += 1
                 logger.warning(f"Failed to score record {global_idx}: {e}")
-            
+
             # Progress reporting
             if self.config.enable_progress_callback and self._progress_callback:
                 if (global_idx + 1) % (self.config.chunk_size // 10) == 0:  # Report every 10% of chunk
                     self._progress_callback(global_idx + 1, stats.records_analysed, stats)
-        
+
         return chunk_scores, chunk_errors
 
     def run(
-        self, 
+        self,
         records: Sequence[dict],
         use_cache: bool = True,
     ) -> PsyopPipelineStats:
         """
         Score all records for psyop indicators, persist risky ones.
-        
+
         Args:
             records: List of dicts, each containing required fields.
             use_cache: Whether to use cached results for identical text.
-            
+
         Returns:
             PsyopPipelineStats with processing metrics.
-            
+
         Raises:
             ValidationError: If no valid records to process.
         """
@@ -302,42 +300,42 @@ class PsyopPipeline:
                 run_id=self.config.run_id,
                 started_at=datetime.now(timezone.utc).isoformat(),
             )
-        
+
         stats = PsyopPipelineStats(
             run_id=self.config.run_id,
             started_at=datetime.now(timezone.utc).isoformat(),
         )
         stats.records_analysed = len(records)
-        
+
         all_scores = []
         total_errors = 0
-        
+
         try:
             with self._time_operation(stats):
                 # Process in chunks to manage memory
                 for chunk_idx, chunk in enumerate(self._chunk_records(records)):
                     logger.debug(f"Processing chunk {chunk_idx + 1}/{len(records) // self.config.chunk_size + 1}")
-                    
+
                     chunk_scores, chunk_errors = self._process_chunk(
-                        chunk, 
+                        chunk,
                         chunk_idx * self.config.chunk_size,
                         stats
                     )
                     all_scores.extend(chunk_scores)
                     total_errors += chunk_errors
-                    
+
                     # Stop if too many errors
                     if total_errors >= self.config.max_errors:
                         raise ValidationError(
                             f"Too many errors ({total_errors}). Stopping pipeline."
                         )
-                
+
                 # Filter and store risky records
                 if all_scores:
                     with self._time_operation(stats):
                         risky = filter_risky(all_scores, self.config.min_classification)
                         stats.risky_detected = len(risky)
-                        
+
                         if risky and self.config.auto_flush:
                             # Store with retry logic
                             for attempt in range(self.config.retry_on_failure):
@@ -351,7 +349,7 @@ class PsyopPipeline:
                                     logger.warning(f"Storage attempt {attempt + 1} failed: {e}")
                 else:
                     logger.warning("No records were successfully scored")
-                    
+
         except ValidationError as e:
             stats.add_error(e)
             logger.error(f"Pipeline validation failed: {e}")
@@ -363,7 +361,7 @@ class PsyopPipeline:
             logger.exception("Unexpected pipeline error")
         finally:
             stats.finish()
-        
+
         # Log summary
         logger.info(
             f"Pipeline {stats.run_id} completed: "
@@ -373,17 +371,17 @@ class PsyopPipeline:
             f"errors={len(stats.errors)}, "
             f"time={stats.processing_time_ms:.0f}ms"
         )
-        
+
         return stats
 
     @classmethod
     def analyse_text_cached(cls, text: str) -> PsyopScore:
         """
         Score a single piece of text with caching.
-        
+
         Args:
             text: The text to analyze.
-            
+
         Returns:
             PsyopScore object with risk assessment.
         """
@@ -391,15 +389,15 @@ class PsyopPipeline:
             if text not in cls._score_cache:
                 cls._score_cache[text] = score_text(text, PATTERNS)
             return cls._score_cache[text]
-    
+
     def analyse_text(self, text: str, use_cache: bool = True) -> PsyopScore:
         """
         Score a single piece of text.
-        
+
         Args:
             text: The text to analyze.
             use_cache: Whether to use global cache.
-            
+
         Returns:
             PsyopScore object with risk assessment.
         """
@@ -410,10 +408,10 @@ class PsyopPipeline:
     def get_high_risk(self, as_objects: bool = False) -> Union[list[dict], list[PsyopScore]]:
         """
         Return stored HIGH_RISK scores.
-        
+
         Args:
             as_objects: If True, return PsyopScore objects; otherwise return dicts.
-            
+
         Returns:
             List of high-risk scores in requested format.
         """
@@ -422,23 +420,23 @@ class PsyopPipeline:
         return list(self.store.by_classification(PSYOP_HIGH_RISK))
 
     def get_scores_by_date(
-        self, 
-        start_date: datetime, 
+        self,
+        start_date: datetime,
         end_date: Optional[datetime] = None
     ) -> list[PsyopScore]:
         """
         Retrieve scores within a date range.
-        
+
         Args:
             start_date: Start of date range (inclusive).
             end_date: End of date range (inclusive). Defaults to now.
-            
+
         Returns:
             List of scores within the date range.
         """
         end_date = end_date or datetime.now(timezone.utc)
         all_scores = self.store.load_all()
-        
+
         return [
             score for score in all_scores
             if start_date <= datetime.fromisoformat(score.timestamp) <= end_date
@@ -466,17 +464,17 @@ def run_pipeline(
 ) -> PsyopPipelineStats:
     """
     Convenience function to run psyop pipeline on records.
-    
+
     Args:
         records: List of records to analyze.
         store_path: Path to store results. Auto-generated if None.
         min_classification: Minimum risk level to store.
         progress_callback: Optional callback for progress updates.
         chunk_size: Number of records to process at once.
-        
+
     Returns:
         Pipeline statistics.
-        
+
     Example:
         >>> records = [{'text': 'suspicious message', 'id': 1}]
         >>> stats = run_pipeline(records)
@@ -487,12 +485,12 @@ def run_pipeline(
         min_classification=min_classification,
         chunk_size=chunk_size,
     )
-    
+
     pipeline = PsyopPipeline(config=config)
-    
+
     if progress_callback:
         pipeline.set_progress_callback(progress_callback)
-    
+
     return pipeline.run(records)
 
 
@@ -512,18 +510,18 @@ if __name__ == "__main__":
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    
+
     # Example usage
     sample_records = [
         {"text": "This is a normal message", "id": 1, "source": "test"},
         {"text": "Suspicious coordinated campaign message", "id": 2, "source": "test"},
         {"text": "", "id": 3, "source": "test"},  # Invalid record
     ]
-    
+
     stats = run_pipeline(
         sample_records,
         progress_callback=example_progress_callback,
         chunk_size=2,
     )
-    
+
     print(f"\nFinal stats: {stats}")

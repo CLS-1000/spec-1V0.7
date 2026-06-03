@@ -194,7 +194,7 @@ def generate_brief(records: list[dict], cycle_stats: dict, mode: str = "standard
     if not api_key:
         print("[briefing] ANTHROPIC_API_KEY not set in environment — returning fallback brief")
         logger.warning("ANTHROPIC_API_KEY not set — returning fallback brief")
-        return _fallback_brief(cycle_stats), ""
+        return _fallback_brief(cycle_stats)
 
     if mode == "geopolitics":
         sys_prompt = GEO_SYSTEM_PROMPT
@@ -203,11 +203,10 @@ def generate_brief(records: list[dict], cycle_stats: dict, mode: str = "standard
     else:
         sys_prompt = SYSTEM_PROMPT
 
-    prompts_text = ""
 
     try:
         user_prompt = _build_prompt(records, cycle_stats, mode=mode)
-        prompts_text = f"## SYSTEM PROMPT\n\n{sys_prompt.strip()}\n\n---\n\n## USER PROMPT\n\n{user_prompt.strip()}\n"
+        f"## SYSTEM PROMPT\n\n{sys_prompt.strip()}\n\n---\n\n## USER PROMPT\n\n{user_prompt.strip()}\n"
         client = anthropic.Anthropic(api_key=api_key)
         message = client.messages.create(
             model=MODEL,
@@ -217,8 +216,8 @@ def generate_brief(records: list[dict], cycle_stats: dict, mode: str = "standard
         )
         brief = message.content[0].text.strip()
         logger.info("Brief generated (mode=%s) — %d words", mode, len(brief.split()))
-        return brief, prompts_text
+        return brief
     except Exception as exc:
         print(f"[briefing] API call failed: {type(exc).__name__}: {exc}")
         logger.error("Brief generation failed: %s", exc)
-        return _fallback_brief(cycle_stats), prompts_text
+        return _fallback_brief(cycle_stats)
