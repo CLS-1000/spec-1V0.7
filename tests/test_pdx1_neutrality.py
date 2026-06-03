@@ -19,9 +19,10 @@ class TestToneGate:
         assert not ok
         assert "TONE_001" in (reason or "")
 
-    def test_revealed_fails(self):
+    def test_revealed_passes(self):
+        # "revealed" is legitimate intelligence language — removed from LOADED_VERBS
         ok, reason = tone_gate("Documents revealed the contract.")
-        assert not ok
+        assert ok
 
     def test_slammed_fails(self):
         ok, reason = tone_gate("The mayor slammed the decision.")
