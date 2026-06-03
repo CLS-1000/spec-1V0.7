@@ -315,7 +315,7 @@ def run_cycle(
         if verbose:
             print("\n[Briefing] Generating daily intelligence brief...")
         brief_md = generate_brief(stored_records, stats)
-        brief_path = write_brief(brief_md, run_id, stats["finished_at"], brief_prompts)
+        brief_path = write_brief(brief_md, run_id, stats["finished_at"])
         brief_word_count = len(brief_md.split())
         stats["brief_path"] = brief_path
         stats["brief_word_count"] = brief_word_count
