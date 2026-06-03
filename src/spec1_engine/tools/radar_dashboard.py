@@ -6,13 +6,14 @@ import math
 def draw_retro_radar_sweep():
     # Enforce clear terminal screen dimensions
     os.system('cls' if os.name == 'nt' else 'clear')
-
+    
     # Establish radar sweep radius and center coordinates
     width, height = 70, 22
     cx, cy = width // 2, height // 2
     radius = min(cx, cy) - 2
 
     # Tactical Amber/Green Phosphor character density map
+    shades = [".", ":", "!", "I", "M", "W", "@"]
     angle = 0.0
 
     try:
@@ -28,7 +29,7 @@ def draw_retro_radar_sweep():
                     dx = (x - cx) * 0.5
                     dy = y - cy
                     dist = math.sqrt(dx*dx + dy*dy)
-
+                    
                     if abs(dist - radius) < 0.5 or abs(dist - radius/2) < 0.5:
                         buffer[y][x] = "\033[32m·\033[0m" # Dim target rings
 
@@ -50,12 +51,12 @@ def draw_retro_radar_sweep():
             # ── Render Frame Buffer to Terminal Screen ────────────────────────
             output = []
             output.append("+" + "-" * width + "+")
-            output.append("| SPEC-1 TACTICAL SIGNAL TARGET LOG // RADAR STREAM ACTIVE              |")
+            output.append(f"| SPEC-1 TACTICAL SIGNAL TARGET LOG // RADAR STREAM ACTIVE              |")
             output.append("+" + "-" * width + "+")
-
+            
             for row in buffer:
                 output.append("|" + "".join(row) + "|")
-
+                
             output.append("+" + "-" * width + "+")
             output.append("| COMMANDS: [Ctrl+C] Terminate Console Sweep Run                        |")
             output.append("+" + "-" * width + "+")

@@ -13,7 +13,7 @@ class SnapshotManager:
         self.data_dir = Path(data_dir)
         self.active_file = self.data_dir / "portland_snapshot_base.json"
         self.vault_dir = self.data_dir / "vault"
-
+        
         # Ensure system storage boundaries exist
         self.vault_dir.mkdir(parents=True, exist_ok=True)
 
@@ -38,7 +38,7 @@ class SnapshotManager:
         # Inject runtime verification metadata
         timestamp = datetime.now(timezone.utc).isoformat()
         checksum = self.calculate_checksum(payload)
-
+        
         payload["snapshot_metadata"]["frozen_at"] = timestamp
         payload["snapshot_metadata"]["checksum"] = checksum
         payload["snapshot_metadata"]["milestone_tag"] = milestone_name.upper()
@@ -52,17 +52,17 @@ class SnapshotManager:
         # Write immutable archive snapshot frame
         with open(archive_path, "w") as f:
             json.dump(payload, f, indent=4)
-
+            
         logger.info(f"SNAPSHOT_SECURED // HASH:{checksum[:12]} // DEST:{archive_path.name}")
         print(f"[SUCCESS] SPEC-1 STATE FROZEN: {archive_filename}")
         print(f"--> CHECKSUM: {checksum}")
-
+        
         return checksum
 
 if __name__ == "__main__":
     import sys
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-
+    
     manager = SnapshotManager()
     tag = sys.argv[1] if len(sys.argv) > 1 else "MANUAL_MILESTONE"
     manager.freeze_active_state(tag)

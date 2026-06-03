@@ -14,7 +14,7 @@ import sys
 import argparse
 from pathlib import Path
 
-from spec1_core.workspace.case import (
+from spec1_engine.workspace.case import (
     open_case,
     list_cases,
     get_case,

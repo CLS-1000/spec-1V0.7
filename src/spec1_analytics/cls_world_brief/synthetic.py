@@ -7,6 +7,7 @@ signal patterns. Used for landing page showcase and development fixtures.
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+from typing import Sequence
 
 from spec1_analytics.cls_world_brief.schemas import BriefSection, WorldBrief
 

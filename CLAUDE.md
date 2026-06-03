@@ -356,6 +356,12 @@ Agents must **NOT** modify without human approval:
 | `dev` | Integration branch — merge agent branches here first |
 | `claude/*` or `agent/*` | Agent work — never merge directly to `main` |
 
+### Generated Artifacts
+
+Briefs, logs, and historical outputs must not be committed to `main`.
+Write them to `generated/` (gitignored) or a dedicated `generated` branch.
+The `briefs/` directory in the repo is legacy — new runs should use `generated/briefs/`.
+
 ### PR Requirements
 
 Every PR must include (use `.github/pull_request_template.md`):

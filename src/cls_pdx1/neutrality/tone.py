@@ -14,6 +14,8 @@ LOADED_VERBS: frozenset[str] = frozenset(
         "denied",
         "slammed",
         "blasted",
+        "revealed",
+        "exposed",
         "accused",
         "lied",
         "misled",
@@ -26,8 +28,10 @@ LOADED_VERBS: frozenset[str] = frozenset(
         "capitulated",
         "attacked",
         "defended",
+        "launched",  # in political context
         "lambasted",
         "excoriated",
+        "condemned",
     }
 )
 
