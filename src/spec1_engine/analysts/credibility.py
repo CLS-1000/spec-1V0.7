@@ -1,5 +1,5 @@
 import re
-from typing import Optional, Set, List
+from typing import Optional, Set
 from spec1_engine.analysts.registry import load_all
 from spec1_engine.schemas.models import AnalystRecord, Signal
 
@@ -37,7 +37,7 @@ class CredibilityAnalyst:
                 continue
             first, last_name = parts[0], parts[-1]
 
-            # Bounded initial validation window 
+            # Bounded initial validation window
             initial_pattern = rf"\b{re.escape(first[0])}\.?\s*(?:\b[a-z]\b\.?\s*)*{re.escape(last_name)}\b"
             if re.search(initial_pattern, cleaned):
                 return record
