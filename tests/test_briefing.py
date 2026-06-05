@@ -244,7 +244,7 @@ def test_generate_brief_geo_count_in_prompt():
     records = [make_record(source="war_on_the_rocks"), make_record(source="rand")]
     stats = make_cycle_stats()
     prompt = _build_prompt(records, stats)
-    assert "Geopolitics: 2" in prompt
+    assert "Geopolitics 2" in prompt
 
 
 def test_generate_brief_cyber_count_in_prompt():
@@ -252,7 +252,7 @@ def test_generate_brief_cyber_count_in_prompt():
     records = [make_record(source="cipher_brief"), make_record(source="just_security")]
     stats = make_cycle_stats()
     prompt = _build_prompt(records, stats)
-    assert "Cyber / Info Ops: 2" in prompt
+    assert "Cyber/Info Ops 2" in prompt
 
 
 def test_format_record_contains_source():
@@ -1003,7 +1003,7 @@ def test_build_prompt_standard_mode_uses_standard_template():
     records = [make_record()]
     stats = make_cycle_stats()
     prompt = _build_prompt(records, stats, mode="standard")
-    assert "SPEC-1 DAILY BRIEF" in prompt
+    assert "W O R L D   S T A T E   B R I E F" in prompt
 
 
 def test_geo_system_prompt_constant_is_string():
