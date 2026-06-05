@@ -10,7 +10,6 @@ After this script runs, `pip install feedparser` (or any package that depends
 on feedparser) will skip building sgmllib3k entirely.
 """
 import os
-import site
 import sys
 import sysconfig
 
