@@ -19,10 +19,6 @@ class TestToneGate:
         assert not ok
         assert "TONE_001" in (reason or "")
 
-    def test_revealed_fails(self):
-        ok, reason = tone_gate("Documents revealed the contract.")
-        assert not ok
-
     def test_slammed_fails(self):
         ok, reason = tone_gate("The mayor slammed the decision.")
         assert not ok

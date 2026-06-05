@@ -5,6 +5,10 @@ All tests use in-memory fixture data — no HTTP calls.
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
+import requests
+
 from cls_pdx1.models import BillStatus
 from cls_pdx1.sources.olis import OlisAdapter, _map_status
 
@@ -120,10 +124,12 @@ class TestOlisAdapterOffline:
         bill = result.records[0]
         assert bill.sponsor is None
 
-    def test_no_bill_data_returns_error(self):
-        """No data provided — adapter should return graceful error, not raise."""
-        adapter = OlisAdapter()
-        result = adapter.fetch()
+    def test_no_bill_data_returns_error(self, tmp_path):
+        """Live fetch fails and no cache exists — adapter returns one graceful error."""
+        with patch("cls_pdx1.sources.olis.requests.get") as mock_get:
+            mock_get.side_effect = requests.RequestException("connection refused")
+            adapter = OlisAdapter(cache_dir=tmp_path)
+            result = adapter.fetch()
         assert not result.ok()
         assert len(result.errors) == 1
 
