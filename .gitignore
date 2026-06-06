@@ -91,3 +91,5 @@ spec1_intelligence*.jsonl
 briefs/
 logs/
 generated/
+docs/launch_prep/
+docs/scalability_tracker.md
