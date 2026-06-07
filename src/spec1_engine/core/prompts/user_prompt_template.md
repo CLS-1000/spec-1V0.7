@@ -1,27 +1,16 @@
 
-Today's cycle: {run_id}
-Completed: {timestamp}
-Signals harvested: {signal_count}
-Opportunities scored: {opportunity_count}
-Records written: {record_count}
+CYCLE: {run_id}
+COMPLETED: {timestamp}
+SIGNALS HARVESTED: {signal_count}
+OPPORTUNITIES SCORED: {opportunity_count}
+RECORDS WRITTEN: {record_count}
+DOMAIN SPLIT: Geopolitics {geo_count} · Cyber/Info Ops {cyber_count}
 
 ELEVATED SIGNALS ({elevated_count}):
 {elevated_records}
 
 STANDARD SIGNALS — TOP 10 BY CONFIDENCE:
 {standard_records}
-
-DOMAIN BREAKDOWN:
-Geopolitics: {geo_count} signals
-Cyber / Info Ops: {cyber_count} signals
-
-PSYOP / NARRATIVE DETECTION:
-psyop_classification: {psyop_classification}
-psyop_score: {psyop_score}
-patterns_fired: {psyop_patterns_fired}
-
-Evidence chains ({evidence_count}):
-{evidence_chains}
 
 Write the daily intelligence brief using this exact structure:
 
@@ -30,74 +19,86 @@ Write the daily intelligence brief using this exact structure:
 ## SPEC-1 DAILY BRIEF — {date}
 
 ### Executive Summary
-[3 sentences. What happened today. What it means. What is uncertain.]
+[3 sentences. What the cycle found. What it means structurally. What moves next.
+No hedging. No meta-commentary about collection. The analyst is cleared — write to them.]
 
 ### Elevated Signals
-[One paragraph per elevated signal. Source. What was observed. \
-Confidence score. What to watch next. If zero elevated signals, say so plainly.]
+[One block per elevated signal. Format:
+
+**[SOURCE] — [Pattern description]**
+Confidence: [score] | Classification: [classification]
+
+[What was observed. What mechanism it activates. What it means for the next
+48-72 hours. One paragraph. Direct. No "this may suggest."]
+
+If zero elevated signals: state plainly — "No signals cleared the elevated threshold
+this cycle." Do not pad this section.]
 
 ### Domain Briefings
 
 **Geopolitics**
-[Narrative summary. Patterns, not lists. 2-4 paragraphs.]
+[Narrative analysis. 2-4 paragraphs. Name the actors, the mechanisms, the leverage
+positions. State what the pattern means — not just what was reported. If multiple
+signals converge on one theme, say so and explain why that convergence matters.
+Cite confidence scores only where they affect interpretation.]
 
 **Cyber / Info Ops**
-[Narrative summary. Attribution confidence where relevant. 2-4 paragraphs.]
-
-**Psyop / Narrative Analysis**
-[For each evidence chain, write one paragraph that cites the specific excerpts \
-and sources. Do not just state the pattern fired — show the evidence that \
-triggered it and let the reader judge whether the pattern is real. \
-If no evidence chains exist, write: "No psyop patterns detected this cycle."]
+[Narrative analysis. Attribution confidence stated once where relevant, then set aside.
+2-4 paragraphs. If volume is low, say why that itself is a signal — reduced activity,
+operational security shift, collection gap. Name which.]
 
 ### Story Leads
-[3-5 specific, actionable leads. Each lead must follow this exact format:
-
-**LEAD: [Headline-style title]**
-Signal: [Which scored signal triggered this — include source name, pattern summary, and confidence score]
-The question: [The specific thing a reporter needs to answer]
-Who to call: [Source type — congressional staffer, DoD spokesperson, \
-              CISA, company IR, think tank analyst, etc.]
-Documents to request: [FOIA targets, SEC filings, congressional records, \
-                       earnings calls, company disclosures — what is findable]
-Window: [How long this lead stays fresh — 24hrs / 3 days / 1 week]
-Confidence: [HIGH / MEDIUM / LOW — based on underlying signal score]
-
-> **CLAUDE PROMPT:**
-> "You are an investigative journalist working this lead: [lead title].
->  The signal: [signal description, source, confidence score].
->  The core question: [the question].
->
->  Step 1 — Draft a 3-paragraph background memo on this topic using
->  only publicly available information. Cite specific sources.
->
->  Step 2 — Write 5 specific questions for [who to call source type].
->  Each question should be answerable with a yes/no or a specific fact.
->  Avoid open-ended questions that give a spokesperson room to deflect.
->
->  Step 3 — Write a FOIA request draft targeting [documents to request].
->  Use formal FOIA language. Specify the agency, the date range,
->  and the specific records requested.
->
->  Step 4 — Write a 150-word pitch memo for an editor meeting.
->  State the story, the stakes, what you have, what you still need."
-
-Do not invent leads. Every lead traces to a scored signal.
-Low confidence leads are flagged, not dropped.
-Every lead must include the CLAUDE PROMPT blockquote — it is not optional.]
-
-### Watch List — Tomorrow
-[3-5 specific things to monitor. Tied to today's signals. One line each.]
-
-### Psyop Assessment
-[Summarise the psyop scoring result from today's cycle. State the classification \
-(NOISE / PSYOP_CANDIDATE / PSYOP_CONFIRMED), the score, and which patterns fired. \
-If the score is NOISE, say so in one sentence. If PSYOP_CANDIDATE or PSYOP_CONFIRMED, \
-describe what each fired pattern indicates and the investigative priority. \
-If the assessment was not run, say so.]
-
-### Signal Notes
-[Brief methodological note: source gaps, gate failure patterns, \
-anything that affected today's collection quality. 2-4 sentences.]
+[3-5 leads. Each lead is a context-loading dispatch prompt for an analyst.
+Format exactly as follows:
 
 ---
+**LEAD [N] — [Domain] / [Module]**
+
+SIGNAL
+[One sentence: what SPEC-1 detected, source, confidence score.]
+
+PATTERN
+[One sentence: what the four-gate framework flagged — velocity, novelty, or
+credibility anomaly. Be specific about which gate and why it fired.]
+
+CONTEXT LOAD
+[Everything the analyst needs to become an expert on this signal before they
+route to a module. Background actors, history, related patterns, open questions,
+what has already been established vs what is unknown. 3-6 sentences. Dense.
+This primes the analyst — write it so they walk away knowing the domain.]
+
+ROUTING
+Module: [cls_pdx1 / cls_legislative / cls_osint / quant / conflict / supply chain / tech]
+Suggested lens: [the investigative angle the data supports]
+
+FEED PROMPT
+[The exact prompt the analyst runs after collecting source data. Written so that
+Claude receives expert context before producing output. This is the ignition point —
+when the analyst returns with data and runs this, Claude produces original
+fact-based reporting, not a summary.
+
+Format the feed prompt as a quoted block starting with:
+"Here is [source data description]. [Context load summary in 1-2 sentences.]
+Produce a fact-based [domain] intelligence report. Treat [specific anomaly or
+pattern] as the central finding. Surface [specific things to identify].
+Do not summarize — analyze. Take a position on what the data means."]
+
+Confidence: [HIGH / MEDIUM / LOW]
+Window: [24hrs / 3 days / 1 week]
+---
+
+Do not invent leads. Every lead traces to a scored signal.
+Low confidence leads are flagged and included — do not drop them.]
+
+### Watch List — Tomorrow
+[3-5 items. Specific. Named actors or events, not categories.
+One line each. Tied to today's signals.]
+
+### Signal Notes
+[One methodological note only: what affected collection quality today, if anything.
+Source gaps, gate anomalies, domain skew. 2 sentences maximum.
+If nothing notable — omit this section entirely.]
+
+---
+SPEC-1 // EVASTARARCANA · Portland OR
+CLASSIFICATION: UNCLASSIFIED // BRIEF-{date}
