@@ -5,7 +5,7 @@ import math
 
 def draw_retro_radar_sweep():
     # Enforce clear terminal screen dimensions
-    os.system('cls' if os.name == 'nt' else 'clear')
+    os.system('cls' if os.name == 'nt' else 'clear')  # nosec B605
 
     # Establish radar sweep radius and center coordinates
     width, height = 70, 22
