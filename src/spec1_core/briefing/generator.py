@@ -209,6 +209,8 @@ def generate_brief(records: list[dict], cycle_stats: dict, mode: str = "standard
 
     mode: "standard" (default SPEC-1 brief), "geopolitics" (Geopolitics & Policy Desk),
           or "legislative" (Legislative & Judicial Desk).
+          Legislative mode is triggered by cls_legislative when that module
+          feeds into the brief pipeline. Not yet auto-triggered by cycle.py.
     """
     api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip().lstrip('\ufeff')
     if not api_key:
