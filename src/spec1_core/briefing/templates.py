@@ -167,3 +167,17 @@ _LEG_TEMPLATE_FALLBACK = _TEMPLATE_FALLBACK.replace(
 
 LEG_SYSTEM_PROMPT: str = _load("legislative_system_prompt.md", _LEG_SYSTEM_FALLBACK)
 LEG_USER_PROMPT_TEMPLATE: str = _load("legislative_user_prompt_template.md", _LEG_TEMPLATE_FALLBACK)
+
+
+# ── Verifier Prompt ───────────────────────────────────────────────────────────
+# Used by spec1_core/investigation/verifier.py
+# Returns structured JSON classification of investigation hypothesis.
+
+from spec1_labels import VERIF_CORROBORATED, VERIF_CONFLICTED
+
+VERIFIER_SYSTEM_PROMPT = (
+    "You are an intelligence analyst verifying a hypothesis. "
+    "Respond with JSON only — no prose, no markdown fences. "
+    'Schema: {"verified": bool, "confidence": float, "reasoning": str, '
+    '"classification": "' + VERIF_CORROBORATED + '"|"ESCALATE"|"INVESTIGATE"|"MONITOR"|"' + VERIF_CONFLICTED + '"|"ARCHIVE"}'
+)
