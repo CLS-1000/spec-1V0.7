@@ -71,3 +71,8 @@ def run_migrations(db=None, migrations_dir=None):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     run_migrations()
+
+
+def ensure_schema(db=None):
+    """Ensure all migrations are applied. Called by DualWriter on init."""
+    run_migrations(db=db)

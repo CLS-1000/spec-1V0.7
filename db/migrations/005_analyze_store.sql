@@ -7,10 +7,10 @@ CREATE TABLE IF NOT EXISTS intelligence_records (
     created_at          TEXT NOT NULL DEFAULT (datetime('now')),
     source_type         TEXT NOT NULL,
     schema_version      INTEGER NOT NULL DEFAULT 1,
-    outcome_id          TEXT NOT NULL UNIQUE REFERENCES outcomes(id),
-    investigation_id    TEXT NOT NULL REFERENCES investigations(id),
-    scored_signal_id    TEXT NOT NULL REFERENCES scored_signals(id),
-    harvest_id          TEXT NOT NULL REFERENCES harvest_records(id),
+    outcome_id          TEXT UNIQUE REFERENCES outcomes(id),
+    investigation_id    TEXT REFERENCES investigations(id),
+    scored_signal_id    TEXT REFERENCES scored_signals(id),
+    harvest_id          TEXT REFERENCES harvest_records(id),
 
     -- Final analysis output
     record_id           TEXT NOT NULL UNIQUE,
