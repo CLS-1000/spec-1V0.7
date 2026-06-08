@@ -36,15 +36,15 @@ Seven sequential stages. Each one fails independently — a dead RSS feed never 
 
 ```
 ╔═══════════════════════════════════════════════════════════════════╗
-║  [01 HARVEST] → [02 PARSE] → [03 SCORE] → [04 INVESTIGATE]      ║
-║                                   │                               ║
-║                            4-Gate Filter                          ║
-║                                   │                               ║
-║                    fail → /dev/null  pass → continue             ║
-║                                                                   ║
-║             [05 VERIFY] → [06 ANALYZE] → [07 STORE]             ║
-║                                               │                   ║
-║                                    Daily Brief + Leads            ║
+║  [01 HARVEST] → [02 PARSE] → [03 SCORE] → [04 INVESTIGATE]        ║    
+║                             │                                     ║
+║                       4-Gate Filter                               ║
+║                             │                                     ║
+║               fail → /dev/null  pass → continue                   ║
+║                             |                                     ║
+║          [05 VERIFY] → [06 ANALYZE] → [07 STORE]                  ║
+║                             │                                     ║
+║                    Daily Brief + Leads                            ║
 ╚═══════════════════════════════════════════════════════════════════╝
 ```
 
