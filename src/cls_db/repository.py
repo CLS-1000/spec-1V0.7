@@ -50,8 +50,8 @@ class Repository:
     def insert(self, record: dict) -> dict:
         """Insert a record; skip if PK already exists (INSERT OR IGNORE)."""
         entry = {k: _serialize(v) for k, v in record.items()}
-        # Strip written_at — migration tables use created_at
-        entry.pop("written_at", None)
+        if "written_at" not in entry and "created_at" not in entry:
+            entry["written_at"] = _now()
         columns = ", ".join(entry.keys())
         placeholders = ", ".join("?" for _ in entry)
         sql = f"INSERT OR REPLACE INTO {self.table} ({columns}) VALUES ({placeholders})"

@@ -74,6 +74,14 @@ class DualWriter:
                 pass
         return entries
 
+    def append(self, record: dict) -> dict:
+        """Alias for write() — matches JsonlStore interface."""
+        return self.write(record)
+
+    def append_batch(self, records: list[dict]) -> list[dict]:
+        """Alias for write_batch() — matches JsonlStore interface."""
+        return self.write_batch(records)
+
     def read_jsonl(self) -> list[dict]:
         """Read all records from JSONL (source of truth)."""
         if not self.jsonl_path.exists():
