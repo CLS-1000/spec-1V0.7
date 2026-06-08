@@ -28,7 +28,7 @@ Python OSINT pipeline. Deterministic 7-stage cycle: harvest RSS/FARA/Congression
 
 | Gate | Default threshold |
 |------|------------------|
-| CREDIBILITY | source rating ≥ 0.60 |
+| CREDIBILITY | source rating ≥ calibrated threshold |
 | VOLUME | ≥ 50 words |
 | VELOCITY | ≤ 48h old |
 | NOVELTY | hash dedup + keyword domain match |
