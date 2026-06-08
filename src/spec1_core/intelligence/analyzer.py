@@ -14,7 +14,14 @@ from spec1_core.schemas.models import (
     Outcome,
     Signal,
 )
-from spec1_core.signal.scorer import SOURCE_CREDIBILITY, DEFAULT_CREDIBILITY
+from spec1_core.config.calibration import (
+    SOURCE_CREDIBILITY,
+    DEFAULT_CREDIBILITY,
+    CLASSIFICATION_WEIGHTS,
+    ANALYST_WEIGHTS,
+    DEFAULT_ANALYST_WEIGHT,
+    CONFIDENCE_BLEND,
+)
 from spec1_labels import VERIF_CORROBORATED, VERIF_CONFLICTED
 
 CLASSIFICATION_WEIGHTS: dict[str, float] = {

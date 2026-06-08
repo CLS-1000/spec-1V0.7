@@ -18,6 +18,18 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from spec1_core.schemas.models import Opportunity, ParsedSignal, Signal
+from spec1_core.config.calibration import (
+    SOURCE_CREDIBILITY,
+    DEFAULT_CREDIBILITY,
+    CREDIBILITY_THRESHOLD,
+    VOLUME_THRESHOLD,
+    VELOCITY_THRESHOLD,
+    NOVELTY_THRESHOLD,
+    VOLUME_TIERS,
+    COMPOSITE_WEIGHTS,
+    PRIORITY_ELEVATED,
+    PRIORITY_STANDARD,
+)
 
 # ─── Credibility gate ────────────────────────────────────────────────────────
 SOURCE_CREDIBILITY: dict[str, float] = {
