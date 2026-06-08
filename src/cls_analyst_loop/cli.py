@@ -248,7 +248,7 @@ def show_case(ctx: click.Context, case_id: str) -> None:
             if audits:
                 click.echo(f"\n  === AUDITS ({len(audits)}) ===")
                 for audit in audits:
-                    audit_data = json.loads(audit["audit_output"])
+                    pass  # audit_output available as audit["audit_output"]
                     click.echo(f"    {audit['audit_id']}")
                     click.echo(f"      Confirmed: {audit['claims_confirmed']}")
                     click.echo(f"      Flagged: {audit['claims_flagged']}")

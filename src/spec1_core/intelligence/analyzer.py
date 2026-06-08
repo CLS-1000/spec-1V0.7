@@ -18,33 +18,11 @@ from spec1_core.config.calibration import (
     SOURCE_CREDIBILITY,
     DEFAULT_CREDIBILITY,
     CLASSIFICATION_WEIGHTS,
-    ANALYST_WEIGHTS,
     DEFAULT_ANALYST_WEIGHT,
-    CONFIDENCE_BLEND,
+    ANALYST_WEIGHTS,
 )
-from spec1_labels import VERIF_CORROBORATED, VERIF_CONFLICTED
 
-CLASSIFICATION_WEIGHTS: dict[str, float] = {
-    VERIF_CORROBORATED: 1.0,
-    "ESCALATE": 0.85,
-    "INVESTIGATE": 0.70,
-    "MONITOR": 0.55,
-    VERIF_CONFLICTED: 0.35,
-    "ARCHIVE": 0.15,
-}
 
-ANALYST_WEIGHT_MAP: dict[str, float] = {
-    "Julian E. Barnes": 0.90,
-    "Ken Dilanian": 0.85,
-    "Natasha Bertrand": 0.87,
-    "Shane Harris": 0.88,
-    "Phillips O'Brien": 0.85,
-    "Michael Kofman": 0.92,
-    "Dara Massicot": 0.91,
-    "Thomas Rid": 0.89,
-    "Melinda Haring": 0.86,
-}
-DEFAULT_ANALYST_WEIGHT = 0.60
 
 
 def _extract_pattern(opportunity: Opportunity, investigation: Investigation) -> str:
@@ -65,7 +43,7 @@ def _calc_analyst_weight(investigation: Investigation) -> float:
     leads = investigation.analyst_leads
     if not leads:
         return DEFAULT_ANALYST_WEIGHT
-    weights = [ANALYST_WEIGHT_MAP.get(lead, DEFAULT_ANALYST_WEIGHT) for lead in leads]
+    weights = [ANALYST_WEIGHTS.get(lead, DEFAULT_ANALYST_WEIGHT) for lead in leads]
     return round(sum(weights) / len(weights), 4)
 
 
