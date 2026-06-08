@@ -76,3 +76,21 @@ if __name__ == "__main__":
 def ensure_schema(db=None):
     """Ensure all migrations are applied. Called by DualWriter on init."""
     run_migrations(db=db)
+
+
+def drop_all(db=None):
+    """Drop all managed tables. Used in tests only."""
+    from cls_db.database import get_db
+    db = db or get_db()
+    tables = [
+        'intelligence_records', 'intelligence_store_log',
+        'analyst_verdicts', 'audit_results', 'analyst_outputs', 'analyst_cases',
+        'psycheops_columns', 'world_state_briefs', 'leads',
+        'political_signals', 'archive',
+        'verification_log', 'outcomes', 'investigations',
+        'score_rejects', 'scored_signals', 'parsed_signals',
+        'harvest_runs', 'harvest_records',
+        'schema_migrations',
+    ]
+    for table in tables:
+        db.execute(f'DROP TABLE IF EXISTS {table}')
