@@ -94,3 +94,9 @@ def drop_all(db=None):
     ]
     for table in tables:
         db.execute(f'DROP TABLE IF EXISTS {table}')
+
+
+def reset_schema(db=None):
+    """Drop all tables and recreate schema. Test utility only."""
+    drop_all(db=db)
+    ensure_schema(db=db)
