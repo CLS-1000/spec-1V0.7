@@ -2,38 +2,21 @@
 -- Dialect: SQLite
 
 CREATE TABLE IF NOT EXISTS leads (
-    id              TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
-    run_id          TEXT NOT NULL,
-    created_at      TEXT NOT NULL DEFAULT (datetime('now')),
-    source_type     TEXT NOT NULL DEFAULT 'pipeline',
-    schema_version  INTEGER NOT NULL DEFAULT 1,
-    lead_id         TEXT NOT NULL UNIQUE,
-    intel_record_id TEXT REFERENCES intelligence_records(id),
-
-    -- Lead content
-    title           TEXT NOT NULL,
-    summary         TEXT NOT NULL,
-    priority        TEXT NOT NULL CHECK (priority IN ('HIGH','MEDIUM','LOW')),
-    phase           INTEGER NOT NULL DEFAULT 1 CHECK (phase IN (1,2)),
-    status          TEXT NOT NULL DEFAULT 'OPEN' CHECK (status IN ('OPEN','ROUTED','PUBLISHED','SPIKED')),
-    domain          TEXT,
-    module          TEXT,
-    recommended_adapter TEXT,
-    investigative_lens  TEXT,
-    freshness_window    TEXT,
-
-    -- Feed prompt (the ignition point)
-    context_load    TEXT,
-    feed_prompt     TEXT,
-
-    -- Confidence
-    confidence      REAL CHECK (confidence BETWEEN 0 AND 1),
-    confidence_label TEXT CHECK (confidence_label IN ('HIGH','MEDIUM','LOW'))
+    lead_id          TEXT PRIMARY KEY,
+    title            TEXT NOT NULL,
+    summary          TEXT,
+    priority         TEXT,
+    category         TEXT,
+    source_record_ids TEXT DEFAULT '[]',
+    action_items     TEXT DEFAULT '[]',
+    confidence       REAL DEFAULT 0.5,
+    generated_at     TEXT,
+    expires_at       TEXT,
+    metadata         TEXT DEFAULT '{}',
+    written_at       TEXT
 );
-CREATE INDEX IF NOT EXISTS idx_leads_run_id ON leads (run_id);
-CREATE INDEX IF NOT EXISTS idx_leads_status ON leads (status);
 CREATE INDEX IF NOT EXISTS idx_leads_priority ON leads (priority);
-CREATE INDEX IF NOT EXISTS idx_leads_domain ON leads (domain);
+CREATE INDEX IF NOT EXISTS idx_leads_category ON leads (category);
 
 CREATE TABLE IF NOT EXISTS world_state_briefs (
     id              TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
@@ -72,7 +55,7 @@ CREATE TABLE IF NOT EXISTS psycheops_columns (
     source_type     TEXT NOT NULL DEFAULT 'analyst',
     schema_version  INTEGER NOT NULL DEFAULT 1,
     column_id       TEXT NOT NULL UNIQUE,
-    lead_id         TEXT REFERENCES leads(id),
+    lead_id         TEXT REFERENCES leads(lead_id),
     issue_number    INTEGER,
 
     -- Content

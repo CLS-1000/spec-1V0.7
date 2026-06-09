@@ -64,8 +64,12 @@ def run_migrations(db=None, migrations_dir=None):
             logger.error("Failed: %s — %s", mf.name, exc)
             raise
 
+    # Build return report
+    from cls_db.models import ALL_DDL
+    total_tables = len(ALL_DDL)
+    tables_created = [name for name, _ in ALL_DDL]
     logger.info("%d migration(s) applied", applied_count)
-    return applied_count
+    return {"tables_created": tables_created, "total_tables": total_tables, "migrations_applied": applied_count}
 
 
 if __name__ == "__main__":
@@ -75,7 +79,10 @@ if __name__ == "__main__":
 
 def ensure_schema(db=None):
     """Ensure all migrations are applied. Called by DualWriter on init."""
-    run_migrations(db=db)
+    report = run_migrations(db=db)
+    if report["migrations_applied"] == 0:
+        return []
+    return report["tables_created"]
 
 
 def drop_all(db=None):
@@ -91,6 +98,8 @@ def drop_all(db=None):
         'score_rejects', 'scored_signals', 'parsed_signals',
         'harvest_runs', 'harvest_records',
         'schema_migrations',
+        'signals', 'briefs', 'psyop_scores', 'verdicts',
+        'congress_records', 'fara_records', 'intel_records', 'osint_records',
     ]
     for table in tables:
         db.execute(f'DROP TABLE IF EXISTS {table}')

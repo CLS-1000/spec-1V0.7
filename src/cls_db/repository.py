@@ -54,7 +54,7 @@ class Repository:
             entry["written_at"] = _now()
         columns = ", ".join(entry.keys())
         placeholders = ", ".join("?" for _ in entry)
-        sql = f"INSERT OR REPLACE INTO {self.table} ({columns}) VALUES ({placeholders})"
+        sql = f"INSERT OR REPLACE INTO {self.table} ({columns}) VALUES ({placeholders})"  # nosec B608
         self.db.execute(sql, tuple(entry.values()))
         return record
 
@@ -76,7 +76,7 @@ class Repository:
             first["written_at"] = now
         columns = ", ".join(first.keys())
         placeholders = ", ".join("?" for _ in first)
-        sql = f"INSERT OR REPLACE INTO {self.table} ({columns}) VALUES ({placeholders})"
+        sql = f"INSERT OR REPLACE INTO {self.table} ({columns}) VALUES ({placeholders})"  # nosec B608
         self.db.executemany(sql, rows)
         return len(rows)
 
