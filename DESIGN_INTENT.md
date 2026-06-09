@@ -276,3 +276,15 @@ Brief output must not be:
 *This document is the authoritative specification for SPEC-1 design intent.*  
 *Last updated by operator. Version controlled in repo root.*  
 *Agents: read this first. Always.*
+
+---
+
+## 11. Product Naming
+
+SPEC-1          Internal engine name. Never changes.
+ONE WORLD CITIZEN  The publication. World State Brief + Metropolitan Source.
+SWITCHBOARD     The city intelligence platform. cls_metro + city adapters.
+                What other cities license to run Metropolitan Source locally.
+
+These names are locked. Do not rename modules to match product names.
+Internal code names (cls_pdx1, cls_metro, cls_osint) stay as-is.
