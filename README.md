@@ -5,7 +5,7 @@ SPEC-1 is a real-time open-source intelligence (OSINT) engine that harvests RSS 
 ## Architecture
 
 ```
-RSS Harvest → Parse → Score (4 gates) → Investigation → Verify → Intelligence → JSONL + PostgreSQL Store
+RSS Harvest → Parse → Score (4 gates) → Investigation → Verify → Intelligencepip → JSONL + PostgreSQL Store
 ```
 
 ## Sources
@@ -20,7 +20,7 @@ RSS Harvest → Parse → Score (4 gates) → Investigation → Verify → Intel
 ## Quick Start
 
 ```bash
-pip install -e ".[dev]"
+ install -e ".[dev]"
 python -m spec1_engine.app.cycle
 ```
 
