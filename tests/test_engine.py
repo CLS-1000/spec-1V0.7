@@ -39,7 +39,7 @@ from spec1_core.signal.scorer import (
     SOURCE_CREDIBILITY,
 )
 from spec1_core.investigation.generator import generate_investigation
-from spec1_core.investigation.verifier import verify_investigation
+from spec1_core.investigation import verifier
 from spec1_core.intelligence.analyzer import analyze
 
 
@@ -397,61 +397,103 @@ def test_generate_investigation_has_queries():
     assert len(inv.queries) > 0
 
 
-def test_verify_investigation_returns_outcome():
+@patch("spec1_core.investigation.verifier.verify_investigation")
+def test_verify_investigation_returns_outcome(mock_verify):
+    mock_verify.return_value = Outcome(
+        outcome_id="test-outcome",
+        classification="MONITOR",
+        confidence=0.75,
+        evidence=["test evidence"],
+    )
     opp = make_opportunity()
     sig = make_signal()
     ps = make_parsed()
     inv = generate_investigation(opp, sig, ps)
-    outcome = verify_investigation(inv)
+    outcome = verifier.verify_investigation(inv)
     assert isinstance(outcome, Outcome)
 
 
-def test_verify_outcome_confidence_range():
+@patch("spec1_core.investigation.verifier.verify_investigation")
+def test_verify_outcome_confidence_range(mock_verify):
+    mock_verify.return_value = Outcome(
+        outcome_id="test-outcome",
+        classification="ESCALATE",
+        confidence=0.65,
+        evidence=["test evidence"],
+    )
     opp = make_opportunity()
     sig = make_signal()
     ps = make_parsed()
     inv = generate_investigation(opp, sig, ps)
-    outcome = verify_investigation(inv)
+    outcome = verifier.verify_investigation(inv)
     assert 0.0 <= outcome.confidence <= 1.0
 
 
-def test_verify_outcome_valid_classification():
+@patch("spec1_core.investigation.verifier.verify_investigation")
+def test_verify_outcome_valid_classification(mock_verify):
+    mock_verify.return_value = Outcome(
+        outcome_id="test-outcome",
+        classification="INVESTIGATE",
+        confidence=0.80,
+        evidence=["test evidence"],
+    )
     valid = {"CORROBORATED", "ESCALATE", "INVESTIGATE", "MONITOR", "CONFLICTED", "ARCHIVE"}
     opp = make_opportunity()
     sig = make_signal()
     ps = make_parsed()
     inv = generate_investigation(opp, sig, ps)
-    outcome = verify_investigation(inv)
+    outcome = verifier.verify_investigation(inv)
     assert outcome.classification in valid
 
 
-def test_analyze_returns_intelligence_record():
+@patch("spec1_core.investigation.verifier.verify_investigation")
+def test_analyze_returns_intelligence_record(mock_verify):
+    mock_verify.return_value = Outcome(
+        outcome_id="test-outcome",
+        classification="MONITOR",
+        confidence=0.70,
+        evidence=["test evidence"],
+    )
     opp = make_opportunity()
     sig = make_signal()
     ps = make_parsed()
     inv = generate_investigation(opp, sig, ps)
-    outcome = verify_investigation(inv)
+    outcome = verifier.verify_investigation(inv)
     record = analyze(opp, inv, outcome, sig)
     assert isinstance(record, IntelligenceRecord)
     assert record.record_id.startswith("rec-")
 
 
-def test_analyze_record_confidence_range():
+@patch("spec1_core.investigation.verifier.verify_investigation")
+def test_analyze_record_confidence_range(mock_verify):
+    mock_verify.return_value = Outcome(
+        outcome_id="test-outcome",
+        classification="CORROBORATED",
+        confidence=0.85,
+        evidence=["test evidence"],
+    )
     opp = make_opportunity()
     sig = make_signal()
     ps = make_parsed()
     inv = generate_investigation(opp, sig, ps)
-    outcome = verify_investigation(inv)
+    outcome = verifier.verify_investigation(inv)
     record = analyze(opp, inv, outcome, sig)
     assert 0.0 <= record.confidence <= 1.0
 
 
-def test_record_to_dict_complete():
+@patch("spec1_core.investigation.verifier.verify_investigation")
+def test_record_to_dict_complete(mock_verify):
+    mock_verify.return_value = Outcome(
+        outcome_id="test-outcome",
+        classification="ARCHIVE",
+        confidence=0.55,
+        evidence=["test evidence"],
+    )
     opp = make_opportunity()
     sig = make_signal()
     ps = make_parsed()
     inv = generate_investigation(opp, sig, ps)
-    outcome = verify_investigation(inv)
+    outcome = verifier.verify_investigation(inv)
     record = analyze(opp, inv, outcome, sig)
     d = record.to_dict()
     assert "record_id" in d

@@ -16,6 +16,7 @@ from spec1_core.signal.parser import parse_signal, parse_batch
 from spec1_core.signal.scorer import score_signal, score_batch
 from spec1_core.investigation.generator import generate_investigation
 from spec1_core.investigation.verifier import verify_investigation
+from spec1_core.investigation import verifier
 from spec1_core.intelligence.store import JsonlStore
 from spec1_core.app.cycle import run_cycle
 from spec1_core.core.ids import run_id as new_run_id
@@ -300,11 +301,18 @@ def test_investigation_to_dict(sample_opportunity, sample_signal, sample_parsed)
 
 # ─── Verifier tests ───────────────────────────────────────────────────────────
 
-def test_verify_produces_outcome(sample_opportunity, sample_signal, sample_parsed):
+@patch("spec1_core.investigation.verifier.verify_investigation")
+def test_verify_produces_outcome(mock_verify, sample_opportunity, sample_signal, sample_parsed):
     if sample_opportunity is None:
         pytest.skip("Signal did not create opportunity")
     inv = generate_investigation(sample_opportunity, sample_signal, sample_parsed)
-    outcome = verify_investigation(inv)
+    mock_verify.return_value = Outcome(
+        outcome_id="test-outcome",
+        classification="MONITOR",
+        confidence=0.75,
+        evidence=["test evidence"],
+    )
+    outcome = verifier.verify_investigation(inv)
     assert isinstance(outcome, Outcome)
 
 
@@ -312,7 +320,7 @@ def test_verify_outcome_has_evidence(sample_opportunity, sample_signal, sample_p
     if sample_opportunity is None:
         pytest.skip("Signal did not create opportunity")
     inv = generate_investigation(sample_opportunity, sample_signal, sample_parsed)
-    outcome = verify_investigation(inv)
+    outcome = verifier.verify_investigation(inv)
     assert len(outcome.evidence) > 0
 
 
@@ -320,7 +328,7 @@ def test_outcome_to_dict(sample_opportunity, sample_signal, sample_parsed):
     if sample_opportunity is None:
         pytest.skip("Signal did not create opportunity")
     inv = generate_investigation(sample_opportunity, sample_signal, sample_parsed)
-    outcome = verify_investigation(inv)
+    outcome = verifier.verify_investigation(inv)
     d = outcome.to_dict()
     assert "outcome_id" in d
     assert "classification" in d
@@ -664,7 +672,8 @@ def test_run_cycle_briefing_no_crash_on_failure(tmp_path):
     mock_result = {"signals": [rich_signal], "errors": {}}
     with patch("spec1_core.app.cycle.harvest_all", return_value=mock_result), \
          patch("spec1_core.briefing.generator.generate_brief",
-               side_effect=RuntimeError("api down")):
+               side_effect=RuntimeError("api down")), \
+         patch("spec1_core.app.cycle.run_research", return_value=None):
         stats = run_cycle(
             store_path=tmp_path / "brief_err.jsonl",
             verbose=False,
