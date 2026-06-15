@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   tools_backfill_jsonl_to_db
 # @loc:      gh_main
-# @status:   drafting
+# @status:   stable
 # @depends:  NONE
 
 """JSONL → SQLite backfill / migration tool.

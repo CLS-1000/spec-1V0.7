@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   tools_run_psyop
 # @loc:      gh_main
-# @status:   drafting
+# @status:   stable
 # @depends:  NONE
 
 """CLI: read intelligence records, score them for psyop patterns, write JSONL.

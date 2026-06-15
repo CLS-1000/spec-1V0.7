@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   tools_publication_generator
 # @loc:      gh_main
-# @status:   drafting
+# @status:   stable
 # @depends:  NONE
 
 """

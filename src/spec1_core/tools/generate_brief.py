@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   tools_generate_brief
 # @loc:      gh_main
-# @status:   drafting
+# @status:   stable
 # @depends:  NONE
 
 """CLI: generate a daily intelligence brief from intelligence records.
