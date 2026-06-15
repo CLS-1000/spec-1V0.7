@@ -1,4 +1,4 @@
-# @domain:   switchboard
+# @domain:   citizens_cognisance
 # @module:   sources_sei
 # @loc:      _SCRATCH
 # @status:   drafting

@@ -1,4 +1,4 @@
-# @domain:   switchboard
+# @domain:   citizens_cognisance
 # @module:   neutrality_attribution
 # @loc:      _SCRATCH
 # @status:   drafting

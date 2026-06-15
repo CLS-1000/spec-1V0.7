@@ -1,4 +1,4 @@
-# @domain:   switchboard
+# @domain:   citizens_cognisance
 # @module:   demos_metro_president_vacancy
 # @loc:      _SCRATCH
 # @status:   drafting

@@ -1,4 +1,4 @@
-# @domain:   switchboard
+# @domain:   citizens_cognisance
 # @module:   watch_base
 # @loc:      _SCRATCH
 # @status:   drafting

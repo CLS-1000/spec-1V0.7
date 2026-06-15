@@ -1,4 +1,4 @@
-# @domain:   switchboard
+# @domain:   citizens_cognisance
 # @module:   legislation_bills
 # @loc:      _SCRATCH
 # @status:   drafting

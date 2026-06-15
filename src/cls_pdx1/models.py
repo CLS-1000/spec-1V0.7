@@ -1,4 +1,4 @@
-# @domain:   switchboard
+# @domain:   citizens_cognisance
 # @module:   models
 # @loc:      _SCRATCH
 # @status:   drafting
