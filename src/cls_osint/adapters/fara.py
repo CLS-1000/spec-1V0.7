@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   adapters_fara
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  cls_db, spec1_core
+
 """FARA (Foreign Agents Registration Act) adapter.
 
 Fetches and parses FARA filings from the DOJ FARA database.

@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   briefing_brief_package_templates
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core/schemas
+
 """
 SPEC-1 Intelligence Engine — Brief Package Prompt Templates
 Three-document cycle output: World State Brief + Lead Packets + Feed Prompts

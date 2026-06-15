@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   workspace_researcher
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Claude API-driven case research for investigation workspace."""
 
 from __future__ import annotations

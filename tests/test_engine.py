@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_engine
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for core engine — pipeline logic, gate scoring, IDs."""
 
 from __future__ import annotations

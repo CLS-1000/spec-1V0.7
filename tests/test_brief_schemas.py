@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_brief_schemas
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for spec1_core.schemas.brief — WorldStateBrief value objects."""
 
 from __future__ import annotations

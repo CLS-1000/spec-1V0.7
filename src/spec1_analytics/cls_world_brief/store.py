@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   cls_world_brief_store
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """WorldBrief persistence — JSONL index + dated Markdown files, with optional SQLite dual-write."""
 
 from __future__ import annotations

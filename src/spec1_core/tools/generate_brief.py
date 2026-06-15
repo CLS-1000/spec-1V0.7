@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   tools_generate_brief
+# @loc:      gh_main
+# @status:   drafting
+# @depends:  NONE
+
 """CLI: generate a daily intelligence brief from intelligence records.
 
 Tries Claude Sonnet via spec1_core.briefing.generator first; falls back to

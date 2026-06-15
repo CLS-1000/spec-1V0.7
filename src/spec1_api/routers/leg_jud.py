@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   routers_leg_jud
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Legislative & Judicial Desk router — /leg_jud."""
 
 from __future__ import annotations

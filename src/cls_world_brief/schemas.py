@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   schemas
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Data schemas for cls_world_brief."""
 
 from __future__ import annotations

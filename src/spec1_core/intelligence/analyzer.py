@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   intelligence_analyzer
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Intelligence Analyzer.
 
 Analyzes verified outcomes and produces IntelligenceRecord instances.

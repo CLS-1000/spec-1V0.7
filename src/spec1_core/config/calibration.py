@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   config_calibration
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """SPEC-1 Calibration Parameters.
 
 Operational parameters — not published. Changes require operator sign-off.

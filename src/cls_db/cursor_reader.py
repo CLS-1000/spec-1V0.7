@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   cursor_reader
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Cursor-based and chunked JSONL reading for cls_db.
 
 Provides forward-only, stateless iteration over large JSONL files without

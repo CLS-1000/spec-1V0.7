@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   tools_historical_briefs
+# @loc:      gh_main
+# @status:   drafting
+# @depends:  NONE
+
 """Generate briefs for every run_id in spec1_intelligence.jsonl that lacks one.
 
 Usage:

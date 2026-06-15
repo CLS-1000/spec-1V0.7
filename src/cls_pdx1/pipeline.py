@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   pipeline
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """PDX-1i pipeline orchestrator.
 
 Runs all source adapters and watch modules, evaluates publication trigger,

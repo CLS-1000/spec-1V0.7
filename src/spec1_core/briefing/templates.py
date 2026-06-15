@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   briefing_templates
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core/schemas
+
 """Prompt templates for the SPEC-1 daily intelligence brief."""
 
 from __future__ import annotations

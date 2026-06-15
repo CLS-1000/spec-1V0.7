@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   scorer
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Psyop scorer — scores text against known psyop patterns."""
 
 from __future__ import annotations

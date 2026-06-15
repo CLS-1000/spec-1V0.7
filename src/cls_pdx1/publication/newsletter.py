@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   publication_newsletter
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Markdown + PDF newsletter renderer for Metro Citizens Brief."""
 
 from __future__ import annotations

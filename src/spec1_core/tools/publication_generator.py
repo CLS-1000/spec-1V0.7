@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   tools_publication_generator
+# @loc:      gh_main
+# @status:   drafting
+# @depends:  NONE
+
 """
 SPEC-1 Publication Generator.
 Produces a PDF brief matching the Psyche-Ops Issue 001 layout.

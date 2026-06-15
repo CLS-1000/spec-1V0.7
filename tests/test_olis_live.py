@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_olis_live
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_pdx1.sources.olis — OlisAdapter offline coverage.
 
 All tests use in-memory fixture data — no HTTP calls.

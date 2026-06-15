@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   schemas
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  cls_db
+
 """Data schemas for cls_analyst_loop — analyst workflow chain of custody."""
 
 from __future__ import annotations

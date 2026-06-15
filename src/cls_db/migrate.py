@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   migrate
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Migration runner for cls_db SQLite schema."""
 from __future__ import annotations
 

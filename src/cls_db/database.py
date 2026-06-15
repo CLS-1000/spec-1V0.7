@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   database
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """SQLite database connection management for cls_db."""
 
 from __future__ import annotations

@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   tools_generate_leads
+# @loc:      gh_main
+# @status:   drafting
+# @depends:  NONE
+
 """CLI: derive actionable Lead objects from intelligence records.
 
 Usage:

@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   signal_harvester
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core/config/calibration.py
+
 """RSS Harvester — ported from cls_osint/collectors/rss.py.
 
 Fetches RSS feeds using feedparser and produces Signal dataclass instances.

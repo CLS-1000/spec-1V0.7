@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   resolver
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Entity resolver for cls_pdx1.
 
 Maps raw contributor/official name strings to canonical IDs in the PDX-1i graph.

@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_tools_generate_brief
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for spec1_core.tools.generate_brief CLI."""
 
 from __future__ import annotations

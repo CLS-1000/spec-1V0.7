@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   demos_metro_president_vacancy
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Metro president vacancy scenario — demonstration pipeline run.
 
 Constructs a minimal fixture set for the Metro Council President vacancy event:

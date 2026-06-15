@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   sources
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  cls_db, spec1_core
+
 """OSINT source registry.
 
 Defines all known sources used across cls_osint adapters.

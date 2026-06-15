@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   signal_scorer
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core/config/calibration.py
+
 """Signal Scorer — implements 4-gate scoring logic.
 
 Ported from cls_osint/scorers/signal_scorer.py with new 4-gate architecture.

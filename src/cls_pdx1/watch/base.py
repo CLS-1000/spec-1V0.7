@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   watch_base
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Watch module base — abstract interface for PDX-1i entity monitors.
 
 Each watch module tracks one entity (PGE, TriMet, PPB, etc.) and emits

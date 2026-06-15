@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   audit
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  cls_db
+
 """LLM audit runner for analyst outputs.
 
 Audits check for:

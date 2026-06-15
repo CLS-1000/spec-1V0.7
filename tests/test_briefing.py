@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_briefing
+# @loc:      gh_main
+# @status:   testing
+# @depends:  spec1_core/schemas
+
 """Tests for the SPEC-1 briefing module."""
 
 from __future__ import annotations

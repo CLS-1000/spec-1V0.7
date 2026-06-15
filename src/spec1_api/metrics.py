@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   metrics
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Thread-safe in-process metrics collector for SPEC-1 API.
 
 Tracks:

@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_psyop_evidence
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_psyop evidence chain system."""
 
 from __future__ import annotations

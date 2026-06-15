@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   legislation_bills
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Bill state machine and tracker.
 
 Every state transition produces a Signal that feeds the publication trigger.

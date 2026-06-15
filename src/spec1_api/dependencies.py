@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   dependencies
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """FastAPI dependency injection for spec1_api."""
 
 from __future__ import annotations

@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   api_routes
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """SPEC-1 API route handlers."""
 
 from __future__ import annotations

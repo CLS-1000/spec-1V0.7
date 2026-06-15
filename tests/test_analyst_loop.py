@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_analyst_loop
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_analyst_loop — analyst workflow chain of custody."""
 
 from __future__ import annotations

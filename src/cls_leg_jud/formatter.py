@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   formatter
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Formatter for LegJudBrief → Markdown."""
 from __future__ import annotations
 from cls_leg_jud.schemas import LegJudBrief, LegJudSection

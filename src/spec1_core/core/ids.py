@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   core_ids
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """ID generation utilities."""
 
 from __future__ import annotations

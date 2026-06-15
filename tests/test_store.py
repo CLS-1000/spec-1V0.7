@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_store
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for intelligence/store.py — JSONL persistence."""
 
 from __future__ import annotations

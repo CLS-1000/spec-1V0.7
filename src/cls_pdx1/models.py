@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   models
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Core data models for cls_pdx1 (PDX-1i).
 
 Uses Pydantic v2 throughout — API-safe and schema-exportable.

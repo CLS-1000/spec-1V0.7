@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   store
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  cls_db, spec1_core
+
 """JSONL persistence for cls_osint records."""
 
 from __future__ import annotations

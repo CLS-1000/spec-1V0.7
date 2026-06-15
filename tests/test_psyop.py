@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_psyop
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_psyop — psyop detection pipeline."""
 
 from __future__ import annotations

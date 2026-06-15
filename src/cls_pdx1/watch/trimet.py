@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   watch_trimet
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """TriMet watch module.
 
 TriMet's board is appointed by the governor. Monitors:

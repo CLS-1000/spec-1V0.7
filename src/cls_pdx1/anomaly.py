@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   anomaly
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """90-day rolling baseline anomaly detector for PDX-1i watch entities."""
 
 from __future__ import annotations

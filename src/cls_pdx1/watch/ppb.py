@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   watch_ppb
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Portland Police Bureau watch module.
 
 City bureau. Monitors:

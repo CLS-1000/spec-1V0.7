@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   producer
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """World brief producer.
 
 Assembles a WorldBrief from IntelligenceRecords and OSINTRecords

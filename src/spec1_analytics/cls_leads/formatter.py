@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   cls_leads_formatter
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Lead formatter — renders Lead objects for human consumption."""
 
 from __future__ import annotations

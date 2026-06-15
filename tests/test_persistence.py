@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_persistence
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_db — database persistence and dual-write."""
 
 from __future__ import annotations

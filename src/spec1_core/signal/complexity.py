@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   signal_complexity
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core/config/calibration.py
+
 """Signal complexity scorer.
 
 Assigns a 0.0–1.0 complexity score to a raw signal before it enters the

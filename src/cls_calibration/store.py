@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   store
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """JSONL persistence for CalibrationReport."""
 
 from __future__ import annotations

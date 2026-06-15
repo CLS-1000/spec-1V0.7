@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   adapters_state_legislative
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  cls_db, spec1_core
+
 """State legislative adapter.
 
 3-source fallback: OpenStates API → LegiScan API → synthetic sample.

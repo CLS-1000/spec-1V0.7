@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   routers_verdicts
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Verdicts router — POST /verdicts, GET /verdicts, GET /verdicts/{record_id}.
 
 Captures human ground truth on intelligence records — Phase 1 of the

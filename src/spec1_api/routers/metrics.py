@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   routers_metrics
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Metrics router — GET /metrics and GET /metrics/json."""
 
 from __future__ import annotations

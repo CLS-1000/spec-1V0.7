@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   psyop_scorer
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Psyop pattern scorer — spec1_core.cls_psyop.
 
 Detects psyop signatures by scoring clustered patterns across harvested signals

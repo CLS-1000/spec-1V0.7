@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   investigation_generator
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Investigation Generator.
 
 Generates Investigation instances from Opportunity + Signal + ParsedSignal.

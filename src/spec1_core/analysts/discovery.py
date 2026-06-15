@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   analysts_discovery
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Discovery Analyst.
 
 Discovers new potential analysts from signal text by pattern matching.

@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_pdx1_anomaly
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_pdx1.anomaly — rolling baseline detector."""
 
 from __future__ import annotations

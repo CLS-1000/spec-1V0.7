@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   neutrality_tone
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Tone gate: reject loaded or editorialising vocabulary."""
 
 from __future__ import annotations

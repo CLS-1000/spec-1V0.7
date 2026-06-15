@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_labels_compliance
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for spec1_labels compliance — no hardcoded label strings in source.
 
 These tests import the check_hardcoded_labels script and run it against the

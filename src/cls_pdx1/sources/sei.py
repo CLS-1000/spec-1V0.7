@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   sources_sei
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """SEI adapter — Oregon Government Ethics Commission Statement of Economic Interest.
 
 SEI filings disclose every official's employer, household income sources,

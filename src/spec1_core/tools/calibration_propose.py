@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   tools_calibration_propose
+# @loc:      gh_main
+# @status:   drafting
+# @depends:  NONE
+
 """Calibration proposal CLI — surfaces drift for human review.
 
 Reads intel records + verdicts, produces a descriptive ProposalReport,

@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   cls_leads_store
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Lead persistence — JSONL store for Lead objects, with optional SQLite dual-write."""
 
 from __future__ import annotations

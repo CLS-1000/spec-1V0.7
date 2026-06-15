@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   publication_builder
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """IssueBuilder — assembles Metro Citizens Brief issues.
 
 Enforces neutrality gate on every section before accepting it.

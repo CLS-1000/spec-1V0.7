@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   cls_world_brief_formatter
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """World brief formatter — renders WorldBrief to Markdown and plain text."""
 
 from __future__ import annotations

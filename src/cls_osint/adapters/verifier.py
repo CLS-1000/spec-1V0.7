@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   adapters_verifier
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  cls_db, spec1_core
+
 """Cross-source verifier for OSINT records.
 
 Checks whether a claim or record appears across multiple independent sources,

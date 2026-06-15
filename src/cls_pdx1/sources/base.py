@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   sources_base
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Abstract base for all PDX-1i source adapters."""
 
 from __future__ import annotations

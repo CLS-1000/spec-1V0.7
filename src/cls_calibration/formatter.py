@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   formatter
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Markdown rendering for ProposalReport."""
 
 from __future__ import annotations

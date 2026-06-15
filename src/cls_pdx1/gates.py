@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   gates
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Structural gates for cls_pdx1.
 
 Every record must pass applicable gates before entering the graph or publication.

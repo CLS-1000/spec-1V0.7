@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   neutrality_attribution
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Attribution gate: every factual claim must carry a source URI."""
 
 from __future__ import annotations

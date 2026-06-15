@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   adapters_narrative
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  cls_db, spec1_core
+
 """Narrative / influence-operation adapter.
 
 Analyses a corpus of OSINTRecords to detect recurring narrative themes,

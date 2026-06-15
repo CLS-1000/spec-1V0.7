@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   repository
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Generic CRUD repository for cls_db.
 
 Provides typed insert/select/delete over SQLite tables.

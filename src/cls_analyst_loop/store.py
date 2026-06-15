@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   store
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  cls_db
+
 """Append-only JSONL + SQLite dual-write storage for analyst workflow records.
 
 All four record types (case, output, audit, verdict) persist via:

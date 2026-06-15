@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   adapters_quant
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  cls_db, spec1_core
+
 """Quantitative market intelligence adapter.
 
 Watches defense, cyber, energy, and macro tickers as a corroborating signal

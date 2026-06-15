@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   indexed_queries
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Indexed query helpers for cls_db.
 
 Provides a thin, composable query layer on top of :class:`cls_db.repository.Repository`

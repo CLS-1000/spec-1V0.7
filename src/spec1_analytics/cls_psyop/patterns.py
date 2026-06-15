@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   cls_psyop_patterns
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Known psyop pattern registry.
 
 Defines PsyopPattern instances covering major psychological operation

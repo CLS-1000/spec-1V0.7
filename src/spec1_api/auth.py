@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   auth
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Optional API-key authentication middleware for spec1_api.
 
 Enabled by setting ``SPEC1_API_KEY`` in the environment.  When set, every

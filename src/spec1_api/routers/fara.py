@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   routers_fara
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """FARA router — GET /fara."""
 
 from __future__ import annotations

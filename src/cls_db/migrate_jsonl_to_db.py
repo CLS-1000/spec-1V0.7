@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   migrate_jsonl_to_db
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Backfill JSONL → SQLite. Idempotent, safe to re-run."""
 
 from __future__ import annotations

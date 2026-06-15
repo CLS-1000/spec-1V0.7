@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   llm_tier3_rules
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Tier 3: rule-based fallback analyzer. Zero external calls."""
 
 from __future__ import annotations

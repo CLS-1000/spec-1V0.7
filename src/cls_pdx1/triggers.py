@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   triggers
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Publication trigger evaluation for Metro Citizens Brief.
 
 The brief is signal-gated, not calendar-gated. This module evaluates

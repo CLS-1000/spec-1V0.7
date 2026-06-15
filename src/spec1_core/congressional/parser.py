@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   congressional_parser
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Congressional trade parser — normalizes raw dicts into Signal dataclasses.
 
 source_type : "congressional_trade"

@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   store
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Verdict persistence — JSONL (always) and SQLite (when a Database is provided).
 
 VerdictStore can run in two modes:

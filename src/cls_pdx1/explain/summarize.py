@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   explain_summarize
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Plain-language summarisation via Claude Sonnet with neutrality retry.
 
 Falls back to a rule-based template on API error — the pipeline never crashes

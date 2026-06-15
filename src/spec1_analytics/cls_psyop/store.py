@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   cls_psyop_store
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Psyop score persistence — JSONL store, with optional SQLite dual-write."""
 
 from __future__ import annotations

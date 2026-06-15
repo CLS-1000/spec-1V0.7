@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   neutrality_section
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Section-level composite neutrality gate."""
 
 from __future__ import annotations

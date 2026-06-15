@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_logging_utils
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for core/logging_utils.py."""
 
 from __future__ import annotations

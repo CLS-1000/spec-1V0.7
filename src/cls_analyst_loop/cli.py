@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   cli
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  cls_db
+
 """Command-line interface for analyst workflow chain of custody.
 
 Commands:

@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_resolver
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_pdx1.resolver — EntityResolver name resolution."""
 
 from __future__ import annotations

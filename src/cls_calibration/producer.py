@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   producer
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Calibration report producer.
 
 Aggregates verdicts onto intelligence records and surfaces reliability drift

@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   spec1_labels
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Canonical label constants for SPEC-1.
 
 All enum-like string values used across packages are defined here.

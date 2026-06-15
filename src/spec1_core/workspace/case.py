@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   workspace_case
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Case file management for persistent investigations."""
 
 from __future__ import annotations

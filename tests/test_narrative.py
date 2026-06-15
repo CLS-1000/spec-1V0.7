@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_narrative
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_osint.adapters.narrative — narrative detection adapter."""
 
 from __future__ import annotations

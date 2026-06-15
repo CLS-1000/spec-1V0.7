@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   publish_log
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Idempotency log for published X (Twitter) threads.
 
 Append-only JSONL; keyed by run_id. Safe for concurrent reads from multiple

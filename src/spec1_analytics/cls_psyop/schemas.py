@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   cls_psyop_schemas
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Data schemas for cls_psyop."""
 
 from __future__ import annotations

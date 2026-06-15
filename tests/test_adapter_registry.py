@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_adapter_registry
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_osint.adapters.registry — adapter marketplace registry."""
 
 from __future__ import annotations

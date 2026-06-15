@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   workspace_tracker
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Signal-to-case matching for investigation workspace."""
 
 from __future__ import annotations

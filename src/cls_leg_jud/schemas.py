@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   schemas
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Schemas for Legislative & Judicial Desk."""
 from __future__ import annotations
 import hashlib

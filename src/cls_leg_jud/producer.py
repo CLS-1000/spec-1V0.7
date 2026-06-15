@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   producer
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Producer for Legislative & Judicial Desk brief."""
 from __future__ import annotations
 

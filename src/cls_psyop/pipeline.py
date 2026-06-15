@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   pipeline
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Psyop detection pipeline — end-to-end processing with enhanced features."""
 
 from __future__ import annotations

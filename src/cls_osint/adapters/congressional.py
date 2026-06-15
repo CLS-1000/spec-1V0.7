@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   adapters_congressional
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  cls_db, spec1_core
+
 """Congressional records adapter.
 
 Fetches US Congressional bills, resolutions, and hearings from:

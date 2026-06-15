@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   aggregator
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Calibration aggregator — folds verdicts onto records to produce reports."""
 
 from __future__ import annotations

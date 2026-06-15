@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_cycle
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for the full cycle pipeline — end-to-end with mocked RSS."""
 
 from __future__ import annotations

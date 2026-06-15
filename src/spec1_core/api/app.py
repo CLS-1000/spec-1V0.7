@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   api_app
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """SPEC-1 FastAPI application.
 
 Startup: initialises APScheduler and optionally fires an immediate cycle.

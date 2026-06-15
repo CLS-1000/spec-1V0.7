@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_leads
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_leads — lead generator, formatter, store."""
 
 from __future__ import annotations

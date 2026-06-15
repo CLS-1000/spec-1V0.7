@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   watch_schnitzer
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Schnitzer family network watch module.
 
 Tracks: Schnitzer Steel, Schnitzer Properties, Harsch Investment Properties,

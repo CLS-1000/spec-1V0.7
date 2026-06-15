@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   watch_water_bureau
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Portland Water Bureau watch module.
 
 City bureau — anomaly surface differs from utilities:

@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   sources_wa_pdc
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """WA PDC adapter — Washington Public Disclosure Commission.
 
 PDC API: https://data.wa.gov/resource/tijg-9uu3.json (contributions)

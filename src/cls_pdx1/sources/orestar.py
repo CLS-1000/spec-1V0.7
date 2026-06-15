@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   sources_orestar
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """ORESTAR adapter — Oregon SOS campaign finance records.
 
 Source: Oregon Secretary of State bulk CSV export.

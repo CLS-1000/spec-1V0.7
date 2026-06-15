@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   routers_brief
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """World brief router — GET /brief."""
 
 from __future__ import annotations

@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   tools_backfill_jsonl_to_db
+# @loc:      gh_main
+# @status:   drafting
+# @depends:  NONE
+
 """JSONL → SQLite backfill / migration tool.
 
 Reads one or more JSONL files and inserts every record into the corresponding

@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   spec1_professional
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Out-of-process PDF renderer for SPEC-1 briefs.
 
 Invoked as a subprocess from spec1_engine.briefing.writer.write_brief_pdf so

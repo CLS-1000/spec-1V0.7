@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   mcp_server
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """SPEC-1 MCP Server — exposes SPEC-1 tools to Claude via Model Context Protocol.
 
 Tools exposed:

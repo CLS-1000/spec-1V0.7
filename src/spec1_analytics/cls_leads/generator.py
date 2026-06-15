@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   cls_leads_generator
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Lead generator — derives actionable leads from intelligence records."""
 
 from __future__ import annotations

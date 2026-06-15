@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   routers_health
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Health check router."""
 
 from __future__ import annotations

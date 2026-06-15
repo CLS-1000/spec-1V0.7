@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   cls_world_brief_synthetic
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Synthetic brief generator for demonstration and testing.
 
 Generates realistic SPEC-1 intelligence briefs with plausible geopolitical

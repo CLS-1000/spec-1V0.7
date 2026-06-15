@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   workspace_cli
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Command-line interface for case management.
 
 Usage:

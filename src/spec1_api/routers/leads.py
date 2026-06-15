@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   routers_leads
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Leads router — GET /leads, POST /leads/generate."""
 
 from __future__ import annotations

@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   main
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 from __future__ import annotations
 
 

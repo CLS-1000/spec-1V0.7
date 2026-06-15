@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   adapters_judicial
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  cls_db, spec1_core
+
 """Judicial adapter — federal court and disclosure records.
 
 3-source fallback: CourtListener API → PACER RSS feed → synthetic sample.

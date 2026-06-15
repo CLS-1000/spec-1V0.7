@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   cls_psyop_evidence
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Evidence chains for psyop pattern detection."""
 
 from __future__ import annotations

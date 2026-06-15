@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_mcp_server
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for mcp_server.py — MCP server tool implementations."""
 
 from __future__ import annotations

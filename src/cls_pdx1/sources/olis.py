@@ -1,3 +1,9 @@
+# @domain:   switchboard
+# @module:   sources_olis
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """OLIS adapter — Oregon Legislative Information System.
 
 Tracks bills, votes, committee assignments, and hearing witnesses.

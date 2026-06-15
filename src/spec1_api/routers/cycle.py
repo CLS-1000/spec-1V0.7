@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   routers_cycle
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Cycle router — POST /cycle/run."""
 
 from __future__ import annotations

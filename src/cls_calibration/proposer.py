@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   proposer
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Calibration proposer — turns a CalibrationReport into suggested adjustments.
 
 Output is descriptive only. Every adjustment is something a human is

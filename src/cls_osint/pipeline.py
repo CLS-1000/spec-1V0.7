@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   pipeline
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  cls_db, spec1_core
+
 """Full OSINT processing pipeline.
 
 Orchestrates: feed collection → narrative detection → FARA/Congressional

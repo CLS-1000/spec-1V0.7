@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   store
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """LegJudBrief persistence — append-only JSONL store."""
 from __future__ import annotations
 

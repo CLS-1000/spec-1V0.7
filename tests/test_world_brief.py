@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_world_brief
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_world_brief — world brief producer, formatter, store."""
 
 from __future__ import annotations

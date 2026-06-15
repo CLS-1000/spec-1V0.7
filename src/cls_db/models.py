@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   models
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """SQLite table schemas for cls_db.
 
 Defines CREATE TABLE statements for all SPEC-1 entities.
