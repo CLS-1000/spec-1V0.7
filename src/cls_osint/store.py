@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   store
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  cls_db, spec1_core
 
 """JSONL persistence for cls_osint records."""

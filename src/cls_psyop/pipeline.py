@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   pipeline
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Psyop detection pipeline — end-to-end processing with enhanced features."""

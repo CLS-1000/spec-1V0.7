@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   producer
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Producer for Legislative & Judicial Desk brief."""

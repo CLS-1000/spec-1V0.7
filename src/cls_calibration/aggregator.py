@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   aggregator
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Calibration aggregator — folds verdicts onto records to produce reports."""

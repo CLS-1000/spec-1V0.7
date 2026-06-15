@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   adapters_registry
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  cls_db, spec1_core
 
 """Adapter base class and registry for the SPEC-1 custom adapter marketplace.

@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   adapters_congressional
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  cls_db, spec1_core
 
 """Congressional records adapter.

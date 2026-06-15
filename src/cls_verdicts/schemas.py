@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   schemas
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Data schemas for cls_verdicts."""

@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   generator
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Lead generator — derives actionable leads from intelligence records."""

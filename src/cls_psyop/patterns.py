@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   patterns
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Known psyop pattern registry.

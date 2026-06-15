@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   audit
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  cls_db
 
 """LLM audit runner for analyst outputs.

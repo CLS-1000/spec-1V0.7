@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   formatter
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """World brief formatter — renders WorldBrief to Markdown and plain text."""

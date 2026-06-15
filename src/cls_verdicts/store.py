@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   store
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Verdict persistence — JSONL (always) and SQLite (when a Database is provided).

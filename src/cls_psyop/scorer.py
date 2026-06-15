@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   scorer
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Psyop scorer — scores text against known psyop patterns."""

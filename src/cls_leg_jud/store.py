@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   store
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """LegJudBrief persistence — append-only JSONL store."""

@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   store
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  cls_db
 
 """Append-only JSONL + SQLite dual-write storage for analyst workflow records.

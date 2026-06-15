@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   proposer
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Calibration proposer — turns a CalibrationReport into suggested adjustments.

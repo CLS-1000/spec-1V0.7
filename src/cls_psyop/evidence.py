@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   evidence
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Evidence chains for psyop pattern detection."""

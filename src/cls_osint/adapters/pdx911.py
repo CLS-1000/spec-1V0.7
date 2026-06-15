@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   adapters_pdx911
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  cls_db, spec1_core
 
 """Portland 911 incidents adapter.

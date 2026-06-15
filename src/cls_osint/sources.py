@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   sources
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  cls_db, spec1_core
 
 """OSINT source registry.

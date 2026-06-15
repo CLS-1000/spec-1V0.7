@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   schemas
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  cls_db
 
 """Data schemas for cls_analyst_loop — analyst workflow chain of custody."""

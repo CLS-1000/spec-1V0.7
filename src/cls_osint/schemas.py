@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   schemas
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  cls_db, spec1_core
 
 """Data schemas for cls_osint."""
