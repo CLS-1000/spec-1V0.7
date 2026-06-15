@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   dual_write
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Dual-write layer — writes to both JSONL and SQLite atomically.

@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   database
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """SQLite database connection management for cls_db."""

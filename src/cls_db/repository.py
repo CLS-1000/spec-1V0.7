@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   repository
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Generic CRUD repository for cls_db.

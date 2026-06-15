@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   models
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """SQLite table schemas for cls_db.

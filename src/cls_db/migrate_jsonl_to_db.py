@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   migrate_jsonl_to_db
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Backfill JSONL → SQLite. Idempotent, safe to re-run."""

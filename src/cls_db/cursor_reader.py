@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   cursor_reader
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Cursor-based and chunked JSONL reading for cls_db.

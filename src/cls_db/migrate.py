@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   migrate
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Migration runner for cls_db SQLite schema."""

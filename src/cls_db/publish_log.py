@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   publish_log
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Idempotency log for published X (Twitter) threads.

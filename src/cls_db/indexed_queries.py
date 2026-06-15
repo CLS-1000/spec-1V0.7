@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   indexed_queries
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Indexed query helpers for cls_db.
