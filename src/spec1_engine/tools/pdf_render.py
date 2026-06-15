@@ -1,7 +1,7 @@
 # @domain:   spec-1
 # @module:   spec1_professional
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Out-of-process PDF renderer for SPEC-1 briefs.
