@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   pipeline
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """PDX-1i pipeline orchestrator.

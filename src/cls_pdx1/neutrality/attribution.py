@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   neutrality_attribution
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """Attribution gate: every factual claim must carry a source URI."""

@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   resolver
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """Entity resolver for cls_pdx1.

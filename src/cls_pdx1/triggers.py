@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   triggers
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """Publication trigger evaluation for Metro Citizens Brief.

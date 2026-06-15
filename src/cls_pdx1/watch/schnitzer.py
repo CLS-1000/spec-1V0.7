@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   watch_schnitzer
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """Schnitzer family network watch module.

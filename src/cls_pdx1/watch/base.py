@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   watch_base
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """Watch module base — abstract interface for PDX-1i entity monitors.

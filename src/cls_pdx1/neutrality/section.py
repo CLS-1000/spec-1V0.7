@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   neutrality_section
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """Section-level composite neutrality gate."""

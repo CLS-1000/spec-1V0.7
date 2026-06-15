@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   legislation_bills
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """Bill state machine and tracker.

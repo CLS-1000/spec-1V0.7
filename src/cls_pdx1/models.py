@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   models
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """Core data models for cls_pdx1 (PDX-1i).

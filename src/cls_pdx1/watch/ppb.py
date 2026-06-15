@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   watch_ppb
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """Portland Police Bureau watch module.

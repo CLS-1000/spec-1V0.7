@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   watch_water_bureau
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """Portland Water Bureau watch module.

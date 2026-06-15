@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   sources_base
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """Abstract base for all PDX-1i source adapters."""

@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   publication_diagram
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """D3 force-directed graph exporter for Metro Citizens Brief.

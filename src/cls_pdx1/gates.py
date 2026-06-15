@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   gates
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """Structural gates for cls_pdx1.

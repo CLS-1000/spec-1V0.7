@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   publication_builder
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """IssueBuilder — assembles Metro Citizens Brief issues.

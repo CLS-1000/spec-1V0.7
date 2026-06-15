@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   demos_metro_president_vacancy
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """Metro president vacancy scenario — demonstration pipeline run.

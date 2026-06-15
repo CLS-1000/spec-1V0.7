@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   sources_wa_pdc
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """WA PDC adapter — Washington Public Disclosure Commission.

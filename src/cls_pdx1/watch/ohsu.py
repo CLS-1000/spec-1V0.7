@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   watch_ohsu
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """OHSU watch module — Oregon Health & Science University.

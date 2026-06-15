@@ -1,7 +1,7 @@
 # @domain:   citizens_cognisance
 # @module:   neutrality_tone
-# @loc:      _SCRATCH
-# @status:   drafting
+# @loc:      gh_main
+# @status:   testing
 # @depends:  NONE
 
 """Tone gate: reject loaded or editorialising vocabulary."""
