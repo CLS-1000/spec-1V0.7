@@ -76,8 +76,9 @@ class DualWriter:
                     fh.write(json.dumps(entry) + "\n")
             try:
                 self.repo.insert_batch(entries)
-            except Exception:
-                pass
+            except Exception as _e:
+                import logging
+                logging.getLogger(__name__).warning("SQLite batch write failed (non-fatal): %s", _e)
         return entries
 
     def append(self, record: dict) -> dict:
