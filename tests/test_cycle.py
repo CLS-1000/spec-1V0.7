@@ -678,7 +678,7 @@ def test_run_cycle_briefing_no_crash_on_failure(tmp_path):
     with patch("spec1_core.app.cycle.harvest_all", return_value=mock_result), \
          patch("spec1_core.briefing.generator.generate_brief",
                side_effect=RuntimeError("api down")), \
-         patch("spec1_core.app.cycle.run_research", return_value=None):
+         patch("spec1_core.workspace.researcher.run_research", return_value=None):
         stats = run_cycle(
             store_path=tmp_path / "brief_err.jsonl",
             verbose=False,
