@@ -21,7 +21,6 @@ from spec1_core.signal.harvester import harvest_all, DEFAULT_FEEDS
 from spec1_core.signal.parser import parse_signal, parse_batch
 from spec1_core.signal.scorer import score_signal, score_batch
 from spec1_core.investigation.generator import generate_investigation
-from spec1_core.investigation.verifier import verify_investigation
 from spec1_core.investigation import verifier
 from spec1_core.intelligence.store import JsonlStore
 from spec1_core.app.cycle import run_cycle
