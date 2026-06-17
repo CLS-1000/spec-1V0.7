@@ -1,4 +1,4 @@
-# @domain:   citizens_cognisance
+# @domain:   citizens_source
 # @module:   demos_metro_president_vacancy
 # @loc:      gh_main
 # @status:   testing

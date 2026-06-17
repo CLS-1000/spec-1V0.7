@@ -1,4 +1,4 @@
-# @domain:   citizens_cognisance
+# @domain:   citizens_source
 # @module:   orestar
 # @loc:      _SCRATCH
 # @status:   drafting
