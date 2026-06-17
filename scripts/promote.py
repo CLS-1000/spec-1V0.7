@@ -49,7 +49,7 @@ NAMESPACE_PATHS = {
     "tests":            "tests",
     "scripts":          "scripts",
     "tools":            "tools",
-    "citizens_cognisance": "src/cls_pdx1",
+    "citizens_source": "src/cls_pdx1",
 }
 
 def update_tags(filepath: Path, new_loc: str, new_status: str, dry_run: bool) -> tuple[bool, str, str]:

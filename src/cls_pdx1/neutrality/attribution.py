@@ -1,4 +1,4 @@
-# @domain:   citizens_cognisance
+# @domain:   citizens_source
 # @module:   neutrality_attribution
 # @loc:      gh_main
 # @status:   testing

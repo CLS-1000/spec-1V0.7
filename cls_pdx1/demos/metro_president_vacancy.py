@@ -1,4 +1,4 @@
-# @domain:   citizens_cognisance
+# @domain:   citizens_source
 # @module:   metro_president_vacancy
 # @loc:      _SCRATCH
 # @status:   drafting
