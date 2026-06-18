@@ -1,4 +1,4 @@
-# @domain:   leads_intel
+# @domain:   publisher
 # @module:   store
 # @loc:      gh_main
 # @status:   stable

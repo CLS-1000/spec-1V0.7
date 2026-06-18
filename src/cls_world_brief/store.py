@@ -1,4 +1,4 @@
-# @domain:   world_brief
+# @domain:   publisher
 # @module:   store
 # @loc:      gh_main
 # @status:   stable

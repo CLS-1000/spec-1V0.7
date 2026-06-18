@@ -1,4 +1,4 @@
-# @domain:   psyop
+# @domain:   product
 # @module:   patterns
 # @loc:      gh_main
 # @status:   stable
