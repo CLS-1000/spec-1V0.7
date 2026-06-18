@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   machine
 # @module:   migrate_jsonl_to_db
 # @loc:      gh_main
 # @status:   stable

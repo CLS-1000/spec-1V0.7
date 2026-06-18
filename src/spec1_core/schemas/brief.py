@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   machine
 # @module:   schemas_brief
 # @loc:      gh_main
 # @status:   stable

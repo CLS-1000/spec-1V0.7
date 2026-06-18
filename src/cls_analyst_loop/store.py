@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   handler
 # @module:   store
 # @loc:      gh_main
 # @status:   stable

@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   publisher
 # @module:   app_x
 # @loc:      gh_main
 # @status:   stable

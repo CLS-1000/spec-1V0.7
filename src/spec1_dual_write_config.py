@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   machine
 # @module:   spec1_dual_write_config
 # @loc:      _SCRATCH
 # @status:   drafting

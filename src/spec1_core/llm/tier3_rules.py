@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   machine
 # @module:   llm_tier3_rules
 # @loc:      gh_main
 # @status:   stable

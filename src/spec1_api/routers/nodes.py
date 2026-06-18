@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   machine
 # @module:   routers_nodes
 # @loc:      gh_main
 # @status:   stable

@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   intelligence
 # @module:   congressional_cycle
 # @loc:      gh_main
 # @status:   stable

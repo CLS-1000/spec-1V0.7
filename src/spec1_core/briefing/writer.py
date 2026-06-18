@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   publisher
 # @module:   briefing_writer
 # @loc:      gh_main
 # @status:   stable

@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   machine
 # @module:   repository
 # @loc:      gh_main
 # @status:   stable

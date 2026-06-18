@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   machine
 # @module:   api_scheduler
 # @loc:      gh_main
 # @status:   stable

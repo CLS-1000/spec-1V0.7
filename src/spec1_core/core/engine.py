@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   machine
 # @module:   core_engine
 # @loc:      gh_main
 # @status:   stable

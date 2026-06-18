@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   intelligence
 # @module:   adapters_state_legislative
 # @loc:      gh_main
 # @status:   stable

@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   intelligence
 # @module:   analysts_credibility
 # @loc:      gh_main
 # @status:   stable

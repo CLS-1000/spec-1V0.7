@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   intelligence
 # @module:   adapters_registry
 # @loc:      gh_main
 # @status:   stable

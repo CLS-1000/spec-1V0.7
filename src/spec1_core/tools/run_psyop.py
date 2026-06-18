@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   publisher
 # @module:   tools_run_psyop
 # @loc:      gh_main
 # @status:   stable

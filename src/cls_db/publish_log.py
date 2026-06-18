@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   machine
 # @module:   publish_log
 # @loc:      gh_main
 # @status:   stable

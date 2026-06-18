@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   handler
 # @module:   workspace_researcher
 # @loc:      gh_main
 # @status:   stable

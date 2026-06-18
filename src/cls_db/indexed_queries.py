@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   machine
 # @module:   indexed_queries
 # @loc:      gh_main
 # @status:   stable

@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   intelligence
 # @module:   signal_complexity
 # @loc:      gh_main
 # @status:   stable

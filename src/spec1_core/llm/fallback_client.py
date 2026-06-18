@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   machine
 # @module:   llm_fallback_client
 # @loc:      gh_main
 # @status:   stable

@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   machine
 # @module:   cursor_reader
 # @loc:      gh_main
 # @status:   stable

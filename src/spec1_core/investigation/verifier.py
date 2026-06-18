@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   intelligence
 # @module:   investigation_verifier
 # @loc:      gh_main
 # @status:   stable

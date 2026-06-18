@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   intelligence
 # @module:   adapters_narrative
 # @loc:      gh_main
 # @status:   stable

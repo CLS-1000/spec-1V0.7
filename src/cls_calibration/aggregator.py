@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   intelligence
 # @module:   aggregator
 # @loc:      gh_main
 # @status:   stable

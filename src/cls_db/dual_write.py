@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   machine
 # @module:   dual_write
 # @loc:      gh_main
 # @status:   stable

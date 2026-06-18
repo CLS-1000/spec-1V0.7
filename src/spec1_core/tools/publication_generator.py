@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   publisher
 # @module:   tools_publication_generator
 # @loc:      gh_main
 # @status:   stable
