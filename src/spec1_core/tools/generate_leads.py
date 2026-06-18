@@ -25,8 +25,8 @@ import os
 import sys
 from pathlib import Path
 
-from spec1_analytics.cls_leads.generator import generate_leads
-from spec1_analytics.cls_leads.store import LeadStore
+from cls_leads.generator import generate_leads
+from cls_leads.store import LeadStore
 from spec1_labels import PRIORITY_CRITICAL, PRIORITY_HIGH, PRIORITY_MEDIUM, PRIORITY_LOW
 
 

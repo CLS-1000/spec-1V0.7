@@ -13,7 +13,7 @@ from typing import Optional
 from fastapi import APIRouter, Query
 
 from spec1_api.dependencies import BriefStoreDep, IntelStoreDep
-from spec1_analytics.cls_world_brief.producer import produce_brief
+from cls_world_brief.producer import produce_brief
 
 router = APIRouter(prefix="/brief", tags=["brief"])
 

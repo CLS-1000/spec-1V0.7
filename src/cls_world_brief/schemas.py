@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   world_brief
 # @module:   schemas
 # @loc:      gh_main
 # @status:   stable

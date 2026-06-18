@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   world_brief
 # @module:   producer
 # @loc:      gh_main
 # @status:   stable

@@ -1,7 +1,7 @@
-# @domain:   spec-1
-# @module:   cls_world_brief_synthetic
-# @loc:      _SCRATCH
-# @status:   drafting
+# @domain:   world_brief
+# @module:   synthetic
+# @loc:      gh_main
+# @status:   stable
 # @depends:  NONE
 
 """Synthetic brief generator for demonstration and testing.
@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 
-from spec1_analytics.cls_world_brief.schemas import BriefSection, WorldBrief
+from cls_world_brief.schemas import BriefSection, WorldBrief
 
 
 # Realistic signal clusters by date offset
@@ -89,7 +89,7 @@ _SYNTHETIC_BRIEFS = {
             {
                 "title": "Cyber & Infrastructure",
                 "body": (
-                    "House Armed Services Cyber Subcommittee advances FY2027 appropriations (+$15M cyber personnel). "
+                    "House Armed Services Cyber Subcommittee advances FY2027 appropriations (+\$15M cyber personnel). "
                     "Signal sourced from Capitol Trades equity filings + congressional activity mining. "
                     "Likely beneficiaries: Northrop Grumman, Raytheon (flagged in leads)."
                 ),

@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   psyop
 # @module:   store
 # @loc:      gh_main
 # @status:   stable

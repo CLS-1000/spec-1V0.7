@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   leads_intel
 # @module:   formatter
 # @loc:      gh_main
 # @status:   stable

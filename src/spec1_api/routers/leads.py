@@ -13,7 +13,7 @@ from typing import Optional
 from fastapi import APIRouter, Query
 
 from spec1_api.dependencies import IntelStoreDep, LeadStoreDep, OsintStoreDep
-from spec1_analytics.cls_leads.generator import generate_leads
+from cls_leads.generator import generate_leads
 
 router = APIRouter(prefix="/leads", tags=["leads"])
 

@@ -105,8 +105,8 @@ def _try_claude(records: list[dict], cycle_stats: dict, mode: str = "standard") 
 
 
 def _rule_based_fallback(records: list[dict]) -> str:
-    from spec1_analytics.cls_world_brief.formatter import to_markdown
-    from spec1_analytics.cls_world_brief.producer import produce_brief
+    from cls_world_brief.formatter import to_markdown
+    from cls_world_brief.producer import produce_brief
 
     brief = produce_brief(records)
     return to_markdown(brief)

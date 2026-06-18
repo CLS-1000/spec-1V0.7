@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 
 
-from spec1_analytics.cls_psyop.evidence import EvidenceChain, EvidenceStore
+from cls_psyop.evidence import EvidenceChain, EvidenceStore
 from spec1_core.psyop.scorer import (
     NARRATIVE_CLUSTER,
     CONSENSUS_SPIKE,

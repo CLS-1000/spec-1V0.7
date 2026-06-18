@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   world_brief
 # @module:   formatter
 # @loc:      gh_main
 # @status:   stable

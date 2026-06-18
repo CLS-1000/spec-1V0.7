@@ -29,7 +29,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from spec1_analytics.cls_psyop.evidence import EvidenceChain, EvidenceStore
+from cls_psyop.evidence import EvidenceChain, EvidenceStore
 from spec1_core.intelligence.store import JsonlStore
 from spec1_labels import PSYOP_CLEAN
 
