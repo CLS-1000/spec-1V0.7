@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   publisher
 # @module:   test_world_brief
 # @loc:      gh_main
 # @status:   testing

@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   intelligence
 # @module:   test_adapter_registry
 # @loc:      gh_main
 # @status:   testing

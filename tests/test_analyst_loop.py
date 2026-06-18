@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   intelligence
 # @module:   test_analyst_loop
 # @loc:      gh_main
 # @status:   testing

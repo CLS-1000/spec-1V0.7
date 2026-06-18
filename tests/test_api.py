@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   machine
 # @module:   test_api
 # @loc:      gh_main
 # @status:   testing

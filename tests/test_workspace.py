@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   handler
 # @module:   test_workspace
 # @loc:      gh_main
 # @status:   testing

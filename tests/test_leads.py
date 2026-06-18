@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   publisher
 # @module:   test_leads
 # @loc:      gh_main
 # @status:   testing

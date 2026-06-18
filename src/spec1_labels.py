@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   machine
 # @module:   spec1_labels
 # @loc:      _SCRATCH
 # @status:   drafting

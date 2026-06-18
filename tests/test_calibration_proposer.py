@@ -1,4 +1,4 @@
-# @domain:   spec-1
+# @domain:   intelligence
 # @module:   test_calibration_proposer
 # @loc:      gh_main
 # @status:   testing
