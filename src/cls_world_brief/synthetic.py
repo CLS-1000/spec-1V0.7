@@ -89,7 +89,7 @@ _SYNTHETIC_BRIEFS = {
             {
                 "title": "Cyber & Infrastructure",
                 "body": (
-                    "House Armed Services Cyber Subcommittee advances FY2027 appropriations (+\$15M cyber personnel). "
+                    r"House Armed Services Cyber Subcommittee advances FY2027 appropriations (+\$15M cyber personnel). "
                     "Signal sourced from Capitol Trades equity filings + congressional activity mining. "
                     "Likely beneficiaries: Northrop Grumman, Raytheon (flagged in leads)."
                 ),
