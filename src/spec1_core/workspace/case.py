@@ -1,3 +1,10 @@
+# @domain:   handler
+# @module:   workspace_case
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+# TODO: back-import from spec1_engine — migrate to spec1_core equivalent
+
 """Case file management for persistent investigations."""
 
 from __future__ import annotations

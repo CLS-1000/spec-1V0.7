@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   feed
+# @loc:      gh_main
+# @status:   stable
+# @depends:  cls_db, spec1_core
+
 """Generic feed fetcher used across cls_osint adapters.
 
 Wraps feedparser with retry logic and source-specific workarounds.

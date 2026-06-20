@@ -1,3 +1,9 @@
+# @domain:   product
+# @module:   scorer
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Psyop scorer — scores text against known psyop patterns."""
 
 from __future__ import annotations

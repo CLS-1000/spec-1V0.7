@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   watch_schnitzer
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Schnitzer family network watch module.
 
 Tracks: Schnitzer Steel, Schnitzer Properties, Harsch Investment Properties,

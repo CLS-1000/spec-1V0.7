@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   formatter
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Lead formatter — renders Lead objects for human consumption."""
 
 from __future__ import annotations

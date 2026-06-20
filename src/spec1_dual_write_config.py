@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   spec1_dual_write_config
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Dual-write factory per module. Singleton pattern."""
 
 from __future__ import annotations

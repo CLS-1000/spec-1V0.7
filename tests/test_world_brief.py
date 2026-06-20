@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   test_world_brief
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_world_brief — world brief producer, formatter, store."""
 
 from __future__ import annotations
@@ -5,10 +11,10 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 
-from spec1_analytics.cls_world_brief.schemas import WorldBrief, BriefSection
-from spec1_analytics.cls_world_brief.producer import produce_brief
-from spec1_analytics.cls_world_brief.formatter import to_markdown, to_plain_text, to_json_summary
-from spec1_analytics.cls_world_brief.store import BriefStore
+from cls_world_brief.schemas import WorldBrief, BriefSection
+from cls_world_brief.producer import produce_brief
+from cls_world_brief.formatter import to_markdown, to_plain_text, to_json_summary
+from cls_world_brief.store import BriefStore
 
 
 def _make_record(record_id="rec1", content="Defense spending increased for military"):

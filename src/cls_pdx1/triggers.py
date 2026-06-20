@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   triggers
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Publication trigger evaluation for Metro Citizens Brief.
 
 The brief is signal-gated, not calendar-gated. This module evaluates

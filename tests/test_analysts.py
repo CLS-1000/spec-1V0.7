@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   test_analysts
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for analysts — registry, credibility scoring, discovery."""
 
 from __future__ import annotations

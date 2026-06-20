@@ -146,7 +146,7 @@ ANALYSTS = [
         name="Jane Smith",
         affiliation="RAND Corporation",
         domains=["defense", "strategy"],
-        credibility_score=0.85,   # ← adjust here
+        credibility_score=0.5,   # ← calibrated threshold, adjust here
     ),
     # ...
 ]

@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   publish_log
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Idempotency log for published X (Twitter) threads.
 
 Append-only JSONL; keyed by run_id. Safe for concurrent reads from multiple

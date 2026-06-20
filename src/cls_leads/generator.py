@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   generator
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Lead generator — derives actionable leads from intelligence records."""
 
 from __future__ import annotations

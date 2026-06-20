@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_pdx1_watch
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_pdx1 watch modules."""
 
 from __future__ import annotations

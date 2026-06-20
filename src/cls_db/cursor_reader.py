@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   cursor_reader
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Cursor-based and chunked JSONL reading for cls_db.
 
 Provides forward-only, stateless iteration over large JSONL files without

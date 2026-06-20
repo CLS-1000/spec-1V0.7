@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   test_metrics
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for spec1_api.metrics — in-process metrics collector."""
 
 from __future__ import annotations

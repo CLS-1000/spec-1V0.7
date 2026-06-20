@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   test_api
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for the SPEC-1 FastAPI application."""
 
 from __future__ import annotations

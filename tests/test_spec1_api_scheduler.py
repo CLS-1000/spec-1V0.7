@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   test_spec1_api_scheduler
+# @loc:      gh_main
+# @status:   testing
+# @depends:  spec1_core, cls_db
+
 """Tests for spec1_api.scheduler — kill-switch and run-on-start behaviour."""
 
 from __future__ import annotations

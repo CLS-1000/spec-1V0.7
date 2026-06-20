@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   adapters_quant
+# @loc:      gh_main
+# @status:   stable
+# @depends:  cls_db, spec1_core
+
 """Quantitative market intelligence adapter.
 
 Watches defense, cyber, energy, and macro tickers as a corroborating signal

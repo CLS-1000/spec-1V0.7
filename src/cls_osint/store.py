@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   store
+# @loc:      gh_main
+# @status:   stable
+# @depends:  cls_db, spec1_core
+
 """JSONL persistence for cls_osint records."""
 
 from __future__ import annotations

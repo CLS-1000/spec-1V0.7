@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   congressional_scorer
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Congressional trade scorer — 4-gate scoring.
 
 Gates:

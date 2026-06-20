@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   routers_leads
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Leads router — GET /leads, POST /leads/generate."""
 
 from __future__ import annotations
@@ -7,7 +13,7 @@ from typing import Optional
 from fastapi import APIRouter, Query
 
 from spec1_api.dependencies import IntelStoreDep, LeadStoreDep, OsintStoreDep
-from spec1_analytics.cls_leads.generator import generate_leads
+from cls_leads.generator import generate_leads
 
 router = APIRouter(prefix="/leads", tags=["leads"])
 

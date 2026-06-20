@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   store
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """WorldBrief persistence — JSONL index + dated Markdown files, with optional SQLite dual-write."""
 
 from __future__ import annotations

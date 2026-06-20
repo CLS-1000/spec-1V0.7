@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   intelligence_store
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """JSONL Intelligence Store — ported from cls_osint/persistence/store.py.
 
 Append-only JSONL writer with threading lock and disk persistence.

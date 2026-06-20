@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   test_verifier
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for the three-tier LLM investigation verifier."""
 
 from __future__ import annotations

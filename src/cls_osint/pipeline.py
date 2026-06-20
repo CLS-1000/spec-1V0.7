@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   pipeline
+# @loc:      gh_main
+# @status:   stable
+# @depends:  cls_db, spec1_core
+
 """Full OSINT processing pipeline.
 
 Orchestrates: feed collection → narrative detection → FARA/Congressional

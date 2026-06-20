@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   api_scheduler
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """APScheduler setup for SPEC-1.
 
 Schedules run_cycle() on a daily cron at 06:00 America/Los_Angeles.

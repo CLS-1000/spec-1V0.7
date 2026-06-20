@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   llm_ollama_manager
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Tier 2: Ollama lifecycle manager (spawn, health-check, model pull, chat)."""
 
 from __future__ import annotations

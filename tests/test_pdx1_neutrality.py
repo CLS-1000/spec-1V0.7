@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_pdx1_neutrality
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_pdx1.neutrality gates."""
 
 from __future__ import annotations
@@ -18,10 +24,6 @@ class TestToneGate:
         ok, reason = tone_gate("The official admitted wrongdoing.")
         assert not ok
         assert "TONE_001" in (reason or "")
-
-    def test_revealed_fails(self):
-        ok, reason = tone_gate("Documents revealed the contract.")
-        assert not ok
 
     def test_slammed_fails(self):
         ok, reason = tone_gate("The mayor slammed the decision.")

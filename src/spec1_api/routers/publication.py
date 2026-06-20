@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   routers_publication
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Publication router — GET /publication/latest, GET /publication/list, POST /publication/generate."""
 
 from __future__ import annotations

@@ -1,3 +1,9 @@
+# @domain:   handler
+# @module:   test_verdicts
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_verdicts (schema + store) and the /verdicts API surface."""
 
 from __future__ import annotations

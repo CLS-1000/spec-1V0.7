@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_cursor_reader
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_db.cursor_reader — cursor-based JSONL pagination."""
 
 from __future__ import annotations

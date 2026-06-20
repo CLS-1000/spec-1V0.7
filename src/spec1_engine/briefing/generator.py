@@ -4,16 +4,10 @@ Calls Claude Sonnet to write a publishable brief from today's scored records.
 Falls back to a raw-stats brief on any API error — never crashes the cycle.
 """
 
-import os
-try:
-    from dotenv import load_dotenv
-except ModuleNotFoundError:
-    load_dotenv = None
-
-if load_dotenv is not None:
-    load_dotenv()
+from __future__ import annotations
 
 import logging
+import os
 from datetime import datetime, timezone
 
 import anthropic
@@ -31,7 +25,7 @@ from spec1_engine.briefing.templates import (
 logger = logging.getLogger(__name__)
 
 MODEL = "claude-sonnet-4-6"
-MAX_TOKENS = 4000
+MAX_TOKENS = 2500
 
 # Sources that map to Cyber / Info Ops domain
 _CYBER_SOURCES = {
@@ -51,6 +45,7 @@ def _classify_domain(record: dict) -> str:
     src = str(record.get("signal_source", "")).lower()
     if src in _CYBER_SOURCES:
         return "cyber"
+    # Default geopolitics for national-security OSINT sources
     return "geo"
 
 
@@ -74,7 +69,7 @@ def _build_prompt(records: list[dict], cycle_stats: dict, mode: str = "standard"
     """Build the filled prompt template string for the given mode."""
     elevated = [
         r for r in records
-        if r.get("outcome_classification", r.get("classification", "")) in (VERIF_CORROBORATED, "ESCALATE")
+        if r.get("outcome_classification", r.get("classification", "")) in (VERIF_CORROBORATED, "Escalate")
     ]
     remaining = [r for r in records if r not in elevated]
     standard_top10 = sorted(
@@ -97,34 +92,6 @@ def _build_prompt(records: list[dict], cycle_stats: dict, mode: str = "standard"
 
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
-    # Format evidence chains for the template
-    raw_chains: list[dict] = cycle_stats.get("psyop_evidence_chains", [])
-    if raw_chains:
-        chain_blocks = []
-        for ec in raw_chains:
-            sources_str = ", ".join(
-                m.get("source", "") for m in ec.get("source_metadata", [])
-            ) or "—"
-            excerpts = ec.get("raw_excerpts", [])
-            excerpts_str = " | ".join(
-                f"[{x.get('source', '')}] {x.get('text_snippet', '')[:200]}"
-                for x in excerpts[:3]
-            ) or "—"
-            xrefs = ec.get("cross_references", [])
-            xrefs_str = ", ".join(xrefs[:5]) or "none"
-            block = (
-                f"  Pattern: {ec.get('pattern_name', '—')} | "
-                f"Confidence: {ec.get('confidence', 0.0):.2f}\n"
-                f"  Summary: {ec.get('summary', '—')}\n"
-                f"  Sources: {sources_str}\n"
-                f"  Excerpts: {excerpts_str}\n"
-                f"  Cross-references: {xrefs_str}"
-            )
-            chain_blocks.append(block)
-        evidence_chains_str = "\n\n".join(chain_blocks)
-    else:
-        evidence_chains_str = "(none)"
-
     if mode == "geopolitics":
         tmpl = GEO_USER_PROMPT_TEMPLATE
     elif mode == "legislative":
@@ -144,37 +111,14 @@ def _build_prompt(records: list[dict], cycle_stats: dict, mode: str = "standard"
         geo_count=geo_count,
         cyber_count=cyber_count,
         date=date_str,
-        psyop_classification=cycle_stats.get("psyop_classification", "—"),
-        psyop_score=cycle_stats.get("psyop_score", "—"),
-        psyop_patterns_fired=cycle_stats.get("psyop_patterns_fired", []),
-        evidence_count=len(raw_chains),
-        evidence_chains=evidence_chains_str,
     )
 
 
 def _fallback_brief(cycle_stats: dict) -> str:
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    run_id = cycle_stats.get("run_id", "—")
-    harvested = cycle_stats.get("signals_harvested", 0)
-    opportunities = cycle_stats.get("opportunities_found", 0)
-    stored = cycle_stats.get("records_stored", 0)
-    errors = cycle_stats.get("errors", [])
-    finished = cycle_stats.get("finished_at", "—")
-
-    error_block = ""
-    if errors:
-        error_lines = "\n".join(f"  - {e}" for e in errors)
-        error_block = f"\n\n**Harvest errors ({len(errors)}):**\n{error_lines}"
-
     return (
         f"## SPEC-1 DAILY BRIEF — {date_str}\n\n"
-        f"*AI brief unavailable — API key not configured. Cycle stats below.*\n\n"
-        f"**Run:** {run_id}  \n"
-        f"**Completed:** {finished}  \n"
-        f"**Signals harvested:** {harvested}  \n"
-        f"**Opportunities found:** {opportunities}  \n"
-        f"**Records stored:** {stored}"
-        f"{error_block}"
+        f"[Brief generation failed. Raw stats: {cycle_stats}]"
     )
 
 
@@ -183,14 +127,14 @@ def generate_brief(records: list[dict], cycle_stats: dict, mode: str = "standard
 
     Returns a (brief, prompts_text) tuple where *brief* is the generated
     markdown and *prompts_text* is the full prompts payload (system + user)
-    that was sent to the model.  On any failure the brief is a fallback
+    that was sent to the model. On any failure the brief is a fallback
     string; prompts_text is still populated when available.
     Never raises.
 
     mode: "standard" (default SPEC-1 brief), "geopolitics" (Geopolitics & Policy Desk),
           or "legislative" (Legislative & Judicial Desk).
     """
-    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip().lstrip('\ufeff')
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip().lstrip('﻿')
     if not api_key:
         print("[briefing] ANTHROPIC_API_KEY not set in environment — returning fallback brief")
         logger.warning("ANTHROPIC_API_KEY not set — returning fallback brief")

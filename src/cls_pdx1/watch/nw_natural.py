@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   watch_nw_natural
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """NW Natural watch module — Northwest Natural Gas Company.
 
 Monitors: PUC rate cases, lobbying registrations, contract awards.

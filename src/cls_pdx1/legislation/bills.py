@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   legislation_bills
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Bill state machine and tracker.
 
 Every state transition produces a Signal that feeds the publication trigger.

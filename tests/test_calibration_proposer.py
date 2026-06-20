@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   test_calibration_proposer
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for the calibration proposer, formatter, CLI, and /calibration/proposals."""
 
 from __future__ import annotations

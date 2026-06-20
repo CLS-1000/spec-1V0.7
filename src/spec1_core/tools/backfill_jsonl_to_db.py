@@ -1,3 +1,10 @@
+# @domain:   publisher
+# @module:   tools_backfill_jsonl_to_db
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+# TODO: back-import from spec1_engine — migrate to spec1_core equivalent
+
 """JSONL → SQLite backfill / migration tool.
 
 Reads one or more JSONL files and inserts every record into the corresponding

@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   routers_workspace
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Workspace router — GET/POST /workspace/cases."""
 
 from __future__ import annotations

@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   resolver
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Entity resolver for cls_pdx1.
 
 Maps raw contributor/official name strings to canonical IDs in the PDX-1i graph.

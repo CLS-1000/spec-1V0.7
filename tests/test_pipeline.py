@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   test_pipeline
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_osint.pipeline — full OSINT processing pipeline."""
 
 from __future__ import annotations

@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   routers_ingest
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Ingest router — POST /api/v1/ingest/signal
 
 Single-writer endpoint for the n8n crawler → SPEC-1 signal loop.

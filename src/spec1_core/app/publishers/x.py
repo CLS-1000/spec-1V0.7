@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   app_x
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """app/publishers/x.py — World State Brief publisher.
 
 Single-writer, append-only, run_id-traced. Emits the daily 06:00 PT thread

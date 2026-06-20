@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   routers_psyop
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Psyop router — GET /psyop, POST /psyop/analyse."""
 
 from __future__ import annotations
@@ -7,8 +13,8 @@ from typing import Optional
 from fastapi import APIRouter, Body, Query
 
 from spec1_api.dependencies import OsintStoreDep, PsyopStoreDep
-from spec1_analytics.cls_psyop.scorer import score_text
-from spec1_analytics.cls_psyop.pipeline import PsyopPipeline
+from cls_psyop.scorer import score_text
+from cls_psyop.pipeline import PsyopPipeline
 
 router = APIRouter(prefix="/psyop", tags=["psyop"])
 

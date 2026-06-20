@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   routers_signals
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Signals router — GET /signals  +  POST /signals/ingest."""
 
 from __future__ import annotations

@@ -134,8 +134,8 @@ Exact constants are in `src/spec1_core/signal/scorer.py`.
 
 | Gate | Criterion | Constant |
 |------|-----------|----------|
-| credibility | Source credibility score ≥ threshold | `CREDIBILITY_THRESHOLD = 0.60` |
-| volume | Volume score ≥ threshold (tier-based; ≥30 words passes) | `VOLUME_THRESHOLD = 0.30` |
+| credibility | Source credibility score ≥ threshold | `CREDIBILITY_THRESHOLD = calibrated` |
+| volume | Volume score ≥ threshold (tier-based; ≥30 words passes) | `VOLUME_THRESHOLD = calibrated` |
 | velocity | Signal velocity score ≥ threshold (uses `signal.velocity`) | `VELOCITY_THRESHOLD = 0.0` |
 | novelty | At least N keyword domain matches | `NOVELTY_THRESHOLD = 1` |
 

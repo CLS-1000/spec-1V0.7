@@ -1,3 +1,9 @@
+# @domain:   handler
+# @module:   test_workspace
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for the investigation workspace."""
 
 import pytest

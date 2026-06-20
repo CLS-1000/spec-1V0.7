@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   signal_parser
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core/config/calibration.py
+
 """Signal Parser — ported from cls_osint/parsers/news.py.
 
 Cleans HTML and extracts keywords/entities from Signal text.

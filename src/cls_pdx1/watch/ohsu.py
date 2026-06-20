@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   watch_ohsu
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """OHSU watch module — Oregon Health & Science University.
 
 OHSU board is appointed by the governor. Monitors:

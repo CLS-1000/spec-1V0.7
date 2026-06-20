@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_indexed_queries
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_db.indexed_queries — IndexedQueryLayer."""
 
 from __future__ import annotations

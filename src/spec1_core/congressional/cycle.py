@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   congressional_cycle
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Congressional Trade Pipeline — full cycle runner.
 
 Collects, scores, and analyzes congressional stock trades for

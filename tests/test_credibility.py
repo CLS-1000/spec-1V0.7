@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   test_credibility
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 import pytest
 from spec1_engine.schemas.models import AnalystRecord, Signal
 from spec1_engine.analysts.credibility import CredibilityAnalyst
@@ -7,17 +13,17 @@ def mock_analyst_registry(monkeypatch):
     # Populating all required schema properties to keep __init__ happy
     mock_records = [
         AnalystRecord(
-            analyst_id="analyst-1", 
-            name="Julian E. Barnes", 
-            affiliation="The New York Times", 
-            domains=["intelligence", "national-security"], 
+            analyst_id="analyst-1",
+            name="Julian E. Barnes",
+            affiliation="The New York Times",
+            domains=["intelligence", "national-security"],
             credibility_score=0.90
         ),
         AnalystRecord(
-            analyst_id="analyst-2", 
-            name="Michael Kofman", 
-            affiliation="OSINT", 
-            domains=["military-analysis"], 
+            analyst_id="analyst-2",
+            name="Michael Kofman",
+            affiliation="OSINT",
+            domains=["military-analysis"],
             credibility_score=0.95
         ),
     ]

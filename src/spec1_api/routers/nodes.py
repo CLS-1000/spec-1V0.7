@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   routers_nodes
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Nodes router — GET /api/v1/nodes/{node_id}/signal
 
 Returns a NodeTooltipPayload for the Portland Political Web visualization.
