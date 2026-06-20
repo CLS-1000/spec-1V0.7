@@ -156,13 +156,15 @@ class TestOsintPipeline:
                 collect_fara=False,
                 collect_congress=False,
                 detect_narratives=False,
+                collect_judicial=False,
+                collect_state_leg=False,
             )
 
         mock_rss.assert_not_called()
         mock_fara.assert_not_called()
         mock_congress.assert_not_called()
-        mock_judicial.assert_called_once()
-        mock_state_leg.assert_called_once()
+        mock_judicial.assert_not_called()
+        mock_state_leg.assert_not_called()
         assert stats.rss_records == 0
 
     def test_get_recent_returns_records(self, tmp_path):
