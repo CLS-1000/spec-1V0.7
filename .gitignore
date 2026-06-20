@@ -46,6 +46,7 @@ htmlcov/
 generated/
 briefs/
 workspace/
+research/dossiers/
 .mcp.json
 
 # Loose runtime artifacts at root — exports, rendered HTML, kill files

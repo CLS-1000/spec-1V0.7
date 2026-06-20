@@ -1,0 +1,43 @@
+{
+  "topic_id": "topic_portland_metro_housing_levy_implementation",
+  "name": "Portland Metro Housing Levy Implementation",
+  "core_question": "Is the Metro supportive-housing services levy being implemented as voters were told it would be?",
+  "subquestions": [
+    "What is the disbursement rate of collected levy funds to date?",
+    "Have any oversight or audit findings been published?",
+    "Has city council or county commission proposed reallocating levy funds?"
+  ],
+  "keywords": [
+    "housing levy",
+    "supportive housing",
+    "metro",
+    "homelessness funding"
+  ],
+  "entities": [
+    "Metro",
+    "Portland City Council",
+    "Multnomah County"
+  ],
+  "geographies": [
+    "Portland",
+    "Multnomah County",
+    "Metro"
+  ],
+  "time_horizon_days": 180,
+  "source_classes": [
+    "RSS"
+  ],
+  "exclusions": [
+    "real estate listing",
+    "open house"
+  ],
+  "analyst_notes": "CITIZEN COGNISANCE companion topic \u2014 long-horizon accountability tracking, British spelling per house style applies to published output, not to this internal profile.",
+  "aliases": {
+    "Metro": [
+      "Metro Council",
+      "Oregon Metro"
+    ]
+  },
+  "created_at": "2026-06-19T20:19:53.234282+00:00",
+  "metadata": {}
+}

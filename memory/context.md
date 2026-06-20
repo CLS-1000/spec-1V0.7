@@ -23,9 +23,10 @@ state or active work changes significantly.
 | `cls_world_brief` | Active | |
 | `cls_verdicts` | Active | Append-only; currently single reviewer |
 | `cls_calibration` | Active | Descriptive only — never auto-tunes |
+| `cls_research` | Active | Analyst-defined topic dossiers with automated expansion |
 | `cls_db` | Active | Dual-write; SQLite non-fatal |
 | `spec1_api` | Active | FastAPI + APScheduler on port 8000 |
-| `mcp_server.py` | Active | 12 tools exposed to Claude |
+| `mcp_server.py` | Active | 13 tools exposed to Claude |
 | `spec1_core.workspace` | Active | Case file management |
 
 ---

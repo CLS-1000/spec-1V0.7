@@ -180,3 +180,29 @@ after a scheduled run must call the brief-generation entrypoint explicitly (for
 example via `POST /brief/generate` or the MCP `generate_brief` tool). The
 simplification is presentational and operational, not algorithmic — no scoring or
 persistence semantics changed.
+
+---
+
+## ADR-009 — Research Mode: Analyst-Defined Topic Dossiers
+
+**Date:** 2026-06-20
+**Status:** Active
+
+**Decision:** Add Research Mode (`cls_research`) as an operator-invoked tool that allows
+analysts to define investigation topics as JSON dossier templates, then run automated
+signal collection, expansion, and analysis against those topics. Topics are stored in
+`research/topics/topic_*.json`; dossiers (expanded results) are written to
+`research/dossiers/` and tracked via `RESEARCH_STATUS_*` enums in `spec1_labels.py`.
+
+**Rationale:** Analysts need a way to define sustained investigations around topics
+of interest (e.g., "DPRK missile indigenization", "Portland metro housing policy").
+Rather than running ad-hoc searches in the Workspace, Research Mode lets them version
+topic definitions and re-run expansions on a schedule or on-demand, maintaining an
+append-only audit trail of what signals were collected for each investigation.
+
+**Tradeoff accepted:** Research Mode is decoupled from the canonical cycle. Analysts
+invoke it explicitly via `make research`, the MCP `run_research` tool, or the API route.
+It reads from the signal and intelligence stores but does not auto-execute. This keeps
+the core cycle lean and makes research an intentional operator action.
+
+---

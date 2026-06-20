@@ -22,6 +22,7 @@ Tools exposed:
   - run_psyop          Score every intelligence record for psyop patterns (operator tool)
   - generate_brief     Build a daily brief for one run_id (operator tool, Claude + fallback)
   - generate_leads     Derive Lead objects from intelligence records (operator tool)
+  - run_research       Run analyst-defined topic research dossier expansion
 
 This server uses a simple JSON-RPC 2.0 over stdio protocol compatible
 with the Claude MCP specification.
@@ -376,6 +377,21 @@ def tool_get_calibration(args: dict) -> dict:
     return out
 
 
+def tool_run_research(args: dict) -> dict:
+    """Run analyst-defined topic research dossier expansion."""
+    from spec1_core.tools.run_research import run_research
+
+    topic_name = args.get("topic_name")
+    topics_path = _store_path("SPEC1_RESEARCH_TOPICS_PATH", "research/topics")
+    dossier_path = _store_path("SPEC1_RESEARCH_DOSSIER_PATH", "research/dossiers")
+
+    return run_research(
+        topic_name=topic_name,
+        topics_path=topics_path,
+        dossier_path=dossier_path,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Tool registry
 # ---------------------------------------------------------------------------
@@ -576,6 +592,19 @@ TOOLS: dict[str, dict] = {
             },
         },
         "fn": tool_generate_leads,
+    },
+    "run_research": {
+        "description": (
+            "Run analyst-defined topic research dossier expansion. "
+            "Expands topic definitions with automated signal collection and analysis."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "topic_name": {"type": "string", "description": "Topic name to expand (optional; if not provided, expands all topics)"},
+            },
+        },
+        "fn": tool_run_research,
     },
 }
 
