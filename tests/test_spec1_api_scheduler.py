@@ -110,7 +110,6 @@ def test_get_scheduler_returns_none_when_unstarted():
 def test_start_scheduler_idempotent(monkeypatch):
     """Calling start_scheduler twice does not create a second scheduler."""
     mock_cls = MagicMock()
-    mock_cls.return_value.running = True
 
     mock_bg_module = MagicMock()
     mock_bg_module.BackgroundScheduler = mock_cls
@@ -120,6 +119,9 @@ def test_start_scheduler_idempotent(monkeypatch):
     monkeypatch.setitem(sys.modules, "apscheduler.schedulers.background", mock_bg_module)
 
     sched.start_scheduler()
-    first_call_count = mock_cls.call_count
+    # _scheduler is now set; a second call must return early without instantiating again
+    scheduler_after_first_call = sched._scheduler
+    assert scheduler_after_first_call is not None
     sched.start_scheduler()
-    assert mock_cls.call_count == first_call_count
+    assert sched._scheduler is scheduler_after_first_call, "start_scheduler must be idempotent"
+    assert mock_cls.call_count == 1, "BackgroundScheduler should be instantiated exactly once"
