@@ -1,11 +1,11 @@
-import os
 import sys
 import time
 import math
 
 def draw_retro_radar_sweep():
-    # Enforce clear terminal screen dimensions
-    os.system('cls' if os.name == 'nt' else 'clear')  # nosec B605
+    # Clear terminal using ANSI escape sequences (avoids subprocess shell invocation)
+    sys.stdout.write("\033[2J\033[H")
+    sys.stdout.flush()
 
     # Establish radar sweep radius and center coordinates
     width, height = 70, 22
