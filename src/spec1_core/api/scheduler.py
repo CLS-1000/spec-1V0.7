@@ -73,10 +73,14 @@ def build_scheduler() -> "BackgroundScheduler":
     from apscheduler.schedulers.background import BackgroundScheduler
     from apscheduler.triggers.cron import CronTrigger
 
-    scheduler = BackgroundScheduler(timezone="America/Los_Angeles")
+    timezone = os.environ.get("SPEC1_TIMEZONE", "America/Los_Angeles")
+    hour = int(os.environ.get("SPEC1_CRON_HOUR", "6"))
+    minute = int(os.environ.get("SPEC1_CRON_MINUTE", "0"))
+
+    scheduler = BackgroundScheduler(timezone=timezone)
     scheduler.add_job(
         _guarded_cycle,
-        trigger=CronTrigger(hour=6, minute=0, timezone="America/Los_Angeles"),
+        trigger=CronTrigger(hour=hour, minute=minute, timezone=timezone),
         id="daily_cycle",
         name="SPEC-1 Daily Intelligence Cycle",
         replace_existing=True,
@@ -84,7 +88,7 @@ def build_scheduler() -> "BackgroundScheduler":
     )
     scheduler.add_job(
         _guarded_congressional_cycle,
-        trigger=CronTrigger(hour=7, minute=0, timezone="America/Los_Angeles"),
+        trigger=CronTrigger(hour=hour + 1, minute=minute, timezone=timezone),
         id="congressional_cycle",
         name="SPEC-1 Congressional Trade Cycle",
         replace_existing=True,

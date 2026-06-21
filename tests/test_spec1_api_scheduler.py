@@ -109,9 +109,8 @@ def test_get_scheduler_returns_none_when_unstarted():
 
 def test_start_scheduler_idempotent(monkeypatch):
     """Calling start_scheduler twice does not create a second scheduler."""
-    mock_instance = MagicMock()
-    mock_instance.running = True
-    mock_cls = MagicMock(return_value=mock_instance)
+    mock_cls = MagicMock()
+    mock_cls.return_value.running = True
 
     mock_bg_module = MagicMock()
     mock_bg_module.BackgroundScheduler = mock_cls
