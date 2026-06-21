@@ -17,7 +17,10 @@ import logging
 import os
 import threading
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from apscheduler.schedulers.background import BackgroundScheduler
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +68,7 @@ def _guarded_congressional_cycle() -> None:
         logger.error("Congressional cycle failed: %s", exc)
 
 
-def build_scheduler() -> Any:
+def build_scheduler() -> "BackgroundScheduler":
     """Create and configure the BackgroundScheduler (not yet started)."""
     from apscheduler.schedulers.background import BackgroundScheduler
     from apscheduler.triggers.cron import CronTrigger
