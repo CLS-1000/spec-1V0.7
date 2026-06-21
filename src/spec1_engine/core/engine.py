@@ -21,6 +21,7 @@ from spec1_engine.investigation.generator import generate_investigation
 from spec1_engine.investigation.verifier import verify_investigation
 from spec1_engine.intelligence.analyzer import analyze
 from spec1_engine.intelligence.store import JsonlStore
+import spec1_engine.persistence.postgres as pg_store
 
 logger = get_logger(__name__)
 
@@ -100,7 +101,8 @@ class Engine:
                 stats.errors.append(f"harvest:{src}:{err}")
             logger.info("Harvested %d signals", stats.signals_harvested)
         except Exception as exc:
-            stats.errors.append(f"harvest_all:{exc}")
+            stats.errors.append(f"harvest_all:{type(exc).__name__}:{exc}")
+            logger.error("Harvest failed (%s): %s", type(exc).__name__, exc, exc_info=True)
             stats.finish()
             return stats
 
@@ -112,7 +114,8 @@ class Engine:
                 ps = parse_signal(sig)
                 parsed_pairs.append((sig, ps))
             except Exception as exc:
-                stats.errors.append(f"parse:{sig.signal_id}:{exc}")
+                stats.errors.append(f"parse:{sig.signal_id}:{type(exc).__name__}:{exc}")
+                logger.warning("Parse failed for %s (%s): %s", sig.signal_id, type(exc).__name__, exc)
         stats.signals_parsed = len(parsed_pairs)
         logger.info("Parsed %d signals", stats.signals_parsed)
 
@@ -124,7 +127,8 @@ class Engine:
                 if opp is not None:
                     opportunities.append((sig, ps, opp))
             except Exception as exc:
-                stats.errors.append(f"score:{sig.signal_id}:{exc}")
+                stats.errors.append(f"score:{sig.signal_id}:{type(exc).__name__}:{exc}")
+                logger.warning("Score failed for %s (%s): %s", sig.signal_id, type(exc).__name__, exc)
         stats.opportunities_found = len(opportunities)
         logger.info("Scored: %d opportunities", stats.opportunities_found)
 
@@ -138,10 +142,13 @@ class Engine:
                 stats.outcomes_verified += 1
 
                 record = analyze(opp, inv, outcome, sig)
-                self.store.append(record.to_dict())
+                record_dict = record.to_dict()
+                written_record = self.store.append(record_dict)
+                pg_store.append(written_record)
                 stats.records_stored += 1
             except Exception as exc:
-                stats.errors.append(f"pipeline:{opp.opportunity_id}:{exc}")
+                stats.errors.append(f"pipeline:{opp.opportunity_id}:{type(exc).__name__}:{exc}")
+                logger.error("Pipeline failed for %s (%s): %s", opp.opportunity_id, type(exc).__name__, exc, exc_info=True)
 
         stats.finish()
         logger.info(

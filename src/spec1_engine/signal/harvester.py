@@ -8,8 +8,6 @@ from __future__ import annotations
 
 import hashlib
 import re
-import ssl
-import urllib.request
 from datetime import datetime, timezone
 from typing import Iterator, Optional
 
@@ -20,7 +18,7 @@ from spec1_engine.schemas.models import Signal
 
 DEFAULT_FEEDS: dict[str, str] = {
     "war_on_the_rocks": "https://warontherocks.com/feed/",
-    "cipher_brief": "https://www.thecipherbrief.com/feed",
+    "cipher_brief": "https://www.thecipherbrief.com/feeds/feed.rss",
     "just_security": "https://www.justsecurity.org/feed/",
     "rand": "https://www.rand.org/blog.xml",
     "atlantic_council": "https://www.atlanticcouncil.org/feed/",
@@ -35,11 +33,8 @@ DEFAULT_FEEDS: dict[str, str] = {
 TIMEOUT = 15
 _HEADERS = {"User-Agent": "spec1-engine/0.2"}
 
-# Sources that need SSL verification disabled (cert chain issues on this host)
-_SSL_UNVERIFIED = {"cipher_brief"}
-
 # Sources whose feeds contain stray invalid XML characters that need scrubbing
-_SANITIZE_XML: set[str] = set()
+_SANITIZE_XML: set[str] = {"cipher_brief"}
 
 # Regex matching XML-illegal control characters (except tab/LF/CR)
 _ILLEGAL_XML_RE = re.compile(
@@ -115,22 +110,9 @@ def _fetch_raw_sanitized(url: str, timeout: int) -> bytes:
     return text.encode("utf-8")
 
 
-def _fetch_raw_no_ssl(url: str, timeout: int) -> bytes:
-    """Fetch URL ignoring SSL verification errors, return raw bytes."""
-    ctx = ssl.create_default_context()
-    ctx.check_hostname = False
-    ctx.verify_mode = ssl.CERT_NONE
-    req = urllib.request.Request(url, headers=_HEADERS)
-    with urllib.request.urlopen(req, context=ctx, timeout=timeout) as resp:
-        return resp.read()
-
 
 def _parse_feed(name: str, url: str, timeout: int) -> feedparser.FeedParserDict:
     """Return a feedparser result, applying source-specific workarounds."""
-    if name in _SSL_UNVERIFIED:
-        raw = _fetch_raw_no_ssl(url, timeout)
-        return feedparser.parse(raw)
-
     if name in _SANITIZE_XML:
         raw = _fetch_raw_sanitized(url, timeout)
         return feedparser.parse(raw)

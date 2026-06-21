@@ -16,6 +16,7 @@ from spec1_labels import VERIF_CORROBORATED, VERIF_CONFLICTED
 
 logger = logging.getLogger(__name__)
 
+
 MODEL = "claude-haiku-4-5-20251001"
 VALID_CLASSIFICATIONS = {
     VERIF_CORROBORATED, "ESCALATE", "INVESTIGATE", "MONITOR", VERIF_CONFLICTED, "ARCHIVE"
@@ -108,5 +109,8 @@ def verify_investigation(investigation: Investigation) -> Outcome:
             evidence=evidence,
         )
     except Exception as exc:
-        logger.error("Failed to parse Claude response %r: %s", raw, exc)
+        logger.error(
+            "Failed to parse Claude response (%s) %r: %s",
+            type(exc).__name__, raw, exc,
+        )
         return _fallback_outcome()
