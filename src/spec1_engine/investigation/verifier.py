@@ -16,17 +16,6 @@ from spec1_labels import VERIF_CORROBORATED, VERIF_CONFLICTED
 
 logger = logging.getLogger(__name__)
 
-# Transient errors — worth retrying; permanent errors — not worth retrying
-_TRANSIENT_API_ERRORS = (
-    anthropic.RateLimitError,
-    anthropic.APIConnectionError,
-    anthropic.APITimeoutError,
-)
-_PERMANENT_API_ERRORS = (
-    anthropic.AuthenticationError,
-    anthropic.PermissionDeniedError,
-    anthropic.BadRequestError,
-)
 
 MODEL = "claude-haiku-4-5-20251001"
 VALID_CLASSIFICATIONS = {
@@ -85,23 +74,6 @@ def verify_investigation(investigation: Investigation) -> Outcome:
             prompt=_build_user_prompt(investigation),
             system=_SYSTEM_PROMPT,
         )
-<<<<<<< HEAD
-        raw = message.content[0].text.strip()
-    except _TRANSIENT_API_ERRORS as exc:
-        logger.warning(
-            "Claude API transient error (%s) — fallback outcome: %s",
-            type(exc).__name__, exc,
-        )
-        return _fallback_outcome()
-    except _PERMANENT_API_ERRORS as exc:
-        logger.error(
-            "Claude API permanent error (%s) — check credentials/request: %s",
-            type(exc).__name__, exc,
-        )
-        return _fallback_outcome()
-    except Exception as exc:
-        logger.error("Claude API unexpected error (%s): %s", type(exc).__name__, exc, exc_info=True)
-=======
         # Strip markdown fences that some tiers may include.
         if raw.startswith("```"):
             parts = raw.split("```")
@@ -113,7 +85,6 @@ def verify_investigation(investigation: Investigation) -> Outcome:
                 raw = inner.strip()
     except Exception as exc:
         logger.error("LLM fallback chain error: %s", exc)
->>>>>>> origin/main
         return _fallback_outcome()
 
     try:

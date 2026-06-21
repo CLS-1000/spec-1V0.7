@@ -24,13 +24,8 @@ from spec1_engine.briefing.templates import (
 
 logger = logging.getLogger(__name__)
 
-<<<<<<< HEAD
-MODEL = "claude-sonnet-4-20250514"
-MAX_TOKENS = 3000
-=======
 MODEL = "claude-sonnet-4-6"
 MAX_TOKENS = 2500
->>>>>>> origin/main
 
 # Sources that map to Cyber / Info Ops domain
 _CYBER_SOURCES = {

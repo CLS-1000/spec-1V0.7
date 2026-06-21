@@ -8,10 +8,7 @@
 
 from __future__ import annotations
 
-<<<<<<< HEAD
-=======
 import ssl
->>>>>>> origin/main
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
@@ -23,12 +20,9 @@ from spec1_core.signal.harvester import (
     _get_text,
     _get_author,
     _fetch_raw_sanitized,
+    _fetch_raw_no_ssl,
     _parse_feed,
-<<<<<<< HEAD
-    _SANITIZE_XML,
-=======
     _SSL_UNVERIFIED,
->>>>>>> origin/main
     fetch_feed,
     harvest_all,
     _make_signal_id,
@@ -209,10 +203,6 @@ def test_fetch_raw_sanitized_calls_raise_for_status():
     mock_resp.raise_for_status.assert_called_once()
 
 
-<<<<<<< HEAD
-# ─── _parse_feed tests ────────────────────────────────────────────────────────
-
-=======
 # ─── _fetch_raw_no_ssl tests ──────────────────────────────────────────────────
 
 def test_fetch_raw_no_ssl_returns_bytes():
@@ -264,7 +254,6 @@ def test_parse_feed_ssl_unverified_uses_no_ssl_fetch():
     mock_no_ssl.assert_called_once()
 
 
->>>>>>> origin/main
 def test_parse_feed_sanitize_xml_uses_raw_sanitized():
     """SANITIZE_XML sources use _fetch_raw_sanitized."""
     # Temporarily add a test source to _SANITIZE_XML

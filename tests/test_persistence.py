@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-
-
 """Tests for the PostgreSQL persistence module.
 
 Uses SQLite (via SQLAlchemy) as a drop-in replacement so tests run without
@@ -216,7 +213,8 @@ def test_reset_engine_clears_cache(sqlite_url):
     assert pg._engine is not None
     pg.reset_engine()
     assert pg._engine is None
-=======
+
+
 # @domain:   machine
 # @module:   test_persistence
 # @loc:      gh_main
@@ -225,7 +223,6 @@ def test_reset_engine_clears_cache(sqlite_url):
 
 """Tests for cls_db — database persistence and dual-write."""
 
-from __future__ import annotations
 
 
 
@@ -721,4 +718,3 @@ class TestBriefStoreDualWrite:
         entry = store.save(brief, write_markdown=False)
         assert "written_at" in entry
         assert store.count() == 1
->>>>>>> origin/main

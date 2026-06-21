@@ -114,14 +114,9 @@ class Engine:
                 ps = parse_signal(sig)
                 parsed_pairs.append((sig, ps))
             except Exception as exc:
-<<<<<<< HEAD
                 stats.errors.append(f"parse:{sig.signal_id}:{type(exc).__name__}:{exc}")
                 logger.warning("Parse failed for %s (%s): %s", sig.signal_id, type(exc).__name__, exc)
-        stats.signals_parsed = len(parsed_signals)
-=======
-                stats.errors.append(f"parse:{sig.signal_id}:{exc}")
         stats.signals_parsed = len(parsed_pairs)
->>>>>>> origin/main
         logger.info("Parsed %d signals", stats.signals_parsed)
 
         # 3. Score — 4 gates
