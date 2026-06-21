@@ -27,6 +27,15 @@ logger = logging.getLogger(__name__)
 KILL_FILE = Path(".cls_kill")
 
 
+def _parse_env_int(env_var: str, default: int) -> int:
+    """Read an integer from an environment variable with a descriptive error on bad input."""
+    value = os.environ.get(env_var, str(default))
+    try:
+        return int(value)
+    except ValueError:
+        raise ValueError(f"Invalid value for {env_var}: expected integer, got {value!r}")
+
+
 def _guarded_cycle() -> None:
     """Run one OSINT cycle unless the kill file is present."""
     if KILL_FILE.exists():
@@ -74,17 +83,9 @@ def build_scheduler() -> "BackgroundScheduler":
     from apscheduler.triggers.cron import CronTrigger
 
     timezone = os.environ.get("SPEC1_TIMEZONE", "America/Los_Angeles")
-
-    def _parse_int(env_var: str, default: int) -> int:
-        value = os.environ.get(env_var, str(default))
-        try:
-            return int(value)
-        except ValueError:
-            raise ValueError(f"Invalid value for {env_var}: expected integer, got {value!r}")
-
-    hour = _parse_int("SPEC1_CRON_HOUR", 6)
-    minute = _parse_int("SPEC1_CRON_MINUTE", 0)
-    congressional_hour = _parse_int("SPEC1_CONGRESSIONAL_CRON_HOUR", 7)
+    hour = _parse_env_int("SPEC1_CRON_HOUR", 6)
+    minute = _parse_env_int("SPEC1_CRON_MINUTE", 0)
+    congressional_hour = _parse_env_int("SPEC1_CONGRESSIONAL_CRON_HOUR", 7)
 
     scheduler = BackgroundScheduler(timezone=timezone)
     scheduler.add_job(
@@ -97,7 +98,7 @@ def build_scheduler() -> "BackgroundScheduler":
     )
     scheduler.add_job(
         _guarded_congressional_cycle,
-        trigger=CronTrigger(hour=congressional_hour % 24, minute=minute, timezone=timezone),
+        trigger=CronTrigger(hour=congressional_hour, minute=minute, timezone=timezone),
         id="congressional_cycle",
         name="SPEC-1 Congressional Trade Cycle",
         replace_existing=True,
