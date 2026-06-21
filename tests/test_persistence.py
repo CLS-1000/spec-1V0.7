@@ -1,11 +1,22 @@
-<<<<<<< HEAD
+# @domain:   machine
+# @module:   test_persistence
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
+"""Tests for cls_db — database persistence and dual-write."""
+
+from __future__ import annotations
+
+
+# ---------------------------------------------------------------------------
+# PostgreSQL persistence tests (spec1_engine.persistence.postgres)
+# ---------------------------------------------------------------------------
 """Tests for the PostgreSQL persistence module.
 
 Uses SQLite (via SQLAlchemy) as a drop-in replacement so tests run without
 a real PostgreSQL instance.
 """
-
-from __future__ import annotations
 
 import pytest
 
@@ -216,23 +227,9 @@ def test_reset_engine_clears_cache(sqlite_url):
     assert pg._engine is None
 
 
-=======
->>>>>>> origin/develop
-# @domain:   machine
-# @module:   test_persistence
-# @loc:      gh_main
-# @status:   testing
-# @depends:  NONE
-
-"""Tests for cls_db — database persistence and dual-write."""
-
-<<<<<<< HEAD
-=======
-from __future__ import annotations
->>>>>>> origin/develop
-
-
-
+# ---------------------------------------------------------------------------
+# cls_db persistence tests
+# ---------------------------------------------------------------------------
 from cls_db.database import Database
 from cls_db.models import ALL_DDL
 from cls_db.repository import Repository, _serialize, _row_to_dict
