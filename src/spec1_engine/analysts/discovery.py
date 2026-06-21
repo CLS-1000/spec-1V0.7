@@ -6,8 +6,7 @@ Discovers new potential analysts from signal text by pattern matching.
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
 
 from spec1_engine.analysts.registry import get_all_names
 from spec1_engine.schemas.models import ParsedSignal, Signal

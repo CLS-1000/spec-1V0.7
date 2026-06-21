@@ -5,7 +5,6 @@ Contains the authoritative list of known national security analysts and think ta
 
 from __future__ import annotations
 
-import uuid
 from typing import Optional
 
 from spec1_engine.schemas.models import AnalystRecord

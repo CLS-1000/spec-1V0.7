@@ -76,6 +76,29 @@ class JsonlStore:
             if record.get(field) == value:
                 yield record
 
+    def read_chunk(self, offset: int = 0, limit: int = 100) -> list[dict]:
+        """Return a slice of records by line offset (0-based).
+
+        This is a convenience method for simple pagination; for large files
+        prefer :mod:`cls_db.cursor_reader` which avoids re-reading from the
+        beginning.
+
+        Parameters
+        ----------
+        offset:
+            Number of records to skip.
+        limit:
+            Maximum number of records to return.
+        """
+        result: list[dict] = []
+        for i, record in enumerate(self.read_all()):
+            if i < offset:
+                continue
+            if len(result) >= limit:
+                break
+            result.append(record)
+        return result
+
     def exists(self) -> bool:
         """Return True if the store file exists and is non-empty."""
         return self.path.exists() and self.path.stat().st_size > 0
@@ -92,7 +115,7 @@ _DEFAULT_PATH = Path("spec1_intelligence.jsonl")
 
 
 def _get_default_store(path: Optional[Path] = None) -> JsonlStore:
-    global _DEFAULT_STORE, _DEFAULT_PATH
+    global _DEFAULT_STORE
     target = path or _DEFAULT_PATH
     if _DEFAULT_STORE is None or _DEFAULT_STORE.path != target:
         _DEFAULT_STORE = JsonlStore(target)

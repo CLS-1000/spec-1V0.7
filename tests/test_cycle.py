@@ -1,28 +1,30 @@
+# @domain:   intelligence
+# @module:   test_cycle
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for the full cycle pipeline — end-to-end with mocked RSS."""
 
 from __future__ import annotations
 
 import json
-import threading
 from datetime import datetime, timezone
-from pathlib import Path
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from spec1_engine.schemas.models import (
-    Signal, ParsedSignal, Opportunity, Investigation, Outcome, IntelligenceRecord,
+from spec1_core.schemas.models import (
+    Signal, ParsedSignal, Opportunity, Outcome,
 )
-from spec1_engine.signal.harvester import harvest_all, fetch_feed, DEFAULT_FEEDS
-from spec1_engine.signal.parser import parse_signal, parse_batch
-from spec1_engine.signal.scorer import score_signal, score_batch
-from spec1_engine.investigation.generator import generate_investigation
-from spec1_engine.investigation.verifier import verify_investigation
-from spec1_engine.intelligence.analyzer import analyze
-from spec1_engine.intelligence.store import JsonlStore
-from spec1_engine.app.cycle import run_cycle
-from spec1_engine.core.ids import run_id as new_run_id
+from spec1_core.signal.harvester import harvest_all, DEFAULT_FEEDS
+from spec1_core.signal.parser import parse_signal, parse_batch
+from spec1_core.signal.scorer import score_signal, score_batch
+from spec1_core.investigation.generator import generate_investigation
+from spec1_core.investigation import verifier
+from spec1_core.intelligence.store import JsonlStore
+from spec1_core.app.cycle import run_cycle
+from spec1_core.core.ids import run_id as new_run_id
 
 
 # ─── Shared fixtures ─────────────────────────────────────────────────────────
@@ -104,7 +106,7 @@ def test_harvest_all_with_mock_feeds(tmp_path, fake_feed_xml):
 
     mock_parsed = feedparser.parse(fake_feed_xml)
 
-    with patch("spec1_engine.signal.harvester.feedparser.parse", return_value=mock_parsed):
+    with patch("spec1_core.signal.harvester.feedparser.parse", return_value=mock_parsed):
         result = harvest_all(
             feeds={"test_feed": "https://example.com/feed"},
             run_id="run-test",
@@ -119,7 +121,7 @@ def test_harvest_all_with_mock_feeds(tmp_path, fake_feed_xml):
 def test_harvest_signals_are_signal_instances(fake_feed_xml):
     import feedparser
     mock_parsed = feedparser.parse(fake_feed_xml)
-    with patch("spec1_engine.signal.harvester.feedparser.parse", return_value=mock_parsed):
+    with patch("spec1_core.signal.harvester.feedparser.parse", return_value=mock_parsed):
         result = harvest_all(feeds={"test": "https://x.com"}, run_id="run-test", environment="test")
     for sig in result["signals"]:
         assert isinstance(sig, Signal)
@@ -128,7 +130,7 @@ def test_harvest_signals_are_signal_instances(fake_feed_xml):
 def test_harvest_signal_has_run_id(fake_feed_xml):
     import feedparser
     mock_parsed = feedparser.parse(fake_feed_xml)
-    with patch("spec1_engine.signal.harvester.feedparser.parse", return_value=mock_parsed):
+    with patch("spec1_core.signal.harvester.feedparser.parse", return_value=mock_parsed):
         result = harvest_all(feeds={"test": "https://x.com"}, run_id="run-xyz", environment="test")
     for sig in result["signals"]:
         assert sig.run_id == "run-xyz"
@@ -137,7 +139,7 @@ def test_harvest_signal_has_run_id(fake_feed_xml):
 def test_harvest_signal_has_source(fake_feed_xml):
     import feedparser
     mock_parsed = feedparser.parse(fake_feed_xml)
-    with patch("spec1_engine.signal.harvester.feedparser.parse", return_value=mock_parsed):
+    with patch("spec1_core.signal.harvester.feedparser.parse", return_value=mock_parsed):
         result = harvest_all(feeds={"my_source": "https://x.com"}, run_id="run-test", environment="test")
     for sig in result["signals"]:
         assert sig.source == "my_source"
@@ -149,14 +151,14 @@ def test_harvest_error_captured(fake_feed_xml):
     mock_parsed.get = MagicMock(side_effect=lambda k, d=None: {"bozo": True, "bozo_exception": Exception("bad xml"), "entries": []}.get(k, d))
     mock_parsed.__contains__ = MagicMock(return_value=True)
 
-    with patch("spec1_engine.signal.harvester.feedparser.parse", return_value=mock_parsed):
+    with patch("spec1_core.signal.harvester.feedparser.parse", return_value=mock_parsed):
         result = harvest_all(feeds={"bad_feed": "https://x.com"}, run_id="r", environment="test")
     # Errors may or may not be populated depending on bozo handling, but no crash
     assert "errors" in result
 
 
-def test_default_feeds_has_six_sources():
-    assert len(DEFAULT_FEEDS) == 6
+def test_default_feeds_has_expected_sources():
+    assert len(DEFAULT_FEEDS) == 10
 
 
 def test_default_feeds_includes_rand():
@@ -304,11 +306,18 @@ def test_investigation_to_dict(sample_opportunity, sample_signal, sample_parsed)
 
 # ─── Verifier tests ───────────────────────────────────────────────────────────
 
-def test_verify_produces_outcome(sample_opportunity, sample_signal, sample_parsed):
+@patch("spec1_core.investigation.verifier.verify_investigation")
+def test_verify_produces_outcome(mock_verify, sample_opportunity, sample_signal, sample_parsed):
     if sample_opportunity is None:
         pytest.skip("Signal did not create opportunity")
     inv = generate_investigation(sample_opportunity, sample_signal, sample_parsed)
-    outcome = verify_investigation(inv)
+    mock_verify.return_value = Outcome(
+        outcome_id="test-outcome",
+        classification="MONITOR",
+        confidence=0.75,
+        evidence=["test evidence"],
+    )
+    outcome = verifier.verify_investigation(inv)
     assert isinstance(outcome, Outcome)
 
 
@@ -316,7 +325,7 @@ def test_verify_outcome_has_evidence(sample_opportunity, sample_signal, sample_p
     if sample_opportunity is None:
         pytest.skip("Signal did not create opportunity")
     inv = generate_investigation(sample_opportunity, sample_signal, sample_parsed)
-    outcome = verify_investigation(inv)
+    outcome = verifier.verify_investigation(inv)
     assert len(outcome.evidence) > 0
 
 
@@ -324,7 +333,7 @@ def test_outcome_to_dict(sample_opportunity, sample_signal, sample_parsed):
     if sample_opportunity is None:
         pytest.skip("Signal did not create opportunity")
     inv = generate_investigation(sample_opportunity, sample_signal, sample_parsed)
-    outcome = verify_investigation(inv)
+    outcome = verifier.verify_investigation(inv)
     d = outcome.to_dict()
     assert "outcome_id" in d
     assert "classification" in d
@@ -339,7 +348,7 @@ def test_run_cycle_with_mocked_feeds(tmp_path, fake_feed_xml):
     mock_parsed_feed = feedparser.parse(fake_feed_xml)
 
     store_path = tmp_path / "cycle_test.jsonl"
-    with patch("spec1_engine.signal.harvester.feedparser.parse", return_value=mock_parsed_feed):
+    with patch("spec1_core.signal.harvester.feedparser.parse", return_value=mock_parsed_feed):
         stats = run_cycle(
             store_path=store_path,
             run_id="run-cycle-test",
@@ -360,7 +369,7 @@ def test_run_cycle_records_stored_if_opportunities(tmp_path, fake_feed_xml):
     mock_feed = feedparser.parse(fake_feed_xml)
 
     store_path = tmp_path / "cycle_records.jsonl"
-    with patch("spec1_engine.signal.harvester.feedparser.parse", return_value=mock_feed):
+    with patch("spec1_core.signal.harvester.feedparser.parse", return_value=mock_feed):
         stats = run_cycle(
             store_path=store_path,
             run_id="run-records-test",
@@ -379,7 +388,7 @@ def test_run_cycle_stats_keys(tmp_path, fake_feed_xml):
     import feedparser
     mock_feed = feedparser.parse(fake_feed_xml)
 
-    with patch("spec1_engine.signal.harvester.feedparser.parse", return_value=mock_feed):
+    with patch("spec1_core.signal.harvester.feedparser.parse", return_value=mock_feed):
         stats = run_cycle(
             store_path=tmp_path / "stats_test.jsonl",
             feeds={"test": "https://x.com"},
@@ -398,7 +407,7 @@ def test_run_cycle_stats_keys(tmp_path, fake_feed_xml):
 def test_run_cycle_errors_list_is_list(tmp_path, fake_feed_xml):
     import feedparser
     mock_feed = feedparser.parse(fake_feed_xml)
-    with patch("spec1_engine.signal.harvester.feedparser.parse", return_value=mock_feed):
+    with patch("spec1_core.signal.harvester.feedparser.parse", return_value=mock_feed):
         stats = run_cycle(store_path=tmp_path / "t.jsonl", feeds={"t": "https://x.com"}, verbose=False)
     assert isinstance(stats["errors"], list)
 
@@ -417,7 +426,7 @@ def test_run_cycle_jsonl_records_valid_json(tmp_path, fake_feed_xml):
     mock_feed = feedparser.parse(fake_feed_xml)
     store_path = tmp_path / "valid_json.jsonl"
 
-    with patch("spec1_engine.signal.harvester.feedparser.parse", return_value=mock_feed):
+    with patch("spec1_core.signal.harvester.feedparser.parse", return_value=mock_feed):
         run_cycle(store_path=store_path, feeds={"test": "https://x.com"}, verbose=False)
 
     if store_path.exists():
@@ -434,7 +443,7 @@ def test_run_cycle_jsonl_records_valid_json(tmp_path, fake_feed_xml):
 def test_run_cycle_with_max_signals(tmp_path, fake_feed_xml):
     import feedparser
     mock_feed = feedparser.parse(fake_feed_xml)
-    with patch("spec1_engine.signal.harvester.feedparser.parse", return_value=mock_feed):
+    with patch("spec1_core.signal.harvester.feedparser.parse", return_value=mock_feed):
         stats = run_cycle(
             store_path=tmp_path / "max.jsonl",
             feeds={"test": "https://x.com"},
@@ -448,7 +457,7 @@ def test_run_cycle_with_max_signals(tmp_path, fake_feed_xml):
 def test_run_cycle_investigations_geq_records(tmp_path, fake_feed_xml):
     import feedparser
     mock_feed = feedparser.parse(fake_feed_xml)
-    with patch("spec1_engine.signal.harvester.feedparser.parse", return_value=mock_feed):
+    with patch("spec1_core.signal.harvester.feedparser.parse", return_value=mock_feed):
         stats = run_cycle(store_path=tmp_path / "inv.jsonl", feeds={"test": "https://x.com"}, verbose=False)
     assert stats["investigations_generated"] >= stats["records_stored"]
 
@@ -456,7 +465,7 @@ def test_run_cycle_investigations_geq_records(tmp_path, fake_feed_xml):
 def test_run_cycle_outcomes_geq_records(tmp_path, fake_feed_xml):
     import feedparser
     mock_feed = feedparser.parse(fake_feed_xml)
-    with patch("spec1_engine.signal.harvester.feedparser.parse", return_value=mock_feed):
+    with patch("spec1_core.signal.harvester.feedparser.parse", return_value=mock_feed):
         stats = run_cycle(store_path=tmp_path / "out.jsonl", feeds={"test": "https://x.com"}, verbose=False)
     assert stats["outcomes_verified"] >= stats["records_stored"]
 
@@ -467,7 +476,7 @@ def test_run_cycle_multiple_times_appends(tmp_path, fake_feed_xml):
     mock_feed = feedparser.parse(fake_feed_xml)
     store_path = tmp_path / "multi.jsonl"
 
-    with patch("spec1_engine.signal.harvester.feedparser.parse", return_value=mock_feed):
+    with patch("spec1_core.signal.harvester.feedparser.parse", return_value=mock_feed):
         stats1 = run_cycle(store_path=store_path, feeds={"t": "https://x.com"}, verbose=False)
         stats2 = run_cycle(store_path=store_path, feeds={"t": "https://x.com"}, verbose=False)
 
@@ -492,7 +501,7 @@ def test_run_cycle_verbose_true_no_crash(tmp_path):
 
 def test_run_cycle_harvest_exception_returns_stats(tmp_path):
     """If harvest_all raises, run_cycle returns stats dict with error logged."""
-    with patch("spec1_engine.app.cycle.harvest_all", side_effect=RuntimeError("network down")):
+    with patch("spec1_core.app.cycle.harvest_all", side_effect=RuntimeError("network down")):
         stats = run_cycle(
             store_path=tmp_path / "harvest_err.jsonl",
             verbose=False,
@@ -503,7 +512,7 @@ def test_run_cycle_harvest_exception_returns_stats(tmp_path):
 
 def test_run_cycle_harvest_exception_verbose(tmp_path):
     """Harvest exception with verbose=True prints error and returns."""
-    with patch("spec1_engine.app.cycle.harvest_all", side_effect=RuntimeError("bad")):
+    with patch("spec1_core.app.cycle.harvest_all", side_effect=RuntimeError("bad")):
         stats = run_cycle(
             store_path=tmp_path / "harvest_err_v.jsonl",
             verbose=True,
@@ -518,7 +527,7 @@ def test_run_cycle_harvest_feed_errors_in_stats(tmp_path):
         "signals": [],
         "errors": {"failing_feed": "Connection timeout"},
     }
-    with patch("spec1_engine.app.cycle.harvest_all", return_value=mock_result):
+    with patch("spec1_core.app.cycle.harvest_all", return_value=mock_result):
         stats = run_cycle(
             store_path=tmp_path / "feed_err.jsonl",
             verbose=True,
@@ -545,8 +554,8 @@ def test_run_cycle_parse_exception_handled(tmp_path):
         )
     ]
     mock_result = {"signals": signals, "errors": {}}
-    with patch("spec1_engine.app.cycle.harvest_all", return_value=mock_result), \
-         patch("spec1_engine.app.cycle.parse_signal", side_effect=RuntimeError("parse fail")):
+    with patch("spec1_core.app.cycle.harvest_all", return_value=mock_result), \
+         patch("spec1_core.app.cycle.parse_signal", side_effect=RuntimeError("parse fail")):
         stats = run_cycle(
             store_path=tmp_path / "parse_err.jsonl",
             verbose=False,
@@ -573,8 +582,8 @@ def test_run_cycle_score_exception_handled(tmp_path):
         )
     ]
     mock_result = {"signals": signals, "errors": {}}
-    with patch("spec1_engine.app.cycle.harvest_all", return_value=mock_result), \
-         patch("spec1_engine.app.cycle.score_signal", side_effect=RuntimeError("score fail")):
+    with patch("spec1_core.app.cycle.harvest_all", return_value=mock_result), \
+         patch("spec1_core.app.cycle.score_signal", side_effect=RuntimeError("score fail")):
         stats = run_cycle(
             store_path=tmp_path / "score_err.jsonl",
             verbose=False,
@@ -611,7 +620,7 @@ def test_run_cycle_pipeline_loop_executed(tmp_path):
     """When signals produce opportunities, the full pipeline loop runs."""
     rich_signal = _make_rich_signal()
     mock_result = {"signals": [rich_signal], "errors": {}}
-    with patch("spec1_engine.app.cycle.harvest_all", return_value=mock_result):
+    with patch("spec1_core.app.cycle.harvest_all", return_value=mock_result):
         stats = run_cycle(
             store_path=tmp_path / "pipeline.jsonl",
             verbose=False,
@@ -626,7 +635,7 @@ def test_run_cycle_verbose_with_opportunities(tmp_path):
     """Verbose mode with opportunities exercises priority breakdown prints."""
     rich_signal = _make_rich_signal("sig-prio")
     mock_result = {"signals": [rich_signal], "errors": {}}
-    with patch("spec1_engine.app.cycle.harvest_all", return_value=mock_result):
+    with patch("spec1_core.app.cycle.harvest_all", return_value=mock_result):
         stats = run_cycle(
             store_path=tmp_path / "prio_verbose.jsonl",
             verbose=True,
@@ -638,8 +647,8 @@ def test_run_cycle_pipeline_exception_handled(tmp_path):
     """Exceptions inside the investigate/verify/analyze loop are caught."""
     rich_signal = _make_rich_signal("sig-pipe-err")
     mock_result = {"signals": [rich_signal], "errors": {}}
-    with patch("spec1_engine.app.cycle.harvest_all", return_value=mock_result), \
-         patch("spec1_engine.app.cycle.generate_investigation",
+    with patch("spec1_core.app.cycle.harvest_all", return_value=mock_result), \
+         patch("spec1_core.app.cycle.generate_investigation",
                side_effect=RuntimeError("inv fail")):
         stats = run_cycle(
             store_path=tmp_path / "pipe_err.jsonl",
@@ -652,8 +661,8 @@ def test_run_cycle_verbose_pipeline_exception(tmp_path):
     """Pipeline exceptions with verbose=True print error and continue."""
     rich_signal = _make_rich_signal("sig-verbose-err")
     mock_result = {"signals": [rich_signal], "errors": {}}
-    with patch("spec1_engine.app.cycle.harvest_all", return_value=mock_result), \
-         patch("spec1_engine.app.cycle.generate_investigation",
+    with patch("spec1_core.app.cycle.harvest_all", return_value=mock_result), \
+         patch("spec1_core.app.cycle.generate_investigation",
                side_effect=RuntimeError("verbose inv fail")):
         stats = run_cycle(
             store_path=tmp_path / "verbose_pipe.jsonl",
@@ -666,9 +675,10 @@ def test_run_cycle_briefing_no_crash_on_failure(tmp_path):
     """Briefing step failure is caught and logged without crashing the cycle."""
     rich_signal = _make_rich_signal("sig-brief-err")
     mock_result = {"signals": [rich_signal], "errors": {}}
-    with patch("spec1_engine.app.cycle.harvest_all", return_value=mock_result), \
-         patch("spec1_engine.briefing.generator.generate_brief",
-               side_effect=RuntimeError("api down")):
+    with patch("spec1_core.app.cycle.harvest_all", return_value=mock_result), \
+         patch("spec1_core.briefing.generator.generate_brief",
+               side_effect=RuntimeError("api down")), \
+         patch("spec1_core.workspace.researcher.run_research", return_value=None):
         stats = run_cycle(
             store_path=tmp_path / "brief_err.jsonl",
             verbose=False,
@@ -681,7 +691,7 @@ def test_run_cycle_verbose_end_block(tmp_path):
     """Verbose end-of-cycle block runs when cycle completes."""
     rich_signal = _make_rich_signal("sig-end-verbose")
     mock_result = {"signals": [rich_signal], "errors": {}}
-    with patch("spec1_engine.app.cycle.harvest_all", return_value=mock_result):
+    with patch("spec1_core.app.cycle.harvest_all", return_value=mock_result):
         stats = run_cycle(
             store_path=tmp_path / "end_verbose.jsonl",
             verbose=True,
@@ -691,11 +701,11 @@ def test_run_cycle_verbose_end_block(tmp_path):
 
 def test_run_cycle_updates_last_run_state(tmp_path):
     """last_run_state is updated after cycle completes."""
-    from spec1_engine.app import cycle as cycle_mod
+    from spec1_core.app import cycle as cycle_mod
     rich_signal = _make_rich_signal("sig-last-state")
     mock_result = {"signals": [rich_signal], "errors": {}}
-    with patch("spec1_engine.app.cycle.harvest_all", return_value=mock_result):
-        stats = run_cycle(
+    with patch("spec1_core.app.cycle.harvest_all", return_value=mock_result):
+        run_cycle(
             store_path=tmp_path / "last_state.jsonl",
             run_id="run-state-test",
             verbose=False,

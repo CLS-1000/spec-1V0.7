@@ -1,14 +1,19 @@
+# @domain:   intelligence
+# @module:   test_engine
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for core engine — pipeline logic, gate scoring, IDs."""
 
 from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
-from pathlib import Path
 
 import pytest
 
-from spec1_engine.core.ids import (
+from spec1_core.core.ids import (
     new_uuid,
     deterministic_id,
     run_id,
@@ -18,8 +23,8 @@ from spec1_engine.core.ids import (
     outcome_id,
     record_id,
 )
-from spec1_engine.core.engine import Engine, EngineConfig
-from spec1_engine.schemas.models import (
+from spec1_core.core.engine import Engine, EngineConfig
+from spec1_core.schemas.models import (
     Signal,
     ParsedSignal,
     Opportunity,
@@ -28,8 +33,8 @@ from spec1_engine.schemas.models import (
     IntelligenceRecord,
 )
 from unittest.mock import patch
-from spec1_engine.signal.parser import parse_signal, parse_batch, _clean_html, _extract_keywords, _extract_entities
-from spec1_engine.signal.scorer import (
+from spec1_core.signal.parser import parse_signal, parse_batch, _clean_html, _extract_keywords, _extract_entities
+from spec1_core.signal.scorer import (
     score_signal,
     score_batch,
     _score_credibility,
@@ -39,9 +44,9 @@ from spec1_engine.signal.scorer import (
     _priority,
     SOURCE_CREDIBILITY,
 )
-from spec1_engine.investigation.generator import generate_investigation
-from spec1_engine.investigation.verifier import verify_investigation
-from spec1_engine.intelligence.analyzer import analyze
+from spec1_core.investigation.generator import generate_investigation
+from spec1_core.investigation import verifier
+from spec1_core.intelligence.analyzer import analyze
 
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -398,61 +403,103 @@ def test_generate_investigation_has_queries():
     assert len(inv.queries) > 0
 
 
-def test_verify_investigation_returns_outcome():
+@patch("spec1_core.investigation.verifier.verify_investigation")
+def test_verify_investigation_returns_outcome(mock_verify):
+    mock_verify.return_value = Outcome(
+        outcome_id="test-outcome",
+        classification="MONITOR",
+        confidence=0.75,
+        evidence=["test evidence"],
+    )
     opp = make_opportunity()
     sig = make_signal()
     ps = make_parsed()
     inv = generate_investigation(opp, sig, ps)
-    outcome = verify_investigation(inv)
+    outcome = verifier.verify_investigation(inv)
     assert isinstance(outcome, Outcome)
 
 
-def test_verify_outcome_confidence_range():
+@patch("spec1_core.investigation.verifier.verify_investigation")
+def test_verify_outcome_confidence_range(mock_verify):
+    mock_verify.return_value = Outcome(
+        outcome_id="test-outcome",
+        classification="ESCALATE",
+        confidence=0.65,
+        evidence=["test evidence"],
+    )
     opp = make_opportunity()
     sig = make_signal()
     ps = make_parsed()
     inv = generate_investigation(opp, sig, ps)
-    outcome = verify_investigation(inv)
+    outcome = verifier.verify_investigation(inv)
     assert 0.0 <= outcome.confidence <= 1.0
 
 
-def test_verify_outcome_valid_classification():
-    valid = {"Corroborated", "Escalate", "Investigate", "Monitor", "Conflicted", "Archive"}
+@patch("spec1_core.investigation.verifier.verify_investigation")
+def test_verify_outcome_valid_classification(mock_verify):
+    mock_verify.return_value = Outcome(
+        outcome_id="test-outcome",
+        classification="INVESTIGATE",
+        confidence=0.80,
+        evidence=["test evidence"],
+    )
+    valid = {"CORROBORATED", "ESCALATE", "INVESTIGATE", "MONITOR", "CONFLICTED", "ARCHIVE"}
     opp = make_opportunity()
     sig = make_signal()
     ps = make_parsed()
     inv = generate_investigation(opp, sig, ps)
-    outcome = verify_investigation(inv)
+    outcome = verifier.verify_investigation(inv)
     assert outcome.classification in valid
 
 
-def test_analyze_returns_intelligence_record():
+@patch("spec1_core.investigation.verifier.verify_investigation")
+def test_analyze_returns_intelligence_record(mock_verify):
+    mock_verify.return_value = Outcome(
+        outcome_id="test-outcome",
+        classification="MONITOR",
+        confidence=0.70,
+        evidence=["test evidence"],
+    )
     opp = make_opportunity()
     sig = make_signal()
     ps = make_parsed()
     inv = generate_investigation(opp, sig, ps)
-    outcome = verify_investigation(inv)
+    outcome = verifier.verify_investigation(inv)
     record = analyze(opp, inv, outcome, sig)
     assert isinstance(record, IntelligenceRecord)
     assert record.record_id.startswith("rec-")
 
 
-def test_analyze_record_confidence_range():
+@patch("spec1_core.investigation.verifier.verify_investigation")
+def test_analyze_record_confidence_range(mock_verify):
+    mock_verify.return_value = Outcome(
+        outcome_id="test-outcome",
+        classification="CORROBORATED",
+        confidence=0.85,
+        evidence=["test evidence"],
+    )
     opp = make_opportunity()
     sig = make_signal()
     ps = make_parsed()
     inv = generate_investigation(opp, sig, ps)
-    outcome = verify_investigation(inv)
+    outcome = verifier.verify_investigation(inv)
     record = analyze(opp, inv, outcome, sig)
     assert 0.0 <= record.confidence <= 1.0
 
 
-def test_record_to_dict_complete():
+@patch("spec1_core.investigation.verifier.verify_investigation")
+def test_record_to_dict_complete(mock_verify):
+    mock_verify.return_value = Outcome(
+        outcome_id="test-outcome",
+        classification="ARCHIVE",
+        confidence=0.55,
+        evidence=["test evidence"],
+    )
     opp = make_opportunity()
     sig = make_signal()
     ps = make_parsed()
     inv = generate_investigation(opp, sig, ps)
-    outcome = verify_investigation(inv)
+    outcome = verifier.verify_investigation(inv)
     record = analyze(opp, inv, outcome, sig)
     d = record.to_dict()
     assert "record_id" in d
@@ -466,7 +513,7 @@ def test_record_to_dict_complete():
 # ─── RunStats tests ───────────────────────────────────────────────────────────
 
 def test_run_stats_finish_sets_finished_at():
-    from spec1_engine.core.engine import RunStats
+    from spec1_core.core.engine import RunStats
     stats = RunStats(run_id="run-test", started_at="2026-04-11T00:00:00+00:00")
     assert stats.finished_at is None
     stats.finish()
@@ -478,7 +525,7 @@ def test_run_stats_finish_sets_finished_at():
 
 
 def test_run_stats_to_dict_has_all_keys():
-    from spec1_engine.core.engine import RunStats
+    from spec1_core.core.engine import RunStats
     stats = RunStats(run_id="run-abc", started_at="2026-04-11T00:00:00+00:00")
     stats.signals_harvested = 10
     stats.records_stored = 3
@@ -493,7 +540,7 @@ def test_run_stats_to_dict_has_all_keys():
 
 
 def test_run_stats_to_dict_values_correct():
-    from spec1_engine.core.engine import RunStats
+    from spec1_core.core.engine import RunStats
     stats = RunStats(run_id="run-vals", started_at="2026-04-11T00:00:00+00:00")
     stats.signals_harvested = 5
     stats.records_stored = 2
@@ -532,7 +579,7 @@ def _make_rich_signal_for_engine(signal_id: str = "sig-engine") -> Signal:
 
 def test_engine_run_returns_run_stats(tmp_path):
     """Engine.run() with mocked harvest returns a RunStats instance."""
-    from spec1_engine.core.engine import Engine, EngineConfig, RunStats
+    from spec1_core.core.engine import Engine, EngineConfig, RunStats
     rich_signal = _make_rich_signal_for_engine()
     mock_result = {"signals": [rich_signal], "errors": {}}
 
@@ -543,7 +590,7 @@ def test_engine_run_returns_run_stats(tmp_path):
     )
     engine = Engine(cfg)
 
-    with patch("spec1_engine.core.engine.harvest_all", return_value=mock_result):
+    with patch("spec1_core.core.engine.harvest_all", return_value=mock_result):
         stats = engine.run()
 
     assert isinstance(stats, RunStats)
@@ -553,7 +600,7 @@ def test_engine_run_returns_run_stats(tmp_path):
 
 def test_engine_run_signals_harvested(tmp_path):
     """Engine.run() updates signals_harvested from harvest result."""
-    from spec1_engine.core.engine import Engine, EngineConfig
+    from spec1_core.core.engine import Engine, EngineConfig
     signals = [_make_rich_signal_for_engine(f"sig-{i}") for i in range(3)]
     mock_result = {"signals": signals, "errors": {}}
 
@@ -564,7 +611,7 @@ def test_engine_run_signals_harvested(tmp_path):
     )
     engine = Engine(cfg)
 
-    with patch("spec1_engine.core.engine.harvest_all", return_value=mock_result):
+    with patch("spec1_core.core.engine.harvest_all", return_value=mock_result):
         stats = engine.run()
 
     assert stats.signals_harvested == 3
@@ -573,7 +620,7 @@ def test_engine_run_signals_harvested(tmp_path):
 
 def test_engine_run_harvest_exception(tmp_path):
     """Engine.run() handles harvest exception gracefully."""
-    from spec1_engine.core.engine import Engine, EngineConfig
+    from spec1_core.core.engine import Engine, EngineConfig
     cfg = EngineConfig(
         run_id="run-harvest-exc",
         environment="test",
@@ -581,7 +628,7 @@ def test_engine_run_harvest_exception(tmp_path):
     )
     engine = Engine(cfg)
 
-    with patch("spec1_engine.core.engine.harvest_all", side_effect=RuntimeError("no network")):
+    with patch("spec1_core.core.engine.harvest_all", side_effect=RuntimeError("no network")):
         stats = engine.run()
 
     assert any("harvest_all" in e for e in stats.errors)
@@ -590,7 +637,7 @@ def test_engine_run_harvest_exception(tmp_path):
 
 def test_engine_run_with_max_signals(tmp_path):
     """Engine.run() respects max_signals limit."""
-    from spec1_engine.core.engine import Engine, EngineConfig
+    from spec1_core.core.engine import Engine, EngineConfig
     signals = [_make_rich_signal_for_engine(f"sig-max-{i}") for i in range(10)]
     mock_result = {"signals": signals, "errors": {}}
 
@@ -602,7 +649,7 @@ def test_engine_run_with_max_signals(tmp_path):
     )
     engine = Engine(cfg)
 
-    with patch("spec1_engine.core.engine.harvest_all", return_value=mock_result):
+    with patch("spec1_core.core.engine.harvest_all", return_value=mock_result):
         stats = engine.run()
 
     assert stats.signals_harvested == 3
@@ -610,7 +657,7 @@ def test_engine_run_with_max_signals(tmp_path):
 
 def test_engine_run_harvest_errors_in_stats(tmp_path):
     """Feed-level harvest errors are appended to RunStats.errors."""
-    from spec1_engine.core.engine import Engine, EngineConfig
+    from spec1_core.core.engine import Engine, EngineConfig
     mock_result = {
         "signals": [],
         "errors": {"broken_feed": "timeout"},
@@ -623,7 +670,7 @@ def test_engine_run_harvest_errors_in_stats(tmp_path):
     )
     engine = Engine(cfg)
 
-    with patch("spec1_engine.core.engine.harvest_all", return_value=mock_result):
+    with patch("spec1_core.core.engine.harvest_all", return_value=mock_result):
         stats = engine.run()
 
     assert any("harvest:broken_feed" in e for e in stats.errors)
@@ -631,7 +678,7 @@ def test_engine_run_harvest_errors_in_stats(tmp_path):
 
 def test_engine_run_pipeline_loop_runs(tmp_path):
     """Engine.run() executes investigation/verify/analyze loop when opportunities found."""
-    from spec1_engine.core.engine import Engine, EngineConfig
+    from spec1_core.core.engine import Engine, EngineConfig
     rich_signal = _make_rich_signal_for_engine("sig-pipe-loop")
     mock_result = {"signals": [rich_signal], "errors": {}}
 
@@ -642,7 +689,7 @@ def test_engine_run_pipeline_loop_runs(tmp_path):
     )
     engine = Engine(cfg)
 
-    with patch("spec1_engine.core.engine.harvest_all", return_value=mock_result):
+    with patch("spec1_core.core.engine.harvest_all", return_value=mock_result):
         stats = engine.run()
 
     # Should have parsed the signal
@@ -652,7 +699,7 @@ def test_engine_run_pipeline_loop_runs(tmp_path):
 
 # ─── Signal scorer age-based velocity tests ──────────────────────────────────
 
-from spec1_engine.signal.scorer import _score_velocity as _sv
+from spec1_core.signal.scorer import _score_velocity as _sv
 
 
 def _make_aged_signal(hours_ago: float, source: str = "rand") -> Signal:
@@ -729,7 +776,7 @@ def test_velocity_from_naive_datetime():
 
 def test_velocity_score_novelty_single_hit():
     """Exactly 1 novelty term hit returns 0.40."""
-    from spec1_engine.signal.scorer import _score_novelty
+    from spec1_core.signal.scorer import _score_novelty
     score, hits = _score_novelty("intelligence briefing today", [])
     assert hits == 1
     assert score == pytest.approx(0.40)
@@ -737,7 +784,7 @@ def test_velocity_score_novelty_single_hit():
 
 def test_velocity_score_novelty_few_hits():
     """2-3 novelty hits return 0.65."""
-    from spec1_engine.signal.scorer import _score_novelty
+    from spec1_core.signal.scorer import _score_novelty
     # "cyber" + "espionage" = 2 hits → score 0.65
     score, hits = _score_novelty("cyber espionage activity", [])
     assert 2 <= hits <= 3
@@ -746,7 +793,7 @@ def test_velocity_score_novelty_few_hits():
 
 def test_velocity_score_novelty_many_hits():
     """4+ novelty hits return a score >= 0.85."""
-    from spec1_engine.signal.scorer import _score_novelty
+    from spec1_core.signal.scorer import _score_novelty
     text = "military intelligence cyber espionage nuclear nato ukraine russia pentagon"
     score, hits = _score_novelty(text, [])
     assert hits >= 4
@@ -755,7 +802,7 @@ def test_velocity_score_novelty_many_hits():
 
 # ─── Signal parser additional tests ──────────────────────────────────────────
 
-from spec1_engine.signal.parser import _truncate, parse_batch
+from spec1_core.signal.parser import _truncate
 
 
 def test_truncate_long_text():
@@ -792,7 +839,7 @@ def test_parse_batch_handles_exception():
         )
     ]
     # Patch parse_signal to raise on the first call
-    with patch("spec1_engine.signal.parser.parse_signal",
+    with patch("spec1_core.signal.parser.parse_signal",
                side_effect=RuntimeError("parse error")):
         result = parse_batch(signals)
     assert len(result["failed"]) == 1
@@ -801,8 +848,8 @@ def test_parse_batch_handles_exception():
 
 def test_clean_html_exception_falls_back_to_regex():
     """_clean_html falls back to regex stripping when BeautifulSoup raises."""
-    from spec1_engine.signal.parser import _clean_html
-    with patch("spec1_engine.signal.parser.BeautifulSoup", side_effect=Exception("lxml error")):
+    from spec1_core.signal.parser import _clean_html
+    with patch("spec1_core.signal.parser.BeautifulSoup", side_effect=Exception("lxml error")):
         result = _clean_html("<p>Hello <b>world</b></p>")
     # Regex fallback should strip tags
     assert "<" not in result
@@ -859,7 +906,7 @@ def test_parsed_signal_to_dict():
 
 
 def test_opportunity_to_dict():
-    from spec1_engine.schemas.models import Opportunity
+    from spec1_core.schemas.models import Opportunity
     opp = Opportunity(
         opportunity_id="opp-dict-test",
         signal_id="sig-001",
@@ -881,7 +928,7 @@ def test_opportunity_to_dict():
 
 def test_analyze_with_no_analyst_leads_uses_default_weight():
     """analyze uses DEFAULT_ANALYST_WEIGHT when investigation has no analyst leads."""
-    from spec1_engine.intelligence.analyzer import analyze, DEFAULT_ANALYST_WEIGHT
+    from spec1_core.intelligence.analyzer import analyze, DEFAULT_ANALYST_WEIGHT
     opp = make_opportunity()
     sig = make_signal()
     inv = Investigation(
@@ -894,7 +941,7 @@ def test_analyze_with_no_analyst_leads_uses_default_weight():
     )
     outcome = Outcome(
         outcome_id="out-test",
-        classification="Investigate",
+        classification="INVESTIGATE",
         confidence=0.70,
         evidence=["test evidence"],
     )
@@ -906,7 +953,7 @@ def test_analyze_with_no_analyst_leads_uses_default_weight():
 
 def test_investigation_generator_no_domain_match_uses_pool():
     """generate_investigation falls back to ANALYST_POOL[:2] when no keyword match."""
-    from spec1_engine.investigation.generator import generate_investigation, ANALYST_POOL
+    from spec1_core.investigation.generator import generate_investigation, ANALYST_POOL
     opp = make_opportunity()
     sig = make_signal(text="Weather report: sunny skies and mild temperatures.")
     ps = ParsedSignal(
@@ -928,7 +975,7 @@ def test_investigation_generator_no_domain_match_uses_pool():
 
 def test_engine_run_parse_exception_handled(tmp_path):
     """Engine.run() handles parse_signal exceptions."""
-    from spec1_engine.core.engine import Engine, EngineConfig
+    from spec1_core.core.engine import Engine, EngineConfig
     rich_signal = _make_rich_signal_for_engine("sig-eng-parse-err")
     mock_result = {"signals": [rich_signal], "errors": {}}
 
@@ -939,7 +986,7 @@ def test_engine_run_parse_exception_handled(tmp_path):
     )
     engine = Engine(cfg)
 
-    with patch("spec1_engine.core.engine.harvest_all", return_value=mock_result),          patch("spec1_engine.core.engine.parse_signal",
+    with patch("spec1_core.core.engine.harvest_all", return_value=mock_result),          patch("spec1_core.core.engine.parse_signal",
                side_effect=RuntimeError("parse error")):
         stats = engine.run()
 
@@ -949,7 +996,7 @@ def test_engine_run_parse_exception_handled(tmp_path):
 
 def test_engine_run_score_exception_handled(tmp_path):
     """Engine.run() handles score_signal exceptions."""
-    from spec1_engine.core.engine import Engine, EngineConfig
+    from spec1_core.core.engine import Engine, EngineConfig
     rich_signal = _make_rich_signal_for_engine("sig-eng-score-err")
     mock_result = {"signals": [rich_signal], "errors": {}}
 
@@ -960,7 +1007,7 @@ def test_engine_run_score_exception_handled(tmp_path):
     )
     engine = Engine(cfg)
 
-    with patch("spec1_engine.core.engine.harvest_all", return_value=mock_result),          patch("spec1_engine.core.engine.score_signal",
+    with patch("spec1_core.core.engine.harvest_all", return_value=mock_result),          patch("spec1_core.core.engine.score_signal",
                side_effect=RuntimeError("score error")):
         stats = engine.run()
 
@@ -970,7 +1017,7 @@ def test_engine_run_score_exception_handled(tmp_path):
 
 def test_engine_run_pipeline_exception_handled(tmp_path):
     """Engine.run() handles exceptions in the investigate/verify/analyze loop."""
-    from spec1_engine.core.engine import Engine, EngineConfig
+    from spec1_core.core.engine import Engine, EngineConfig
     rich_signal = _make_rich_signal_for_engine("sig-eng-pipeline-err")
     mock_result = {"signals": [rich_signal], "errors": {}}
 
@@ -981,7 +1028,7 @@ def test_engine_run_pipeline_exception_handled(tmp_path):
     )
     engine = Engine(cfg)
 
-    with patch("spec1_engine.core.engine.harvest_all", return_value=mock_result),          patch("spec1_engine.core.engine.generate_investigation",
+    with patch("spec1_core.core.engine.harvest_all", return_value=mock_result),          patch("spec1_core.core.engine.generate_investigation",
                side_effect=RuntimeError("inv error")):
         stats = engine.run()
 
@@ -993,7 +1040,7 @@ def test_engine_run_pipeline_exception_handled(tmp_path):
 
 def test_velocity_from_string_published_at():
     """_score_velocity handles non-datetime published_at via dateutil."""
-    import spec1_engine.signal.scorer as scorer_mod
+    import spec1_core.signal.scorer as scorer_mod
     sig = Signal(
         signal_id="sig-str-date",
         source="rand",
@@ -1017,7 +1064,7 @@ def test_velocity_from_string_published_at():
 
 def test_velocity_exception_returns_default():
     """_score_velocity returns 0.50 fallback on exception."""
-    from spec1_engine.signal.scorer import _score_velocity
+    from spec1_core.signal.scorer import _score_velocity
     sig = Signal(
         signal_id="sig-exc-date",
         source="rand",
@@ -1038,7 +1085,7 @@ def test_velocity_exception_returns_default():
 
 def test_score_volume_fallback_unreachable():
     """_score_volume lowest tier covers word_count=0."""
-    from spec1_engine.signal.scorer import _score_volume
+    from spec1_core.signal.scorer import _score_volume
     # word_count=0 → matches (0, 0.10) tier
     assert _score_volume(0) == pytest.approx(0.10)
     assert _score_volume(1) == pytest.approx(0.10)
@@ -1046,7 +1093,7 @@ def test_score_volume_fallback_unreachable():
 
 def test_parse_batch_max_entities_break():
     """_extract_entities respects max_ent limit and triggers the break."""
-    from spec1_engine.signal.parser import _extract_entities
+    from spec1_core.signal.parser import _extract_entities
     # Build text with enough proper-noun phrases to exceed max_ent
     text = (
         "Michael Kofman reported. Thomas Rid assessed. Julian Barnes confirmed. "

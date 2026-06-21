@@ -12,12 +12,25 @@ from datetime import datetime, timezone
 
 import anthropic
 
-from spec1_engine.briefing.templates import SYSTEM_PROMPT, USER_PROMPT_TEMPLATE
+from spec1_labels import VERIF_CORROBORATED
+from spec1_engine.briefing.templates import (
+    GEO_SYSTEM_PROMPT,
+    GEO_USER_PROMPT_TEMPLATE,
+    LEG_SYSTEM_PROMPT,
+    LEG_USER_PROMPT_TEMPLATE,
+    SYSTEM_PROMPT,
+    USER_PROMPT_TEMPLATE,
+)
 
 logger = logging.getLogger(__name__)
 
+<<<<<<< HEAD
 MODEL = "claude-sonnet-4-20250514"
 MAX_TOKENS = 3000
+=======
+MODEL = "claude-sonnet-4-6"
+MAX_TOKENS = 2500
+>>>>>>> origin/main
 
 # Sources that map to Cyber / Info Ops domain
 _CYBER_SOURCES = {
@@ -57,12 +70,11 @@ def _format_record(record: dict) -> str:
     )
 
 
-def _build_prompt(records: list[dict], cycle_stats: dict) -> str:
-    """Build the filled USER_PROMPT_TEMPLATE string."""
-    # Split elevated vs standard
+def _build_prompt(records: list[dict], cycle_stats: dict, mode: str = "standard") -> str:
+    """Build the filled prompt template string for the given mode."""
     elevated = [
         r for r in records
-        if r.get("outcome_classification", r.get("classification", "")) in ("Corroborated", "Escalate")
+        if r.get("outcome_classification", r.get("classification", "")) in (VERIF_CORROBORATED, "Escalate")
     ]
     remaining = [r for r in records if r not in elevated]
     standard_top10 = sorted(
@@ -71,11 +83,9 @@ def _build_prompt(records: list[dict], cycle_stats: dict) -> str:
         reverse=True,
     )[:10]
 
-    # Domain counts
     geo_count = sum(1 for r in records if _classify_domain(r) == "geo")
     cyber_count = sum(1 for r in records if _classify_domain(r) == "cyber")
 
-    # Format record blocks
     elevated_block = (
         "\n".join(_format_record(r) for r in elevated)
         if elevated else "(none)"
@@ -87,7 +97,14 @@ def _build_prompt(records: list[dict], cycle_stats: dict) -> str:
 
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
-    return USER_PROMPT_TEMPLATE.format(
+    if mode == "geopolitics":
+        tmpl = GEO_USER_PROMPT_TEMPLATE
+    elif mode == "legislative":
+        tmpl = LEG_USER_PROMPT_TEMPLATE
+    else:
+        tmpl = USER_PROMPT_TEMPLATE
+
+    return tmpl.format(
         run_id=cycle_stats.get("run_id", "—"),
         timestamp=cycle_stats.get("finished_at", cycle_stats.get("timestamp", "—")),
         signal_count=cycle_stats.get("signals_harvested", cycle_stats.get("signal_count", 0)),
@@ -110,32 +127,47 @@ def _fallback_brief(cycle_stats: dict) -> str:
     )
 
 
-def generate_brief(records: list[dict], cycle_stats: dict) -> str:
+def generate_brief(records: list[dict], cycle_stats: dict, mode: str = "standard") -> tuple[str, str]:
     """Generate the daily intelligence brief via Claude.
 
-    Returns a markdown string. On any failure returns a fallback brief.
+    Returns a (brief, prompts_text) tuple where *brief* is the generated
+    markdown and *prompts_text* is the full prompts payload (system + user)
+    that was sent to the model. On any failure the brief is a fallback
+    string; prompts_text is still populated when available.
     Never raises.
+
+    mode: "standard" (default SPEC-1 brief), "geopolitics" (Geopolitics & Policy Desk),
+          or "legislative" (Legislative & Judicial Desk).
     """
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip().lstrip('﻿')
     if not api_key:
         print("[briefing] ANTHROPIC_API_KEY not set in environment — returning fallback brief")
         logger.warning("ANTHROPIC_API_KEY not set — returning fallback brief")
-        return _fallback_brief(cycle_stats)
+        return _fallback_brief(cycle_stats), ""
 
-    prompt = _build_prompt(records, cycle_stats)
+    if mode == "geopolitics":
+        sys_prompt = GEO_SYSTEM_PROMPT
+    elif mode == "legislative":
+        sys_prompt = LEG_SYSTEM_PROMPT
+    else:
+        sys_prompt = SYSTEM_PROMPT
+
+    prompts_text = ""
 
     try:
+        user_prompt = _build_prompt(records, cycle_stats, mode=mode)
+        prompts_text = f"## SYSTEM PROMPT\n\n{sys_prompt.strip()}\n\n---\n\n## USER PROMPT\n\n{user_prompt.strip()}\n"
         client = anthropic.Anthropic(api_key=api_key)
         message = client.messages.create(
             model=MODEL,
             max_tokens=MAX_TOKENS,
-            system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": prompt}],
+            system=sys_prompt,
+            messages=[{"role": "user", "content": user_prompt}],
         )
         brief = message.content[0].text.strip()
-        logger.info("Brief generated — %d words", len(brief.split()))
-        return brief
+        logger.info("Brief generated (mode=%s) — %d words", mode, len(brief.split()))
+        return brief, prompts_text
     except Exception as exc:
         print(f"[briefing] API call failed: {type(exc).__name__}: {exc}")
         logger.error("Brief generation failed: %s", exc)
-        return _fallback_brief(cycle_stats)
+        return _fallback_brief(cycle_stats), prompts_text

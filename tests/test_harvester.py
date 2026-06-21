@@ -1,27 +1,40 @@
+# @domain:   intelligence
+# @module:   test_harvester
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for signal/harvester.py — private helpers, fetch paths, error handling."""
 
 from __future__ import annotations
 
+<<<<<<< HEAD
+=======
+import ssl
+>>>>>>> origin/main
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import feedparser
 import pytest
 
-from spec1_engine.signal.harvester import (
+from spec1_core.signal.harvester import (
     _parse_date,
     _get_text,
     _get_author,
     _fetch_raw_sanitized,
     _parse_feed,
+<<<<<<< HEAD
     _SANITIZE_XML,
+=======
+    _SSL_UNVERIFIED,
+>>>>>>> origin/main
     fetch_feed,
     harvest_all,
-    DEFAULT_FEEDS,
     _make_signal_id,
     _ILLEGAL_XML_RE,
 )
-from spec1_engine.schemas.models import Signal
+from spec1_core.schemas.models import Signal
 
 
 # ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -168,7 +181,7 @@ def test_fetch_raw_sanitized_strips_illegal_chars():
     mock_resp.text = dirty_xml
     mock_resp.raise_for_status = MagicMock()
 
-    with patch("spec1_engine.signal.harvester.requests.get", return_value=mock_resp):
+    with patch("spec1_core.signal.harvester.requests.get", return_value=mock_resp):
         result = _fetch_raw_sanitized("https://example.com/feed", timeout=5)
 
     assert b"\x00" not in result
@@ -182,7 +195,7 @@ def test_fetch_raw_sanitized_returns_bytes():
     mock_resp.text = "<feed>content</feed>"
     mock_resp.raise_for_status = MagicMock()
 
-    with patch("spec1_engine.signal.harvester.requests.get", return_value=mock_resp):
+    with patch("spec1_core.signal.harvester.requests.get", return_value=mock_resp):
         result = _fetch_raw_sanitized("https://example.com/feed", timeout=5)
 
     assert isinstance(result, bytes)
@@ -191,23 +204,76 @@ def test_fetch_raw_sanitized_returns_bytes():
 def test_fetch_raw_sanitized_calls_raise_for_status():
     mock_resp = MagicMock()
     mock_resp.text = "<feed/>"
-    with patch("spec1_engine.signal.harvester.requests.get", return_value=mock_resp):
+    with patch("spec1_core.signal.harvester.requests.get", return_value=mock_resp):
         _fetch_raw_sanitized("https://example.com/feed", timeout=5)
     mock_resp.raise_for_status.assert_called_once()
 
 
+<<<<<<< HEAD
 # ─── _parse_feed tests ────────────────────────────────────────────────────────
 
+=======
+# ─── _fetch_raw_no_ssl tests ──────────────────────────────────────────────────
+
+def test_fetch_raw_no_ssl_returns_bytes():
+    """_fetch_raw_no_ssl reads from urlopen response."""
+    fake_content = b"<feed><item/></feed>"
+    mock_response = MagicMock()
+    mock_response.__enter__ = MagicMock(return_value=mock_response)
+    mock_response.__exit__ = MagicMock(return_value=False)
+    mock_response.read = MagicMock(return_value=fake_content)
+
+    with patch("spec1_core.signal.harvester.urllib.request.urlopen", return_value=mock_response), \
+         patch("spec1_core.signal.harvester.ssl.create_default_context") as mock_ctx:
+        mock_ctx.return_value = MagicMock()
+        result = _fetch_raw_no_ssl("https://example.com/feed", timeout=5)
+
+    assert result == fake_content
+
+
+def test_fetch_raw_no_ssl_disables_cert_verification():
+    """_fetch_raw_no_ssl creates an SSL context with cert verification off."""
+    fake_content = b"<feed/>"
+    mock_response = MagicMock()
+    mock_response.__enter__ = MagicMock(return_value=mock_response)
+    mock_response.__exit__ = MagicMock(return_value=False)
+    mock_response.read = MagicMock(return_value=fake_content)
+
+    mock_ssl_ctx = MagicMock()
+    with patch("spec1_core.signal.harvester.urllib.request.urlopen", return_value=mock_response), \
+         patch("spec1_core.signal.harvester.ssl.create_default_context", return_value=mock_ssl_ctx):
+        _fetch_raw_no_ssl("https://example.com/feed", timeout=5)
+
+    assert mock_ssl_ctx.check_hostname is False
+    assert mock_ssl_ctx.verify_mode == ssl.CERT_NONE
+
+
+# ─── _parse_feed tests ────────────────────────────────────────────────────────
+
+def test_parse_feed_ssl_unverified_uses_no_ssl_fetch():
+    """SSL-unverified sources use _fetch_raw_no_ssl."""
+    fake_bytes = b"<rss/>"
+    # Take the first SSL_UNVERIFIED source
+    ssl_source = next(iter(_SSL_UNVERIFIED))
+
+    with patch("spec1_core.signal.harvester._fetch_raw_no_ssl", return_value=fake_bytes) as mock_no_ssl, \
+         patch("spec1_core.signal.harvester.feedparser.parse") as mock_parse:
+        mock_parse.return_value = MagicMock(entries=[])
+        _parse_feed(ssl_source, "https://example.com", timeout=5)
+
+    mock_no_ssl.assert_called_once()
+
+
+>>>>>>> origin/main
 def test_parse_feed_sanitize_xml_uses_raw_sanitized():
     """SANITIZE_XML sources use _fetch_raw_sanitized."""
     # Temporarily add a test source to _SANITIZE_XML
-    import spec1_engine.signal.harvester as h_mod
-    original = set(h_mod._SANITIZE_XML)
+    import spec1_core.signal.harvester as h_mod
     h_mod._SANITIZE_XML.add("test_sanitize_source")
     try:
         fake_bytes = b"<rss/>"
-        with patch("spec1_engine.signal.harvester._fetch_raw_sanitized", return_value=fake_bytes) as mock_san, \
-             patch("spec1_engine.signal.harvester.feedparser.parse") as mock_parse:
+        with patch("spec1_core.signal.harvester._fetch_raw_sanitized", return_value=fake_bytes) as mock_san, \
+             patch("spec1_core.signal.harvester.feedparser.parse") as mock_parse:
             mock_parse.return_value = MagicMock(entries=[])
             _parse_feed("test_sanitize_source", "https://example.com", timeout=5)
         mock_san.assert_called_once()
@@ -217,7 +283,7 @@ def test_parse_feed_sanitize_xml_uses_raw_sanitized():
 
 def test_parse_feed_normal_uses_feedparser_directly():
     """Normal sources go directly through feedparser.parse."""
-    with patch("spec1_engine.signal.harvester.feedparser.parse") as mock_parse:
+    with patch("spec1_core.signal.harvester.feedparser.parse") as mock_parse:
         mock_parse.return_value = MagicMock(entries=[])
         _parse_feed("regular_source", "https://example.com", timeout=5)
     mock_parse.assert_called_once()
@@ -234,7 +300,7 @@ def test_fetch_feed_bozo_with_no_entries_raises():
         "entries": [],
     }.get(k, d))
 
-    with patch("spec1_engine.signal.harvester._parse_feed", return_value=mock_parsed):
+    with patch("spec1_core.signal.harvester._parse_feed", return_value=mock_parsed):
         with pytest.raises(RuntimeError, match="Failed to parse feed"):
             list(fetch_feed("bad_source", "https://example.com"))
 
@@ -246,7 +312,7 @@ def test_fetch_feed_skips_entries_without_title_or_link():
   <item><description>No title or link here</description></item>
 </channel></rss>"""
     parsed = feedparser.parse(fake_xml)
-    with patch("spec1_engine.signal.harvester._parse_feed", return_value=parsed):
+    with patch("spec1_core.signal.harvester._parse_feed", return_value=parsed):
         signals = list(fetch_feed("test", "https://example.com"))
     assert signals == []
 
@@ -261,7 +327,7 @@ def test_fetch_feed_yields_signals_with_correct_source():
   </item>
 </channel></rss>"""
     parsed = feedparser.parse(fake_xml)
-    with patch("spec1_engine.signal.harvester._parse_feed", return_value=parsed):
+    with patch("spec1_core.signal.harvester._parse_feed", return_value=parsed):
         signals = list(fetch_feed("my_source", "https://example.com"))
     assert len(signals) == 1
     assert signals[0].source == "my_source"
@@ -271,7 +337,7 @@ def test_fetch_feed_yields_signals_with_correct_source():
 
 def test_harvest_all_records_error_when_fetch_raises():
     """harvest_all catches exceptions per-feed and records them in errors dict."""
-    with patch("spec1_engine.signal.harvester.fetch_feed", side_effect=RuntimeError("timeout")):
+    with patch("spec1_core.signal.harvester.fetch_feed", side_effect=RuntimeError("timeout")):
         result = harvest_all(
             feeds={"bad_feed": "https://example.com"},
             run_id="run-test",
@@ -283,16 +349,6 @@ def test_harvest_all_records_error_when_fetch_raises():
 
 def test_harvest_all_partial_failure():
     """harvest_all succeeds for good feeds even if one fails."""
-    fake_xml = """<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0"><channel>
-  <item>
-    <title>Good Article</title>
-    <link>https://good.com/art</link>
-    <description>Good content here.</description>
-  </item>
-</channel></rss>"""
-    good_parsed = feedparser.parse(fake_xml)
-
     def _side_effect(name, url, **kwargs):
         if name == "good":
             return iter([Signal(
@@ -311,7 +367,7 @@ def test_harvest_all_partial_failure():
             )])
         raise RuntimeError("bad feed failure")
 
-    with patch("spec1_engine.signal.harvester.fetch_feed", side_effect=_side_effect):
+    with patch("spec1_core.signal.harvester.fetch_feed", side_effect=_side_effect):
         result = harvest_all(
             feeds={"good": "https://good.com", "bad": "https://bad.com"},
             run_id="run-test",
@@ -360,7 +416,7 @@ def test_illegal_xml_re_preserves_tab_lf_cr():
 def test_harvest_all_uses_default_feeds_when_none_passed():
     """harvest_all uses DEFAULT_FEEDS when feeds=None."""
     # When no feeds passed, harvest_all defaults to DEFAULT_FEEDS
-    with patch("spec1_engine.signal.harvester.fetch_feed",
+    with patch("spec1_core.signal.harvester.fetch_feed",
                side_effect=RuntimeError("mocked")):
         result = harvest_all(run_id="run-default", environment="test")
     # All feeds should have errors since fetch_feed raises for all

@@ -1,0 +1,38 @@
+{
+    "snapshot_metadata": {
+        "snapshot_id": "2026-05-30_01",
+        "label": "PORTLAND_ACTIVE_BASE_INGEST",
+        "description": "Manual baseline snapshot mapping localized real estate zoning modifications against TriMet transit-oriented development patterns."
+    },
+    "spatial_layers": {
+        "zoning_overlays": [
+            {
+                "layer_id": "zone_cm3_high_density",
+                "source_url": "https://www.portlandmaps.com/bps/zoning/",
+                "description": "Commercial Mixed Use 3 boundaries targeting elevated FAR development permissions."
+            }
+        ],
+        "trimet_corridors": [
+            {
+                "line_id": "trimet_max_red_pdx_alignment",
+                "status": "active_infrastructure",
+                "geometry_type": "LineString"
+            }
+        ]
+    },
+    "relational_matrix": {
+        "nodes": [
+            {"id": "ent_portland_city_council", "group": 1, "label": "Portland City Council"},
+            {"id": "ent_trimet_board", "group": 1, "label": "TriMet Board of Directors"},
+            {"id": "ent_bds_portland", "group": 1, "label": "Bureau of Development Services"},
+            {"id": "sig_ord_zoning_mod_2026", "group": 2, "label": "Ordinance: High-Density Corridor Shift"},
+            {"id": "ent_lobbyist_transit_group", "group": 3, "label": "Regional Infrastructure PAC"}
+        ],
+        "links": [
+            {"source": "ent_portland_city_council", "target": "sig_ord_zoning_mod_2026", "value": 3, "relation": "enacted_by"},
+            {"source": "ent_bds_portland", "target": "sig_ord_zoning_mod_2026", "value": 2, "relation": "enforces"},
+            {"source": "ent_lobbyist_transit_group", "target": "ent_portland_city_council", "value": 4, "relation": "directed_contributions_to"},
+            {"source": "ent_lobbyist_transit_group", "target": "sig_ord_zoning_mod_2026", "value": 3, "relation": "drafted_proposals_for"}
+        ]
+    }
+}

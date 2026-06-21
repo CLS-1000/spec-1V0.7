@@ -1,19 +1,18 @@
 """Investigation Verifier.
 
-Makes a real Claude API call to assess the investigation hypothesis and
-produce an Outcome record. Falls back gracefully on any API or parse error.
+Uses the three-tier LLM fallback client (Claude → Ollama → rule-based mock)
+to assess the investigation hypothesis and produce an Outcome record.
+Falls back gracefully on any error.
 """
 
 from __future__ import annotations
 
 import json
 import logging
-import os
 import uuid
 
-import anthropic
-
 from spec1_engine.schemas.models import Investigation, Outcome
+from spec1_labels import VERIF_CORROBORATED, VERIF_CONFLICTED
 
 logger = logging.getLogger(__name__)
 
@@ -31,14 +30,14 @@ _PERMANENT_API_ERRORS = (
 
 MODEL = "claude-haiku-4-5-20251001"
 VALID_CLASSIFICATIONS = {
-    "Corroborated", "Escalate", "Investigate", "Monitor", "Conflicted", "Archive"
+    VERIF_CORROBORATED, "ESCALATE", "INVESTIGATE", "MONITOR", VERIF_CONFLICTED, "ARCHIVE"
 }
 
 _SYSTEM_PROMPT = (
     "You are an intelligence analyst verifying a hypothesis. "
     "Respond with JSON only — no prose, no markdown fences. "
     'Schema: {"verified": bool, "confidence": float, "reasoning": str, '
-    '"classification": "Corroborated"|"Escalate"|"Investigate"|"Monitor"|"Conflicted"|"Archive"}'
+    '"classification": "' + VERIF_CORROBORATED + '"|"ESCALATE"|"INVESTIGATE"|"MONITOR"|"' + VERIF_CONFLICTED + '"|"ARCHIVE"}'
 )
 
 
@@ -70,29 +69,23 @@ def _build_user_prompt(investigation: Investigation) -> str:
 def _fallback_outcome() -> Outcome:
     return Outcome(
         outcome_id=f"out-{uuid.uuid4().hex[:12]}",
-        classification="Investigate",
+        classification="INVESTIGATE",
         confidence=0.0,
         evidence=["Fallback: API error or parse failure — manual review required."],
     )
 
 
 def verify_investigation(investigation: Investigation) -> Outcome:
-    """Call Claude to verify an investigation hypothesis. Never raises."""
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        logger.warning("ANTHROPIC_API_KEY not set — using fallback outcome")
-        return _fallback_outcome()
+    """Verify an investigation hypothesis via 3-tier LLM fallback. Never raises."""
+    from spec1_engine.llm.fallback_client import FallbackLLMClient
 
     try:
-        client = anthropic.Anthropic(api_key=api_key)
-        message = client.messages.create(
-            model=MODEL,
-            max_tokens=512,
+        llm = FallbackLLMClient()
+        raw = llm.complete(
+            prompt=_build_user_prompt(investigation),
             system=_SYSTEM_PROMPT,
-            messages=[
-                {"role": "user", "content": _build_user_prompt(investigation)}
-            ],
         )
+<<<<<<< HEAD
         raw = message.content[0].text.strip()
     except _TRANSIENT_API_ERRORS as exc:
         logger.warning(
@@ -108,19 +101,32 @@ def verify_investigation(investigation: Investigation) -> Outcome:
         return _fallback_outcome()
     except Exception as exc:
         logger.error("Claude API unexpected error (%s): %s", type(exc).__name__, exc, exc_info=True)
+=======
+        # Strip markdown fences that some tiers may include.
+        if raw.startswith("```"):
+            parts = raw.split("```")
+            inner = parts[1] if len(parts) >= 2 else raw
+            if "\n" in inner:
+                tag, body = inner.split("\n", 1)
+                raw = body.strip() if tag.strip().isalpha() else inner.strip()
+            else:
+                raw = inner.strip()
+    except Exception as exc:
+        logger.error("LLM fallback chain error: %s", exc)
+>>>>>>> origin/main
         return _fallback_outcome()
 
     try:
         data = json.loads(raw)
-        classification = data.get("classification", "Investigate")
+        classification = data.get("classification", "INVESTIGATE")
         if classification not in VALID_CLASSIFICATIONS:
-            classification = "Investigate"
+            classification = "INVESTIGATE"
         confidence = float(data.get("confidence", 0.0))
         confidence = round(min(max(confidence, 0.0), 1.0), 4)
         verified = bool(data.get("verified", False))
         reasoning = str(data.get("reasoning", ""))
         evidence = [
-            f"Claude assessment: {reasoning}",
+            f"LLM assessment: {reasoning}",
             f"Verified: {verified}",
             f"Confidence: {confidence}",
             f"Hypothesis: {investigation.hypothesis}",
