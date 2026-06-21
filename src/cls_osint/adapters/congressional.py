@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   adapters_congressional
+# @loc:      gh_main
+# @status:   stable
+# @depends:  cls_db, spec1_core
+
 """Congressional records adapter.
 
 Fetches US Congressional bills, resolutions, and hearings from:

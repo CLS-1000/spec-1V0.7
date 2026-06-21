@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   routers_intel
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Intelligence records router — GET /intel."""
 
 from __future__ import annotations

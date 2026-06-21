@@ -2,7 +2,7 @@
 
 **Version:** 1.0  
 **Authority:** EVASTARARCANA LLC  
-**Status:** Canonical — supersedes any conflicting implementation  
+**Status:** Canonical — supersedes any conflicting implementation *unless Analyst explicitley says otherwise  
 
 ---
 
@@ -10,16 +10,15 @@
 
 This document defines the intended behavior, architecture, and output philosophy of SPEC-1. It exists because automated agents (Claude Code, Copilot, Grok) repeatedly revert intentional design decisions when they read code without this context. Any agent operating on this repository must read this document before making changes.
 
-**If this document conflicts with the code, the document is correct. Fix the code.**
+**If this document conflicts with the code, the document is more often correct. ask then Fix the code.**
 
 ---
 
 ## 1. What SPEC-1 Is
 
-SPEC-1 is a signal intelligence engine. Its job is to do the triage work that does not require human judgment — harvesting, filtering, scoring, investigating, and structuring — so that what reaches the analyst is already processed and ready to act on.
+SPEC-1 is a signal intelligence engine. It is a research tool. Its job is to do the triage work that does not require human judgm — harvesting, filtering, scoring, investigating, and structuring — so that what reaches the analyst is already processed and ready to act on.
 
-SPEC-1 is not a neutral reporter. It is an analyst system. It produces verdicts. Those verdicts are grounded in data and earned by sourcing. The difference between bias and analysis is accountability to evidence — not tone.
-
+this Machine is dedicated to presenting the most relaible data possible.  it is realized machines dont have opinions so why worry about the system the most honest truth seeker is still flawed. so The analyst is dedicated to the system to be auditble transparent and useful. The machine will support and reflect weighted andbalancerd data. 
 ---
 
 ## 2. The Division of Labor
@@ -65,7 +64,7 @@ Harvest → Parse → Score → Investigate → Verify → Analyze → Store
 
 **The publication gate runs once — before publication. Nowhere else.**
 
-Gates do not run on:
+Gates do run on:
 - Topic generation output
 - Lead generation output
 - Raw signal data
@@ -86,7 +85,7 @@ Inserting gates earlier in the pipeline destroys the signal quality that makes a
 | Angle is stated explicitly | Language sanded to institutional register |
 | Unsourced claims are flagged | Strong language flagged regardless of sourcing |
 
-The system may use direct, active, urgent language when describing verified anomalies. Urgency is data-driven, not editorial. A 3x committee acceleration velocity is alarming. It should read as alarming.
+The system should write as a sophisticated Aristocrat, educated wordsmith that gives a mindful report. Use direct, active, language when describing verified anomalies. Urgency is data-driven, not editorial. A 3x committee acceleration velocity is alarming. It should read as alarming.
 
 ### The Publication Gate Checks For:
 
@@ -110,7 +109,7 @@ Every cycle brief follows this structure. Sections are fixed. Order is fixed.
 ```
 EXECUTIVE SUMMARY
 What happened this cycle. Aggregate findings. Signal volume and quality.
-Active language. Specific numbers. No hedging.
+Active language use great imact words with . Specific numbers. No hedg
 
 ELEVATED SIGNALS
 Signals requiring immediate analyst attention. Flagged for urgency.
@@ -276,3 +275,18 @@ Brief output must not be:
 *This document is the authoritative specification for SPEC-1 design intent.*  
 *Last updated by operator. Version controlled in repo root.*  
 *Agents: read this first. Always.*
+<<<<<<< HEAD
+
+---
+
+## 11. Product Naming
+
+SPEC-1          Internal engine name. Never changes.
+ONE WORLD CITIZEN  The publication. World State Brief + Metropolitan Source.
+SWITCHBOARD     The city intelligence platform. cls_metro + city adapters.
+                What other cities license to run Metropolitan Source locally.
+
+These names are locked. Do not rename modules to match product names.
+Internal code names (cls_pdx1, cls_metro, cls_osint) stay as-is.
+=======
+>>>>>>> main

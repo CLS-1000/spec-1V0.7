@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   publication_builder
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """IssueBuilder — assembles Metro Citizens Brief issues.
 
 Enforces neutrality gate on every section before accepting it.

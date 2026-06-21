@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   core_engine
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """SPEC-1 Engine — orchestrates the full signal pipeline."""
 
 from __future__ import annotations

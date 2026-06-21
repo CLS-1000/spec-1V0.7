@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   mcp_server
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """SPEC-1 MCP Server — exposes SPEC-1 tools to Claude via Model Context Protocol.
 
 Tools exposed:
@@ -160,7 +166,7 @@ def tool_analyse_psyop(args: dict) -> dict:
     text = args.get("text", "")
     if not text:
         return {"error": "text is required"}
-    from spec1_analytics.cls_psyop.scorer import score_text
+    from cls_psyop.scorer import score_text
     result = score_text(str(text))
     return result.to_dict()
 
@@ -234,8 +240,8 @@ def tool_run_psyop(args: dict) -> dict:
     Reads from $SPEC1_STORE_PATH (default spec1_intelligence.jsonl) and
     writes one PsyopScore per scored record to the configured psyop store.
     """
-    from spec1_analytics.cls_psyop.scorer import filter_risky, score_records
-    from spec1_analytics.cls_psyop.store import PsyopStore
+    from cls_psyop.scorer import filter_risky, score_records
+    from cls_psyop.store import PsyopStore
 
     intel_path = _store_path("SPEC1_STORE_PATH", "spec1_intelligence.jsonl")
     out_path = Path(args.get("out") or os.environ.get("SPEC1_PSYOP_PATH", "generated/psyop_scores.jsonl"))
@@ -317,8 +323,8 @@ def tool_generate_leads(args: dict) -> dict:
 
     Reads from $SPEC1_STORE_PATH and writes Lead JSONL to the configured leads store.
     """
-    from spec1_analytics.cls_leads.generator import generate_leads
-    from spec1_analytics.cls_leads.store import LeadStore
+    from cls_leads.generator import generate_leads
+    from cls_leads.store import LeadStore
 
     intel_path = _store_path("SPEC1_STORE_PATH", "spec1_intelligence.jsonl")
     out_path = Path(args.get("out") or os.environ.get("SPEC1_LEADS_PATH", "generated/leads.jsonl"))

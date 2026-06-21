@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   producer
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Calibration report producer.
 
 Aggregates verdicts onto intelligence records and surfaces reliability drift

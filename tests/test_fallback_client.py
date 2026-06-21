@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   test_fallback_client
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for the three-tier LLM fallback client."""
 
 from __future__ import annotations

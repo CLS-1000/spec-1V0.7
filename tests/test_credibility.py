@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   test_credibility
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 import pytest
 from spec1_engine.schemas.models import AnalystRecord, Signal
 from spec1_engine.analysts.credibility import CredibilityAnalyst

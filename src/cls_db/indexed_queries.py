@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   indexed_queries
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Indexed query helpers for cls_db.
 
 Provides a thin, composable query layer on top of :class:`cls_db.repository.Repository`

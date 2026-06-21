@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   analysts_credibility
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Credibility Analyst.
 
 Scores signals based on known-analyst authorship.

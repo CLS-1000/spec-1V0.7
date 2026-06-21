@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   routers_adapters
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Adapters router — GET /adapters, GET /adapters/{name}."""
 
 from __future__ import annotations

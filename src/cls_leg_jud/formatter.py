@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   formatter
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Formatter for LegJudBrief → Markdown."""
 from __future__ import annotations
 from cls_leg_jud.schemas import LegJudBrief, LegJudSection

@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   formatter
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """World brief formatter — renders WorldBrief to Markdown and plain text."""
 
 from __future__ import annotations

@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   core_logging_utils
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Logging utilities for SPEC-1."""
 
 from __future__ import annotations

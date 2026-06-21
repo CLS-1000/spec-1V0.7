@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   schemas
+# @loc:      gh_main
+# @status:   stable
+# @depends:  cls_db, spec1_core
+
 """Data schemas for cls_osint."""
 
 from __future__ import annotations

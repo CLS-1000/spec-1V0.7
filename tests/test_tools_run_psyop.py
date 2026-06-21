@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   test_tools_run_psyop
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for spec1_core.tools.run_psyop CLI."""
 
 from __future__ import annotations

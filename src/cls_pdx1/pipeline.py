@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   pipeline
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """PDX-1i pipeline orchestrator.
 
 Runs all source adapters and watch modules, evaluates publication trigger,

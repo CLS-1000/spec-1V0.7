@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   sources_olis
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """OLIS adapter — Oregon Legislative Information System.
 
 Tracks bills, votes, committee assignments, and hearing witnesses.

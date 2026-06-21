@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   main
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """SPEC-1 entry point.
 
 Usage:

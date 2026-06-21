@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_pdx1_gates
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_pdx1.gates."""
 
 from __future__ import annotations

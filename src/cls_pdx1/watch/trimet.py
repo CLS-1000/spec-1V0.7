@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   watch_trimet
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """TriMet watch module.
 
 TriMet's board is appointed by the governor. Monitors:

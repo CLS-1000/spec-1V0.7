@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   models
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Core data models for cls_pdx1 (PDX-1i).
 
 Uses Pydantic v2 throughout — API-safe and schema-exportable.

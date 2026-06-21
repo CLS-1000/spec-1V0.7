@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   test_psyop_evidence
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_psyop evidence chain system."""
 
 from __future__ import annotations
@@ -5,7 +11,7 @@ from __future__ import annotations
 import json
 
 
-from spec1_analytics.cls_psyop.evidence import EvidenceChain, EvidenceStore
+from cls_psyop.evidence import EvidenceChain, EvidenceStore
 from spec1_core.psyop.scorer import (
     NARRATIVE_CLUSTER,
     CONSENSUS_SPIKE,

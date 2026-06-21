@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   producer
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Producer for Legislative & Judicial Desk brief."""
 from __future__ import annotations
 

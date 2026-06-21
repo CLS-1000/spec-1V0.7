@@ -1,3 +1,9 @@
+# @domain:   product
+# @module:   evidence
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Evidence chains for psyop pattern detection."""
 
 from __future__ import annotations

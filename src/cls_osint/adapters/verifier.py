@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   adapters_verifier
+# @loc:      gh_main
+# @status:   stable
+# @depends:  cls_db, spec1_core
+
 """Cross-source verifier for OSINT records.
 
 Checks whether a claim or record appears across multiple independent sources,

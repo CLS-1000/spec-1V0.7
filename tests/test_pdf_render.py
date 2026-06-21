@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_pdf_render
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for the out-of-process PDF renderer and its subprocess wrapper."""
 
 from __future__ import annotations

@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   routers_calibration
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Calibration router — GET /calibration/report.
 
 Produces a CalibrationReport from current intelligence records + verdicts.

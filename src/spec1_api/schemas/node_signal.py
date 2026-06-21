@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   schemas_node_signal
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Pydantic schemas for the Portland Political Web signal loop."""
 
 from __future__ import annotations

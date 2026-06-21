@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   test_feed
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_osint.feed — RSS feed fetching."""
 
 from __future__ import annotations

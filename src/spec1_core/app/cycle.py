@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   app_cycle
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """SPEC-1 Full Pipeline Cycle.
 
 Implements and runs the full loop:
@@ -32,6 +38,11 @@ from spec1_core.investigation.generator import generate_investigation
 from spec1_core.investigation.verifier import verify_investigation
 from spec1_core.intelligence.analyzer import analyze
 from spec1_core.intelligence.store import JsonlStore
+try:
+    from cls_db.dual_write import make_dual_writer as _make_dual_writer
+    _DUAL_WRITE_AVAILABLE = True
+except ImportError:
+    _DUAL_WRITE_AVAILABLE = False
 
 configure_root()
 logger = get_logger(__name__)
@@ -124,7 +135,16 @@ def run_cycle(
 ) -> dict:
     """Execute one full SPEC-1 cycle and return a summary dict."""
     run_id = run_id or new_run_id()
-    store = JsonlStore(store_path)
+    if _DUAL_WRITE_AVAILABLE:
+        from pathlib import Path as _Path
+        store = _make_dual_writer(
+            jsonl_path=store_path,
+            db_path=_Path("spec1.db"),
+            table="intelligence_records",
+            pk_field="record_id",
+        )
+    else:
+        store = JsonlStore(store_path)
     started_at = datetime.now(timezone.utc).isoformat()
 
     if verbose:
@@ -314,8 +334,8 @@ def run_cycle(
         from spec1_core.briefing.writer import write_brief
         if verbose:
             print("\n[Briefing] Generating daily intelligence brief...")
-        brief_md, brief_prompts = generate_brief(stored_records, stats)
-        brief_path = write_brief(brief_md, run_id, stats["finished_at"], brief_prompts)
+        brief_md, _ = generate_brief(stored_records, stats)
+        brief_path = write_brief(brief_md, run_id, stats["finished_at"])
         brief_word_count = len(brief_md.split())
         stats["brief_path"] = brief_path
         stats["brief_word_count"] = brief_word_count
@@ -325,8 +345,8 @@ def run_cycle(
         logger.error("Briefing step failed: %s — trying rule-based fallback", exc)
         stats["errors"].append(f"briefing:{exc}")
         try:
-            from spec1_analytics.cls_world_brief.producer import produce_brief
-            from spec1_analytics.cls_world_brief.formatter import to_markdown
+            from cls_world_brief.producer import produce_brief
+            from cls_world_brief.formatter import to_markdown
             if verbose:
                 print("\n[Briefing] Claude API unavailable — using rule-based brief fallback...")
             fallback_brief = produce_brief(stored_records)

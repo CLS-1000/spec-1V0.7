@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   store
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """LegJudBrief persistence — append-only JSONL store."""
 from __future__ import annotations
 

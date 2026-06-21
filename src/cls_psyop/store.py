@@ -1,3 +1,9 @@
+# @domain:   product
+# @module:   store
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Psyop score persistence — JSONL store, with optional SQLite dual-write."""
 
 from __future__ import annotations

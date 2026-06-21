@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   adapters_narrative
+# @loc:      gh_main
+# @status:   stable
+# @depends:  cls_db, spec1_core
+
 """Narrative / influence-operation adapter.
 
 Analyses a corpus of OSINTRecords to detect recurring narrative themes,

@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   briefing_writer
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core/schemas
+
 """Brief writer — persists generated briefs to disk."""
 
 from __future__ import annotations

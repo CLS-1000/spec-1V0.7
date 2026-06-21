@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   adapters_pdx911
+# @loc:      gh_main
+# @status:   stable
+# @depends:  cls_db, spec1_core
+
 """Portland 911 incidents adapter.
 
 Fetches the live KML feed from PortlandMaps and parses it into Pdx911Record instances.

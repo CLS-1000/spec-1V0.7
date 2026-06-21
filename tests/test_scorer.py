@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   test_scorer
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_psyop/scorer.py — psyop pattern scoring."""
 
 from __future__ import annotations

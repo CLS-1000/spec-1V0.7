@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   schemas_models
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Data models for SPEC-1 Intelligence Engine."""
 
 from __future__ import annotations

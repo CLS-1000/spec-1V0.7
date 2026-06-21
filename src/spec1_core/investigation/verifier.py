@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   investigation_verifier
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Investigation Verifier.
 
 Uses the three-tier LLM fallback client (Claude → Ollama → rule-based mock)

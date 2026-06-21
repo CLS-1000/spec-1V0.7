@@ -1,3 +1,9 @@
+# @domain:   product
+# @module:   patterns
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Known psyop pattern registry.
 
 Defines PsyopPattern instances covering major psychological operation

@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   producer
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """World brief producer.
 
 Assembles a WorldBrief from IntelligenceRecords and OSINTRecords

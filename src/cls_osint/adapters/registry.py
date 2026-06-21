@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   adapters_registry
+# @loc:      gh_main
+# @status:   stable
+# @depends:  cls_db, spec1_core
+
 """Adapter base class and registry for the SPEC-1 custom adapter marketplace.
 
 Every custom signal adapter must subclass :class:`AdapterBase` and register

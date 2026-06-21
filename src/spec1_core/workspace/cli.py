@@ -1,3 +1,10 @@
+# @domain:   handler
+# @module:   workspace_cli
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+# TODO: back-import from spec1_engine — migrate to spec1_core equivalent
+
 """Command-line interface for case management.
 
 Usage:
@@ -14,7 +21,7 @@ import sys
 import argparse
 from pathlib import Path
 
-from spec1_engine.workspace.case import (
+from spec1_core.workspace.case import (
     open_case,
     list_cases,
     get_case,

@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_ui_route
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for the SPEC-1 UI root route + Portland Political Web env-gating."""
 
 from __future__ import annotations

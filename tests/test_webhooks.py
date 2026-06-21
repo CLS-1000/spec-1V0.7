@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_webhooks
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for spec1_api.webhooks — cycle-event delivery."""
 
 from __future__ import annotations

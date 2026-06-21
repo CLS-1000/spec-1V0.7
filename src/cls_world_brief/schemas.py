@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   schemas
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Data schemas for cls_world_brief."""
 
 from __future__ import annotations

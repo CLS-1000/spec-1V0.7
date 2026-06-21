@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   tools_pdf_render
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Out-of-process PDF renderer for SPEC-1 briefs.
 
 Invoked as a subprocess from spec1_core.briefing.writer.write_brief_pdf so

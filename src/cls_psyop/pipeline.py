@@ -1,3 +1,9 @@
+# @domain:   product
+# @module:   pipeline
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Psyop detection pipeline — end-to-end processing with enhanced features."""
 
 from __future__ import annotations

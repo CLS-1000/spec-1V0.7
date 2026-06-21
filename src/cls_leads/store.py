@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   store
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Lead persistence — JSONL store for Lead objects, with optional SQLite dual-write."""
 
 from __future__ import annotations

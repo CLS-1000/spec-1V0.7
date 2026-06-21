@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   signal_gates
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core/config/calibration.py
+
 """Political signal gate scoring functions.
 
 Four independent gates for the Portland Political Web signal loop:

@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   llm_fallback_client
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Three-tier LLM fallback client.
 
 Tier 1: Anthropic Claude (ANTHROPIC_API_KEY)

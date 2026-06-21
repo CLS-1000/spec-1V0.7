@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   neutrality_section
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Section-level composite neutrality gate."""
 
 from __future__ import annotations

@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   analysts_registry
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Analyst Registry.
 
 Contains the authoritative list of known national security analysts and think tanks.

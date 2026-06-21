@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   test_harvester
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for signal/harvester.py — private helpers, fetch paths, error handling."""
 
 from __future__ import annotations
