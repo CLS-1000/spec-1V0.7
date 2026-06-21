@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 """Tests for the PostgreSQL persistence module.
 
 Uses SQLite (via SQLAlchemy) as a drop-in replacement so tests run without
@@ -215,6 +216,8 @@ def test_reset_engine_clears_cache(sqlite_url):
     assert pg._engine is None
 
 
+=======
+>>>>>>> origin/develop
 # @domain:   machine
 # @module:   test_persistence
 # @loc:      gh_main
@@ -223,6 +226,10 @@ def test_reset_engine_clears_cache(sqlite_url):
 
 """Tests for cls_db — database persistence and dual-write."""
 
+<<<<<<< HEAD
+=======
+from __future__ import annotations
+>>>>>>> origin/develop
 
 
 

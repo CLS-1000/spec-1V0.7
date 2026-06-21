@@ -3,9 +3,14 @@ import time
 import math
 
 def draw_retro_radar_sweep():
+<<<<<<< HEAD
     # Clear terminal using ANSI escape sequences (avoids subprocess shell invocation)
     sys.stdout.write("\033[2J\033[H")
     sys.stdout.flush()
+=======
+    # Enforce clear terminal screen dimensions
+    os.system('cls' if os.name == 'nt' else 'clear')  # nosec B605
+>>>>>>> origin/develop
 
     # Establish radar sweep radius and center coordinates
     width, height = 70, 22
