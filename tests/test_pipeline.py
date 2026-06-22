@@ -85,8 +85,11 @@ class TestOsintPipeline:
         with patch("cls_osint.pipeline.fetch_all_rss") as mock_rss, \
              patch("cls_osint.pipeline.fara_adapter.collect") as mock_fara, \
              patch("cls_osint.pipeline.congressional_adapter.collect") as mock_congress, \
+<<<<<<< HEAD
+=======
              patch("cls_osint.pipeline.judicial_adapter.collect", return_value=[]), \
              patch("cls_osint.pipeline.state_leg_adapter.collect", return_value=[]), \
+>>>>>>> origin/develop
              patch("cls_osint.pipeline.narrative_adapter.detect_narratives") as mock_narrative:
 
             mock_rss.return_value = {"records": rss_records, "errors": {}}
@@ -109,8 +112,11 @@ class TestOsintPipeline:
         with patch("cls_osint.pipeline.fetch_all_rss") as mock_rss, \
              patch("cls_osint.pipeline.fara_adapter.collect", return_value=[]), \
              patch("cls_osint.pipeline.congressional_adapter.collect", return_value=[]), \
+<<<<<<< HEAD
+=======
              patch("cls_osint.pipeline.judicial_adapter.collect", return_value=[]), \
              patch("cls_osint.pipeline.state_leg_adapter.collect", return_value=[]), \
+>>>>>>> origin/develop
              patch("cls_osint.pipeline.narrative_adapter.detect_narratives", return_value=[]):
 
             mock_rss.return_value = {
@@ -130,8 +136,11 @@ class TestOsintPipeline:
         with patch("cls_osint.pipeline.fetch_all_rss") as mock_rss, \
              patch("cls_osint.pipeline.fara_adapter.collect", return_value=[]), \
              patch("cls_osint.pipeline.congressional_adapter.collect", return_value=[]), \
+<<<<<<< HEAD
+=======
              patch("cls_osint.pipeline.judicial_adapter.collect", return_value=[]), \
              patch("cls_osint.pipeline.state_leg_adapter.collect", return_value=[]), \
+>>>>>>> origin/develop
              patch("cls_osint.pipeline.narrative_adapter.detect_narratives") as mock_narrative:
 
             mock_rss.return_value = {"records": records, "errors": {}}
@@ -147,24 +156,34 @@ class TestOsintPipeline:
 
         with patch("cls_osint.pipeline.fetch_all_rss") as mock_rss, \
              patch("cls_osint.pipeline.fara_adapter.collect") as mock_fara, \
+<<<<<<< HEAD
+             patch("cls_osint.pipeline.congressional_adapter.collect") as mock_congress:
+=======
              patch("cls_osint.pipeline.congressional_adapter.collect") as mock_congress, \
              patch("cls_osint.pipeline.judicial_adapter.collect") as mock_judicial, \
              patch("cls_osint.pipeline.state_leg_adapter.collect") as mock_state_leg:
+>>>>>>> origin/develop
 
             stats = pipeline.run(
                 collect_rss=False,
                 collect_fara=False,
                 collect_congress=False,
                 detect_narratives=False,
+<<<<<<< HEAD
+=======
                 collect_judicial=False,
                 collect_state_leg=False,
+>>>>>>> origin/develop
             )
 
         mock_rss.assert_not_called()
         mock_fara.assert_not_called()
         mock_congress.assert_not_called()
+<<<<<<< HEAD
+=======
         mock_judicial.assert_not_called()
         mock_state_leg.assert_not_called()
+>>>>>>> origin/develop
         assert stats.rss_records == 0
 
     def test_get_recent_returns_records(self, tmp_path):
@@ -197,8 +216,11 @@ class TestRunPipeline:
         with patch("cls_osint.pipeline.fetch_all_rss") as mock_rss, \
              patch("cls_osint.pipeline.fara_adapter.collect", return_value=[]), \
              patch("cls_osint.pipeline.congressional_adapter.collect", return_value=[]), \
+<<<<<<< HEAD
+=======
              patch("cls_osint.pipeline.judicial_adapter.collect", return_value=[]), \
              patch("cls_osint.pipeline.state_leg_adapter.collect", return_value=[]), \
+>>>>>>> origin/develop
              patch("cls_osint.pipeline.narrative_adapter.detect_narratives", return_value=[]):
 
             mock_rss.return_value = {"records": [], "errors": {}}
