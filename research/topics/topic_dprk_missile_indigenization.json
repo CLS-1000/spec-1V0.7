@@ -1,0 +1,60 @@
+{
+  "topic_id": "topic_dprk_missile_indigenization",
+  "name": "DPRK Missile Indigenization",
+  "core_question": "Is North Korea reducing its reliance on imported missile components, and what does that imply for sanctions-regime effectiveness and regional deterrence posture?",
+  "subquestions": [
+    "What evidence exists of domestic production capacity for missile components previously imported?",
+    "Are known sanctions-evasion procurement routes still active, or have they been displaced by indigenization?",
+    "How are South Korea, Japan, and the United States adjusting deterrence posture in response?",
+    "What role does China or Russia play in enabling or constraining indigenization?"
+  ],
+  "keywords": [
+    "missile",
+    "indigenization",
+    "indigenous production",
+    "sanctions evasion",
+    "procurement network",
+    "satellite imagery",
+    "solid fuel",
+    "guidance system"
+  ],
+  "entities": [
+    "North Korea",
+    "DPRK",
+    "Kim Jong Un",
+    "South Korea",
+    "United Nations"
+  ],
+  "geographies": [
+    "Korea",
+    "Korean Peninsula",
+    "Northeast Asia"
+  ],
+  "time_horizon_days": 120,
+  "source_classes": [
+    "RSS",
+    "FARA"
+  ],
+  "exclusions": [
+    "K-pop",
+    "sports",
+    "box office"
+  ],
+  "analyst_notes": "Opened as a long-horizon companion to PSYCHE-OPS Issue 597 (\"The Exploitable Interval\"). Signal Mode surfaces day-to-day DPRK developments; this topic profile exists to accumulate the indigenization thread specifically, across cycles, independent of whether any single day's signal clears the 4-gate filter.",
+  "aliases": {
+    "DPRK": [
+      "North Korea",
+      "Democratic People's Republic of Korea"
+    ],
+    "indigenization": [
+      "self-sufficiency",
+      "domestic production",
+      "import substitution"
+    ]
+  },
+  "created_at": "2026-06-19T20:19:36.354675+00:00",
+  "metadata": {
+    "related_publication": "PSYCHE-OPS Issue 597",
+    "analyst": "spec1_ops"
+  }
+}

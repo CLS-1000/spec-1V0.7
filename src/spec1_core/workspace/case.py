@@ -242,7 +242,17 @@ def get_case(case_id: str) -> CaseFile:
     _validate_case_id(case_id)
     _ensure_dirs()
 
+<<<<<<< HEAD
     case_file = CASES_DIR / f"case_{case_id}.json"
+=======
+    cases_root = CASES_DIR.resolve()
+    case_file = (cases_root / f"case_{case_id}.json").resolve()
+    try:
+        case_file.relative_to(cases_root)
+    except ValueError:
+        raise ValueError(f"Invalid case path for case_id: {case_id!r}")
+
+>>>>>>> origin/develop
     if not case_file.exists():
         raise ValueError(f"Case {case_id} not found")
 

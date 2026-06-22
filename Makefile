@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 .PHONY: install test test-fast test-cov lint run mcp cycle backfill calibration workspace clean help brief leads psyop
+=======
+.PHONY: install test test-fast test-cov lint run mcp cycle backfill calibration workspace clean help brief leads psyop research
+>>>>>>> origin/develop
 
 PYTHONPATH := src
 PYTHON     := PYTHONPATH=$(PYTHONPATH) python
@@ -18,6 +22,7 @@ help:
 	@echo "  make brief        Generate a daily brief for the latest run_id (operator tool)"
 	@echo "  make leads        Derive Lead objects from intelligence records (operator tool)"
 	@echo "  make psyop        Score every intelligence record for psyop patterns (operator tool)"
+	@echo "  make research     Run analyst-defined topic research dossier expansion"
 	@echo "  make workspace    Open workspace CLI"
 	@echo "  make clean        Remove __pycache__ and .pytest_cache"
 
@@ -55,6 +60,7 @@ calibration: $(PYTHON) -m spec1_engine.tools.calibration_propose \
 brief: $(PYTHON) -m spec1_engine.tools.generate_brief
 leads: $(PYTHON) -m spec1_engine.tools.generate_leads
 psyop: $(PYTHON) -m spec1_engine.tools.run_psyop
+research: $(PYTHON) -m spec1_core.tools.run_research
 workspace: $(PYTHON) -m spec1_engine.workspace
 
 clean:
