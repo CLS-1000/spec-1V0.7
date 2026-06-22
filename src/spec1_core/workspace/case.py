@@ -34,6 +34,17 @@ def _validate_case_id(case_id: str) -> None:
     if not _CASE_ID_RE.match(case_id):
         raise ValueError(f"Invalid case_id: {case_id!r}")
 
+
+def _safe_case_file_path(case_id: str) -> Path:
+    """Build a safe case file path rooted under CASES_DIR."""
+    root = CASES_DIR.resolve()
+    candidate = (CASES_DIR / f"case_{case_id}.json").resolve()
+    try:
+        candidate.relative_to(root)
+    except ValueError as exc:
+        raise ValueError(f"Invalid case_id path: {case_id!r}") from exc
+    return candidate
+
 # Workspace directory at project root
 WORKSPACE_DIR = Path(__file__).parent.parent.parent.parent / "workspace"
 CASES_DIR = WORKSPACE_DIR / "cases"
@@ -178,7 +189,7 @@ def close_case(case_id: str) -> CaseFile:
     _validate_case_id(case_id)
     _ensure_dirs()
 
-    case_file = CASES_DIR / f"case_{case_id}.json"
+    case_file = _safe_case_file_path(case_id)
     if not case_file.exists():
         raise ValueError(f"Case {case_id} not found")
 
@@ -242,7 +253,7 @@ def get_case(case_id: str) -> CaseFile:
     _validate_case_id(case_id)
     _ensure_dirs()
 
-    case_file = CASES_DIR / f"case_{case_id}.json"
+    case_file = _safe_case_file_path(case_id)
     if not case_file.exists():
         raise ValueError(f"Case {case_id} not found")
 
