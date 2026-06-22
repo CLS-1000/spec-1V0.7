@@ -275,8 +275,11 @@ Brief output must not be:
 *This document is the authoritative specification for SPEC-1 design intent.*  
 *Last updated by operator. Version controlled in repo root.*  
 *Agents: read this first. Always.*
+
 <<<<<<< HEAD
 
+=======
+>>>>>>> origin/develop
 ---
 
 ## 11. Product Naming
@@ -288,5 +291,3 @@ SWITCHBOARD     The city intelligence platform. cls_metro + city adapters.
 
 These names are locked. Do not rename modules to match product names.
 Internal code names (cls_pdx1, cls_metro, cls_osint) stay as-is.
-=======
->>>>>>> main

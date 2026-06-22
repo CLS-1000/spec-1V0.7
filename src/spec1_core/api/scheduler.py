@@ -17,13 +17,23 @@ import logging
 import os
 import threading
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.cron import CronTrigger
+if TYPE_CHECKING:
+    from apscheduler.schedulers.background import BackgroundScheduler
 
 logger = logging.getLogger(__name__)
 
 KILL_FILE = Path(".cls_kill")
+
+
+def _parse_env_int(env_var: str, default: int) -> int:
+    """Read an integer from an environment variable with a descriptive error on bad input."""
+    value = os.environ.get(env_var, str(default))
+    try:
+        return int(value)
+    except ValueError:
+        raise ValueError(f"Invalid value for {env_var}: expected integer, got {value!r}")
 
 
 def _guarded_cycle() -> None:
@@ -67,12 +77,20 @@ def _guarded_congressional_cycle() -> None:
         logger.error("Congressional cycle failed: %s", exc)
 
 
-def build_scheduler() -> BackgroundScheduler:
+def build_scheduler() -> "BackgroundScheduler":
     """Create and configure the BackgroundScheduler (not yet started)."""
-    scheduler = BackgroundScheduler(timezone="America/Los_Angeles")
+    from apscheduler.schedulers.background import BackgroundScheduler
+    from apscheduler.triggers.cron import CronTrigger
+
+    timezone = os.environ.get("SPEC1_TIMEZONE", "America/Los_Angeles")
+    hour = _parse_env_int("SPEC1_CRON_HOUR", 6)
+    minute = _parse_env_int("SPEC1_CRON_MINUTE", 0)
+    congressional_hour = _parse_env_int("SPEC1_CONGRESSIONAL_CRON_HOUR", 7)
+
+    scheduler = BackgroundScheduler(timezone=timezone)
     scheduler.add_job(
         _guarded_cycle,
-        trigger=CronTrigger(hour=6, minute=0, timezone="America/Los_Angeles"),
+        trigger=CronTrigger(hour=hour, minute=minute, timezone=timezone),
         id="daily_cycle",
         name="SPEC-1 Daily Intelligence Cycle",
         replace_existing=True,
@@ -80,7 +98,7 @@ def build_scheduler() -> BackgroundScheduler:
     )
     scheduler.add_job(
         _guarded_congressional_cycle,
-        trigger=CronTrigger(hour=7, minute=0, timezone="America/Los_Angeles"),
+        trigger=CronTrigger(hour=congressional_hour, minute=minute, timezone=timezone),
         id="congressional_cycle",
         name="SPEC-1 Congressional Trade Cycle",
         replace_existing=True,

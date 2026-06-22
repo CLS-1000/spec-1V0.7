@@ -16,18 +16,6 @@ from spec1_labels import VERIF_CORROBORATED, VERIF_CONFLICTED
 
 logger = logging.getLogger(__name__)
 
-# Transient errors — worth retrying; permanent errors — not worth retrying
-_TRANSIENT_API_ERRORS = (
-    anthropic.RateLimitError,
-    anthropic.APIConnectionError,
-    anthropic.APITimeoutError,
-)
-_PERMANENT_API_ERRORS = (
-    anthropic.AuthenticationError,
-    anthropic.PermissionDeniedError,
-    anthropic.BadRequestError,
-)
-
 MODEL = "claude-haiku-4-5-20251001"
 VALID_CLASSIFICATIONS = {
     VERIF_CORROBORATED, "ESCALATE", "INVESTIGATE", "MONITOR", VERIF_CONFLICTED, "ARCHIVE"
