@@ -15,7 +15,7 @@ from typing import Annotated
 
 import json
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Path, Query
 
 from spec1_core.core.ids import run_id as new_run_id
 from spec1_core.api.scheduler import KILL_FILE
@@ -234,7 +234,15 @@ def list_cases_endpoint(status: str = None) -> dict:
 
 
 @router.get("/workspace/cases/{case_id}")
-def get_case_endpoint(case_id: str) -> dict:
+def get_case_endpoint(
+    case_id: Annotated[
+        str,
+        Path(
+            pattern=r"^case-[0-9a-f]{12}$",
+            description="Canonical case id (example: case-1a2b3c4d5e6f)",
+        ),
+    ]
+) -> dict:
     """Get details for a specific case."""
     try:
         from spec1_core.workspace.case import get_case
@@ -259,7 +267,15 @@ def get_case_endpoint(case_id: str) -> dict:
 
 
 @router.post("/workspace/cases/{case_id}/close")
-def close_case_endpoint(case_id: str) -> dict:
+def close_case_endpoint(
+    case_id: Annotated[
+        str,
+        Path(
+            pattern=r"^case-[0-9a-f]{12}$",
+            description="Canonical case id (example: case-1a2b3c4d5e6f)",
+        ),
+    ]
+) -> dict:
     """Close an investigation case and generate final report."""
     try:
         from spec1_core.workspace.case import close_case
