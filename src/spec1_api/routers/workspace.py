@@ -11,7 +11,7 @@ from __future__ import annotations
 import logging
 from typing import Annotated, Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Path, Query
 from pydantic import BaseModel, Field
 from pydantic import StringConstraints
 
@@ -21,6 +21,13 @@ router = APIRouter(prefix="/workspace", tags=["workspace"])
 
 _Title = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]
 _Tag   = Annotated[str, StringConstraints(strip_whitespace=True, max_length=100)]
+_CaseId = Annotated[
+    str,
+    Path(
+        pattern=r"^case-[0-9a-f]{12}$",
+        description="Canonical case id (example: case-1a2b3c4d5e6f)",
+    ),
+]
 
 
 class OpenCaseRequest(BaseModel):
@@ -63,7 +70,7 @@ def open_case(req: OpenCaseRequest) -> dict:
 
 
 @router.get("/cases/{case_id}")
-def get_case(case_id: str) -> dict:
+def get_case(case_id: _CaseId) -> dict:
     """Get a specific case by ID."""
     try:
         from spec1_core.workspace.case import get_case as _get
@@ -73,7 +80,7 @@ def get_case(case_id: str) -> dict:
 
 
 @router.post("/cases/{case_id}/findings")
-def add_finding(case_id: str, req: AddFindingRequest) -> dict:
+def add_finding(case_id: _CaseId, req: AddFindingRequest) -> dict:
     """Manually append a finding to an open investigation case."""
     try:
         from spec1_core.workspace.case import update_case as _update
@@ -86,7 +93,7 @@ def add_finding(case_id: str, req: AddFindingRequest) -> dict:
 
 
 @router.post("/cases/{case_id}/close")
-def close_case(case_id: str) -> dict:
+def close_case(case_id: _CaseId) -> dict:
     """Close an investigation case and generate its final report."""
     try:
         from spec1_core.workspace.case import close_case as _close
