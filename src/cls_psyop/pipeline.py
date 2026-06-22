@@ -88,7 +88,7 @@ class PsyopPipelineStats:
             "stored": self.stored,
             "processing_time_ms": self.processing_time_ms,
             "error_count": len(self.errors),
-            "errors": self.errors,
+            "errors": [],
         }
 
     def __repr__(self) -> str:
