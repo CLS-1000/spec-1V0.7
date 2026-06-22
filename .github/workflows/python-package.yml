@@ -35,6 +35,7 @@ jobs:
         python -m pip install --upgrade pip wheel setuptools
         pip install -e ".[dev]"
         pip install ruff bandit[toml] coverage pytest-cov
+        pip install "tzlocal>=4.0"
 
     - name: Check hardcoded labels
       run: python .github/scripts/check_hardcoded_labels.py
