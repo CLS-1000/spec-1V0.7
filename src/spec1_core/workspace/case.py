@@ -52,6 +52,16 @@ REPORTS_DIR = WORKSPACE_DIR / "reports"
 INDEX_FILE = WORKSPACE_DIR / "case_index.jsonl"
 
 
+def _safe_case_file_path(case_id: str) -> Path:
+    """Build and validate the case file path stays within CASES_DIR."""
+    case_file = CASES_DIR / f"case_{case_id}.json"
+    try:
+        case_file.resolve().relative_to(CASES_DIR.resolve())
+    except ValueError as exc:
+        raise ValueError(f"Invalid case file path for case_id: {case_id!r}") from exc
+    return case_file
+
+
 def _ensure_dirs():
     """Ensure workspace directories exist."""
     CASES_DIR.mkdir(parents=True, exist_ok=True)
@@ -135,7 +145,7 @@ def update_case(
     _validate_case_id(case_id)
     _ensure_dirs()
 
-    case_file = CASES_DIR / f"case_{case_id}.json"
+    case_file = _safe_case_file_path(case_id)
     if not case_file.exists():
         raise ValueError(f"Case {case_id} not found")
 
