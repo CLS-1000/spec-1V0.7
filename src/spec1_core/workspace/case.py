@@ -35,6 +35,15 @@ def _validate_case_id(case_id: str) -> None:
         raise ValueError(f"Invalid case_id: {case_id!r}")
 
 
+def _safe_workspace_path(base_dir: Path, filename: str) -> Path:
+    """Build a path under *base_dir* and enforce containment."""
+    base_resolved = base_dir.resolve()
+    candidate = (base_resolved / filename).resolve()
+    if candidate != base_resolved and base_resolved not in candidate.parents:
+        raise ValueError("Invalid path")
+    return candidate
+
+
 def _safe_case_file_path(case_id: str) -> Path:
     """Build a safe case file path rooted under CASES_DIR."""
     root = CASES_DIR.resolve()
@@ -124,7 +133,7 @@ def open_case(
     print(f"  Tags:     {', '.join(tags)}\n")
 
     return case
-
+    case_file = _safe_workspace_path(CASES_DIR, f"case_{case_id}.json")
 
 def update_case(
     case_id: str,
@@ -178,7 +187,7 @@ def update_case(
             case.confidence = (high_count * 1.0 + medium_count * 0.5 + low_count * 0.0) / total
 
     # Write back
-    with open(case_file, "w") as f:
+    case_file = _safe_workspace_path(CASES_DIR, f"case_{case_id}.json")
         f.write(json.dumps(case.to_dict(), indent=2, default=str))
 
     logger.info(f"case_updated: case_id={case_id}, signals_added={len(new_signals)}, total_signals={len(case.signal_ids)}, findings={len(case.findings)}")
@@ -194,7 +203,7 @@ def close_case(case_id: str) -> CaseFile:
         case_id: Case ID
 
     Returns:
-        Closed CaseFile
+    report_path = _safe_workspace_path(REPORTS_DIR, f"report_{case_id}.md")
     """
     _validate_case_id(case_id)
     _ensure_dirs()
