@@ -175,6 +175,17 @@ RSS / FARA / Congress / Narrative
   mcp_server.py (Claude MCP)
 ```
 
+## Shorthand glossary — confirm before acting on these
+- "spec-1" / "the repo" → CLS-1000/spec-1V0.7, develop branch
+- "pdx1-i" → PDX-1i / cls_pdx1 (Portland Metro Intelligence module)
+- "gh research" → push/pull research mode work to GitHub
+- "The Downlow" → [whatever this actually refers to — worth spelling out once]
+
+If a message uses a term not in this glossary, or could mean more than
+one thing, state your interpretation in one line and wait for
+confirmation before running anything.
+
+
 ## Key Data Models
 
 ### spec1_engine (core)
@@ -332,7 +343,7 @@ Every PR must declare its version bump type in the PR description.
 ### Agent Write Surfaces
 
 Agents may freely modify:
-- `src/spec1_engine/signal/`
+- `src/spec1_engine/signal
 - `src/spec1_engine/investigation/`
 - `src/spec1_engine/intelligence/`
 - `src/spec1_engine/briefing/` (except `templates.py` imports — edit `.md` files instead)
@@ -358,7 +369,36 @@ Agents must **NOT** modify without human approval:
 
 ### PR Requirements
 
-Every PR must include (use `.github/pull_request_template.md`):
+## Session Safety Rules (added 2026-06-20, after repeated scope violations)
+
+### Shorthand glossary — confirm before acting on these
+- "spec-1" / "the repo" → CLS-1000/spec-1V0.7, develop branch
+- "pdx1-i" → PDX-1i / cls_pdx1 (Portland Metro Intelligence module)
+- "gh research" → push/pull Research Mode work to GitHub
+- "The Downlow" → [spell this one out once, then add it here]
+
+If a message uses a term not in this glossary, or could mean more than
+one thing, state your interpretation in one line and wait for
+confirmation before running anything.
+
+### Repo/scope anchoring — required at the start of every session
+Before any write, commit, or push:
+1. Run `pwd` and `git remote -v` and `git branch --show-current`.
+2. Confirm aloud: working directory is inside spec-1V0.7, remote is
+   CLS-1000/spec-1V0.7, branch is develop.
+3. If any of these don't match, STOP and ask — do not create a new
+   branch, worktree, or remote to "fix" it yourself.
+
+### Plan mode means read-only
+While in plan mode: read and report only. Never write, edit, delete,
+or run git commands. State the plan and stop. Wait for an explicit
+"approved, proceed" message before executing anything.
+
+### Destructive operations
+Never delete a directory, force-push, rewrite history, or change
+formatting/structural conventions (e.g. PAI-style output) without
+first stating the exact change and getting explicit approval —
+even if you believe it's clearly implied by the request.Every PR must include (use `.github/pull_request_template.md`):
 1. Summary of changes
 2. Version bump type and justification
 3. Confirmation that `/core` was not modified (or justification if it was)
