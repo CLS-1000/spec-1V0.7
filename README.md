@@ -1,4 +1,4 @@
-# [ SPEC-1 INTELLIGENCE ENGINE ]
+# [SPEC-1 INTELLIGENCE ENGINE]
 
 [![CI](https://github.com/mjlak1000/spec-1/actions/workflows/python-package.yml/badge.svg)](https://github.com/mjlak1000/spec-1/actions/workflows/python-package.yml)
 [![Pages](https://github.com/mjlak1000/spec-1/actions/workflows/pages.yml/badge.svg)](https://mjlak1000.github.io/spec-1/)
