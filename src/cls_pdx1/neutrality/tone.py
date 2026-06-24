@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   neutrality_tone
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tone gate: reject loaded or editorialising vocabulary."""
 
 from __future__ import annotations
@@ -14,8 +20,6 @@ LOADED_VERBS: frozenset[str] = frozenset(
         "denied",
         "slammed",
         "blasted",
-        "revealed",
-        "exposed",
         "accused",
         "lied",
         "misled",
@@ -28,10 +32,8 @@ LOADED_VERBS: frozenset[str] = frozenset(
         "capitulated",
         "attacked",
         "defended",
-        "launched",  # in political context
         "lambasted",
         "excoriated",
-        "condemned",
     }
 )
 

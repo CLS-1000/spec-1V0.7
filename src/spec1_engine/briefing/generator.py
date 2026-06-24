@@ -1,0 +1,168 @@
+"""Daily intelligence brief generator.
+
+Calls Claude Sonnet to write a publishable brief from today's scored records.
+Falls back to a raw-stats brief on any API error — never crashes the cycle.
+"""
+
+from __future__ import annotations
+
+import logging
+import os
+from datetime import datetime, timezone
+
+import anthropic
+
+from spec1_labels import VERIF_CORROBORATED
+from spec1_engine.briefing.templates import (
+    GEO_SYSTEM_PROMPT,
+    GEO_USER_PROMPT_TEMPLATE,
+    LEG_SYSTEM_PROMPT,
+    LEG_USER_PROMPT_TEMPLATE,
+    SYSTEM_PROMPT,
+    USER_PROMPT_TEMPLATE,
+)
+
+logger = logging.getLogger(__name__)
+
+MODEL = "claude-sonnet-4-20250514"
+MAX_TOKENS = 3000
+
+# Sources that map to Cyber / Info Ops domain
+_CYBER_SOURCES = {
+    "cipher_brief", "just_security", "lawfare",
+    "cyberscoop", "recordedfuture", "krebs",
+}
+
+# Sources that map to Geopolitics domain
+_GEO_SOURCES = {
+    "war_on_the_rocks", "rand", "atlantic_council",
+    "defense_one", "foreign_affairs", "bellingcat",
+}
+
+
+def _classify_domain(record: dict) -> str:
+    """Return 'cyber' or 'geo' based on signal source."""
+    src = str(record.get("signal_source", "")).lower()
+    if src in _CYBER_SOURCES:
+        return "cyber"
+    # Default geopolitics for national-security OSINT sources
+    return "geo"
+
+
+def _format_record(record: dict) -> str:
+    """Format a single record for the prompt — readable, not raw JSON."""
+    source = record.get("signal_source", record.get("source", "unknown"))
+    pattern = record.get("pattern", "—")
+    confidence = record.get("confidence", record.get("outcome_confidence", 0.0))
+    classification = record.get("outcome_classification", record.get("classification", "—"))
+    priority = record.get("opportunity_priority", "—")
+    url = record.get("signal_url", "")
+    url_str = f" | {url}" if url else ""
+    return (
+        f"{source.upper()} | {pattern} | "
+        f"confidence={float(confidence):.2f} | classification={classification} | "
+        f"priority={priority}{url_str}"
+    )
+
+
+def _build_prompt(records: list[dict], cycle_stats: dict, mode: str = "standard") -> str:
+    """Build the filled prompt template string for the given mode."""
+    elevated = [
+        r for r in records
+        if r.get("outcome_classification", r.get("classification", "")) in (VERIF_CORROBORATED, "Escalate")
+    ]
+    remaining = [r for r in records if r not in elevated]
+    standard_top10 = sorted(
+        remaining,
+        key=lambda r: float(r.get("confidence", r.get("outcome_confidence", 0.0))),
+        reverse=True,
+    )[:10]
+
+    geo_count = sum(1 for r in records if _classify_domain(r) == "geo")
+    cyber_count = sum(1 for r in records if _classify_domain(r) == "cyber")
+
+    elevated_block = (
+        "\n".join(_format_record(r) for r in elevated)
+        if elevated else "(none)"
+    )
+    standard_block = (
+        "\n".join(_format_record(r) for r in standard_top10)
+        if standard_top10 else "(none)"
+    )
+
+    date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    if mode == "geopolitics":
+        tmpl = GEO_USER_PROMPT_TEMPLATE
+    elif mode == "legislative":
+        tmpl = LEG_USER_PROMPT_TEMPLATE
+    else:
+        tmpl = USER_PROMPT_TEMPLATE
+
+    return tmpl.format(
+        run_id=cycle_stats.get("run_id", "—"),
+        timestamp=cycle_stats.get("finished_at", cycle_stats.get("timestamp", "—")),
+        signal_count=cycle_stats.get("signals_harvested", cycle_stats.get("signal_count", 0)),
+        opportunity_count=cycle_stats.get("opportunities_found", 0),
+        record_count=cycle_stats.get("records_stored", cycle_stats.get("record_count", len(records))),
+        elevated_count=len(elevated),
+        elevated_records=elevated_block,
+        standard_records=standard_block,
+        geo_count=geo_count,
+        cyber_count=cyber_count,
+        date=date_str,
+    )
+
+
+def _fallback_brief(cycle_stats: dict) -> str:
+    date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    return (
+        f"## SPEC-1 DAILY BRIEF — {date_str}\n\n"
+        f"[Brief generation failed. Raw stats: {cycle_stats}]"
+    )
+
+
+def generate_brief(records: list[dict], cycle_stats: dict, mode: str = "standard") -> tuple[str, str]:
+    """Generate the daily intelligence brief via Claude.
+
+    Returns a (brief, prompts_text) tuple where *brief* is the generated
+    markdown and *prompts_text* is the full prompts payload (system + user)
+    that was sent to the model. On any failure the brief is a fallback
+    string; prompts_text is still populated when available.
+    Never raises.
+
+    mode: "standard" (default SPEC-1 brief), "geopolitics" (Geopolitics & Policy Desk),
+          or "legislative" (Legislative & Judicial Desk).
+    """
+    api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip().lstrip('﻿')
+    if not api_key:
+        print("[briefing] ANTHROPIC_API_KEY not set in environment — returning fallback brief")
+        logger.warning("ANTHROPIC_API_KEY not set — returning fallback brief")
+        return _fallback_brief(cycle_stats), ""
+
+    if mode == "geopolitics":
+        sys_prompt = GEO_SYSTEM_PROMPT
+    elif mode == "legislative":
+        sys_prompt = LEG_SYSTEM_PROMPT
+    else:
+        sys_prompt = SYSTEM_PROMPT
+
+    prompts_text = ""
+
+    try:
+        user_prompt = _build_prompt(records, cycle_stats, mode=mode)
+        prompts_text = f"## SYSTEM PROMPT\n\n{sys_prompt.strip()}\n\n---\n\n## USER PROMPT\n\n{user_prompt.strip()}\n"
+        client = anthropic.Anthropic(api_key=api_key)
+        message = client.messages.create(
+            model=MODEL,
+            max_tokens=MAX_TOKENS,
+            system=sys_prompt,
+            messages=[{"role": "user", "content": user_prompt}],
+        )
+        brief = message.content[0].text.strip()
+        logger.info("Brief generated (mode=%s) — %d words", mode, len(brief.split()))
+        return brief, prompts_text
+    except Exception as exc:
+        print(f"[briefing] API call failed: {type(exc).__name__}: {exc}")
+        logger.error("Brief generation failed: %s", exc)
+        return _fallback_brief(cycle_stats), prompts_text

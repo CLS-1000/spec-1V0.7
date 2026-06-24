@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   briefing_generator
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core/schemas
+
 """Daily intelligence brief generator.
 
 Calls Claude Sonnet to write a publishable brief from today's scored records.
@@ -24,9 +30,15 @@ from spec1_core.briefing.templates import (
     GEO_USER_PROMPT_TEMPLATE,
     LEG_SYSTEM_PROMPT,
     LEG_USER_PROMPT_TEMPLATE,
-    SYSTEM_PROMPT,
-    USER_PROMPT_TEMPLATE,
 )
+from spec1_core.briefing.brief_package_templates import BRIEF_SYSTEM, BRIEF_USER
+
+try:
+    from zoneinfo import ZoneInfo
+    _PT_ZONE: object = ZoneInfo("America/Los_Angeles")
+except Exception:
+    from datetime import timedelta
+    _PT_ZONE = timezone(timedelta(hours=-7))
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +108,16 @@ def _build_prompt(records: list[dict], cycle_stats: dict, mode: str = "standard"
     )
 
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    pt_now = datetime.now(_PT_ZONE)
+    date_long = pt_now.strftime("%A, %d %B %Y")
+    time_pt = pt_now.strftime("%H:%M")
+    _doms = []
+    if geo_count > 0:
+        _doms.append("Geopolitics")
+    if cyber_count > 0:
+        _doms.append("Cyber · Info Ops")
+    active_domains = " · ".join(_doms) if _doms else "—"
+    issue_number = cycle_stats.get("issue_number", "—")
 
     # Format evidence chains for the template
     raw_chains: list[dict] = cycle_stats.get("psyop_evidence_chains", [])
@@ -130,7 +152,7 @@ def _build_prompt(records: list[dict], cycle_stats: dict, mode: str = "standard"
     elif mode == "legislative":
         tmpl = LEG_USER_PROMPT_TEMPLATE
     else:
-        tmpl = USER_PROMPT_TEMPLATE
+        tmpl = BRIEF_USER
 
     return tmpl.format(
         run_id=cycle_stats.get("run_id", "—"),
@@ -144,6 +166,10 @@ def _build_prompt(records: list[dict], cycle_stats: dict, mode: str = "standard"
         geo_count=geo_count,
         cyber_count=cyber_count,
         date=date_str,
+        date_long=date_long,
+        time_pt=time_pt,
+        active_domains=active_domains,
+        issue_number=issue_number,
         psyop_classification=cycle_stats.get("psyop_classification", "—"),
         psyop_score=cycle_stats.get("psyop_score", "—"),
         psyop_patterns_fired=cycle_stats.get("psyop_patterns_fired", []),
@@ -189,6 +215,8 @@ def generate_brief(records: list[dict], cycle_stats: dict, mode: str = "standard
 
     mode: "standard" (default SPEC-1 brief), "geopolitics" (Geopolitics & Policy Desk),
           or "legislative" (Legislative & Judicial Desk).
+          Legislative mode is triggered by cls_legislative when that module
+          feeds into the brief pipeline. Not yet auto-triggered by cycle.py.
     """
     api_key = os.environ.get("ANTHROPIC_API_KEY", "").strip().lstrip('\ufeff')
     if not api_key:
@@ -201,10 +229,9 @@ def generate_brief(records: list[dict], cycle_stats: dict, mode: str = "standard
     elif mode == "legislative":
         sys_prompt = LEG_SYSTEM_PROMPT
     else:
-        sys_prompt = SYSTEM_PROMPT
+        sys_prompt = BRIEF_SYSTEM
 
     prompts_text = ""
-
     try:
         user_prompt = _build_prompt(records, cycle_stats, mode=mode)
         prompts_text = f"## SYSTEM PROMPT\n\n{sys_prompt.strip()}\n\n---\n\n## USER PROMPT\n\n{user_prompt.strip()}\n"

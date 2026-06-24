@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   repository
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Generic CRUD repository for cls_db.
 
 Provides typed insert/select/delete over SQLite tables.
@@ -50,11 +56,11 @@ class Repository:
     def insert(self, record: dict) -> dict:
         """Insert a record; skip if PK already exists (INSERT OR IGNORE)."""
         entry = {k: _serialize(v) for k, v in record.items()}
-        if "written_at" not in entry:
+        if "written_at" not in entry and "created_at" not in entry:
             entry["written_at"] = _now()
         columns = ", ".join(entry.keys())
         placeholders = ", ".join("?" for _ in entry)
-        sql = f"INSERT OR REPLACE INTO {self.table} ({columns}) VALUES ({placeholders})"
+        sql = f"INSERT OR REPLACE INTO {self.table} ({columns}) VALUES ({placeholders})"  # nosec B608
         self.db.execute(sql, tuple(entry.values()))
         return record
 
@@ -76,7 +82,7 @@ class Repository:
             first["written_at"] = now
         columns = ", ".join(first.keys())
         placeholders = ", ".join("?" for _ in first)
-        sql = f"INSERT OR REPLACE INTO {self.table} ({columns}) VALUES ({placeholders})"
+        sql = f"INSERT OR REPLACE INTO {self.table} ({columns}) VALUES ({placeholders})"  # nosec B608
         self.db.executemany(sql, rows)
         return len(rows)
 

@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   adapters_state_legislative
+# @loc:      gh_main
+# @status:   stable
+# @depends:  cls_db, spec1_core
+
 """State legislative adapter.
 
 3-source fallback: OpenStates API → LegiScan API → synthetic sample.

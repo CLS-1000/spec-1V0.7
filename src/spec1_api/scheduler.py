@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   scheduler
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """APScheduler background scheduler for spec1_api."""
 
 from __future__ import annotations

@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   signal_scorer
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core/config/calibration.py
+
 """Signal Scorer — implements 4-gate scoring logic.
 
 Ported from cls_osint/scorers/signal_scorer.py with new 4-gate architecture.
@@ -18,43 +24,18 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from spec1_core.schemas.models import Opportunity, ParsedSignal, Signal
+from spec1_core.config.calibration import (
+    SOURCE_CREDIBILITY,
+    DEFAULT_CREDIBILITY,
+    CREDIBILITY_THRESHOLD,
+    VOLUME_THRESHOLD,
+    VELOCITY_THRESHOLD,
+    NOVELTY_THRESHOLD,
+    VOLUME_TIERS,
+)
 
-# ─── Credibility gate ────────────────────────────────────────────────────────
-SOURCE_CREDIBILITY: dict[str, float] = {
-    "war_on_the_rocks": 0.85,
-    "cipher_brief": 0.88,
-    "lawfare": 0.87,
-    "rand": 0.90,
-    "atlantic_council": 0.82,
-    "defense_one": 0.83,
-    # DPRK / Korea intelligence sources
-    "38_north": 0.89,
-    "nk_news": 0.85,
-    "csis_korea": 0.88,
-    "yonhap": 0.82,
-    # legacy sources (from cls_osint)
-    "reuters_world": 0.90,
-    "reuters_us": 0.90,
-    "ap_top": 0.88,
-    "propublica": 0.85,
-    "politico": 0.78,
-}
-DEFAULT_CREDIBILITY = 0.60
-CREDIBILITY_THRESHOLD = 0.60  # gate passes if credibility >= this
 
-# ─── Volume gate ─────────────────────────────────────────────────────────────
-VOLUME_TIERS: list[tuple[int, float]] = [
-    (500, 1.0),
-    (200, 0.75),
-    (80,  0.50),
-    (30,  0.30),
-    (0,   0.10),
-]
-VOLUME_THRESHOLD = 0.30  # gate passes if volume score >= this (≥30 words)
 
-# ─── Velocity gate ───────────────────────────────────────────────────────────
-# We use signal.velocity if set; otherwise derive from age in hours
-VELOCITY_THRESHOLD = 0.0  # gate passes if velocity >= 0 (always pass unless explicitly negative)
 
 # ─── Novelty gate ────────────────────────────────────────────────────────────
 NOVELTY_TERMS: set[str] = {
@@ -74,7 +55,6 @@ NOVELTY_TERMS: set[str] = {
     "coal exports", "russia oil", "china border trade",
     "fuel depot", "strategic reserves", "military logistics",
 }
-NOVELTY_THRESHOLD = 1  # must have at least 1 novelty term hit
 
 
 # ─── Composite scoring ───────────────────────────────────────────────────────

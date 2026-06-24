@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_pdx1_legislation
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_pdx1.legislation — bill state machine."""
 
 from __future__ import annotations

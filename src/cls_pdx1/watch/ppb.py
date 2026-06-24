@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   watch_ppb
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Portland Police Bureau watch module.
 
 City bureau. Monitors:

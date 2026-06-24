@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   watch_pge
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """PGE watch module — Portland General Electric.
 
 Monitors: PUC rate cases, lobbying registrations, board changes, donation patterns.

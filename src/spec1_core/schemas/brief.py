@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   schemas_brief
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """schemas/brief.py — World State Brief value objects."""
 
 from __future__ import annotations

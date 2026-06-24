@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   tools_historical_briefs
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Generate briefs for every run_id in spec1_intelligence.jsonl that lacks one.
 
 Usage:

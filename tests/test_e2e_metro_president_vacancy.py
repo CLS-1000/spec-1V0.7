@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_e2e_metro_president_vacancy
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """End-to-end tests — Metro Council President vacancy scenario.
 
 Exercises the full gate → anomaly → trigger stack via run_vacancy_demo().

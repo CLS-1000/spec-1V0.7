@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   migrate_jsonl_to_db
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Backfill JSONL → SQLite. Idempotent, safe to re-run."""
 
 from __future__ import annotations

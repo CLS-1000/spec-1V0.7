@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   publication_diagram
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """D3 force-directed graph exporter for Metro Citizens Brief.
 
 Produces a self-contained HTML file with embedded D3.js and graph data.

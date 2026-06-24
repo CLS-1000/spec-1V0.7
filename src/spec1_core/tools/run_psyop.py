@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   tools_run_psyop
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """CLI: read intelligence records, score them for psyop patterns, write JSONL.
 
 Usage:
@@ -19,8 +25,8 @@ import os
 import sys
 from pathlib import Path
 
-from spec1_analytics.cls_psyop.scorer import filter_risky, score_records
-from spec1_analytics.cls_psyop.store import PsyopStore
+from cls_psyop.scorer import filter_risky, score_records
+from cls_psyop.store import PsyopStore
 from spec1_labels import PSYOP_CLEAN, PSYOP_LOW_RISK, PSYOP_MEDIUM_RISK, PSYOP_HIGH_RISK
 
 

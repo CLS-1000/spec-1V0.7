@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   neutrality_attribution
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Attribution gate: every factual claim must carry a source URI."""
 
 from __future__ import annotations

@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   proposer
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Calibration proposer — turns a CalibrationReport into suggested adjustments.
 
 Output is descriptive only. Every adjustment is something a human is

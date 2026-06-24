@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   formatter
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Markdown rendering for ProposalReport."""
 
 from __future__ import annotations

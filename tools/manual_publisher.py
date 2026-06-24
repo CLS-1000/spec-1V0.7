@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+# @domain:   spec-1
+# @module:   manual_publisher
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """
 SPEC-1 Manual Publisher — workbench for generating and rendering intelligence briefs.
 

@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_publication_generator
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for spec1_core.tools.publication_generator."""
 from __future__ import annotations
 

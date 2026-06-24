@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_orestar_resolver
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Integration tests — ORESTAR adapter + EntityResolver.
 
 Validates that campaign finance records produced by OrestarAdapter

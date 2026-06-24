@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   test_calibration
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_calibration aggregator and the /calibration/report endpoint."""
 
 from __future__ import annotations

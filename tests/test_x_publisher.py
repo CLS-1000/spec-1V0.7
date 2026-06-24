@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_x_publisher
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for spec1_core.app.publishers.x — XPublisher and helpers."""
 
 from __future__ import annotations

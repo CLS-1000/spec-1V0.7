@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   spec1_labels
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Canonical label constants for SPEC-1.
 
 All enum-like string values used across packages are defined here.
@@ -101,6 +107,21 @@ DISCLOSURE_PARTIAL    = "PARTIAL"
 DISCLOSURE_NONE       = "NONE"
 DISCLOSURE_GAP_MARKER = "DISCLOSURE GAP"
 
+# ── Research Mode — dossier status ────────────────────────────────────────────
+RESEARCH_STATUS_DRAFT     = "DRAFT"
+RESEARCH_STATUS_FINAL     = "FINAL"
+RESEARCH_GAP_MARKER       = "COLLECTION GAP"
+
+# ── Research Mode — expansion rule tags ───────────────────────────────────────
+EXPANSION_RULE_KEYWORD            = "keyword"
+EXPANSION_RULE_ENTITY             = "entity"
+EXPANSION_RULE_ALIAS              = "alias"
+EXPANSION_RULE_SUBQUESTION        = "subquestion"
+EXPANSION_RULE_KEYWORD_X_ENTITY   = "keyword_x_entity"
+EXPANSION_RULE_KEYWORD_X_GEO      = "keyword_x_geography"
+EXPANSION_RULE_ENTITY_X_GEO       = "entity_x_geography"
+
+
 # ── Type aliases ──────────────────────────────────────────────────────────────
 from typing import Literal  # noqa: E402
 
@@ -108,6 +129,7 @@ PriorityT      = Literal["CRITICAL", "HIGH", "MEDIUM", "LOW"]
 ThreatLevelT   = Literal["HIGH", "MEDIUM", "LOW"]
 PsyopRiskT     = Literal["HIGH_RISK", "MEDIUM_RISK", "LOW_RISK", "CLEAN"]
 VerificationT  = Literal["CORROBORATED", "PARTIAL", "UNVERIFIED", "CONFLICTED"]
+ResearchStatusT = Literal["DRAFT", "FINAL"]
 
 
 def is_valid_priority(value: str) -> bool:
@@ -124,3 +146,7 @@ def is_valid_psyop_risk(value: str) -> bool:
 
 def is_valid_verification(value: str) -> bool:
     return value in {VERIF_CORROBORATED, VERIF_PARTIAL, VERIF_UNVERIFIED, VERIF_CONFLICTED}
+
+
+def is_valid_research_status(value: str) -> bool:
+    return value in {RESEARCH_STATUS_DRAFT, RESEARCH_STATUS_FINAL}

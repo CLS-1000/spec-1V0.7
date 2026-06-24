@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   explain_summarize
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Plain-language summarisation via Claude Sonnet with neutrality retry.
 
 Falls back to a rule-based template on API error — the pipeline never crashes

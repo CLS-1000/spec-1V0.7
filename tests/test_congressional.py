@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   test_congressional
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for cls_osint.adapters.congressional — Congressional records adapter."""
 
 from __future__ import annotations

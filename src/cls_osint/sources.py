@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   sources
+# @loc:      gh_main
+# @status:   stable
+# @depends:  cls_db, spec1_core
+
 """OSINT source registry.
 
 Defines all known sources used across cls_osint adapters.
@@ -104,6 +110,64 @@ RSS_SOURCES: dict[str, OsintSource] = {
         credibility=0.82,
         refresh_interval_hours=2,
         tags=["korea", "dprk", "asia", "news"],
+    ),
+    # ── Law enforcement ───────────────────────────────────────────────────────
+    "portland_police": OsintSource(
+        name="portland_police",
+        source_type="RSS",
+        url="https://www.portland.gov/police/news/rss.xml",
+        credibility=0.85,
+        refresh_interval_hours=4,
+        tags=["portland", "law_enforcement", "pdx", "local", "police"],
+    ),
+    "fbi_portland": OsintSource(
+        name="fbi_portland",
+        source_type="RSS",
+        url="https://www.fbi.gov/feeds/portland-press-releases/atom.xml",
+        credibility=0.92,
+        refresh_interval_hours=6,
+        tags=["fbi", "portland", "law_enforcement", "federal", "pdx"],
+    ),
+    "fbi_national": OsintSource(
+        name="fbi_national",
+        source_type="RSS",
+        url="https://www.fbi.gov/feeds/fbi-press-releases/atom.xml",
+        credibility=0.93,
+        refresh_interval_hours=6,
+        tags=["fbi", "law_enforcement", "federal", "national_security"],
+    ),
+    # ── Crime statistics ──────────────────────────────────────────────────────
+    "bjs": OsintSource(
+        name="bjs",
+        source_type="RSS",
+        url="https://www.bjs.gov/rss/rss.cfm",
+        credibility=0.95,
+        refresh_interval_hours=24,
+        tags=["crime_stats", "justice", "federal", "statistics", "bjs"],
+    ),
+    "nij": OsintSource(
+        name="nij",
+        source_type="RSS",
+        url="https://nij.ojp.gov/rss.xml",
+        credibility=0.93,
+        refresh_interval_hours=24,
+        tags=["crime_stats", "justice", "research", "federal", "nij"],
+    ),
+    "ojp": OsintSource(
+        name="ojp",
+        source_type="RSS",
+        url="https://ojp.gov/rss/ojpnews.xml",
+        credibility=0.92,
+        refresh_interval_hours=24,
+        tags=["crime_stats", "justice", "federal", "grants", "ojp"],
+    ),
+    "crime_reports_portland": OsintSource(
+        name="crime_reports_portland",
+        source_type="RSS",
+        url="https://www.crimemapping.com/map/rss/city/Portland/OR",
+        credibility=0.80,
+        refresh_interval_hours=2,
+        tags=["crime_stats", "portland", "pdx", "local", "incidents"],
     ),
 }
 

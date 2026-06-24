@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_auth
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for spec1_api.auth — API key middleware."""
 
 from __future__ import annotations

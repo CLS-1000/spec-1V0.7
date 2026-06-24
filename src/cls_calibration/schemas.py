@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   schemas
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Schemas for cls_calibration."""
 
 from __future__ import annotations

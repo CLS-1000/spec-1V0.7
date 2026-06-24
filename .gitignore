@@ -46,6 +46,7 @@ htmlcov/
 generated/
 briefs/
 workspace/
+research/dossiers/
 .mcp.json
 
 # Loose runtime artifacts at root — exports, rendered HTML, kill files
@@ -56,3 +57,41 @@ workspace/
 
 # Personal scratch scripts — not part of the project
 /get_signals.py
+/spec1_mono_light.py
+/spec1_professional.py
+
+# Runtime output and data dirs
+/output/
+/data/
+/cache/
+/src/spec1_api/static/data/
+
+# Duplicate env stub (use .env.example instead)
+/env.example
+
+# Rendered HTML copies in docs (source lives at root or src/spec1_api/static/)
+/docs/*.html
+
+# Literal ${HOME} directory — artifact of bad shell expansion in a git command
+${HOME}/
+
+# Sensitive root-level files — not for public repo
+INVESTOR_PITCH.md
+OUTREACH_TEMPLATES.md
+LAUNCH_PLAN.md
+LAUNCH_READINESS.md
+REPAIR_PLAN_PR64_66_WORKFLOWS.md
+TEST_STATUS.md
+FALLBACK_SETUP.md
+MERGE_SAFETY_PLAN.md
+SPEC-1 Design System.zip
+spec1_intelligence_export.json
+spec1_intelligence*.json
+spec1_intelligence*.jsonl
+*.jsonl
+briefs/
+logs/
+generated/
+docs/launch_prep/
+docs/scalability_tracker.md
+AUDIT_REPORT.md

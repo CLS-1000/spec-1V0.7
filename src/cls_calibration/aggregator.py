@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   aggregator
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Calibration aggregator — folds verdicts onto records to produce reports."""
 
 from __future__ import annotations

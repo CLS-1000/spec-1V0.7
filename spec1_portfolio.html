@@ -361,20 +361,20 @@
     SPEC-1 Intelligence Engine
   </div>
   <div class="header-meta">
-    <span>v0.4.0</span>
+    <span>v0.6.0</span>
     <span>Portland OR</span>
-    <span>EVASTARARCANA</span>
+    
   </div>
 </header>
 
 <div class="hero">
-  <div class="hero-eyebrow">Portfolio Summary</div>
-  <div class="hero-title">Open Source Intelligence Engine</div>
-  <div class="hero-sub">Signal → Opportunity → Investigation → Intelligence</div>
+  <div class="hero-eyebrow">Open-Source Intelligence Infrastructure</div>
+  <div class="hero-title">SPEC-1 Intelligence Engine</div>
+  <div class="hero-sub">Harvest · Score · Investigate · Analyze · Brief</div>
   <div class="badges">
-    <div class="badge"><strong>607</strong> Tests</div>
+    <div class="badge"><strong>591</strong> Tests</div>
     <div class="badge"><strong>7</strong>-Stage Pipeline</div>
-    <div class="badge">Python <strong>3.11+</strong></div>
+    <div class="badge">Python <strong>3.9+</strong></div>
     <div class="badge">Claude <strong>API</strong></div>
     <div class="badge">v<strong>0.4.0</strong></div>
   </div>
@@ -385,9 +385,9 @@
   <!-- 01 -->
   <div class="section">
     <div class="section-num">01 — What This Is</div>
-    <div class="section-title">Automated OSINT for national security signal monitoring</div>
-    <p>SPEC-1 is an automated open-source intelligence (OSINT) system built for real-time national security signal monitoring. It harvests, filters, investigates, and analyzes signals from authoritative sources — producing structured intelligence records and daily written briefs without manual intervention.</p>
-    <p>The system is designed to do one thing well: separate signal from noise in a high-volume information environment, and surface what actually matters to a human analyst.</p>
+    <div class="section-title">Real-time signal monitoring for national security and geopolitical risk</div>
+    <p>SPEC-1 is an automated open-source intelligence engine. It harvests signals from authoritative sources, filters them through a deterministic four-gate framework, and surfaces what matters — producing structured intelligence records and daily written briefs without manual intervention.</p>
+    <p>One purpose: separate signal from noise in a high-volume information environment, and deliver what actually requires human attention.</p>
   </div>
 
   <!-- 02 -->
@@ -401,8 +401,8 @@
   <!-- 03 -->
   <div class="section">
     <div class="section-num">03 — System Architecture</div>
-    <div class="section-title">A seven-stage sequential pipeline</div>
-    <p>The system is built as a sequential pipeline with seven stages. Each stage transforms the data and gates what moves forward. A FastAPI service wraps the pipeline for scheduled and on-demand operation.</p>
+    <div class="section-title">Seven sequential stages. Each transforms the data and gates what moves forward.</div>
+    <p>The pipeline runs end-to-end on a daily cron schedule and on demand via API. Every stage has a single responsibility. Failures at any stage are logged and skipped — the cycle never halts on a single error.</p>
 
     <div class="pipeline">
       <div class="pipeline-label">Pipeline — seven stages · Harvest → Store</div>
@@ -528,8 +528,8 @@
   <!-- 06 -->
   <div class="section">
     <div class="section-num">06 — Daily Intelligence Brief</div>
-    <div class="section-title">Claude Sonnet writes the brief · rule-based fallback on API failure</div>
-    <p>After each pipeline cycle, a briefing generator collects the scored intelligence records and calls Claude Sonnet to produce a structured written brief. Claude is prompted to write as a professional intelligence editor — precise, sourced, and without speculation beyond what the evidence supports. Every claim in the brief traces back to a scored signal. If the API call fails, a structured fallback brief is generated from the raw record data.</p>
+    <div class="section-title">Claude Sonnet authors the brief. Rule-based fallback if the API is unavailable.</div>
+    <p>After each cycle, a briefing generator submits scored intelligence records to Claude Sonnet with a professional editor prompt — precise, sourced, no speculation beyond the evidence. Every claim traces back to a scored signal. If the API call fails for any reason, a structured fallback brief is generated from the raw record data. The cycle never produces nothing.</p>
     <ul>
       <li>Executive summary of cycle findings</li>
       <li>Elevated signals requiring immediate attention</li>
@@ -542,8 +542,8 @@
   <!-- 07 -->
   <div class="section">
     <div class="section-num">07 — API and Scheduling</div>
-    <div class="section-title">FastAPI · APScheduler · 06:00 AM PT daily cron</div>
-    <p>A FastAPI application wraps the pipeline for operational use. The scheduler runs on a fixed daily cron cadence at 06:00 AM PT. A kill-file mechanism allows operators to pause scheduled execution without modifying configuration.</p>
+    <div class="section-title">FastAPI service. APScheduler. Daily cron at 06:00 AM PT.</div>
+    <p>A FastAPI application wraps the full pipeline for operational use. The scheduler runs on a fixed daily cadence. A kill-file mechanism lets operators pause scheduled execution without touching configuration — no restart required.</p>
     <ul>
       <li>Trigger an immediate pipeline cycle</li>
       <li>Query cycle status and statistics</li>
@@ -556,8 +556,8 @@
   <!-- 08 -->
   <div class="section">
     <div class="section-num">08 — How the System Learns and Improves</div>
-    <div class="section-title">Explicit, legible, deterministic learning</div>
-    <p>SPEC-1 does not use a trained machine learning model in the traditional sense. There is no gradient descent, no neural network, no embedding space. The scoring framework is rule-based and deterministic. But the system is designed to improve — through a different kind of learning.</p>
+    <div class="section-title">Explicit, legible, deterministic. The system learns — without learning implicitly.</div>
+    <p>SPEC-1 has no neural network, no gradient descent, no embedding space. The scoring framework is rule-based and deterministic. Improvement happens through calibration: thresholds are adjusted by humans, based on evidence surfaced by the system. When something is wrong, the specific failure is diagnosable and fixable.</p>
 
     <h3>Calibration as Learning</h3>
     <p>The four-gate framework and composite scoring weights were developed through iterative exposure to the signal environment. When a threshold is wrong, the failure is diagnosable. The specific threshold that failed can be identified and adjusted. A neural network learns implicitly. SPEC-1 learns explicitly.</p>
@@ -573,23 +573,23 @@
     <p>Human verdicts are recorded via <code>cls_verdicts</code>. Calibration drift is surfaced descriptively by <code>cls_calibration</code> — it never auto-applies changes. Tuning is a human decision. This preserves the deterministic, legible design philosophy.</p>
 
     <h3>Test Suite as Learning Anchor</h3>
-    <p>607 tests across 31 files. When a threshold or weight changes during calibration, the tests verify that the change does not break intended behavior elsewhere. The test suite is, in a real sense, a changelog of accumulated judgment.</p>
+    <p>591 tests across 58 files. When a threshold or weight changes during calibration, the tests verify that the change does not break intended behavior elsewhere. The test suite is, in a real sense, a changelog of accumulated judgment.</p>
   </div>
 
   <!-- 09 -->
   <div class="section">
     <div class="section-num">09 — What Is Not Here</div>
-    <div class="section-title">Operational parameters are not published</div>
+    <div class="section-title">Operational parameters are not published here.</div>
     <div class="redacted-box">
       <ul>
-        <li>Specific gate thresholds or cutoff values</li>
-        <li>Composite scoring weights or their derivation</li>
-        <li>The keyword taxonomy used for novelty detection</li>
-        <li>Individual source credibility ratings</li>
-        <li>Individual analyst credibility scores or weighting scheme</li>
+        <li>Gate thresholds and cutoff values</li>
+        <li>Composite scoring weights and their derivation</li>
+        <li>Keyword taxonomy used for novelty detection</li>
+        <li>Source credibility ratings</li>
+        <li>Analyst credibility scores and weighting scheme</li>
       </ul>
     </div>
-    <p>These are the calibrated parameters that represent the operational intelligence of the system. They are not appropriate for public documentation.</p>
+    <p>These parameters represent the accumulated operational judgment of the system. They are not appropriate for public documentation.</p>
   </div>
 
   <!-- 10 -->
@@ -597,7 +597,7 @@
     <div class="section-num">10 — Technical Summary</div>
     <div class="section-title">Stack at a glance</div>
     <table class="tech-table">
-      <tr><td>Language</td><td>Python 3.11+</td></tr>
+      <tr><td>Language</td><td>Python 3.9+</td></tr>
       <tr><td>Pipeline stages</td><td>7 (Harvest → Store)</td></tr>
       <tr><td>Signal sources</td><td>RSS feeds from curated authoritative publishers</td></tr>
       <tr><td>Scoring framework</td><td>4-gate deterministic filtering</td></tr>
@@ -607,8 +607,8 @@
       <tr><td>Domain adapters</td><td>cls_osint/adapters: fara · congressional · narrative</td></tr>
       <tr><td>API</td><td>FastAPI · APScheduler · 06:00 AM PT daily cron</td></tr>
       <tr><td>MCP server</td><td>mcp_server.py · 12 tools exposed to Claude</td></tr>
-      <tr><td>Tests</td><td>607 across 31 files</td></tr>
-      <tr><td>Architecture version</td><td>v0.4.0</td></tr>
+      <tr><td>Tests</td><td>591 across 58 files</td></tr>
+      <tr><td>Architecture version</td><td>v0.6.0</td></tr>
     </table>
   </div>
 
@@ -626,8 +626,8 @@
 </div><!-- /content -->
 
 <footer>
-  <span>SPEC-1 · EVASTARARCANA · Portland OR</span>
-  <span>v0.4.0</span>
+  <span>SPEC-1 · Portland OR</span>
+  <span>v0.6.0</span>
 </footer>
 
 </div><!-- /page -->

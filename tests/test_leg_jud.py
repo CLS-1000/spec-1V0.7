@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_leg_jud
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for the Legislative & Judicial Desk — schemas, adapters, producer, store, API."""
 
 from __future__ import annotations

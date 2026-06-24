@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   congressional_collector
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Congressional trade collector — 3-source fallback chain.
 
 Source 1: Quiver Quantitative API  (QUIVER_API_KEY env var required)

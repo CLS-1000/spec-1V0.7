@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   db_signals
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Async-safe SQLite queries for the political_signals table.
 
 All public functions are async; they delegate synchronous work to a

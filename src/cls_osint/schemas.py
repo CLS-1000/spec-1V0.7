@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   schemas
+# @loc:      gh_main
+# @status:   stable
+# @depends:  cls_db, spec1_core
+
 """Data schemas for cls_osint."""
 
 from __future__ import annotations
@@ -5,6 +11,7 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from typing import Optional
 
 
 def _now() -> datetime:
@@ -303,5 +310,63 @@ class StateLegRecord:
             content=content,
             url=self.source_url,
             collected_at=_now(),
+            metadata=self.to_dict(),
+        )
+
+
+@dataclass
+class Pdx911Record:
+    """A Portland 911 incident parsed from the PortlandMaps live KML feed."""
+
+    record_id: str
+    case_id: Optional[str]        # e.g. "PP26000121104"; None if not in feed
+    agency: str                   # e.g. "Portland Police"
+    incident_type: str            # e.g. "UNWANTED PERSON"
+    location_block: str           # e.g. "1900 SE 6TH AVE"
+    timestamp: Optional[datetime]
+    longitude: Optional[float]
+    latitude: Optional[float]
+    collected_at: datetime = field(default_factory=_now)
+    metadata: dict = field(default_factory=dict)
+
+    @classmethod
+    def make_id(cls, case_id: Optional[str], incident_type: str, location: str) -> str:
+        return _make_id("pdx911", case_id or "", incident_type, location)
+
+    def to_dict(self) -> dict:
+        return {
+            "record_id": self.record_id,
+            "case_id": self.case_id,
+            "agency": self.agency,
+            "incident_type": self.incident_type,
+            "location_block": self.location_block,
+            "timestamp": self.timestamp.isoformat() if self.timestamp else None,
+            "geospatial": {
+                "type": "Point",
+                "coordinates": [self.longitude, self.latitude]
+                if self.longitude is not None and self.latitude is not None
+                else None,
+            },
+            "collected_at": self.collected_at.isoformat(),
+            "metadata": self.metadata,
+        }
+
+    def to_osint_record(self) -> OSINTRecord:
+        coord_str = (
+            f" [{self.latitude:.5f}, {self.longitude:.5f}]"
+            if self.latitude is not None and self.longitude is not None
+            else ""
+        )
+        content = (
+            f"{self.incident_type} at {self.location_block}{coord_str}. "
+            f"Agency: {self.agency}. Case: {self.case_id or 'N/A'}."
+        )
+        return OSINTRecord(
+            record_id=self.record_id,
+            source_type="PDX911",
+            source_name="portlandmaps_911",
+            content=content,
+            url="https://www.portlandmaps.com/scripts/911incidents-kml_link.cfm",
+            collected_at=self.collected_at,
             metadata=self.to_dict(),
         )

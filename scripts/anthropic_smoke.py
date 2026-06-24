@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   anthropic_smoke
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 from dotenv import load_dotenv
 import os
 from anthropic import Anthropic

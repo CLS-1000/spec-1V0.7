@@ -1,3 +1,9 @@
+# @domain:   publisher
+# @module:   schemas
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Schemas for Legislative & Judicial Desk."""
 from __future__ import annotations
 import hashlib

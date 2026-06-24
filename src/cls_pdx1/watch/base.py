@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   watch_base
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Watch module base — abstract interface for PDX-1i entity monitors.
 
 Each watch module tracks one entity (PGE, TriMet, PPB, etc.) and emits

@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   gates
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Structural gates for cls_pdx1.
 
 Every record must pass applicable gates before entering the graph or publication.

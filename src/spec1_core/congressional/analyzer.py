@@ -1,3 +1,9 @@
+# @domain:   intelligence
+# @module:   congressional_analyzer
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """Congressional trade analyzer — conflict-of-interest scoring.
 
 Five scoring dimensions:

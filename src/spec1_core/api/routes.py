@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   api_routes
+# @loc:      gh_main
+# @status:   stable
+# @depends:  NONE
+
 """SPEC-1 API route handlers."""
 
 from __future__ import annotations
@@ -6,6 +12,7 @@ import threading
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Annotated
+import re
 
 import json
 
@@ -20,6 +27,7 @@ router = APIRouter()
 
 STORE_PATH = Path("spec1_intelligence.jsonl")
 VERSION = "0.2"
+_CASE_ID_RE = re.compile(r"^case-[0-9a-f]{12}$")
 
 
 def _now_iso() -> str:
@@ -156,10 +164,16 @@ def brief_prompts_latest() -> dict:
 @router.get("/brief/{date}")
 def brief_by_date(date: str) -> dict:
     """Return the brief for a specific date (YYYY-MM-DD)."""
-    brief_path = _brief_writer.BRIEFS_DIR / f"spec1_brief_{date}.md"
+    try:
+        parsed_date = datetime.strptime(date, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD.")
+
+    safe_date = parsed_date.strftime("%Y-%m-%d")
+    brief_path = _brief_writer.BRIEFS_DIR / f"spec1_brief_{safe_date}.md"
     if not brief_path.exists():
-        raise HTTPException(status_code=404, detail=f"No brief found for {date}.")
-    return {"brief": brief_path.read_text(encoding="utf-8"), "date": date}
+        raise HTTPException(status_code=404, detail=f"No brief found for {safe_date}.")
+    return {"brief": brief_path.read_text(encoding="utf-8"), "date": safe_date}
 
 
 # ── Workspace: Investigation Cases ───────────────────────────────────────────
@@ -224,6 +238,8 @@ def list_cases_endpoint(status: str = None) -> dict:
 @router.get("/workspace/cases/{case_id}")
 def get_case_endpoint(case_id: str) -> dict:
     """Get details for a specific case."""
+    if not _CASE_ID_RE.match(case_id):
+        raise HTTPException(status_code=400, detail="Invalid case_id format")
     try:
         from spec1_core.workspace.case import get_case
         case = get_case(case_id)

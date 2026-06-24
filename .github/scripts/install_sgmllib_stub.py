@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+# @domain:   spec-1
+# @module:   install_sgmllib_stub
+# @loc:      _SCRATCH
+# @status:   drafting
+# @depends:  NONE
+
 """Install a minimal sgmllib stub so feedparser can be installed without sgmllib3k.
 
 feedparser 6.x depends on sgmllib3k (released 2013), which fails to build
@@ -10,7 +16,6 @@ After this script runs, `pip install feedparser` (or any package that depends
 on feedparser) will skip building sgmllib3k entirely.
 """
 import os
-import site
 import sys
 import sysconfig
 

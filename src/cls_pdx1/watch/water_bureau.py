@@ -1,3 +1,9 @@
+# @domain:   citizens_source
+# @module:   watch_water_bureau
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Portland Water Bureau watch module.
 
 City bureau — anomaly surface differs from utilities:

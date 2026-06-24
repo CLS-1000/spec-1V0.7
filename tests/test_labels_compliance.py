@@ -1,3 +1,9 @@
+# @domain:   spec-1
+# @module:   test_labels_compliance
+# @loc:      gh_main
+# @status:   testing
+# @depends:  NONE
+
 """Tests for spec1_labels compliance — no hardcoded label strings in source.
 
 These tests import the check_hardcoded_labels script and run it against the
@@ -21,17 +27,17 @@ from check_hardcoded_labels import check_file  # noqa: E402
 
 SRC_DIR = Path(__file__).parent.parent / "src"
 
-# Modules have moved under spec1_analytics/ — use canonical paths.
-_LEADS_GENERATOR = SRC_DIR / "spec1_analytics" / "cls_leads" / "generator.py"
-_PSYOP_PATTERNS = SRC_DIR / "spec1_analytics" / "cls_psyop" / "patterns.py"
-_PSYOP_SCORER = SRC_DIR / "spec1_analytics" / "cls_psyop" / "scorer.py"
+# Modules have moved under canonical cls_* paths.
+_LEADS_GENERATOR = SRC_DIR / "cls_leads" / "generator.py"
+_PSYOP_PATTERNS = SRC_DIR / "cls_psyop" / "patterns.py"
+_PSYOP_SCORER = SRC_DIR / "cls_psyop" / "scorer.py"
 
 
 class TestCheckHardcodedLabels:
     def test_cls_leads_generator_clean(self):
         """cls_leads/generator.py must not contain hardcoded priority strings."""
         violations = check_file(_LEADS_GENERATOR)
-        path = SRC_DIR / "spec1_analytics" / "cls_leads" / "generator.py"
+        path = SRC_DIR / "cls_leads" / "generator.py"
         violations = check_file(path)
         assert violations == [], (
             f"Found hardcoded labels in {_LEADS_GENERATOR}:\n"
@@ -41,7 +47,7 @@ class TestCheckHardcodedLabels:
     def test_cls_psyop_patterns_clean(self):
         """cls_psyop/patterns.py must not contain hardcoded threat level strings."""
         violations = check_file(_PSYOP_PATTERNS)
-        path = SRC_DIR / "spec1_analytics" / "cls_psyop" / "patterns.py"
+        path = SRC_DIR / "cls_psyop" / "patterns.py"
         violations = check_file(path)
         assert violations == [], (
             f"Found hardcoded labels in {_PSYOP_PATTERNS}:\n"
@@ -51,7 +57,7 @@ class TestCheckHardcodedLabels:
     def test_cls_psyop_scorer_clean(self):
         """cls_psyop/scorer.py must not contain hardcoded risk classification strings."""
         violations = check_file(_PSYOP_SCORER)
-        path = SRC_DIR / "spec1_analytics" / "cls_psyop" / "scorer.py"
+        path = SRC_DIR / "cls_psyop" / "scorer.py"
         violations = check_file(path)
         assert violations == [], (
             f"Found hardcoded labels in {_PSYOP_SCORER}:\n"

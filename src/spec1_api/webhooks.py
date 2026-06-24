@@ -1,3 +1,9 @@
+# @domain:   machine
+# @module:   webhooks
+# @loc:      gh_main
+# @status:   stable
+# @depends:  spec1_core, cls_db
+
 """Webhook delivery for SPEC-1 cycle events.
 
 When ``SPEC1_WEBHOOK_URLS`` is set (comma-separated list of HTTPS URLs),
