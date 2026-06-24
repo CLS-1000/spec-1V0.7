@@ -2,7 +2,7 @@ name: Pages
 
 on:
   push:
-    branches: [main]
+    branches: [develop]
     paths:
       - spec1_portfolio.html
       - spec1_ui.html
