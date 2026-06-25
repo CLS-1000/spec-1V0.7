@@ -121,7 +121,6 @@ EXPANSION_RULE_KEYWORD_X_ENTITY   = "keyword_x_entity"
 EXPANSION_RULE_KEYWORD_X_GEO      = "keyword_x_geography"
 EXPANSION_RULE_ENTITY_X_GEO       = "entity_x_geography"
 
-
 # ── Type aliases ──────────────────────────────────────────────────────────────
 from typing import Literal  # noqa: E402
 

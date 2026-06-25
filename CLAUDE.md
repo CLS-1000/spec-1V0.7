@@ -536,6 +536,12 @@ Every PR must declare its version bump type in the PR description.
 ### Agent Write Surfaces
 
 Agents may freely modify:
+- `src/spec1_engine/signal/`
+- `src/spec1_engine/investigation/`
+- `src/spec1_engine/intelligence/`
+- `src/spec1_engine/briefing/` (except `templates.py` imports — edit `.md` files instead)
+- `src/spec1_engine/tools/`
+- `src/cls_osint/`, `src/cls_psyop/`, `src/cls_quant/`, `src/cls_leads/`
 - `src/spec1_core/signal/`
 - `src/spec1_core/investigation/`
 - `src/spec1_core/intelligence/`

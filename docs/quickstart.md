@@ -31,8 +31,8 @@ Get SPEC-1 running locally in under 5 minutes.
 ## Installation
 
 ```bash
-git clone https://github.com/CLS-1000/spec-1V0.7.git
-cd spec-1V0.7
+git clone https://github.com/mjlak1000/spec-1.git
+cd spec-1
 pip install -e ".[dev]"
 ```
 

@@ -27,93 +27,143 @@ graph TB
     subgraph "Analysis Modules"
         INTEL_ANALYZER["Intelligence Analyzer"]
         PSYOP["PsyOp Pattern Detector"]
+        QUANT["Quantitative Analysis"]
         CONGRESSIONAL["Congressional Analyzer"]
     end
 
-    subgraph "Output & API"
-        BRIEFING["Brief Generator"]
-        LEADS["Lead Generator"]
-        API["FastAPI Service"]
+    subgraph "Intelligence Output"
+        BRIEF["World Brief Generator"]
+        LEADS["Actionable Leads"]
+        PSYOP_OUT["PsyOp Intelligence"]
+        MARKET["Market Intelligence"]
+    end
+
+    subgraph "Feedback & Calibration"
+        VERDICTS["Human Verdicts"]
+        CALIBRATION["Calibration Engine"]
+        DRIFT["Drift Detection"]
+    end
+
+    subgraph "Storage Layer"
+        JSONL["JSONL Persistence"]
+        SQLITE["SQLite Database"]
+        WORKSPACE["Investigation Case Files"]
+    end
+
+    subgraph "API & Integration"
+        FASTAPI["FastAPI HTTP API"]
         MCP["MCP Server"]
+        CLI["Operational CLIs"]
     end
 
-    subgraph "Persistence"
-        JSONL["JSONL Store (append-only)"]
-        SQLITE["SQLite (queryable index)"]
-    end
+    %% Data flow
+    RSS --> HARVEST
+    FARA --> HARVEST
+    CONGRESS --> HARVEST
+    NARRATIVE --> HARVEST
 
-    RSS & FARA & CONGRESS & NARRATIVE --> HARVEST
-    HARVEST --> PARSER --> SCORER --> COMPLEXITY
+    HARVEST --> PARSER
+    PARSER --> SCORER
+    SCORER --> COMPLEXITY
+
     COMPLEXITY --> ENGINE
-    ENGINE --> INV_GEN --> INV_VER
+    ENGINE --> INV_GEN
+    INV_GEN --> INV_VER
+
     INV_VER --> INTEL_ANALYZER
-    INTEL_ANALYZER --> PSYOP & CONGRESSIONAL
-    INTEL_ANALYZER --> BRIEFING & LEADS
-    BRIEFING & LEADS --> API & MCP
-    INTEL_ANALYZER --> JSONL & SQLITE
+    INTEL_ANALYZER --> PSYOP
+    INTEL_ANALYZER --> QUANT
+    INTEL_ANALYZER --> CONGRESSIONAL
+
+    PSYOP --> PSYOP_OUT
+    QUANT --> MARKET
+    CONGRESSIONAL --> BRIEF
+    INTEL_ANALYZER --> LEADS
+
+    BRIEF --> JSONL
+    LEADS --> JSONL
+    PSYOP_OUT --> JSONL
+    MARKET --> JSONL
+
+    JSONL --> SQLITE
+    ENGINE --> WORKSPACE
+
+    SQLITE --> FASTAPI
+    WORKSPACE --> CLI
+    SQLITE --> MCP
+
+    VERDICTS --> CALIBRATION
+    CALIBRATION --> DRIFT
+
+    FASTAPI -.->|Integration| BRIEF
+    MCP -.->|Integration| BRIEF
+
+    style ENGINE fill:#ff9999
+    style STORAGE fill:#99ccff
+    style API fill:#99ff99
 ```
 
 ## Module Organization
 
-### Core Pipeline (`src/spec1_core/`)
+### Core Pipeline (src/spec1_engine/)
 
 | Module | Responsibility |
-|---|---|
-| `signal/` | Harvesting, parsing, and scoring raw signals from multiple sources |
-| `investigation/` | Generating and verifying investigations based on scored signals |
-| `intelligence/` | Analyzing signals and storing results |
-| `analysts/` | Managing analyst credibility weighting and discovery |
-| `briefing/` | Generating daily world briefs (Claude Sonnet + fallback) |
-| `congressional/` | Specialized congressional records processing |
-| `workspace/` | Persistent investigation case files and tracking |
-| `tools/` | Operational CLIs (historical briefs, calibration, PDF rendering) |
+|--------|-----------------|
+| **signal/** | Harvesting, parsing, and scoring raw signals from multiple sources |
+| **investigation/** | Generating and verifying investigations based on scored signals |
+| **intelligence/** | Analyzing signals and storing results |
+| **analysts/** | Managing analyst credibility weighting and discovery |
+| **briefing/** | Generating daily world briefs (Claude Sonnet + fallback) |
+| **congressional/** | Specialized congressional records processing |
+| **quant/** | Quantitative and market intelligence analysis |
+| **workspace/** | Persistent investigation case files and tracking |
+| **tools/** | Operational CLIs (historical briefs, calibration, PDF rendering) |
 
-### Extended Processing (`src/cls_*`)
+### Extended Processing (src/cls_*)
 
 | Module | Purpose |
-|---|---|
-| `cls_osint/` | Extended OSINT adapters (FARA, Congressional, Narrative) |
-| `cls_world_brief/` | Daily intelligence brief production |
-| `cls_leads/` | Actionable intelligence leads generation |
-| `cls_psyop/` | Psychological operation pattern detection |
-| `cls_verdicts/` | Human feedback loop (ground truth labeling) |
-| `cls_calibration/` | Drift detection and calibration reporting |
-| `cls_pdx1/` | Portland Metro civic intelligence (Notitia Civica) |
-| `cls_research/` | Analyst-defined topic dossier research mode |
+|--------|---------|
+| **cls_osint/** | Extended OSINT adapters (FARA, Congressional, Narrative) |
+| **cls_world_brief/** | Daily intelligence brief production |
+| **cls_leads/** | Actionable intelligence leads generation |
+| **cls_psyop/** | Psychological operation pattern detection |
+| **cls_quant/** | Market and quantitative intelligence |
+| **cls_verdicts/** | Human feedback loop (ground truth labeling) |
+| **cls_calibration/** | Drift detection and calibration reporting |
 
 ### Storage & API
 
 | Component | Function |
-|---|---|
-| `cls_db/` | SQLite persistence layer with connection pooling |
-| `spec1_api/` | FastAPI HTTP endpoints (`/api/v1`) |
-| JSONL | Append-only event stream for all records |
-| MCP Server | Claude integration and extended LLM capabilities |
+|-----------|----------|
+| **cls_db/** | SQLite persistence layer with connection pooling |
+| **api/** | FastAPI HTTP endpoints (/api/v1) |
+| **JSONL** | Append-only event stream for all records |
+| **MCP Server** | Claude integration and extended LLM capabilities |
 
 ## Data Flow
 
 1. **Harvest** → Collect signals from RSS, FARA, Congressional, Narrative sources
-2. 2. **Parse** → Normalize and structure raw signals
-   3. 3. **Score** → Evaluate confidence and relevance (4-gate pipeline)
-      4. 4. **Investigate** → Generate and verify investigation hypotheses
-         5. 5. **Analyze** → Apply domain-specific analyzers (PsyOp, Congressional)
-            6. 6. **Output** → Produce briefs, leads, and intelligence records
-               7. 7. **Persist** → Dual-write to JSONL and SQLite
-                  8. 8. **Feedback** → Collect human verdicts and surface calibration drift
-                    
-                     9. ## Key Characteristics
-                    
-                     10. - **Real-time OSINT:** Continuous harvesting and scoring of signals
-                         - - **Confidence-based:** Multi-gate pipeline filters low-confidence signals
-                           - - **Human-in-the-loop:** Verdict system captures analyst feedback
-                             - - **Drift detection:** Surfaces model calibration issues without auto-tuning
-                               - - **Multiple outputs:** Briefs, leads, PsyOp patterns, research dossiers
-                                 - - **Dual persistence:** JSONL (events) + SQLite (queries)
-                                   - - **API-first:** HTTP and MCP server interfaces
-                                     - - **Extensible:** Modular architecture for new signal sources and analyzers
-                                      
-                                       - ## Language Composition
-                                      
-                                       - - **Python:** 76.9% (Core engine, pipelines, analysis)
-                                         - - **HTML:** 22.4% (Templating, briefing output)
-                                           - - **Other:** 0.7%
+2. **Parse** → Normalize and structure raw signals
+3. **Score** → Evaluate confidence and relevance (4-gate pipeline)
+4. **Investigate** → Generate and verify investigation hypotheses
+5. **Analyze** → Apply domain-specific analyzers (PsyOp, Quant, Congressional)
+6. **Output** → Produce briefs, leads, and market intelligence
+7. **Persist** → Dual-write to JSONL and SQLite
+8. **Feedback** → Collect human verdicts and surface calibration drift
+
+## Key Characteristics
+
+- **Real-time OSINT**: Continuous harvesting and scoring of signals
+- **Confidence-based**: Multi-gate pipeline filters low-confidence signals
+- **Human-in-the-loop**: Verdict system captures analyst feedback
+- **Drift detection**: Surfaces model calibration issues without auto-tuning
+- **Multiple outputs**: Briefs, leads, PsyOp patterns, market intelligence
+- **Dual persistence**: JSONL (events) + SQLite (queries)
+- **API-first**: HTTP and MCP server interfaces
+- **Extensible**: Modular architecture for new signal sources and analyzers
+
+## Language Composition
+
+- **Python**: 76.9% (Core engine, pipelines, analysis)
+- **HTML**: 22.4% (Templating, briefing output)
+- **Other**: 0.7%

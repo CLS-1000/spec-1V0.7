@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir --upgrade pip \
 FROM python:3.11-slim-bookworm AS runtime
 
 LABEL org.opencontainers.image.title="SPEC-1 Intelligence Engine" \
-            org.opencontainers.image.source="https://github.com/CLS-1000/spec-1V0.7" \
+      org.opencontainers.image.source="https://github.com/mjlak1000/spec-1" \
       org.opencontainers.image.licenses="Proprietary"
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
