@@ -5,6 +5,14 @@ on:
     branches: [ "main", "develop" ]
   pull_request:
     branches: [ "main", "develop" ]
+<<<<<<< HEAD
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  OLLAMA_AUTO_SPAWN: "false"
+
+=======
+>>>>>>> origin/develop
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -20,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.12"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
 
     steps:
     - uses: actions/checkout@v4
