@@ -5,19 +5,10 @@ on:
     branches: [ "main", "develop" ]
   pull_request:
     branches: [ "main", "develop" ]
-<<<<<<< HEAD
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
   OLLAMA_AUTO_SPAWN: "false"
-
-=======
->>>>>>> origin/develop
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  OLLAMA_AUTO_SPAWN: "false"
-
 
 permissions:
   contents: read
