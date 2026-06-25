@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;600;700&family=Courier+Prime&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
+h
   :root {
     --bg:       #000000;
     --surface:  #0A0A0A;
@@ -372,11 +372,11 @@
   <div class="hero-title">SPEC-1 Intelligence Engine</div>
   <div class="hero-sub">Harvest · Score · Investigate · Analyze · Brief</div>
   <div class="badges">
-    <div class="badge"><strong>591</strong> Tests</div>
+    <div class="badge"><strong>621</strong> Tests</div>
     <div class="badge"><strong>7</strong>-Stage Pipeline</div>
     <div class="badge">Python <strong>3.9+</strong></div>
     <div class="badge">Claude <strong>API</strong></div>
-    <div class="badge">v<strong>0.4.0</strong></div>
+    <div class="badge">v<strong>0.6.0</strong></div>
   </div>
 </div>
 
@@ -519,10 +519,10 @@
 
   <!-- 05 -->
   <div class="section">
-    <div class="section-num">05 — Quantitative Signal Domain</div>
-    <div class="section-title">Market signals alongside text OSINT</div>
-    <p>Alongside the text-based OSINT pipeline, SPEC-1 monitors a curated watchlist of publicly traded equities across four sectors: defense primes, cybersecurity vendors, energy majors, and macro instruments. Market signals are processed through their own four-gate framework evaluating watchlist membership, relative volume, daily return magnitude, and deduplication.</p>
-    <p>Signals clearing all four gates enter the same investigation, verification, and analysis pipeline as text signals. The rationale: defense and cybersecurity equities often move on information that has not yet surfaced publicly in text form. Anomalous volume and price action in these names can be an early signal worth investigating.</p>
+    <div class="section-num">05 — Domain Adapters: Extended Coverage</div>
+    <div class="section-title">Specialized modules extend the core pipeline into adjacent intelligence domains.</div>
+    <p>The Notitia Civica adapter monitors Portland Metro civic sources — city council, Multnomah County, TriMet, and PDX 911 — applying the same four-gate framework to local government signals. The Research Mode adapter runs analyst-defined topic dossiers: the analyst specifies a topic, the system expands it into a structured feed set, runs the full pipeline cycle, and produces a research brief with notable findings and collection gaps.</p>
+    <p>Note: the quantitative market intelligence module (cls_quant) was removed in v0.6.0. Defense and cybersecurity equity signals are no longer part of the core pipeline. Scope assessment determined the core triage mission is text-based OSINT; market signal demand was not validated for operational use.</p>
   </div>
 
   <!-- 06 -->
@@ -573,7 +573,7 @@
     <p>Human verdicts are recorded via <code>cls_verdicts</code>. Calibration drift is surfaced descriptively by <code>cls_calibration</code> — it never auto-applies changes. Tuning is a human decision. This preserves the deterministic, legible design philosophy.</p>
 
     <h3>Test Suite as Learning Anchor</h3>
-    <p>591 tests across 58 files. When a threshold or weight changes during calibration, the tests verify that the change does not break intended behavior elsewhere. The test suite is, in a real sense, a changelog of accumulated judgment.</p>
+    <p>621 tests across 61 files. When a threshold or weight changes during calibration, the tests verify that the change does not break intended behavior elsewhere. The test suite is, in a real sense, a changelog of accumulated judgment.</p>
   </div>
 
   <!-- 09 -->
@@ -602,12 +602,11 @@
       <tr><td>Signal sources</td><td>RSS feeds from curated authoritative publishers</td></tr>
       <tr><td>Scoring framework</td><td>4-gate deterministic filtering</td></tr>
       <tr><td>AI integration</td><td>Claude Haiku (verification) · Claude Sonnet (briefing)</td></tr>
-      <tr><td>Market signals</td><td>4-sector equity watchlist via yfinance</td></tr>
       <tr><td>Persistence</td><td>Append-only JSONL + SQLite (cls_db dual-write)</td></tr>
       <tr><td>Domain adapters</td><td>cls_osint/adapters: fara · congressional · narrative</td></tr>
       <tr><td>API</td><td>FastAPI · APScheduler · 06:00 AM PT daily cron</td></tr>
       <tr><td>MCP server</td><td>mcp_server.py · 12 tools exposed to Claude</td></tr>
-      <tr><td>Tests</td><td>591 across 58 files</td></tr>
+      <tr><td>Tests</td><td>621 across 61 files</td></tr>
       <tr><td>Architecture version</td><td>v0.6.0</td></tr>
     </table>
   </div>
@@ -633,3 +632,4 @@
 </div><!-- /page -->
 </body>
 </html>
+h
