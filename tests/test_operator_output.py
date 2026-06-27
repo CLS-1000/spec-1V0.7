@@ -10,8 +10,6 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-import pytest
-
 from spec1_core.schemas.models import ParsedSignal, Signal
 from spec1_core.schemas.operator import (
     OPERATOR_GATE_THRESHOLD,
