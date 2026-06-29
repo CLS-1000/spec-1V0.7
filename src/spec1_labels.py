@@ -44,6 +44,11 @@ SENTIMENT_NEGATIVE = "NEGATIVE"
 SENTIMENT_NEUTRAL  = "NEUTRAL"
 SENTIMENT_MIXED    = "MIXED"
 
+# ── Operator structured-output verdict ───────────────────────────────────────
+OPERATOR_VERDICT_ESCALATE = "ESCALATE"
+OPERATOR_VERDICT_ARCHIVE  = "ARCHIVE"
+OPERATOR_VERDICT_HOLD     = "HOLD"
+
 # ── Investigation outcome classification ──────────────────────────────────────
 OUTCOME_CORROBORATED = "CORROBORATED"
 OUTCOME_ESCALATE     = "ESCALATE"
