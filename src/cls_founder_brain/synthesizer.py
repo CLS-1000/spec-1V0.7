@@ -115,8 +115,7 @@ def synthesize_decision(
 
     elif attack_fires:
         # Priority 2: Existential fire
-        top_fire = attack_fires[0]
-        primary_action = (
+        top_fire = max(attack_fires, key=lambda f: (f.existential_score, 1.0 - f.reversibility))
             f"ATTACK: {top_fire.description}. "
             f"This is existential. Clear your calendar. "
             f"Time to irreversible: {top_fire.time_to_irreversible}."
