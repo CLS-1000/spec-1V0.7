@@ -41,7 +41,7 @@ from cls_founder_brain.schemas import (
 
 
 def _generate_decision_id(situation_id: str) -> str:
-    """Deterministic decision ID from situation."""
+    """Generate a unique (time-based) decision ID from a situation ID."""
     ts = datetime.now(timezone.utc).isoformat()
     raw = f"{situation_id}_{ts}"
     return f"fd_{hashlib.sha256(raw.encode()).hexdigest()[:12]}"
