@@ -22,7 +22,7 @@ Design constraints:
   - $0 cost: no API keys required; fully rule-based (Tier 3 compatible)
   - 7-day horizon: all outputs scoped to immediate actionable windows
   - No mentor dependency: encodes pattern libraries, not advice
-  - Deterministic: same inputs → same outputs (auditable)
+  - Deterministic core logic: same inputs → same classifications/scores (IDs/timestamps are time-based)
   - Append-only JSONL persistence (spec-1 convention)
 """
 
