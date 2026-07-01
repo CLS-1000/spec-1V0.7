@@ -10,7 +10,7 @@ Combines outputs from all three layers into a single executive decision.
 This is the "so what do I DO" layer.
 
 The exited-founder synthesis rules:
-  1. If ANY pattern matches EXIT_SIGNAL with strength > 0.6 → primary action is explore exit
+  1. If ANY pattern matches EXIT_SIGNAL with strength >= 0.4 → primary action is explore exit
   2. If fire triage has ATTACK items → primary action addresses the top ATTACK fire
   3. If conviction is HIGH on any signal → primary action exploits that signal
   4. Otherwise → primary action is "prove one thing" (de-risk with smallest possible test)
