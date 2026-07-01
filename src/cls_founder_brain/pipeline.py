@@ -113,7 +113,7 @@ def run_founder_brain(
         fc = classify_fire(
             fire_id=f"fire_{i}",
             description=fire,
-            additional_context=f"stage={stage} runway={runway_days}d",
+            additional_context=f"stage={stage} days_remaining={runway_days}",
         )
         fire_classifications.append(fc)
 
