@@ -504,7 +504,7 @@ class TestPipeline:
             store_path=tmp_path / "test2.jsonl",
         )
         # Cosmetic fires should end up in ignore list
-        assert len(decision.ignore_list) >= 0  # At least processed
+        assert any("logo" in item.lower() for item in decision.ignore_list)
 
     def test_pipeline_persists_to_store(self, tmp_path: Path):
         store_path = tmp_path / "persist.jsonl"
