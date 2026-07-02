@@ -221,7 +221,10 @@ class MemberRegistry:
         rows = json.loads(self._seed_path.read_text(encoding="utf-8"))
         members: list[Member] = []
         for row in rows:
-            chamber = Chamber.HOUSE if str(row.get("chamber", "HOUSE")).upper() == "HOUSE" else Chamber.SENATE
+            raw_chamber = str(row.get("chamber", "HOUSE")).upper()
+            chamber = {"HOUSE": Chamber.HOUSE, "SENATE": Chamber.SENATE}.get(raw_chamber)
+            if chamber is None:
+                continue
             member_id = row.get("member_id") or Member.make_id(
                 row.get("name", "Unknown"),
                 chamber,

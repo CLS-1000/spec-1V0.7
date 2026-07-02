@@ -5,7 +5,7 @@ from typing import Any
 
 import requests
 
-from cls_congress.models import Affiliation, ConfidenceTier, EdgeType, Entity, Member, MemberRegistry, Provenance
+from cls_congress.models import Affiliation, Chamber, ConfidenceTier, EdgeType, Entity, Member, MemberRegistry, Provenance
 from cls_congress.sources.base import AdapterResult, BaseAdapter
 
 SEI_URL = "https://efdsearch.senate.gov/search/home/"
@@ -45,7 +45,7 @@ class SenateSeiAdapter(BaseAdapter):
         for row in rows:
             member_name = row.get("member_name") or "Unknown Member"
             matches = self._member_registry.find(name=member_name)
-            member_id = matches[0].member_id if matches else Member.make_id(member_name, 2, "NA", None)
+            member_id = matches[0].member_id if matches else Member.make_id(member_name, Chamber.SENATE, "NA", None)
             entity_name = row.get("entity_name") or "Unknown Entity"
             role = str(row.get("role") or "EMPLOYMENT").upper()
             edge_type = EdgeType.BOARD_SEAT if role == "BOARD_SEAT" else EdgeType.EMPLOYMENT

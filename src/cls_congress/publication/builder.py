@@ -10,8 +10,9 @@ def _now() -> datetime:
 
 
 class IssueBuilder:
-    def __init__(self, *, title_prefix: str = "Congress Brief") -> None:
+    def __init__(self, *, title_prefix: str = "Congress Brief", max_signals: int = 10) -> None:
         self._title_prefix = title_prefix
+        self._max_signals = max_signals
 
     def build(self, issue_number: int, signals: list[Signal], anomalies: list[Anomaly]) -> Issue:
         published_at = _now()
@@ -32,7 +33,7 @@ class IssueBuilder:
             sections.append(
                 IssueSection(
                     title="Signal summary",
-                    body="\n".join(f"- {s.description or s.kind}" for s in signals[:10]),
+                    body="\n".join(f"- {s.description or s.kind}" for s in signals[: self._max_signals]),
                     section_type="signal",
                     source_uri=signals[0].provenance.source_uri,
                     member_ids=[s.member_id for s in signals if s.member_id],

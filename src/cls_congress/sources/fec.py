@@ -5,7 +5,7 @@ from typing import Any
 
 import requests
 
-from cls_congress.models import Affiliation, ConfidenceTier, EdgeType, Entity, Member, MemberRegistry, Provenance
+from cls_congress.models import Affiliation, Chamber, ConfidenceTier, EdgeType, Entity, Member, MemberRegistry, Provenance
 from cls_congress.resolver import EntityResolver
 from cls_congress.sources.base import AdapterResult, BaseAdapter
 
@@ -59,14 +59,13 @@ class FecAdapter(BaseAdapter):
 
     def _member_id(self, row: dict[str, Any]) -> str:
         name = (row.get("recipient_name") or "Unknown Member").strip()
-        chamber = "SENATE" if str(row.get("recipient_chamber", "")).upper() == "S" else "HOUSE"
+        chamber = Chamber.SENATE if str(row.get("recipient_chamber", "")).upper() == "S" else Chamber.HOUSE
         state = row.get("recipient_state") or "NA"
         members = self._member_registry.find(name=name, state=state)
         if members:
             return members[0].member_id
 
-        m_chamber = 2 if chamber == "SENATE" else 1
-        return Member.make_id(name, m_chamber, state, None)
+        return Member.make_id(name, chamber, state, None)
 
     def fetch(self) -> AdapterResult:
         errors: list[str] = []

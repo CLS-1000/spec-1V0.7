@@ -5,7 +5,7 @@ from typing import Any
 
 import requests
 
-from cls_congress.models import Affiliation, ConfidenceTier, EdgeType, Entity, Member, MemberRegistry, Provenance
+from cls_congress.models import Affiliation, Chamber, ConfidenceTier, EdgeType, Entity, Member, MemberRegistry, Provenance, _make_id
 from cls_congress.resolver import EntityResolver
 from cls_congress.sources.base import AdapterResult, BaseAdapter
 from cls_osint.adapters import fara
@@ -49,13 +49,17 @@ class LdaAdapter(BaseAdapter):
         try:
             foreign_rows = fara.collect(use_api=True)
         except Exception as exc:
-            errors.append(f"FARA collect failed: {exc}")
+            errors.append(f"FARA foreign-lobbying collection failed in LDA adapter: {exc}")
             foreign_rows = []
 
         for row in domestic_rows:
             member_name = row.get("member_name") or "Unknown Member"
             member_matches = self._member_registry.find(name=member_name)
-            member_id = member_matches[0].member_id if member_matches else Member.make_id(member_name, 1, "NA", None)
+            member_id = (
+                member_matches[0].member_id
+                if member_matches
+                else Member.make_id(member_name, Chamber.HOUSE, "NA", None)
+            )
 
             client_name = row.get("client_name") or "Unknown Client"
             resolved = self._resolver.resolve(client_name)
@@ -81,7 +85,7 @@ class LdaAdapter(BaseAdapter):
             entity_id = Entity.make_id(row.registrant)
             records.append(
                 Affiliation(
-                    member_id=Member.make_id("Foreign Affairs Committee", 1, "NA", None),
+                    member_id=_make_id("member", "unknown_lobby_target"),
                     entity_id=entity_id,
                     edge_type=EdgeType.LOBBYING,
                     confidence=ConfidenceTier.REPORTED,
@@ -89,7 +93,7 @@ class LdaAdapter(BaseAdapter):
                     valid_from=row.filed_at.date(),
                     description=f"FARA filing: {row.registrant} for {row.foreign_principal}",
                     provenance=Provenance(source_uri=row.doc_url, source_name="FARA", fetched_at=_now()),
-                    metadata={"fara_record_id": row.record_id},
+                    metadata={"fara_record_id": row.record_id, "unresolved_member_target": True},
                 )
             )
 

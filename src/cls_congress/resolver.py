@@ -6,6 +6,7 @@ from typing import Optional
 from cls_congress.models import Entity, Member
 
 _MIN_CONFIDENCE = 0.6
+_SUBSTRING_CONFIDENCE_FACTOR = 0.7
 
 
 def _normalise(name: str) -> str:
@@ -74,7 +75,7 @@ class EntityResolver:
             if key in indexed or indexed in key:
                 overlap = min(len(key), len(indexed))
                 longer = max(len(key), len(indexed))
-                confidence = 0.7 * (overlap / longer) if longer else 0.0
+                confidence = _SUBSTRING_CONFIDENCE_FACTOR * (overlap / longer) if longer else 0.0
                 if confidence > best_confidence:
                     best_confidence = confidence
                     best = ResolveResult(

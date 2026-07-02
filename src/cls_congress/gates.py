@@ -7,6 +7,9 @@ from typing import Optional
 from cls_congress.models import ConfidenceTier, Signal
 
 GateResult = tuple[bool, Optional[str]]
+DEFAULT_MIN_CREDIBILITY_SCORE = 0.5
+DEFAULT_MIN_WORDS = 50
+DEFAULT_MAX_HOURS = 48
 
 _CREDIBILITY_SCORE = {
     ConfidenceTier.HARD_RECORD: 1.0,
@@ -15,21 +18,24 @@ _CREDIBILITY_SCORE = {
 }
 
 
-def credibility_gate(confidence: ConfidenceTier, min_score: float = 0.5) -> GateResult:
+def credibility_gate(
+    confidence: ConfidenceTier,
+    min_score: float = DEFAULT_MIN_CREDIBILITY_SCORE,
+) -> GateResult:
     score = _CREDIBILITY_SCORE.get(confidence, 0.0)
     if score < min_score:
         return False, f"CRED_001: score {score:.2f} below {min_score:.2f}"
     return True, None
 
 
-def volume_gate(text: str, min_words: int = 50) -> GateResult:
+def volume_gate(text: str, min_words: int = DEFAULT_MIN_WORDS) -> GateResult:
     count = len((text or "").split())
     if count < min_words:
         return False, f"VOL_001: {count} words below {min_words}"
     return True, None
 
 
-def velocity_gate(occurred_at: datetime, max_hours: int = 48) -> GateResult:
+def velocity_gate(occurred_at: datetime, max_hours: int = DEFAULT_MAX_HOURS) -> GateResult:
     ts = occurred_at if occurred_at.tzinfo else occurred_at.replace(tzinfo=timezone.utc)
     age = datetime.now(timezone.utc) - ts
     if age > timedelta(hours=max_hours):

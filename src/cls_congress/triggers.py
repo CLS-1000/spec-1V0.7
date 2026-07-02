@@ -59,15 +59,45 @@ def evaluate_trigger(state: TriggerState, policy: Optional[TriggerPolicy] = None
     days_since = state.days_since_last_issue()
 
     if days_since is not None and days_since < policy.min_spacing_days:
-        return TriggerDecision(False, f"minimum spacing not met ({days_since:.1f}d < {policy.min_spacing_days}d)", weight, len(state.pending_signals), len(state.pending_anomalies))
+        return TriggerDecision(
+            False,
+            f"minimum spacing not met ({days_since:.1f}d < {policy.min_spacing_days}d)",
+            weight,
+            len(state.pending_signals),
+            len(state.pending_anomalies),
+        )
 
     if policy.tier1_auto_trigger and state.has_tier1_anomaly():
-        return TriggerDecision(True, "TIER_1 anomaly detected — auto-trigger", weight, len(state.pending_signals), len(state.pending_anomalies))
+        return TriggerDecision(
+            True,
+            "TIER_1 anomaly detected — auto-trigger",
+            weight,
+            len(state.pending_signals),
+            len(state.pending_anomalies),
+        )
 
     if days_since is not None and days_since >= policy.max_silence_days:
-        return TriggerDecision(True, f"floor cadence reached ({days_since:.1f}d >= {policy.max_silence_days}d)", weight, len(state.pending_signals), len(state.pending_anomalies))
+        return TriggerDecision(
+            True,
+            f"floor cadence reached ({days_since:.1f}d >= {policy.max_silence_days}d)",
+            weight,
+            len(state.pending_signals),
+            len(state.pending_anomalies),
+        )
 
     if weight >= policy.signal_weight_threshold:
-        return TriggerDecision(True, f"weight threshold met ({weight:.1f} >= {policy.signal_weight_threshold})", weight, len(state.pending_signals), len(state.pending_anomalies))
+        return TriggerDecision(
+            True,
+            f"weight threshold met ({weight:.1f} >= {policy.signal_weight_threshold})",
+            weight,
+            len(state.pending_signals),
+            len(state.pending_anomalies),
+        )
 
-    return TriggerDecision(False, f"insufficient weight ({weight:.1f} < {policy.signal_weight_threshold})", weight, len(state.pending_signals), len(state.pending_anomalies))
+    return TriggerDecision(
+        False,
+        f"insufficient weight ({weight:.1f} < {policy.signal_weight_threshold})",
+        weight,
+        len(state.pending_signals),
+        len(state.pending_anomalies),
+    )
