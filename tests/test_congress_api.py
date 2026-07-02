@@ -5,9 +5,10 @@ from datetime import datetime, timezone
 from fastapi.testclient import TestClient
 
 from cls_congress.models import Chamber, Issue, IssueSection, Member
+from cls_congress.api import router as congress_api_router
+from cls_congress.api.main import create_app as create_congress_app
 from cls_congress.pipeline import CycleResult
 from spec1_api.main import create_app
-from spec1_api.routers import congress_brief
 
 
 def _now() -> datetime:
@@ -32,9 +33,9 @@ class _FakePipeline:
 
 def test_congress_cycle_and_brief_routes(monkeypatch):
     member = Member(member_id=Member.make_id("Ron Wyden", Chamber.SENATE, "OR", None), name="Ron Wyden", chamber=Chamber.SENATE, state="OR")
-    congress_brief._registry._members = [member]
-    congress_brief._registry._members_by_id = {member.member_id: member}
-    congress_brief._pipeline = _FakePipeline(member.member_id)
+    congress_api_router._registry._members = [member]
+    congress_api_router._registry._members_by_id = {member.member_id: member}
+    congress_api_router._pipeline = _FakePipeline(member.member_id)
 
     monkeypatch.setattr("spec1_api.main.start_scheduler", lambda: None)
     monkeypatch.setattr("spec1_api.main.stop_scheduler", lambda: None)
@@ -53,3 +54,18 @@ def test_congress_cycle_and_brief_routes(monkeypatch):
 
         anomalies = client.get("/api/v1/congress_brief/anomalies")
         assert anomalies.status_code == 200
+
+
+def test_congress_standalone_app(monkeypatch):
+    member = Member(member_id=Member.make_id("Ron Wyden", Chamber.SENATE, "OR", None), name="Ron Wyden", chamber=Chamber.SENATE, state="OR")
+    congress_api_router._registry._members = [member]
+    congress_api_router._registry._members_by_id = {member.member_id: member}
+    congress_api_router._pipeline = _FakePipeline(member.member_id)
+
+    app = create_congress_app()
+    with TestClient(app) as client:
+        cycle = client.post("/api/v1/congress_brief/cycle")
+        assert cycle.status_code == 200
+
+        brief = client.get("/api/v1/congress_brief/brief")
+        assert brief.status_code == 200
