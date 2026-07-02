@@ -1,14 +1,16 @@
 from __future__ import annotations
 
+import importlib
 from datetime import datetime, timezone
 
 from fastapi.testclient import TestClient
 
 from cls_congress.models import Chamber, Issue, IssueSection, Member
-from cls_congress.api import router as congress_api_router
 from cls_congress.api.main import create_app as create_congress_app
 from cls_congress.pipeline import CycleResult
 from spec1_api.main import create_app
+
+congress_api_router = importlib.import_module("cls_congress.api.router")
 
 
 def _now() -> datetime:
